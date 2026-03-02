@@ -29,3 +29,31 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* 覆蓋 Bootstrap nav-link 預設的黑色 */
+.nav-link {
+    color: #747474;
+}
+
+    .nav-link:hover,
+    .nav-link:focus {
+        color: #FFC43F!important;
+    }
+
+/* 特別保留導覽列主選單的深色 */
+.main-menu .nav-link {
+    color: #222222;
+}
+
+    .main-menu .nav-link:hover {
+        color: #FFC43F;
+    }
+
+/*a {
+    text-decoration: none;*/ /* 移除超連結下劃線 */
+    /*color: inherit;*/ /* 讓顏色跟隨父元素，不要變藍色 */
+/*}
+
+a:hover {
+        color: inherit;
+}*/
