@@ -5,6 +5,7 @@
 *.suo
 *.user
 *.sln.docstates
+*.dtbcache.v2
 
 # Build results
 
