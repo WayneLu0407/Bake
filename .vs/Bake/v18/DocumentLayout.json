@@ -1,10 +1,10 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\User\\source\\repos\\WayneLu0407\\Bake\\",
+  "WorkspaceRootPath": "C:\\Users\\autum\\source\\repos\\WayneLu0407\\Bake\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A1E19CF2-DE1C-6DEA-04A0-DB5863DCB8CD}|Bake.csproj|c:\\users\\user\\source\\repos\\waynelu0407\\bake\\controllers\\checkoutcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{A1E19CF2-DE1C-6DEA-04A0-DB5863DCB8CD}|Bake.csproj|solutionrelative:controllers\\checkoutcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{A1E19CF2-DE1C-6DEA-04A0-DB5863DCB8CD}|Bake.csproj|c:\\users\\autum\\source\\repos\\waynelu0407\\bake\\data\\bakecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{A1E19CF2-DE1C-6DEA-04A0-DB5863DCB8CD}|Bake.csproj|solutionrelative:data\\bakecontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -27,14 +27,14 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "CheckoutController.cs",
-              "DocumentMoniker": "C:\\Users\\User\\source\\repos\\WayneLu0407\\Bake\\Controllers\\CheckoutController.cs",
-              "RelativeDocumentMoniker": "Controllers\\CheckoutController.cs",
-              "ToolTip": "C:\\Users\\User\\source\\repos\\WayneLu0407\\Bake\\Controllers\\CheckoutController.cs",
-              "RelativeToolTip": "Controllers\\CheckoutController.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAkAAAAAAAAAA==",
+              "Title": "BakeContext.cs",
+              "DocumentMoniker": "C:\\Users\\autum\\source\\repos\\WayneLu0407\\Bake\\Data\\BakeContext.cs",
+              "RelativeDocumentMoniker": "Data\\BakeContext.cs",
+              "ToolTip": "C:\\Users\\autum\\source\\repos\\WayneLu0407\\Bake\\Data\\BakeContext.cs",
+              "RelativeToolTip": "Data\\BakeContext.cs",
+              "ViewState": "AgIAAA8AAAAAAAAAAAAIwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-03-02T07:08:45.664Z",
+              "WhenOpened": "2026-03-02T10:04:05.032Z",
               "EditorCaption": ""
             }
           ]
