@@ -45,6 +45,7 @@ x64/
 *.svclog
 *.scc
 .vs/
+appsettings.json
 
 # Visual C++ cache files
 ipch/
