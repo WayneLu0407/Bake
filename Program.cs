@@ -17,7 +17,7 @@ app.UseHttpsRedirection();
 app.UseRouting();
 
 app.UseAuthorization();
-
+app.UseMiddleware<GlobalExceptionMiddleware>();
 app.MapStaticAssets();
 
 app.MapControllerRoute(
