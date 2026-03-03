@@ -1,0 +1,24 @@
+﻿
+
+.main-menu .navbar-collapse,
+.main-menu .offcanvas-body {
+    justify-content: center;
+}
+
+@media (min-width: 992px) {
+    .main-menu {
+        justify-content: center width: 100%;
+    }
+
+        .main-menu .navbar-nav {
+            width: 100%;
+            justify-content: center;
+        }
+}
+.offcanvas-body .filter-categories {
+    width: 100%;
+    margin-bottom: 20px !important;
+    border: 1px solid #d1d1d1 !important;
+    padding: 14px;
+    border-radius: 8px;
+}

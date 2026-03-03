@@ -26,6 +26,7 @@
 
     @* 5. 個人微調：放最後面蓋掉所有人 *@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/MyStyleSheet -nav .css" asp-append-version="true" />
 
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -158,15 +159,23 @@
         <div class="container-fluid">
             <div class="row py-3 border-bottom">
 
-                <div class="col-sm-4 col-lg-3 text-center text-sm-start">
+                <div class="col-4 col-lg-2 text-start">
                     <div class="main-logo">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">
+                        <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">
                             <img src="~/images/logo.png" alt="logo" class="img-fluid">
                         </a>
                     </div>
                 </div>
 
-                <div class="col-sm-6 offset-sm-2 offset-md-0 col-lg-5 d-none d-lg-block">
+
+                <div b-pjrg6lzpyy class="col-4 col-lg-2 text-start" style="display:flex; align-items:center;">
+                    <a class="nav-link text-dark fw-bold" href="/Home/shop">
+                        <h5 b-pjrg6lzpyy class="mb-0">所有商品</h5>
+                    </a>
+                </div>
+
+
+                <div class="col-lg-4 d-none d-lg-block">
                     <div class="search-bar d-flex align-items-center bg-light px-3 my-2 rounded-4">
                         <form id="search-form" class="flex-grow-1" action="/Home/Search" method="get">
                             <input name="keyword" type="text" class="form-control border-0 bg-transparent" placeholder="請搜尋關鍵字" />
@@ -177,10 +186,10 @@
                     </div>
                 </div>
 
-                <div class="col-sm-8 col-lg-4 d-flex justify-content-end gap-5 align-items-center mt-4 mt-sm-0 justify-content-center justify-content-sm-end">
+
+                <div class="col-4 col-lg-4 d-flex justify-content-end gap-5 align-items-center mt-4 mt-sm-0 justify-content-center justify-content-sm-end">
                     <div class="support-box text-end d-none d-xl-block">
                         <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="posts"><h5 class="mb-0">交流分享區</h5></a>
-
                     </div>
 
                     <ul class="d-flex justify-content-end list-unstyled m-0">
@@ -275,6 +284,7 @@
 
     <script src="~/js/script.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/myJavaScript-swiper2.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
