@@ -14,10 +14,20 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
+
 app.UseRouting();
 
-app.UseAuthorization();
 app.UseMiddleware<GlobalExceptionMiddleware>();
+app.UseAuthorization();
+
+app.MapAreaControllerRoute(
+    name: "MySellerArea",
+    areaName: "Seller",
+    pattern: "Seller/{controller=Default}/{action=Index}/{id?}");
+
+
 app.MapStaticAssets();
 
 app.MapControllerRoute(
