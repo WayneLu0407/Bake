@@ -108,8 +108,16 @@ public partial class BakeContext : DbContext
     public virtual DbSet<UserProfile> UserProfiles { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=tcp:bake.database.windows.net,1433;Initial Catalog=bake;User ID=bake;Password=tjm103_01;Encrypt=True;TrustServerCertificate=False;");
+    {
+        if (!optionsBuilder.IsConfigured) 
+        {
+            IConfiguration configuration = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json")
+                .Build();
+            optionsBuilder.UseSqlServer(configuration.GetConnectionString("Bake"));
+        }
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
