@@ -20,7 +20,5 @@ public partial class ProductReview
 
     public DateTime CreatedAt { get; set; }
 
-    public virtual Product Product { get; set; } = null!;
-
     public virtual UserProfile User { get; set; } = null!;
 }

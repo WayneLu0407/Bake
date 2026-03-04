@@ -14,6 +14,4 @@ public partial class ProductDetail
     public int ProductQuantity { get; set; }
 
     public DateTime ExpireDate { get; set; }
-
-    public virtual Product Product { get; set; } = null!;
 }
