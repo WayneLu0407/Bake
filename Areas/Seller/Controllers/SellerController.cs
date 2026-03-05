@@ -3,6 +3,8 @@ using Bake.Models;
 using Bake.Models.Sales;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using Bake.Areas.Seller.ViewModels;
 
 
 
@@ -19,22 +21,31 @@ namespace Bake.Areas.Seller.Controllers
             _context = context;
             _env = env;
         }
+        [HttpGet]
         public IActionResult Dashboard()
         {
             return View();
         }
-
+        [HttpGet]
         public IActionResult New() => View();
 
         // POST: Seller/New
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> New([Bind("ProductName,ProductDescription,CategoryId")] Product item)
+        public async Task<IActionResult> New([Bind("ProductName,ProductDescription,CategoryId")] ProductViewModel item)
         {
             if (ModelState.IsValid) 
             {
-                item.UserId = 1;
-                item.ProductDate = DateTime.Now;
+                var product = new Product
+                {
+                    ProductName = item.ProductName,
+                    ProductDescription = item.ProductDescription,
+                    UserId = 1, // 暫時固定
+                    ProductDate = DateTime.Now,
+                    CategoryId = 1 // 暫時固定
+                };
+
+
                 var file = Request.Form.Files["ProductImage"];
                 if (file!= null && file.Length > 0)
                 {
@@ -44,11 +55,11 @@ namespace Bake.Areas.Seller.Controllers
                     {
                         await file.CopyToAsync(stream);
                     }
-                    item.ProductImage = "ProductPicture/" + fileName;
+                    product.ProductImage = "ProductPicture/" + fileName;
                 }
                 else
                 {
-                    item.ProductImage = "ProductPicture/NoImage.jpg";
+                    product.ProductImage = "ProductPicture/NoImage.jpg";
                 }
                 _context.Add(item);
                 await _context.SaveChangesAsync();
