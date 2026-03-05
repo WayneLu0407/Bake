@@ -12,5 +12,9 @@ namespace Bake.Controllers
         {
             return View();
         }
+        public IActionResult Signup()
+        {
+            return View();
+        }
     }
 }
