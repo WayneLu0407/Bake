@@ -35,7 +35,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
-
+app.UseSession(); //啟用Session中介軟體，讓應用程式能夠使用Session功能
 app.UseMiddleware<GlobalExceptionMiddleware>();
 app.UseAuthorization();
 
