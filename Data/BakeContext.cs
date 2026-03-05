@@ -109,17 +109,7 @@ public partial class BakeContext : DbContext
 
     public virtual DbSet<UserProfile> UserProfiles { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured) 
-        {
-            IConfiguration configuration = new ConfigurationBuilder()
-                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
-                .AddJsonFile("appsettings.json")
-                .Build();
-            optionsBuilder.UseSqlServer(configuration.GetConnectionString("Bake"));
-        }
-    }
+    
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
