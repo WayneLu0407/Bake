@@ -1,8 +1,7 @@
-﻿using Bake.Models.User;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace Bake.Models.Platform;
+namespace Bake.Models.User;
 
 public partial class UserPaymentSecret
 {

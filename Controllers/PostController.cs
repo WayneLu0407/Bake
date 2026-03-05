@@ -24,7 +24,7 @@ namespace Bake.Controllers
         {
             return View();
         }
-        public IActionResult User()
+        public IActionResult UserProfile()
         {
             return View();
         }

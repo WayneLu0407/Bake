@@ -73,6 +73,8 @@ public partial class BakeContext : DbContext
 
     public virtual DbSet<Product> Products { get; set; }
 
+    public virtual DbSet<ProductCategory> ProductCategories { get; set; }
+
     public virtual DbSet<ProductDetail> ProductDetails { get; set; }
 
     public virtual DbSet<ProductReview> ProductReviews { get; set; }
@@ -219,11 +221,6 @@ public partial class BakeContext : DbContext
                 .HasForeignKey(d => d.CartId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_cartItem_cart");
-
-            entity.HasOne(d => d.Product).WithMany(p => p.CartItems)
-                .HasForeignKey(d => d.ProductId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_cartItem_Products");
         });
 
         modelBuilder.Entity<CartStatus>(entity =>
@@ -481,11 +478,6 @@ public partial class BakeContext : DbContext
                 .HasForeignKey(d => d.OrderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Order_Items_Orders");
-
-            entity.HasOne(d => d.Product).WithMany(p => p.OrderItems)
-                .HasForeignKey(d => d.ProductId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Order_Items_Products");
         });
 
         modelBuilder.Entity<OrderStatus>(entity =>
@@ -713,6 +705,7 @@ public partial class BakeContext : DbContext
             entity.ToTable("Products", "Sales");
 
             entity.Property(e => e.ProductId).HasColumnName("product_id");
+            entity.Property(e => e.CategoryId).HasColumnName("category_id");
             entity.Property(e => e.ProductDate)
                 .HasColumnType("datetime")
                 .HasColumnName("product_date");
@@ -731,10 +724,31 @@ public partial class BakeContext : DbContext
                 .HasColumnName("product_rating");
             entity.Property(e => e.UserId).HasColumnName("user_id");
 
+            entity.HasOne(d => d.Category).WithMany(p => p.Products)
+                .HasForeignKey(d => d.CategoryId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Products_Prodeuct_Category");
+
             entity.HasOne(d => d.User).WithMany(p => p.Products)
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Products_Auth");
+        });
+
+        modelBuilder.Entity<ProductCategory>(entity =>
+        {
+            entity.HasKey(e => e.CategoryId).HasName("PK_Prodeuct_Category");
+
+            entity.ToTable("Product_Category", "Sales");
+
+            entity.Property(e => e.CategoryId).HasColumnName("category_id");
+            entity.Property(e => e.CategoryDescription)
+                .HasMaxLength(200)
+                .HasColumnName("category_description");
+            entity.Property(e => e.CategoryName)
+                .HasMaxLength(50)
+                .HasColumnName("category_name");
+            entity.Property(e => e.DisplayOrder).HasColumnName("display_order");
         });
 
         modelBuilder.Entity<ProductDetail>(entity =>
@@ -756,11 +770,6 @@ public partial class BakeContext : DbContext
                 .HasColumnType("decimal(18, 2)")
                 .HasColumnName("product_price");
             entity.Property(e => e.ProductQuantity).HasColumnName("product_quantity");
-
-            entity.HasOne(d => d.Product).WithOne(p => p.ProductDetail)
-                .HasForeignKey<ProductDetail>(d => d.ProductId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Product_Details_Products");
         });
 
         modelBuilder.Entity<ProductReview>(entity =>
@@ -780,11 +789,6 @@ public partial class BakeContext : DbContext
             entity.Property(e => e.ProductId).HasColumnName("product_id");
             entity.Property(e => e.UserId).HasColumnName("user_id");
             entity.Property(e => e.UserRating).HasColumnName("user_rating");
-
-            entity.HasOne(d => d.Product).WithMany(p => p.ProductReviews)
-                .HasForeignKey(d => d.ProductId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Review_Products");
 
             entity.HasOne(d => d.User).WithMany(p => p.ProductReviews)
                 .HasForeignKey(d => d.UserId)

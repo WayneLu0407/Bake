@@ -1,8 +1,7 @@
-﻿using Bake.Models.Sales;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace Bake.Models;
+namespace Bake.Models.Sales;
 
 public partial class CartItem
 {
@@ -19,6 +18,4 @@ public partial class CartItem
     public DateTime UpdatedAt { get; set; }
 
     public virtual Cart Cart { get; set; } = null!;
-
-    public virtual Product Product { get; set; } = null!;
 }
