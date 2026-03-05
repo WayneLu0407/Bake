@@ -10,7 +10,7 @@ builder.Services.AddDbContext<BakeContext>(options =>
 
 // Configure session state with a custom cookie name and a long timeout duration
 builder.Services.AddSession(Options => {
-    Options.Cookie.Name = "BakeSession";
+    Options.Cookie.Name = "CartSession";
     Options.IOTimeout = TimeSpan.FromDays(10);
     Options.Cookie.IsEssential = true;
     Options.Cookie.HttpOnly = true;
