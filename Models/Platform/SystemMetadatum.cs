@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Bake.Models.User;
+using System;
 using System.Collections.Generic;
 
-namespace Bake.Models.User;
+namespace Bake.Models.Platform;
 
 public partial class SystemMetadatum
 {

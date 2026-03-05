@@ -22,13 +22,9 @@ public partial class Product
 
     public DateTime ProductDate { get; set; }
 
-    public virtual ICollection<CartItem> CartItems { get; set; } = new List<CartItem>();
+    public int CategoryId { get; set; }
 
-    public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
-
-    public virtual ProductDetail? ProductDetail { get; set; }
-
-    public virtual ICollection<ProductReview> ProductReviews { get; set; } = new List<ProductReview>();
+    public virtual ProductCategory Category { get; set; } = null!;
 
     public virtual AccountAuth User { get; set; } = null!;
 }

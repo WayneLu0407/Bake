@@ -1,4 +1,36 @@
-﻿
+﻿<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="assets/images/favicon.svg" type="image/x-icon" />
+    <title>@ViewBag.Title</title>
+
+    <!-- ========== All CSS files linkup ========= -->
+    <link rel="stylesheet" href="~/seller_assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/lineicons.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/quill/bubble.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/quill/snow.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/fullcalendar.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/morris.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/datatable.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/main.css" />
+</head>
 
 
 @RenderBody()
+<footer>
+<script src="~/seller_assets/js/bootstrap.bundle.min.js"></script>
+<script src="~/seller_assets/js/Chart.min.js"></script>
+<script src="~/seller_assets/js/apexcharts.min.js"></script>
+<script src="~/seller_assets/js/dynamic-pie-chart.js"></script>
+<script src="~/seller_assets/js/moment.min.js"></script>
+<script src="~/seller_assets/js/fullcalendar.js"></script>
+<script src="~/seller_assets/js/jvectormap.min.js"></script>
+<script src="~/seller_assets/js/world-merc.js"></script>
+<script src="~/seller_assets/js/polyfill.js"></script>
+<script src="~/seller_assets/js/quill.min.js"></script>
+<script src="~/seller_assets/js/datatable.js"></script>
+<script src="~/seller_assets/js/Sortable.min.js"></script>
+<script src="~/seller_assets/js/main.js"></script>
+	@await RenderSectionAsync("Scripts", required: false)
+</footer>
