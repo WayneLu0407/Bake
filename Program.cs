@@ -8,9 +8,19 @@ var BakeconnectionString = builder.Configuration.GetConnectionString("Bake");
 builder.Services.AddDbContext<BakeContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Bake")));
 
+// Configure session state with a custom cookie name and a long timeout duration
+builder.Services.AddSession(Options => {
+    Options.Cookie.Name = "CartSession";
+    Options.IOTimeout = TimeSpan.FromDays(10);
+    Options.Cookie.IsEssential = true;
+    Options.Cookie.HttpOnly = true;
+    Options.Cookie.SecurePolicy = CookieSecurePolicy.Always;  //要求cookie必須透過HTTPS連線傳送
+});
+
 builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
