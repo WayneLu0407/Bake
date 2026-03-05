@@ -6,7 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var BakeconnectionString = builder.Configuration.GetConnectionString("Bake");
 builder.Services.AddDbContext<BakeContext>(options =>
-    options.UseSqlServer(BakeconnectionString));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("Bake")));
 
 builder.Services.AddControllersWithViews();
 

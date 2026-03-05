@@ -1,0 +1,117 @@
+﻿@model Bake.Areas.Seller.ViewModels.ProductViewModel
+
+        <!-- ========== section start ========== -->
+        <section>
+            <div class="container-fluid">
+                <!-- ========== title-wrapper start ========== -->
+                <div class="title-wrapper pt-30">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="title d-flex align-items-center flex-wrap">
+                                <h2 class="mr-40">新增商品</h2>
+                                <a href="#0" class="main-btn primary-btn btn-hover btn-sm">
+                            <i class="lni lni-plus mr-5"></i> 新增
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- end row -->
+                </div>
+                <!-- ========== title-wrapper end ========== -->
+                <!-- ======== card style start ========== -->
+                <div class="card-style px-0 mb-30">
+                    <div class="title d-flex flex-wrap pl-30 pr-30 mb-10 align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <h6>排序:</h6>
+                            <div class="select-style-1 mb-0 ml-10">
+                                <div class="select-position">
+                                    <select class="p-0 pe-5 border-0">
+                                        <option value="">日期</option>
+                                        <option value="">品名</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                                <form asp-area="Seller" asp-controller="SellerProduct" asp-action="New" method="post" enctype="multipart/form-data">
+                                @Html.AntiForgeryToken()
+                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                <div class="form-group">
+                                    <label asp-for="ProductName" class="control-label"></label>
+                                    <input asp-for="ProductName" class="form-control" />
+                                    <span asp-validation-for="ProductName" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="CategoryId" class="control-label"></label>
+                                    <input asp-for="CategoryId" class="form-control" />
+                                    <span asp-validation-for="ProductDescription" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="ProductDescription" class="control-label"></label>
+                                    <input asp-for="ProductDescription" class="form-control" />
+                                    <span asp-validation-for="ProductDescription" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="ProductPrice" class="control-label"></label>
+                                    <input asp-for="ProductPrice" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="ProductQuantity" class="control-label"></label>
+                                    <input asp-for="ProductQuantity" class="form-control" />
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="ProductImage" class="control-label"></label>
+                                    <img src="~/ProductPicture/NoImage.jpg" style="height:300px" />
+                                    <input type="file" asp-for="ProductImage" class="form-control" accept="image/*" title="尚無內容" />
+                                    <span asp-validation-for="ProductImage" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <input type="submit" value="Create" class="btn btn-primary" />
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                <!-- ======== card style end ========== -->
+               
+            </div>
+            <!-- end container -->
+        </section>
+        <!-- ========== section end ========== -->
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        function previewUploadImage(inputFile) {
+            var file = inputFile.files[0];
+            var allowTypes = "image.*";
+            if (inputFile.files[0].type.match(allowTypes)) {
+                $('.btn').prop('disabled', false);
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $("#ProductImage").prev().attr('src', e.target.result);
+                    $("#ProductImage").prev().attr('title', file.name);
+                }
+                reader.readAsDataURL(file);
+            }
+            else {
+                alert("不支援上傳的檔案格式!");
+                inputFile.value = "";
+                $('.btn').prop('disabled', true);
+
+                $("#ProductImage").prev().attr('src', "/images/NoImage.jpg");
+                $("#ProductImage").prev().attr('title', "尚無圖片");
+
+            }
+        }
+
+        $("#ProductImage").change(function () {
+            // alert("change");
+                previewUploadImage(this);
+        });
+
+    </script>
+}
