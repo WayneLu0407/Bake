@@ -15,5 +15,14 @@ namespace Bake.Areas.Seller.ViewModels
         [Display(Name = "商品圖片")]
         public IFormFile? ProductImage { get; set; }
         public string? ProductImagePath { get; set; }
+
+        [Display(Name = "商品分類")]
+        public int? CategoryId { get; set; }
+
+        [Display(Name = "商品價格")]
+        public decimal? ProductPrice { get; set; }
+
+        [Display(Name = "商品數量")]
+        public int? ProductQuantity { get; set; }
     }
 }
