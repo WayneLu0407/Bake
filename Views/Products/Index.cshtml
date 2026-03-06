@@ -1,1 +1,190 @@
-﻿商品列表頁
+﻿
+<div id="product">
+    <div class="container-fluid">
+        <div class="row py-3 justify-content-center">
+            <div class="d-flex  justify-content-center align-items-center">
+                <nav class="main-menu d-flex navbar navbar-expand-lg">
+
+                    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
+                            aria-controls="offcanvasNavbar">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+
+                        <div class="offcanvas-header justify-content-center">
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                        </div>
+
+                        <div class="offcanvas-body">
+
+                            <ul class="navbar-nav   menu-list list-unstyled d-flex gap-md-3 mb-0">
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">餅乾</a>
+                                </li>
+
+                                <li class="nav-item active">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">蛋糕</a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">布丁</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">麵包</a>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Accessories" asp-action="Accessories">甜甜圈</a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">巧克力</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">糖果</a>
+                            </ul>
+
+                        </div>
+
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <section class="py-5 bg-light">
+        <div class="container-fluid text-center">
+            <h2 class="fw-bold">餅乾</h2>
+        </div>
+    </section>
+
+    <!-- ② 主內容：側邊欄 + 商品格 -->
+    <section class="py-5">
+        <div class="container-fluid">
+            <div class="row">
+
+                <!-- 左側篩選欄 col-lg-3 -->
+                <aside class="col-lg-3 mb-4">
+
+                    <!--  麵包屑 Hero 區 -->
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb justify-content-start mb-3">
+                            <li class="breadcrumb-item"><a asp-area="" asp-controller="Home" asp-action="Index">首頁</a></li>
+                            <li class="breadcrumb-item active">餅乾</li>
+                        </ol>
+                    </nav>
+                    <!-- 商品分類 -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3">商品分類</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-1"><a href="#" class="nav-link fw-bold px-0">一般</a></li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0">客製化</a></li>
+                        </ul>
+                    </div>
+
+                    <hr>
+
+                    <!-- 篩選 -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3">篩選</h5>
+                        <select class="form-select w-auto">
+                            <option>全部</option>
+                            <option>最新</option>
+                            <option>熱銷</option>
+                            <option>價格低到高</option>
+                            <option>價格高到低</option>
+                        </select>
+                    </div>
+
+                    <!-- 金額篩選 -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3">金額</h5>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="priceRange" id="price1">
+                            <label class="form-check-label" for="price1">NT$300 以下（2）</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="priceRange" id="price2">
+                            <label class="form-check-label" for="price2">NT$300 - 500（3）</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="priceRange" id="price3">
+                            <label class="form-check-label" for="price3">NT$500 - 1000（5）</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="priceRange" id="price4">
+                            <label class="form-check-label" for="price4">NT$1500 - 2000（2）</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio" name="priceRange" id="price5">
+                            <label class="form-check-label" for="price5">NT$2000 以上（0）</label>
+                        </div>
+                    </div>
+
+                </aside>
+
+                <!-- 右側商品區 col-lg-9 -->
+                <div class="col-lg-9">
+
+
+                    <!-- 商品格：4欄，小螢幕2欄 -->
+                    <div class="product-grid row row-cols-2 row-cols-md-3 row-cols-xl-4 g-3">
+
+                        <!-- 單一商品 — 複製此區塊重複使用 -->
+                        <div class="col" v-for="product in products" :key="product.id">
+                            <div class="product-item">
+                                <a href="#" class="btn-wishlist">
+                                    <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
+                                </a>
+                                <figure>
+                                    <a href="#"><img :src="product.pic" class="img-fluid"></a>
+                                </figure>
+                                <h3>{{product.title}}</h3>
+                                <span class="qty">{{product.price}}</span>
+                                <span class="price">{{product.price}}</span>
+                                <del class="text-muted small">{{product.price}}</del>
+                            </div>
+                        </div>
+                        <!-- / 單一商品 -->
+
+                    </div>
+                    <!-- / product-grid -->
+                    <!-- ③ 分頁 -->
+                    <div class="d-flex justify-content-center align-items-center gap-2 mt-5">
+                        <nav>
+                            <ul class="pagination mb-0">
+                                <li class="page-item active">
+                                    <a class="page-link rounded-3" href="#">1</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link rounded-3" href="#">2</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link rounded-3" href="#">3</a>
+                                </li>
+                                <li class="page-item disabled">
+                                    <a class="page-link rounded-3" href="#">...</a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link rounded-3" href="#">›</a>
+                                </li>
+                            </ul>
+                        </nav>
+                        <div class="d-flex align-items-center gap-2 ms-3">
+                            <span class="text-muted small">前往頁面</span>
+                            <input type="number" class="form-control form-control-sm" style="width: 60px;" value="1" min="1">
+                        </div>
+                    </div>
+                    <!-- / 分頁 -->
+
+                </div>
+                <!-- / 右側商品區 -->
+
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts
+{
+}
