@@ -145,7 +145,7 @@
                     <span class="text-primary">搜尋</span>
                 </h4>
 
-                <form action="/Home/Search" method="get" class="d-flex mt-3 gap-0">
+                <form asp-controller="Products" asp-action="Index" method="get" class="d-flex mt-3 gap-0">
                     <input name="keyword" class="form-control rounded-start rounded-0 bg-light" type="search" placeholder="您在尋找什麼嗎?" aria-label="What are you looking for?">
                     <button class="btn btn-dark rounded-end rounded-0" type="submit">搜尋</button>
                 </form>
@@ -169,7 +169,7 @@
 
 
                 <div b-pjrg6lzpyy class="col-4 col-lg-2 text-start" style="display:flex; align-items:center;">
-                    <a class="nav-link text-dark fw-bold" href="/Home/shop">
+                    <a class="nav-link text-dark fw-bold" asp-controller="Products" asp-action="Index">
                         <h5 b-pjrg6lzpyy class="mb-0">所有商品</h5>
                     </a>
                 </div>
@@ -177,12 +177,15 @@
 
                 <div class="col-lg-4 d-none d-lg-block">
                     <div class="search-bar d-flex align-items-center bg-light px-3 my-2 rounded-4">
-                        <form id="search-form" class="flex-grow-1" action="/Home/Search" method="get">
+                        <form asp-controller="Products" asp-action="Index" class="flex-grow-1 d-flex align-items-center" method="get">
                             <input name="keyword" type="text" class="form-control border-0 bg-transparent" placeholder="請搜尋關鍵字" />
+                            <button type="submit" class="border-0 bg-transparent p-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                                    <path fill="currentColor" d="M21.71 20.29L18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 7-7a7 7 0 0 1-7 7Z" />
+                                </svg> 
+                            </button>
                         </form>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                            <path fill="currentColor" d="M21.71 20.29L18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 7-7a7 7 0 0 1-7 7Z" />
-                        </svg>
+
                     </div>
                 </div>
 
@@ -193,38 +196,52 @@
                     </div>
 
                     <ul class="d-flex justify-content-end list-unstyled m-0">
-                        <li>
-                            <a href="#" class="rounded-circle bg-light p-2 mx-1">
+                        @* <li>
+                            <a asp-controller="Account" asp-action="Login" class="rounded-circle bg-light p-2 mx-1">
                                 <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#bell"></use></svg>
                             </a>
                         </li>
                         <li>
-                            <a href="#" class="rounded-circle bg-light p-2 mx-1">
+                            <a asp-controller="Account" asp-action="Login" class="rounded-circle bg-light p-2 mx-1">
                                 <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#message"></use></svg>
                             </a>
                         </li>
 
+                        <li>
+                            <a asp-controller="Account" asp-action="Login" class="rounded-circle bg-light p-2 mx-1">
+                                <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#user"></use></svg>
+                            </a>
+                        </li> *@
 
-
-
-                        <li class="nav-item dropdown">
-                            <a href="#" class="rounded-circle bg-light p-2 mx-1 nav-link dropdown-toggle" role="button" id="pages" data-bs-toggle="dropdown" aria-expanded="false"><svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#user"></use></svg></a>
-                            <ul class="dropdown-menu" aria-labelledby="pages">
-                                <li><a class="dropdown-item" asp-controller="Home" asp-action="me">我的帳戶</a></li>
-                                <li><a class="dropdown-item" asp-controller="Home" asp-action="shop">商店 </a></li>
-                                <li><a href="index.html" class="dropdown-item">Single Product </a></li>
-                                <li><a class="dropdown-item" asp-controller="Home" asp-action="cart">購物車 </a></li>
-                                <li><a class="dropdown-item" asp-controller="Home" asp-action="Index">Checkout </a></li>
-                                <li><a class="dropdown-item" asp-controller="Home" asp-action="posts">交流區 </a></li>
-                                <li><a href="index.html" class="dropdown-item">Single Post </a></li>
-                                <li><a href="index.html" class="dropdown-item">Styles </a></li>
-                                <li><a href="index.html" class="dropdown-item">Contact </a></li>
-                                <li><a href="index.html" class="dropdown-item">Thank You </a></li>
-
-                                <li><a href="index.html" class="dropdown-item">404 Error </a></li>
-                            </ul>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <!-- 已登入才顯示 -->
+                            <li>
+                                <a href="#" class="rounded-circle bg-light p-2 mx-1">
+                                    <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#bell"></use></svg>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="#" class="rounded-circle bg-light p-2 mx-1">
+                                    <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#message"></use></svg>
+                                </a>
+                            </li>
+                        }
+                        <!-- User 圖示永遠顯示，但連結不同 -->
+                        <li>
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <a asp-controller="Account" asp-action="Profile" class="rounded-circle bg-light p-2 mx-1">
+                                    <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#user"></use></svg>
+                                </a>
+                            }
+                            else
+                            {
+                                <a asp-controller="Account" asp-action="Login" class="rounded-circle bg-light p-2 mx-1">
+                                    <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#user"></use></svg>
+                                </a>
+                            }
                         </li>
-
 
                         <li class="d-lg-none">
                             <a href="#" class="rounded-circle bg-light p-2 mx-1" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart" aria-controls="offcanvasCart">
