@@ -366,10 +366,10 @@
 				<p>輸入您的Email和密碼</p>
 			</div>
 
-			<form action="" method="" class="login-form" id="loginForm" novalidate>
+			<form asp-controller="Home" asp-action="Login" method="post" class="login-form" id="loginForm" novalidate>
 				<div class="form-group">
 					<div class="input-wrapper">
-						<input type="email" id="email" name="email" required autocomplete="email">
+						<input type="email" id="email" name="account" required autocomplete="email">
 
 					</div>
 					<span class="error-message" id="emailError"></span>
