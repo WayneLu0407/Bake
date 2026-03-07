@@ -67,5 +67,9 @@ namespace Bake.Areas.Seller.Controllers
             return View();
         }
 
+        public IActionResult All()
+        {
+            return View();
+        }
     }
 }

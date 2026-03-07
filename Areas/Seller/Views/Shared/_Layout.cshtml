@@ -66,47 +66,54 @@
                     </a>
                     <ul id="ddmenu_1" class="collapse dropdown-nav">
                         <li>
-                            <a asp-area="Seller" asp-controller="Seller" asp-action="Dashboard">
+                            <a asp-area="Seller" asp-controller="SellerDashboard" asp-action="Dashboard">
                                 商店與商品管理
                             </a>
                         </li>
                         <li>
-                            <a asp-area="Seller" asp-controller="Seller" asp-action="New">
+                            <a asp-area="Seller" asp-controller="SellerProduct" asp-action="All">
+                                <span class="text">
+                                    所有商品
+                                </span>
+                            </a>
+                        </li>
+                        <li>
+                            <a asp-area="Seller" asp-controller="SellerProduct" asp-action="New">
                                 <span class="text">
                                     新增商品
                                 </span>
                             </a>
                         </li>
                         <li>
-                            <a asp-area="Seller" asp-controller="Seller" asp-action="Edit">
+                            <a asp-area="Seller" asp-controller="SellerProduct" asp-action="Edit">
                                 <span class="text">
                                     修改商品
                                 </span>
                             </a>
                         </li>
                         <li>
-                            <a asp-area="Seller" asp-controller="Seller" asp-action="Orders">
+                            <a asp-area="Seller" asp-controller="SellerOrder" asp-action="Orders">
                                 <span class="text">
                                     查看訂單
                                 </span>
                             </a>
                         </li>
                         <li>
-                            <a asp-area="Seller" asp-controller="Seller" asp-action="Past">
+                            <a asp-area="Seller" asp-controller="SellerOrder" asp-action="Past">
                                 <span class="text">
                                     歷史訂單
                                 </span>
                             </a>
                         </li>
                         <li>
-                            <a asp-area="Seller" asp-controller="Seller" asp-action="Shop_settings">
+                            <a asp-area="Seller" asp-controller="SellerShop" asp-action="Shop_settings">
                                 <span class="text">
                                     店鋪設定
                                 </span>
                             </a>
                         </li>
                         <li>
-                            <a asp-area="Seller" asp-controller="Seller" asp-action="Billing_account">
+                            <a asp-area="Seller" asp-controller="SellerShop" asp-action="Billing_account">
                                 <span class="text">
                                     收款帳號設定
                                 </span>
@@ -149,7 +156,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="file-manager.html">
+                    <a asp-area="Seller" asp-controller="Me" asp-action="Favorites">
                         <span class="icon">
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M18.3333 15C18.3333 15.9205 17.5872 16.6667 16.6667 16.6667H3.33332C2.41285 16.6667 1.66666 15.9205 1.66666 15V4.99999C1.66666 4.07952 2.41285 3.33333 3.33332 3.33333H7.64296C8.085 3.33333 8.50891 3.50892 8.82149 3.82149L10.3452 5.34517C10.6577 5.65774 11.0817 5.83333 11.5237 5.83333H16.6667C17.5872 5.83333 18.3333 6.57952 18.3333 7.49999V15Z" />
@@ -164,7 +171,7 @@
 
 
                 <li class="nav-item">
-                    <a href="task.html">
+                    <a asp-area="" asp-controller="Home" asp-action="Index">
                         <span class="icon">
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M14.9211 10.1294C15.1652 9.88534 15.1652 9.48967 14.9211 9.24559L10.7544 5.0789C10.5103 4.83482 10.1147 4.83482 9.87057 5.0789C9.62649 5.32297 9.62649 5.71871 9.87057 5.96278L12.9702 9.06251H1.97916C1.63398 9.06251 1.35416 9.34234 1.35416 9.68751C1.35416 10.0327 1.63398 10.3125 1.97916 10.3125H12.9702L9.87057 13.4123C9.62649 13.6563 9.62649 14.052 9.87057 14.2961C10.1147 14.5402 10.5103 14.5402 10.7544 14.2961L14.9211 10.1294Z" />
@@ -327,41 +334,6 @@
                                         </div>
                                     </div>
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profile">
-                                    <li>
-                                        <div class="author-info flex items-center !p-1">
-                                            <div class="image">
-                                                <img src="~/seller_assets/images/profile/profile-image.png" alt="image">
-                                            </div>
-                                            <div class="content">
-                                                <h4 class="text-sm">Adam Joe</h4>
-                                                <a class="text-black/40 dark:text-white/40 hover:text-black dark:hover:text-white text-xs"
-                                                   href="#">Email@gmail.com</a>
-                                            </div>
-                                        </div>
-                                    </li>
-                                    <li class="divider"></li>
-                                    <li>
-                                        <a href="#0">
-                                            <i class="lni lni-user"></i> View Profile
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#0">
-                                            <i class="lni lni-alarm"></i> Notifications
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#0"> <i class="lni lni-inbox"></i> Messages </a>
-                                    </li>
-                                    <li>
-                                        <a href="#0"> <i class="lni lni-cog"></i> Settings </a>
-                                    </li>
-                                    <li class="divider"></li>
-                                    <li>
-                                        <a href="#0"> <i class="lni lni-exit"></i> Sign Out </a>
-                                    </li>
-                                </ul>
                             </div>
                             <!-- profile end -->
                         </div>
@@ -378,9 +350,6 @@
         <!-- ========== footer end =========== -->
     </main>
     <!-- ======== main-wrapper end =========== -->
-
-    @RenderBody()
-
     <!-- ========= All Javascript files linkup ======== -->
     <script src="~/seller_assets/js/bootstrap.bundle.min.js"></script>
     <script src="~/seller_assets/js/Chart.min.js"></script>
@@ -395,6 +364,7 @@
     <script src="~/seller_assets/js/datatable.js"></script>
     <script src="~/seller_assets/js/Sortable.min.js"></script>
     <script src="~/seller_assets/js/main.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 

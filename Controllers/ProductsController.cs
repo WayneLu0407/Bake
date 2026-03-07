@@ -4,8 +4,9 @@ namespace Bake.Controllers
 {
     public class ProductsController : Controller
     {
-        public IActionResult Index()
+        public IActionResult Index(string keyword)
         {
+            ViewBag.Keyword = keyword;
             return View();
         }
     }
