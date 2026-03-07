@@ -237,7 +237,7 @@
                             }
                             else
                             {
-                                <a asp-controller="Account" asp-action="Login" class="rounded-circle bg-light p-2 mx-1">
+                                <a asp-controller="Home" asp-action="Login" class="rounded-circle bg-light p-2 mx-1">
                                     <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#user"></use></svg>
                                 </a>
                             }
@@ -301,7 +301,7 @@
     <script src="~/js/script.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/myJavaScript-swiper2.js" asp-append-version="true"></script>
-
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
