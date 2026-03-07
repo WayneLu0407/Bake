@@ -1,11 +1,12 @@
 using Bake.Data;
 using Bake.Models;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authentication;
+using static System.Collections.Specialized.BitVector32;
 
 namespace Bake.Controllers;
 
