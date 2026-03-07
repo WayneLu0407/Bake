@@ -1,4 +1,5 @@
 ﻿
+
 <div id="product">
 
 
@@ -178,7 +179,8 @@
         const app=Vue.createApp({
             data(){
                 return{
-                    products: []
+                    products: [],
+                    cart:[]
                 }
             },
             methods: {
@@ -189,7 +191,33 @@
                 originalPrice(price, discount) {
                 if (!discount || discount <= 0) return null
                 return Math.round(price / (1 - discount))  // 100 / 0.8 = 125
-                }
+                },
+                addCart(prod){
+                     var index = this.cart.findIndex(x=>x.ProductName = prod.ProductName);
+                     if(index == -1){
+                            this.cart.push({...prod, count: 1});
+                     }else{
+                     this.cart[index].count++;
+                     }
+                },
+                deletedCart(prod){
+                     var index = this.cart.findIndex(x=>x.ProductName = prod.ProductName);
+                     this.cart.splice(idx,1);
+                },
+            },
+            watch:{
+              cart:{
+                  handler(newValue, oldeValue){
+                        localStorage.setItem("cart", JSON.stringify(newValue));
+                  },deep: true
+              }
+            },
+            beforeCreat(){
+            },
+            created(){
+                var cartDataStr = localStorage.getItem("carts");
+                var cartDataArr = JSON.parse(cartDataStr);
+                this.carts = cartDataArr || [];
             },
             async mounted() {
             // 串接你的 API
@@ -199,5 +227,5 @@
         });
         app.mount('#product');
     </script>
-
+}
 }
