@@ -55,7 +55,7 @@ public class HomeController : Controller
         {
             new Claim(ClaimTypes.Name,model.Account),
             new Claim(ClaimTypes.Role, "Admin"),
-            new Claim("Name","Wayne")
+            
             
         };
         var identity = new ClaimsIdentity(claims,CookieAuthenticationDefaults.AuthenticationScheme);
