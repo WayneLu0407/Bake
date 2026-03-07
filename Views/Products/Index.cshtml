@@ -131,18 +131,44 @@
                     <div class="product-grid row row-cols-2 row-cols-md-3 row-cols-xl-4 g-3">
 
                         <!-- 單一商品 — 複製此區塊重複使用 -->
-                        <div class="col" v-for="product in products" :key="product.id">
+                        <div class="col" v-for="product in products" :key="product.productId">
                             <div class="product-item">
+                                <span v-if="discountLabel(product.productDiscount)" class="badge bg-success position-absolute m-3">{{ discountLabel(product.productDiscount) }}</span>
                                 <a href="#" class="btn-wishlist">
                                     <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
                                 </a>
                                 <figure>
-                                    <a href="#"><img :src="product.pic" class="img-fluid"></a>
+                                    <a asp-controller="Products" asp-action="Details" title="Product Title">
+                                        <img :src="product.productImage" :alt="product.productName" class="tab-image">
+                                    </a>
                                 </figure>
-                                <h3>{{product.title}}</h3>
-                                <span class="qty">{{product.price}}</span>
-                                <span class="price">{{product.price}}</span>
-                                <del class="text-muted small">{{product.price}}</del>
+                                <h3>{{product.productName }}</h3>
+                                <span class="qty">{{ product.shopName }}</span>
+                                <span class="rating">
+                                    <iconify-icon icon="ph:star-fill" style="color:#FFC43F; font-size:16px; vertical-align:-2px;"></iconify-icon>
+                                    {{ product.productRating }}
+                                </span>
+                                <span class="price">NT${{ product.productPrice }}</span>
+                                <del v-if="originalPrice(product.productPrice, product.productDiscount)"
+                                     class="text-muted small">
+                                    NT${{ originalPrice(product.productPrice, product.productDiscount) }}
+                                </del>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="input-group product-qty">
+                                        <span class="input-group-btn">
+                                            <button type="button" class="quantity-left-minus btn btn-danger btn-number" data-type="minus">
+                                                <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
+                                            </button>
+                                        </span>
+                                        <input type="text" id="quantity" name="quantity" class="form-control input-number" value="1">
+                                        <span class="input-group-btn">
+                                            <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
+                                                <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
+                                            </button>
+                                        </span>
+                                    </div>
+                                    <a href="#" class="nav-link">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                </div>
                             </div>
                         </div>
                         <!-- / 單一商品 -->
@@ -187,4 +213,32 @@
 
 @section Scripts
 {
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <script>
+        const app=Vue.createApp({
+            data(){
+                return{
+                    products: []
+                }
+            },
+            methods: {
+                discountLabel(discount) {
+                if (!discount || discount <= 0) return null
+                return `-${Math.round(discount * 100)}%`   // 0.20 → "-20%"
+                },
+                originalPrice(price, discount) {
+                if (!discount || discount <= 0) return null
+                return Math.round(price / (1 - discount))  // 100 / 0.8 = 125
+                }
+            },
+            async mounted() {
+            // 串接你的 API
+            const res = await fetch('/api/Product/Get')
+            this.products = await res.json()
+        }
+        });
+        app.mount('#product');
+    </script>
+
 }
