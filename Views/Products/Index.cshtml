@@ -1,1 +1,59 @@
-﻿商品列表頁
+﻿
+商品列表頁
+
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+@*購物車*@
+@section Scripts
+{
+    <script>
+        const app = Vue.createApp
+        ({
+            data()
+            {
+                return{
+                    cart:[]
+                }
+            },
+            methods:{
+                addCart(prod){
+                     var index = this.cart.findIndex(x=>x.ProductName = prod.ProductName);
+                     if(index == -1){
+                            this.cart.push({...prod, count: 1});
+                     }else{
+                     this.cart[index].count++;
+                     }
+                },
+                deletedCart(prod){
+                     var index = this.cart.findIndex(x=>x.ProductName = prod.ProductName);
+                     this.cart.splice(idx,1);
+                },
+            },
+            watch:{
+              cart:{
+                  handler(newValue, oldeValue){
+                        localStorage.setItem("cart", JSON.stringify(newValue));
+                  },deep: true
+              }
+            },
+            beforeCreat(){
+            },
+            created(){
+                var cartDataStr = localStorage.getItem("carts");
+                var cartDataArr = JSON.parse(cartDataStr);
+                this.carts = cartDataArr || [];
+            },
+            mounted(){
+                var self = this;
+                fetch("").then(x=>x.json()).then(res =>{
+                    self.products = res;
+                    console.log(self.products,res);
+                })
+            },
+        }).mount("#");
+    </script>
+}
