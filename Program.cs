@@ -1,12 +1,14 @@
 using Bake.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.CodeAnalysis.Options;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var BakeconnectionString = builder.Configuration.GetConnectionString("Bake");
+var BakeconnectionString = builder.Configuration.GetConnectionString("DefaultConnection"); // 和appsetting 連線字串相連
 builder.Services.AddDbContext<BakeContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("Bake")));
+    options.UseSqlServer(BakeconnectionString));
 
 // Configure session state with a custom cookie name and a long timeout duration
 builder.Services.AddSession(Options => {
@@ -18,6 +20,13 @@ builder.Services.AddSession(Options => {
 });
 
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme) //驗證身分證的關卡
+.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, option =>
+{
+    option.Cookie.Name = "UserLoginCookie";
+    option.LoginPath = "/Home/Login";
+});
 
 var app = builder.Build();
 
@@ -37,7 +46,9 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseSession(); //啟用Session中介軟體，讓應用程式能夠使用Session功能
 app.UseMiddleware<GlobalExceptionMiddleware>();
-app.UseAuthorization();
+
+app.UseAuthentication();  //登入驗證
+app.UseAuthorization();   //登入授權
 
 app.MapAreaControllerRoute(
     name: "MySellerArea",
