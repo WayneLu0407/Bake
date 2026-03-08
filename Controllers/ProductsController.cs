@@ -1,5 +1,6 @@
 ﻿using Bake.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Bake.Controllers
 {
@@ -33,6 +34,19 @@ namespace Bake.Controllers
         public IActionResult Details()
         {
             return View();
+        }
+
+        //<!- Demo ->之後要合併到商品頁去
+        public async Task<IActionResult> ReviewDemo(int productId = 1)
+        {
+            var reviews = await _db.ProductReviews
+                .AsNoTracking()
+                .Where(r => r.ProductId == productId)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+
+            ViewBag.ProductId = productId;
+            return View(reviews);
         }
     }
 }

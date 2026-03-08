@@ -1,0 +1,35 @@
+﻿@model IEnumerable<Bake.Models.Sales.ProductReview>
+
+<div class="bg-white rounded-4 p-4 shadow-sm">
+    <h5 class="fw-bold mb-3">購買評價</h5>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="text-muted">快來搶先留第一筆資料</div>
+    }
+    else
+    {
+        foreach (var r in Model)
+        {
+            <div class="d-flex gap-3 py-3 border-bottom">
+                <div class="rounded-circle bg-secondary-subtle flex-shrink-0" style="width:40px;height:40px;"></div>
+
+                <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between">
+                        <div class="fw-semibold">User @r.UserId</div>
+                        <small class="text-muted">@r.CreatedAt.ToString("yyyy/MM/dd")</small>
+                    </div>
+
+                    <div class="small mb-2">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <span>@(i <= r.UserRating ? "★" : "☆")</span>
+                        }
+                    </div>
+
+                    <div class="text-muted" style="line-height:1.7;">@r.Comment</div>
+                </div>
+            </div>
+        }
+    }
+</div>
