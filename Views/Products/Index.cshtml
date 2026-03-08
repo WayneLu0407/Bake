@@ -127,7 +127,7 @@
                                             </button>
                                         </span>
                                     </div>
-                                    <a href="#" class="nav-link" @@click="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                    <a href="#" class="nav-link" v-on:click..prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                 </div>
                             </div>
                         </div>
@@ -192,38 +192,24 @@
                 if (!discount || discount <= 0) return null
                 return Math.round(price / (1 - discount))  // 100 / 0.8 = 125
                 },
-                addCart(prod){
-                     var index = this.cart.findIndex(x=>x.productName === prod.productName);
-                     if(index == -1){
-                            this.cart.push({...prod, count: 1});
-                     }else{
-                     this.cart[index].count++;
-                     }
-                },
-                deletedCart(prod){
-                     var index = this.cart.findIndex(x=>x.productName === prod.productName);
-                     this.cart.splice(index,1);
-                },
-            },
-            watch:{
-              cart:{
-                  handler(newValue, oldeValue){
-                        localStorage.setItem("cart", JSON.stringify(newValue));
-                  },deep: true
-              }
-            },
-            beforeCreate(){
-            },
-            created(){
-                var cartDataStr = localStorage.getItem("cart");
-                var cartDataArr = JSON.parse(cartDataStr);
-                this.cart = cartDataArr || [];
+                async addCart(product){
+                const res = await fetch('/Cart/Add',{
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ productId:product.productId, quantity: 1}) //要與後端統一
+                });
+                if(res.ok){
+                    window.dispatchEvent(new Event('update-cart')); //觸發全局事件，通知購物車更新
+                    alert('已加入購物車！');
+                    }   
+                }
             },
             async mounted() {
             // 串接你的 API
             const res = await fetch('/api/Product/Get')
             this.products = await res.json()
-        }
+            },
+            
         });
         app.mount('#product');
     </script>

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var BakeconnectionString = builder.Configuration.GetConnectionString("bake"); // 和appsetting 連線字串相連
+var BakeconnectionString = builder.Configuration.GetConnectionString("Bake"); // 和appsetting 連線字串相連
 builder.Services.AddDbContext<BakeContext>(options =>
     options.UseSqlServer(BakeconnectionString));
 
