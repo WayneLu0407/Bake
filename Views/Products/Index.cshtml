@@ -98,7 +98,7 @@
                                     <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
                                 </a>
                                 <figure class="mb-3">
-                                    <a asp-controller="Products" asp-action="Details" title="Product Title">
+                                    <a :href="'/Products/Details/' + product.productId" title="Product Title">
                                         <img :src="product.productImage" :alt="product.productName" class="tab-image">
                                     </a>
                                 </figure>
@@ -178,6 +178,7 @@
             data(){
                 return{
                     products: [],
+                    product:{},
                     currentPage: 1, 
                     pageSize: 12,
                     cart:[]

@@ -1,56 +1,58 @@
 ﻿
-<main class="container">
+<main class="container" id="product">
 
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
-            <li class="breadcrumb-item"><a asp-controller="Products" asp-action="#">Library</a></li>
-            <li class="breadcrumb-item active" aria-current="page">Data</li>
+    <nav aria-label="breadcrumb" class="my-3">
+        <ol class="breadcrumb" >
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">首頁</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Products" asp-action="#">類別</a></li>
+            <li class="breadcrumb-item active" aria-current="page">產品</li>
         </ol>
     </nav>
 
     <!-- 商品主區 -->
-    <section class="row g-5 mb-5 px-3">
+    <section class="row g-5 mb-5">
         <!-- 左：圖片 -->
-        <div id="carouselExampleFade" class="carousel slide carousel-fade col-12 col-lg-6">
-            <div class="carousel-inner">
-                <div class="carousel-item active">
-                    <img src="..." class="d-block w-100" alt="...">
+        <div class="col-12 col-lg-6 d-flex">
+            <div id="carouselExampleFade" class="carousel slide carousel-fade w-100">
+                <div class="carousel-inner  h-100" style="min-height: 400px;">
+                    <div class="carousel-item active h-100">
+                        <img src="~/productpicture/cookie/cookie1-1.jpg" class="w-100 h-100" style="object-fit: cover;" alt="...">
+                    </div>
+                    <div class="carousel-item h-100">
+                        <img src="~/productpicture/cookie/cookie1-2.jpg" class="w-100 h-100" style="object-fit: cover;" alt="...">
+                    </div>
+                    <div class="carousel-item h-100">
+                        <img src="~/productpicture/cookie/cookie1-3.jpg" class="w-100 h-100" style="object-fit: cover;" alt="...">
+                    </div>
                 </div>
-                <div class="carousel-item">
-                    <img src="..." class="d-block w-100" alt="...">
-                </div>
-                <div class="carousel-item">
-                    <img src="..." class="d-block w-100" alt="...">
-                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
             </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Next</span>
-            </button>
         </div>
         <!-- 右：商品資訊 -->
-        <div class="col-12 col-lg-6 d-flex flex-column gap-3 ">
+        <div class="col-12 col-lg-6 d-flex flex-column gap-3">
             <!-- 品牌名 + 商品標題 -->
             <div>
-                <p class="qty mb-1">小森烘培</p>   <!-- FoodMart .qty = 小字灰色 -->
-                <h1 class="fs-2 mb-0">杏仁餅乾</h1>
+                <p class="qty mb-1">{{product.shopName }}</p>   <!-- FoodMart .qty = 小字灰色 -->
+                <h1 class="fs-2 mb-0">{{ product.productName }}</h1>
             </div>
 
             <!-- 售價 -->
-            <div class="d-flex align-items-baseline gap-2">
-                <span class="price-now">NT$100</span>
-                <span class="price-orig">NT$120</span>
+            <div class="d-flex flex-column gap-2">
+                <span class="fs-1 fw-bold" style="color: #e02020;">NT${{ product.productPrice }}</span>
+                <span class="text-muted text-decoration-line-through">NT${{ product.productPrice }}</span>
             </div>
 
             <!-- 數量 -->
             <div>
                 <p class="qty mb-1">數量</p>
-                <select class="qty-select">
+                <select class="form-select" style="width: 20%;">
                     <option>1</option>
                     <option>2</option>
                     <option>3</option>
@@ -62,7 +64,7 @@
             <!-- 按鈕組 -->
             <div class="d-flex flex-column gap-2 mt-2">
                 <!-- FoodMart .btn-primary -->
-                <button class="btn btn-primary py-3 w-100">放入購物車</button>
+                <button class="btn btn-primary py-3 w-100" style="color: #e02020;">放入購物車</button>
                 <!-- FoodMart .btn-outline-light -->
                 <button class="btn btn-outline-light py-3 w-100">加入最愛</button>
             </div>
@@ -75,11 +77,7 @@
         <div class="col-12 col-lg-6">
             <div class="section-heading">商品介紹</div>
             <p class="lh-lg">
-                法芙娜草莓布朗尼蛋糕（蛋奶素）：直奔產地品質最好的大湖草莓，鮮紅完熟的草莓散發自然甜香，
-                顆顆飽滿多汁使濃郁布朗尼蛋糕，更添一股清爽風味！法芙娜草莓布朗尼蛋糕（蛋奶素）：直奔產地品質最好的大湖草莓，鮮紅完熟的草莓散發自然甜香，
-                顆顆飽滿多汁使濃郁布朗尼蛋糕，更添一股清爽風味！法芙娜草莓布朗尼蛋糕（蛋奶素）：直奔產地品質最好的大湖草莓，鮮紅完熟的草莓散發自然甜香，
-                顆顆飽滿多汁使濃郁布朗尼蛋糕，更添一股清爽風味！法芙娜草莓布朗尼蛋糕（蛋奶素）：直奔產地品質最好的大湖草莓，鮮紅完熟的草莓散發自然甜香，
-                顆顆飽滿多汁使濃郁布朗尼蛋糕，更添一股清爽風味！
+                {{product.productDescription}}
             </p>
         </div>
 
@@ -97,7 +95,7 @@
             <div class="brand-item d-flex align-items-center gap-3 mb-3">
                 <img src="" alt="品牌Logo" class="review-avatar" />
                 <div>
-                    <p class="fw-bold mb-0" style="color:var(--dark-color);">小森烘培</p>
+                    <p class="fw-bold mb-0" style="color:var(--dark-color);">{{product.shopName}}</p>
                     <p class="qty mb-0">台灣</p>
                 </div>
             </div>
@@ -108,8 +106,6 @@
                 <p>回應率：<strong>100%</strong></p>
                 <p>回應速度：<strong>1 日內</strong></p>
                 <p>平均出貨速度：<strong>一週內</strong></p>
-                <p>營業人名稱：純春國際股份有限公司</p>
-                <p>統一編號：61819622</p>
             </div>
         </aside>
     </section>
@@ -127,11 +123,6 @@
                 <tr><td>保存方法</td><td>常溫</td></tr>
                 <tr><td>內容物</td><td>金香鳳梨酥：土鳳梨餡、日本麵粉、雞蛋、奶油、奶粉</td></tr>
                 <tr><td>內容量</td><td>30.0g x 12</td></tr>
-                <tr><td>廠商名稱</td><td>1percentbakery</td></tr>
-                <tr><td>廠商電話</td><td>+886422543535</td></tr>
-                <tr><td>廠商地址</td><td>台中市西屯區黎明路二段920號</td></tr>
-                <tr><td>食品業者</td><td>登錄字號B-161819664-00000-0</td></tr>
-                <tr><td>投保產品</td><td>責任險字號08373273</td></tr>
             </tbody>
         </table>
     </section>
@@ -144,7 +135,7 @@
          Bootstrap row g-3 排列
     ========================================= -->
 
-    <section id="product" class="py-5 overflow-hidden">
+    <section class="py-5 overflow-hidden">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
@@ -178,7 +169,7 @@
                                         <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
                                     </a>
                                     <figure class="mb-3">
-                                        <a asp-controller="Products" asp-action="Details" title="Product Title">
+                                        <a asp-controller="Products" asp-action="Details" asp-route-id="@@product.productId" title="Product Title">
                                             <img :src="product.productImage" :alt="product.productName" class="tab-image">
                                         </a>
                                     </figure>
@@ -232,6 +223,7 @@
             data(){
                 return{
                     products: [],
+                    product: {},
                     sortBy: 'productsByDiscount'
                 }
             },
@@ -260,8 +252,16 @@
 
             },
             async mounted() {
-                const res = await fetch('/api/Product/Get')
-                this.products = await res.json()
+                // 從網址 /Products/Details/3 取出最後的數字 3
+                const id = window.location.pathname.split('/').pop()
+
+                // 抓單筆商品（頁面主角）
+                const res1 = await fetch(`/api/Product/GetById/${id}`)
+                this.product = await res1.json()
+
+                // 抓全部商品（推薦商品輪播）
+                const res2 = await fetch('/api/Product/Get')
+                this.products = await res2.json()
 
                 // 等 Vue 把 DOM 更新完再通知 Swiper
                 this.$nextTick(() => {
