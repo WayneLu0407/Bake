@@ -9,33 +9,56 @@ namespace Bake.Controllers.api
     public class ProductApiController : ControllerBase
     {
         private readonly BakeContext _db;
-
         public ProductApiController(BakeContext db)
         {
             this._db = db;
         }
 
+        // 取全部商品 → /api/Product/Get
         [HttpGet]
         public IActionResult Get()
         {
             var prod = _db.Products
-                .Include(p => p.Category)        // 如果需要分類名稱
-                .Include(p => p.User)            // 透過 User 找到 Shop
-                    .ThenInclude(u => u.Shop)    // User → Shop
+                .Include(p => p.Category)
+                .Include(p => p.ProductDetail)
+                .Include(p => p.User).ThenInclude(u => u.Shop)
                 .Select(p => new {
                     productId = p.ProductId,
                     productName = p.ProductName,
                     productImage = p.ProductImage,
                     productRating = p.ProductRating,
-                    // ProductDetail 是 1對1，直接用導覽屬性
+                    productDate = p.ProductDate,
+                    productPrice = p.ProductDetail.ProductPrice,
+                    productDiscount = p.ProductDetail.ProductDiscount,
+                    shopName = p.User.Shop.ShopName,
+                })
+                .ToList();
+            return Ok(prod);
+        }
+
+        // 取單筆商品 → /api/Product/GetById/3
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
+        {
+            var prod = _db.Products
+                .Include(p => p.ProductDetail)
+                .Include(p => p.User).ThenInclude(u => u.Shop)
+                .Where(p => p.ProductId == id)
+                .Select(p => new {
+                    productId = p.ProductId,
+                    productName = p.ProductName,
+                    productImage = p.ProductImage,
+                    productRating = p.ProductRating,
                     productPrice = p.ProductDetail.ProductPrice,
                     productDiscount = p.ProductDetail.ProductDiscount,
                     productQuantity = p.ProductDetail.ProductQuantity,
-                    // Shop 透過 User 取得
-                    shopName = p.User.Shop.ShopName
+                    expireDate = p.ProductDetail.ExpireDate,
+                    shopName = p.User.Shop.ShopName,
+                    productDescription = p.ProductDescription
                 })
-                .ToList();
+                .FirstOrDefault();
 
+            if (prod == null) return NotFound();
             return Ok(prod);
         }
     }
