@@ -127,7 +127,7 @@
                                             </button>
                                         </span>
                                     </div>
-                                    <a href="#" class="nav-link">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                    <a href="#" class="nav-link" @@click="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                 </div>
                             </div>
                         </div>
@@ -193,7 +193,7 @@
                 return Math.round(price / (1 - discount))  // 100 / 0.8 = 125
                 },
                 addCart(prod){
-                     var index = this.cart.findIndex(x=>x.ProductName = prod.ProductName);
+                     var index = this.cart.findIndex(x=>x.productName === prod.productName);
                      if(index == -1){
                             this.cart.push({...prod, count: 1});
                      }else{
@@ -201,8 +201,8 @@
                      }
                 },
                 deletedCart(prod){
-                     var index = this.cart.findIndex(x=>x.ProductName = prod.ProductName);
-                     this.cart.splice(idx,1);
+                     var index = this.cart.findIndex(x=>x.productName === prod.productName);
+                     this.cart.splice(index,1);
                 },
             },
             watch:{
@@ -212,12 +212,12 @@
                   },deep: true
               }
             },
-            beforeCreat(){
+            beforeCreate(){
             },
             created(){
-                var cartDataStr = localStorage.getItem("carts");
+                var cartDataStr = localStorage.getItem("cart");
                 var cartDataArr = JSON.parse(cartDataStr);
-                this.carts = cartDataArr || [];
+                this.cart = cartDataArr || [];
             },
             async mounted() {
             // 串接你的 API
