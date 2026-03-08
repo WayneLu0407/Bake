@@ -128,7 +128,7 @@
                                             </button>
                                         </span>
                                     </div>
-                                    <a href="#" class="btn btn-danger btn-sm w-20 mt-1">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                    <a href="#" class="btn btn-danger btn-sm w-20 mt-1" v-on:click..prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                 </div>
                             </div>
                         </div>
@@ -193,18 +193,17 @@
                 if (!discount || discount <= 0) return null
                 return Math.round(price / (1 - discount))  // 100 / 0.8 = 125
                 },
-                addCart(prod){
-                     var index = this.cart.findIndex(x=>x.ProductName = prod.ProductName);
-                     if(index == -1){
-                            this.cart.push({...prod, count: 1});
-                     }else{
-                     this.cart[index].count++;
-                     }
-                },
-                deletedCart(prod){
-                     var index = this.cart.findIndex(x=>x.ProductName = prod.ProductName);
-                     this.cart.splice(idx,1);
-                },
+                async addCart(product){
+                const res = await fetch('/Cart/Add',{
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ productId:product.productId, quantity: 1}) //要與後端統一
+                });
+                if(res.ok){
+                    window.dispatchEvent(new Event('update-cart')); //觸發全局事件，通知購物車更新
+                    alert('已加入購物車！');
+                    }
+                }
             },
             computed: {
                 totalPages() {
