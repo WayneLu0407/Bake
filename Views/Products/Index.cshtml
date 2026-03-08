@@ -8,7 +8,7 @@
 
     <section class="py-5 bg-light">
         <div class="container-fluid text-center">
-            <h2 class="fw-bold">餅乾</h2>
+            <h2 class="fw-bold">所有商品</h2>
         </div>
     </section>
 
@@ -17,8 +17,8 @@
         <div class="container-fluid">
             <div class="row">
 
-                <!-- 左側篩選欄 col-lg-3 -->
-                <aside class="col-lg-3 mb-4">
+                <!-- 左側篩選欄 -->
+                <aside class="col-4 col-lg-3 mb-4">
 
                     <!--  麵包屑 Hero 區 -->
                     <nav aria-label="breadcrumb">
@@ -84,20 +84,20 @@
                 </aside>
 
                 <!-- 右側商品區 col-lg-9 -->
-                <div class="col-lg-9">
+                <div class="col-8 col-lg-9">
 
 
                     <!-- 商品格：4欄，小螢幕2欄 -->
-                    <div class="product-grid row row-cols-2 row-cols-md-3 row-cols-xl-4 g-3">
+                    <div class="product-grid row row-cols-1 row-cols-md-2 row-cols-lg row-cols-xl-4 g-3">
 
                         <!-- 單一商品 — 複製此區塊重複使用 -->
-                        <div class="col" v-for="product in products" :key="product.productId">
+                        <div class="col" v-for="product in pagedProducts" :key="product.productId">
                             <div class="product-item">
                                 <span v-if="discountLabel(product.productDiscount)" class="badge bg-success position-absolute m-3">{{ discountLabel(product.productDiscount) }}</span>
                                 <a href="#" class="btn-wishlist">
                                     <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
                                 </a>
-                                <figure>
+                                <figure class="mb-3">
                                     <a asp-controller="Products" asp-action="Details" title="Product Title">
                                         <img :src="product.productImage" :alt="product.productName" class="tab-image">
                                     </a>
@@ -108,11 +108,12 @@
                                     <iconify-icon icon="ph:star-fill" style="color:#FFC43F; font-size:16px; vertical-align:-2px;"></iconify-icon>
                                     {{ product.productRating }}
                                 </span>
+                                <div class="d-flex align-items-center gap-2">
                                 <span class="price">NT${{ product.productPrice }}</span>
-                                <del v-if="originalPrice(product.productPrice, product.productDiscount)"
-                                     class="text-muted small">
-                                    NT${{ originalPrice(product.productPrice, product.productDiscount) }}
-                                </del>
+                                <del v-if="originalPrice(product.productPrice, product.productDiscount)" class="text-muted small">
+                                     NT${{ originalPrice(product.productPrice, product.productDiscount) }}
+                                 </del>
+                                </div>
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div class="input-group product-qty">
                                         <span class="input-group-btn">
@@ -127,7 +128,7 @@
                                             </button>
                                         </span>
                                     </div>
-                                    <a href="#" class="nav-link" v-on:click..prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                    <a href="#" class="btn btn-danger btn-sm w-20 mt-1" v-on:click..prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                 </div>
                             </div>
                         </div>
@@ -139,20 +140,18 @@
                     <div class="d-flex justify-content-center align-items-center gap-2 mt-5">
                         <nav>
                             <ul class="pagination mb-0">
-                                <li class="page-item active">
-                                    <a class="page-link rounded-3" href="#">1</a>
+                                <li class="page-item" :disabled="currentPage === 1 ">
+                                    <a class="page-link" href="#" @@click.prevent ="currentPage--">«</a>
                                 </li>
-                                <li class="page-item">
-                                    <a class="page-link rounded-3" href="#">2</a>
+                                <li class="page-item"
+                                    v-for="page in totalPages" :key="page"
+                                    :class="{ active: page === currentPage }">
+                                    <a class="page-link rounded-3" href="#" @@click.prevent ="currentPage = page">
+                                        {{ page }}
+                                    </a>
                                 </li>
-                                <li class="page-item">
-                                    <a class="page-link rounded-3" href="#">3</a>
-                                </li>
-                                <li class="page-item disabled">
-                                    <a class="page-link rounded-3" href="#">...</a>
-                                </li>
-                                <li class="page-item">
-                                    <a class="page-link rounded-3" href="#">›</a>
+                                <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                                    <a class="page-link" href="#" @@click.prevent ="currentPage++">»</a>
                                 </li>
                             </ul>
                         </nav>
@@ -173,13 +172,14 @@
 
 @section Scripts
 {
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
     <script>
         const app=Vue.createApp({
             data(){
                 return{
                     products: [],
+                    currentPage: 1, 
+                    pageSize: 12,
                     cart:[]
                 }
             },
@@ -213,5 +213,5 @@
         });
         app.mount('#product');
     </script>
-}
+
 }
