@@ -1,4 +1,5 @@
-﻿
+﻿@model Bake.ViewModel.Products.ProductDetailsViewModel
+
 <main class="container" id="product">
 
     <nav aria-label="breadcrumb" class="my-3">
@@ -126,9 +127,13 @@
             </tbody>
         </table>
     </section>
+
     <!-- =========================================
            購買評價
       ========================================= -->
+
+    @await Html.PartialAsync("_ProductReviewsPartial", Model.Reviews)
+
     <!-- =========================================
          推薦商品
          FoodMart .product-item 卡片

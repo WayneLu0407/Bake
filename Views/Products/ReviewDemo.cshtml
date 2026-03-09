@@ -1,7 +1,0 @@
-﻿@* 之後要合到商品頁裡面去 *@
-
-@model IEnumerable<Bake.Models.Sales.ProductReview>
-<h2>商品評論 Demo (ProductId=@ViewBag.ProductId)</h2>
-@* 如果有就抓來顯示 *@
-@await Html.PartialAsync("_ProductReviewsPartial", Model)
-
