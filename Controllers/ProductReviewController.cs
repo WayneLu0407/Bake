@@ -120,10 +120,8 @@ namespace Bake.Controllers
                 _context.ProductReviews.Add(entity);
             }
             await _context.SaveChangesAsync();
-            //正式↓先導回商品頁，未來可改導回訂單明細
-            //return RedirectToAction("Details", "Products", new { id = vm.ProductId });
-            //導到<-測試頁面->用↓
-            return RedirectToAction("ReviewDemo", "Products", new { productId = vm.ProductId });
+
+            return RedirectToAction("Details", "Products", new { id = vm.ProductId });
 
         }
 
@@ -217,6 +215,18 @@ namespace Bake.Controllers
         private bool ProductReviewExists(int id)
         {
             return _context.ProductReviews.Any(e => e.ReviewId == id);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Panel(int productId)
+        {
+            var reviews = await _context.ProductReviews
+                .AsNoTracking()
+                .Where(r => r.ProductId == productId)
+                .OrderByDescending(r => r.CreatedAt)
+                .ToListAsync();
+
+            return PartialView("_ProductReviewsPartial", reviews);
         }
     }
 }

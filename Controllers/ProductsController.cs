@@ -1,4 +1,5 @@
 ﻿using Bake.Data;
+using Bake.ViewModel.Products;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -30,24 +31,40 @@ namespace Bake.Controllers
 
 
 
-        ///Products/Details/3
-        [Route("Products/Details/{id}")]
-        public IActionResult Details(int id)
-        {
-            return View();  // 只負責回傳頁面，資料交給 API 處理
-        }
+        /////Products/Details/3
+        //[Route("Products/Details/{id}")]
+        //public IActionResult Details(int id)
+        //{
+        //    return View();  // 只負責回傳頁面，資料交給 API 處理
+        //}
 
-        //<!- Demo ->之後要合併到商品頁去
-        public async Task<IActionResult> ReviewDemo(int productId = 1)
+        [HttpGet]
+        [Route("Products/Details/{id:int}")]
+        public async Task<IActionResult> Details(int id)
         {
+            //查商品（依你們關聯需要加 Include）
+            var product = await _db.Products
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.ProductId == id);
+
+            if (product == null)
+                return NotFound();
+
+            //查評論
             var reviews = await _db.ProductReviews
                 .AsNoTracking()
-                .Where(r => r.ProductId == productId)
+                .Where(r => r.ProductId == id)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
 
-            ViewBag.ProductId = productId;
-            return View(reviews);
+            //組ViewModel
+            var vm = new ProductDetailsViewModel
+            {
+                Product = product,
+                Reviews = reviews
+            };
+
+            return View(vm);
         }
     }
 }
