@@ -120,8 +120,8 @@
         </div>
     </section>
 
-    <section class="py-5 overflow-hidden">
-        <div class="container-fluid">
+    @* <section class="py-5 overflow-hidden">
+        <iv class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
 
@@ -138,11 +138,11 @@
                     </div>
 
                 </div>
-            </div>
+            </div> *@
 
 
             @* Category食物分類 *@
-            <div class="row">
+            @* <div class="row">
                 <div class="col-md-12">
 
                     <div class="category-carousel swiper">
@@ -200,13 +200,9 @@
                     </div>
 
                 </div>
-            </div>
-        </div>
-
+            </div> *@
 
     </section>
-
-
 
 
     <section class="py-5">
@@ -237,7 +233,7 @@
                                                 <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
                                             </a>
                                             <figure class="mb-3">
-                                                <a asp-controller="Products" asp-action="Details" title="Product Title">
+                                                <a :href="'/Products/Details/' + product.productId" title="Product Title">
                                                     <img :src="product.productImage" :alt="product.productName" class="tab-image">
                                                 </a>
                                             </figure>
@@ -289,7 +285,7 @@
                                                 <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
                                             </a>
                                             <figure class="mb-3">
-                                                <a asp-controller="Products" asp-action="Details" title="Product Title">
+                                                <a :href="'Product/Details/'+product.productID" title="Product Title">
                                                     <img :src="product.productImage" :alt="product.productName" class="tab-image">
                                                 </a>
                                             </figure>
@@ -340,7 +336,7 @@
                                                 <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
                                             </a>
                                             <figure class="mb-3">
-                                                <a asp-controller="Products" asp-action="Details" title="Product Title">
+                                                <a :href="'/Products/Details/' + product.productId" title="Product Title">
                                                     <img :src="product.productImage" :alt="product.productName" class="tab-image">
                                                 </a>
                                             </figure>
@@ -458,7 +454,7 @@
                                         <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
                                     </a>
                                     <figure class="mb-3">
-                                        <a asp-controller="Products" asp-action="Details" title="Product Title">
+                                        <a :href="'/Products/Details/' + product.productId" title="Product Title">
                                             <img :src="product.productImage" :alt="product.productName" class="tab-image">
                                         </a>
                                     </figure>
@@ -538,7 +534,7 @@
                                         <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
                                     </a>
                                     <figure class="mb-3">
-                                        <a asp-controller="Products" asp-action="Details" title="Product Title">
+                                        <a :href="'/Products/Details/' + product.productId" title="Product Title">
                                             <img :src="product.productImage" :alt="product.productName" class="tab-image">
                                         </a>
                                     </figure>
@@ -716,6 +712,7 @@
             data(){
                 return{
                     products: [],
+                    product:{},
                     sortBy: 'default'
                 }
             },
@@ -744,6 +741,7 @@
 
             },
             async mounted() {
+
                 const res = await fetch('/api/Product/Get')
                 this.products = await res.json()
 
