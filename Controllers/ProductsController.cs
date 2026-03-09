@@ -23,7 +23,6 @@ namespace Bake.Controllers
                 ViewBag.Keyword = keyword;
                 // 執行搜尋邏輯...
             }
-
             return View();
         }
 
