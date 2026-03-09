@@ -80,6 +80,22 @@ namespace Bake.Controllers
             return Ok(new { success = true });
         }
 
+        //移除商品
+        // 網址：/Cart/Remove (對應fetch)
+        [HttpPost]
+        public IActionResult Remove([FromBody] int productId) 
+        {
+            var cart = GetCartFromSession();
+            var itemToRemove = cart.FirstOrDefault(c => c.ProductId == productId);
+
+            if (itemToRemove != null) 
+            {
+                cart.Remove(itemToRemove);
+                SaveCartToSession(cart);
+            }
+            return Ok();
+        }
+
         private List<CartViewModel> GetCartFromSession()
         {
             var cartJson = HttpContext.Session.GetString(CartSessionKey);
