@@ -30,10 +30,11 @@ namespace Bake.Controllers
 
 
 
-        //Products/Details
-        public IActionResult Details()
+        ///Products/Details/3
+        [Route("Products/Details/{id}")]
+        public IActionResult Details(int id)
         {
-            return View();
+            return View();  // 只負責回傳頁面，資料交給 API 處理
         }
 
         //<!- Demo ->之後要合併到商品頁去
