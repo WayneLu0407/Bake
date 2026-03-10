@@ -17,22 +17,16 @@
             <div id="carouselExampleFade" class="carousel slide carousel-fade w-100">
                 <div class="carousel-inner  h-100" style="min-height: 400px;">
                     <div class="carousel-item active h-100">
-                        <img src="~/productpicture/cookie/cookie1-1.jpg" class="w-100 h-100" style="object-fit: cover;" alt="...">
-                    </div>
-                    <div class="carousel-item h-100">
-                        <img src="~/productpicture/cookie/cookie1-2.jpg" class="w-100 h-100" style="object-fit: cover;" alt="...">
-                    </div>
-                    <div class="carousel-item h-100">
-                        <img src="~/productpicture/cookie/cookie1-3.jpg" class="w-100 h-100" style="object-fit: cover;" alt="...">
+                        <img :src="product.productImage" :alt="product.productName" class="tab-image w-100 h-100" style="object-fit: cover;" alt="...">
                     </div>
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
+                @* <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Previous</span>
                 </button>
                 <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="next">
                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
+                    <span class="visually-hidden">Next</span> *@
                 </button>
             </div>
         </div>
