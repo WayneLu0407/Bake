@@ -28,9 +28,9 @@ namespace Bake.Controllers.api
                     productImage = p.ProductImage,
                     productRating = p.ProductRating,
                     productDate = p.ProductDate,
-                    productPrice = p.ProductDetail.ProductPrice,
-                    productDiscount = p.ProductDetail.ProductDiscount,
-                    shopName = p.User.Shop.ShopName,
+                    productPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : (decimal?)null,
+                    productDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : (decimal?)null,
+                    shopName = p.User.Shop != null ? p.User.Shop.ShopName : "未知店家",
                 })
                 .ToList();
             return Ok(prod);
@@ -49,11 +49,11 @@ namespace Bake.Controllers.api
                     productName = p.ProductName,
                     productImage = p.ProductImage,
                     productRating = p.ProductRating,
-                    productPrice = p.ProductDetail.ProductPrice,
-                    productDiscount = p.ProductDetail.ProductDiscount,
-                    productQuantity = p.ProductDetail.ProductQuantity,
-                    expireDate = p.ProductDetail.ExpireDate,
-                    shopName = p.User.Shop.ShopName,
+                    productPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : (decimal?)null,
+                    productDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : (decimal?)null,
+                    productQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : (int?)null,
+                    expireDate = p.ProductDetail != null ? p.ProductDetail.ExpireDate : (DateTime?)null,
+                    shopName = p.User.Shop != null ? p.User.Shop.ShopName : "未知店家",
                     productDescription = p.ProductDescription
                 })
                 .FirstOrDefault();
