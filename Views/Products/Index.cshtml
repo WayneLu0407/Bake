@@ -236,11 +236,11 @@
                 }
             },
             watch:{
-              cart:{
-                  handler(newValue, oldeValue){
-                        localStorage.setItem("cart", JSON.stringify(newValue));
-                  },deep: true
-              },
+              // cart:{
+              //     handler(newValue, oldeValue){
+              //           localStorage.setItem("cart", JSON.stringify(newValue));
+              //     },deep: true
+              // },
               sortBy() {
                     this.currentPage = 1
               },
@@ -248,13 +248,13 @@
                   this.currentPage = 1
               }
             },
-            beforeCreat(){
-            },
-            created(){
-                var cartDataStr = localStorage.getItem("carts");
-                var cartDataArr = JSON.parse(cartDataStr);
-                this.carts = cartDataArr || [];
-            },
+            // beforeCreat(){
+            // },
+            // created(){
+            //     var cartDataStr = localStorage.getItem("carts");
+            //     var cartDataArr = JSON.parse(cartDataStr);
+            //     this.carts = cartDataArr || [];
+            // },
             async mounted() {
             // 串接你的 API
             const res = await fetch('/api/Product/Get')

@@ -49,12 +49,15 @@ namespace Bake.Controllers.api
                     productName = p.ProductName,
                     productImage = p.ProductImage,
                     productRating = p.ProductRating,
-                    productPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : (decimal?)null,
-                    productDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : (decimal?)null,
-                    productQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : (int?)null,
-                    expireDate = p.ProductDetail != null ? p.ProductDetail.ExpireDate : (DateTime?)null,
-                    shopName = p.User.Shop != null ? p.User.Shop.ShopName : "未知店家",
-                    productDescription = p.ProductDescription
+                    productPrice = p.ProductDetail.ProductPrice,
+                    productDiscount = p.ProductDetail.ProductDiscount,
+                    productQuantity = p.ProductDetail.ProductQuantity,
+                    expireDate = p.ProductDetail.ExpireDate,
+                    shopName = p.User.Shop.ShopName,
+                    productDescription = p.ProductDescription,
+                    ShelfLifeNote = p.ProductIngredient.ShelfLifeNote,
+                    Ingredient = p.ProductIngredient.Ingredients,
+                    NetWeight = p.ProductIngredient.NetWeight
                 })
                 .FirstOrDefault();
 
