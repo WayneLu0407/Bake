@@ -24,4 +24,5 @@ public partial class BakeContext : DbContext
             optionsBuilder.UseSqlServer(configuration.GetConnectionString("Bake"));
         }
     }
+    public virtual DbSet<ProductIngredient> ProductIngredients { get; set; }
 }
