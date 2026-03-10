@@ -27,7 +27,7 @@
 
                     <div class="row justify-content-center">
                         <div class="col-md-4">
-                                <form asp-area="Seller" asp-controller="SellerProduct" asp-action="New" method="post" enctype="multipart/form-data">
+                <form asp-area="Seller" asp-controller="SellerProduct" asp-action="New" method="post" enctype="multipart/form-data" novalidate>
                                 @Html.AntiForgeryToken()
                                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                                 <div class="form-group">
@@ -41,7 +41,7 @@
                                             asp-items="@(new SelectList(ViewBag.Categories, "CategoryId", "CategoryName"))">
                                             <option value="">-- 請選擇分類 --</option>
                                     </select>
-                                    <span asp-validation-for="ProductDescription" class="text-danger"></span>
+                                    <span asp-validation-for="CategoryId" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="ProductDescription" class="control-label"></label>
@@ -50,19 +50,20 @@
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="ProductPrice" class="control-label"></label>
-                                    <input asp-for="ProductPrice" class="form-control" />
+                        <input asp-for="ProductPrice" class="form-control" type="text" data-val-number="請輸入有效的數字" />
                                     <span asp-validation-for="ProductPrice" class="text-danger"></span>
-
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="ProductDiscount" class="control-label"></label>
-                                    <input asp-for="ProductDiscount" class="form-control" />
+                        <input asp-for="ProductDiscount" class="form-control" type="text" data-val-number="請輸入有效的數字" min="0" min="0.99"  data-val-range="數字必須介於0到0.99之間" />
                                     <span asp-validation-for="ProductDiscount" class="text-danger"></span>
 
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="ProductQuantity" class="control-label"></label>
-                                    <input asp-for="ProductQuantity" class="form-control" min="1" />
+                        <input asp-for="ProductQuantity" class="form-control" min="1" step="1" data-val-range="數量必須大於 0"
+                               data-val-number="請輸入有效的數字"
+                               data-val-step="請輸入整數 (不可有小數點)" />
                                     <span asp-validation-for="ProductQuantity" class="text-danger"></span>
 
                                 </div>
@@ -89,6 +90,45 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
+        $(document).ready(function () {
+            // 強制覆蓋 jQuery Validation 的所有預設訊息，不讓它有機會噴英文
+            if ($.validator) {
+                $.extend($.validator.messages, {
+                    required: "此欄位為必填",
+                    remote: "請修正此欄位",
+                    email: "請輸入有效的電子郵件",
+                    url: "請輸入有效的網址",
+                    date: "請輸入有效的日期",
+                    number: "請輸入有效的數字",
+                    digits: "請只輸入數字",
+                    equalTo: "請再次輸入相同的值",
+                    maxlength: $.validator.format("最多輸入 {0} 個字"),
+                    minlength: $.validator.format("最少輸入 {0} 個字"),
+                    step: $.validator.format("請輸入整數"),
+                    range: $.validator.format("請輸入介於 {0} 到 {1} 之間的數值"),
+                    max: $.validator.format("數值不能大於 {0}"),
+                    min: $.validator.format("數值必須大於或等於 {0}") // 這行就是解決 0 變英文的關鍵
+                });
+            }
+            // 強化數字驗證邏輯：如果不是數字，就直接回傳錯誤，不要再跑後面的 min 驗證
+            var originalNumberMethod = $.validator.methods.number;
+            $.validator.methods.number = function (value, element) {
+                return this.optional(element) || /^-?(?:\d+|\d{1,3}(?:,\d{3})+)?(?:\.\d+)?$/.test(value);
+            };
+            // 修正小數點與 Range 的相容性（維持之前加強的部分）
+            $.validator.methods.number = function (value, element) {
+                return this.optional(element) || /^-?(?:\d+|\d{1,3}(?:,\d{3})+)?(?:\.\d+)?$/.test(value);
+            };
+
+            $.validator.methods.range = function (value, element, param) {
+                var globalizedValue = value.replace(",", ".");
+                return this.optional(element) || (globalizedValue >= param[0] && globalizedValue <= param[1]);
+            };
+            // 針對整數欄位的特別處理：確保 step 驗證也能過
+            $.validator.methods.step = function (value, element, param) {
+                return this.optional(element) || (value % param === 0);
+            };
+        });
         function previewUploadImage(inputFile) {
             var file = inputFile.files[0];
             var allowTypes = "image.*";

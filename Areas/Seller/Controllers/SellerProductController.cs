@@ -38,12 +38,20 @@ namespace Bake.Areas.Seller.Controllers
             {
                 var product = new Product
                 {
-                    ProductName = item.ProductName ?? "未命名商品",
+                    ProductName = item.ProductName!, 
                     ProductDescription = item.ProductDescription,
                     UserId = 1, // 暫時固定
                     ProductDate = DateTime.Now,
-                    CategoryId = 1, // 暫時固定
+                    CategoryId = item.CategoryId!.Value,
                     ProductMethod = "未設定"
+                };
+
+                var detail = new ProductDetail
+                {
+                    ProductId = product.ProductId,
+                    ProductPrice = item.ProductPrice ?? 1,
+                    ProductDiscount = item.ProductDiscount ??0,
+                    ProductQuantity = item.ProductQuantity ?? 0,
                 };
 
 
