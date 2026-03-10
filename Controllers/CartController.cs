@@ -19,16 +19,9 @@ namespace Bake.Controllers
             return View();
         }
 
-        //取得購物車資料 (給 Vue 側邊欄用的 API)
-        //對應網址 Cart/GetCartItems
-        [HttpGet]
-        public IActionResult GetCartItems()
-        {
-            var cart = GetCartFromSession();
-            return Json(cart); //C# 的 CartViewModel 是 Price (大寫 P)。使用 return Json(cart) 時，ASP.NET Core 預設會把它轉成小寫開頭的 JSON。
-        }
+ 
 
-        // 3. 加入商品到購物車
+        // 1. 加入商品到購物車
         // 網址：/Cart/Add (對應fetch)
         [HttpPost]
         public IActionResult Add([FromBody] CartItemRequest request)
@@ -69,18 +62,7 @@ namespace Bake.Controllers
             return Ok(new { success = true });
         }
 
-        //接收前端傳來的整串購物車清單
-        [HttpPost]
-        public IActionResult SaveCart([FromBody] List<CartViewModel> data)
-        {
-            if (data == null) return BadRequest();
-
-            var cartJsonString = JsonSerializer.Serialize(data);
-            HttpContext.Session.SetString(CartSessionKey, cartJsonString);
-            return Ok(new { success = true });
-        }
-
-        //移除商品
+        //2. 移除商品
         // 網址：/Cart/Remove (對應fetch)
         [HttpPost]
         public IActionResult Remove([FromBody] int productId) 
@@ -96,6 +78,18 @@ namespace Bake.Controllers
             return Ok();
         }
 
+        //3. 取得購物車資料 (給 購物車側邊欄、Cart頁面)
+        //對應網址 Cart/GetCartItems
+        [HttpGet]
+        public IActionResult GetCartItems()
+        {
+            var cart = GetCartFromSession();
+            return Json(cart); //C# 的 CartViewModel 是 Price (大寫 P)。使用 return Json(cart) 時，ASP.NET Core 預設會把它轉成小寫開頭的 JSON。
+        }
+
+
+
+        //建立兩個私有方法：一個從 Session 取出購物車資料，另一個把購物車資料存回 Session
         private List<CartViewModel> GetCartFromSession()
         {
             var cartJson = HttpContext.Session.GetString(CartSessionKey);
