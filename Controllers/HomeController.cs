@@ -72,6 +72,11 @@ public class HomeController : Controller
 
         return RedirectToAction("index","home");   // 登入後 回首頁
     }
+    public async Task<IActionResult> Logout()
+    {
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        return RedirectToAction("Index", "Home");
+    }
     public IActionResult Register()
     {
         return View();
