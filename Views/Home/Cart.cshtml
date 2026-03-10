@@ -1,5 +1,222 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿<head>
+    <style>
+        /* 響應式規則：螢幕大於 1025px 時 */
+        @@media (min-width: 1025px) {
+            .h-custom {
+                height: 100vh !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <section class="h-100 h-custom" style="background-color: #eee;">
+        <div class="container py-5 h-100">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col">
+                    <div class="card">
+                        <div class="card-body p-4">
+
+                            <div class="row" id="checkoutApp">
+
+                                @*左邊:購物車清單*@
+                               
+                                    <div class="col-lg-7">
+                                        <h5 class="mb-3">
+                                            <a asp-controller="Home" asp-action="shop" class="text-body">
+                                                <i class="fas fa-long-arrow-alt-left me-2"></i>Continue shopping
+                                            </a>
+                                        </h5>
+                                        <hr>
+
+                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                            <div>
+                                                <p class="mb-1">Shopping cart</p>
+                                                <p class="mb-0">You have {{totalCount}} items in your cart</p>
+                                            </div>
+                                        </div>
+                                        @*購物車清單內容*@
+                                        <div class="card mb-3" v-for="item in cart" :key="item.productId">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between">
+                                                    <div class="d-flex flex-row align-items-center">
+                                                        <div>
+                                                            <img :src="item.imgUrl"
+                                                                 class="img-fluid rounded-3" alt="Shopping item" style="width: 65px;">
+                                                        </div>
+                                                        <div class="ms-3">
+                                                            <h5>{{item.productName}}</h5>
+                                                            <p class="small mb-0">256GB, Navy Blue</p>
+                                                        </div>
+                                                    </div>
+                                                    <div class="d-flex flex-row align-items-center">
+                                                        <div style="width: 50px;">
+                                                            <h5 class="fw-normal mb-0">{{item.quantity}}</h5>
+                                                        </div>
+                                                        <div style="width: 80px;">
+                                                            <h5 class="mb-0">${{item.price}}</h5>
+                                                        </div>
+                                                        <a href="#!" @@click.prevent="deleteItem(item.productId)" style="color: #cecece;"><i class="fas fa-trash-alt"></i></a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @*右邊:結帳卡片細節*@
+                                    <div class="col-lg-5">
+                                        <div class="card bg-primary text-white rounded-3">
+                                            <div class="card-body">
+                                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                                    <h5 class="mb-0">Card details</h5>
+                                                    <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-6.webp"
+                                                         class="img-fluid rounded-3" style="width: 45px;" alt="Avatar">
+                                                </div>
+
+                                                @*選擇卡片類型Visa、Master、JBC等*@
+                                                <p class="small mb-2">Card type</p>
+                                                <a href="#!" type="submit" class="text-white">
+                                                    <i class="fab fa-cc-mastercard fa-2x me-2"></i>
+                                                </a>
+                                                <a href="#!" type="submit" class="text-white">
+                                                    <i class="fab fa-cc-visa fa-2x me-2"></i>
+                                                </a>
+                                                <a href="#!" type="submit" class="text-white">
+                                                    <i class="fab fa-cc-amex fa-2x me-2"></i>
+                                                </a>
+                                                <a href="#!" type="submit" class="text-white"><i class="fab fa-cc-paypal fa-2x"></i></a>
+
+                                                @*卡片資訊form表單*@
+                                                <form class="mt-4" asp-controller="Checkout" asp-action="Info" method="post">
+                                                    <div data-mdb-input-init class="form-outline form-white mb-4">
+                                                        <input name="CardHolder" type="text" id="typeName" class="form-control form-control-lg" siez="17"
+                                                               placeholder="Cardholder's Name" />
+                                                        <label class="form-label" for="typeName">Cardholder's Name</label>
+                                                    </div>
+
+                                                    <div data-mdb-input-init class="form-outline form-white mb-4">
+                                                        <input name="CardNumber" type="text" id="typeText" class="form-control form-control-lg" siez="17"
+                                                               placeholder="1234 5678 9012 3457" minlength="19" maxlength="19" />
+                                                        <label class="form-label" for="typeText">Card Number</label>
+                                                    </div>
+
+                                                    <div class="row mb-4">
+                                                        <div class="col-md-6">
+                                                            <div data-mdb-input-init class="form-outline form-white">
+                                                                <input name="CardExpireMonth" type="text" id="typeExp" class="form-control form-control-lg"
+                                                                       placeholder="MM/YYYY" size="7" id="exp" minlength="7" maxlength="7" />
+                                                                <label class="form-label" for="typeExp">Expiration</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div data-mdb-input-init class="form-outline form-white">
+                                                                <input name="CVVcode" type="password" id="typeText" class="form-control form-control-lg"
+                                                                       placeholder="&#9679;&#9679;&#9679;" size="1" minlength="3" maxlength="3" />
+                                                                <label class="form-label" for="typeText">Cvv</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <hr class="my-4">
+
+                                                    @*結算資訊*@
+                                                    <div class="d-flex justify-content-between">
+                                                        <p class="mb-2">Subtotal</p>
+                                                        <p class="mb-2">${{totalPrice}}</p>
+                                                    </div>
+
+                                                    <div class="d-flex justify-content-between">
+                                                        <p class="mb-2">Shipping</p>
+                                                        <p class="mb-2">$20.00</p>
+                                                    </div>
+
+                                                    <div class="d-flex justify-content-between mb-4">
+                                                        <p class="mb-2">Total(Incl. taxes)</p>
+                                                        <p class="mb-2">${{totalPrice+20}}</p>
+                                                    </div>
+                                                    @*送出表單按鈕*@
+                                                    <button class="btn btn-block w-100 py-3 shadow btn-lg"
+                                                            type="submit" data-mdb-button-init data-mdb-ripple-init
+                                                            style="background-color:#1A237E; color:white">
+                                                        <div class="d-flex justify-content-between fw-bold">
+                                                            <span>$ {{totalPrice+20}}</span>
+                                                            <span>Checkout <i class="fas fa-long-arrow-alt-right ms-2"></i></span>
+                                                        </div>
+                                                    </button>
+                                                </form>
+
+
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                
+
+
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</body>
+
+@section Scripts
+{
+    <script>
+        const app = Vue.createApp({
+            data(){
+                return{
+                    cart:[]
+                }
+            },
+            computed:{
+                totalPrice(){
+                    return this.cart.reduce((sum,item)=>sum+(item.price * item.quantity),0);
+                },
+                totalCount(){
+                    return this.cart.reduce((sum,item)=>sum+item.quantity,0);
+                }
+            },
+            methods:{
+                async fetchCart(){
+                    const response = await fetch('/Cart/GetCartItems')
+                    this.cart = await response.json();
+                },
+                async deleteItem(productId){
+                    if(!confirm('確定移除?')) return;
+                    await fetch('/Cart/Remove',{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify(productId)
+                    })
+                    this.fetchCart();  // 刷新側邊欄購物車資料
+                    window.dispatchEvent(new Event('cart-updated'));
+                },
+                async updateQuantity(productId, change){
+                    //找出該品項，若目前數量為1，且要減1，則改為呼叫刪除
+                    const item = this.cart.find(i=>i.productId===productId);
+                    if(item.quantity ===1 && change ===-1){
+                        this.deleteItem(productId);
+                        return;
+                    }
+
+                    await fetch('/Cart/Add',{ // 這裡重複使用 Add 來增加或減少數量，change 可為正或負
+                        method:'POST',
+                        headers:{'Content-Type':'application/json'},
+                        body:JSON.stringify({productId:productId, quantity:change})
+                    }),
+                    this.fetchCart();  // 刷新側邊欄購物車資料
+                    window.dispatchEvent(new Event('cart-updated'));
+                }
+            },
+            mounted(){
+                this.fetchCart();
+            }
+        }).mount('#checkoutApp');
+    </script>
 }

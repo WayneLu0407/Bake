@@ -1,5 +1,6 @@
 ﻿@{
 	Layout = "_Layout2";
+	ViewBag.Title = "會員登入";
 }
 <style>
 	* {
@@ -366,10 +367,10 @@
 				<p>輸入您的Email和密碼</p>
 			</div>
 
-			<form action="" method="" class="login-form" id="loginForm" novalidate>
+			<form asp-controller="Home" asp-action="Login" method="post" class="login-form" id="loginForm" novalidate>
 				<div class="form-group">
 					<div class="input-wrapper">
-						<input type="email" id="email" name="email" required autocomplete="email">
+						<input type="email" id="email" name="account" required autocomplete="email">
 
 					</div>
 					<span class="error-message" id="emailError"></span>
@@ -395,14 +396,14 @@
 						</span>
 					</label>
 
-					<a class="forgot-password" asp-controller="Account" asp-action="ForgotPassword">忘記密碼?</a>
+					<a class="forgot-password" asp-controller="Home" asp-action="Forgot_password">忘記密碼?</a>
 				</div>
 
 				<button type="submit" class="login-btn" >
 					<span class="btn-text">登入</span>
 					<span class="btn-loader"></span>
 				</button>
-				<a class="text-decoration-none" asp-controller="Account" asp-action="Signup">註冊帳號</a>
+				<a class="text-decoration-none" asp-controller="Home" asp-action="Register">註冊帳號</a>
 			</form>
 		</div>
 	</div>

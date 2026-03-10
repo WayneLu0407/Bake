@@ -1,5 +1,405 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewBag.Title = "會員資料";
 }
+    <!-- ========== section start ========== -->
+    <section class="section">
+        <div class="container-fluid">
+            <!-- ========== title-wrapper start ========== -->
+            <div class="title-wrapper pt-30">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="title">
+                            <h2>個人檔案</h2>
+                        </div>
+                    </div>
+                    <!-- end col -->
+                    <div class="col-md-6">
+                        <div class="breadcrumb-wrapper">
+                            <nav aria-label="breadcrumb">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item">
+                                        <a href="#0">Dashboard</a>
+                                    </li>
+                                    <li class="breadcrumb-item active" aria-current="page">
+                                        Page
+                                    </li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                    <!-- end col -->
+                </div>
+                <!-- end row -->
+            </div>
+            <!-- ========== title-wrapper end ========== -->
+
+            <div class="row">
+                <div class="col-xxl-12 col-lg-8">
+                    <div class="profile-wrapper mb-30">
+                        <div class="profile-cover">
+                            <img src="~/seller_assets/images/profile/profile-cover.jpg" alt="cover-image" />
+                            <div class="update-image">
+                                <input type="file" />
+                                <label for="">
+                                    <i class="lni lni-camera"></i> 編輯背景圖片
+                                </label>
+                            </div>
+                        </div>
+                        <div class="d-md-flex">
+                            <div class="profile-photo">
+                                <div class="image">
+                                    <img src="~/seller_assets/images/profile/profile-image.png" alt="profile" />
+                                    <div class="update-image">
+                                        <input type="file" />
+                                        <label for=""><i class="lni lni-camera"></i></label>
+                                    </div>
+                                </div>
+                                <div class="profile-meta pt-25">
+                                    <h5 class="text-bold mb-10">John Doe</h5>
+                                    <p class="text-sm">Founder, Abc Company</p>
+                                </div>
+                            </div>
+                            <div class="profiles-activities w-100 pt-30">
+                                <ul class="d-flex align-items-center">
+                                    <li class="mr-30">
+                                        <p><strong>234</strong><br></>貼文</p>
+                                    </li>
+                                    <li class="mr-30">
+                                        <p><strong>34K</strong><br></>粉絲</p>
+                                    </li>
+                                    <li class="mr-30">
+                                        <p><strong>4K</strong><br></>關注</p>
+                                    </li>
+                                    <li class="ms-auto">
+                                        <div class="more-btn-wrapper">
+                                            <button class="more-btn dropdown-toggle" id="moreAction" data-bs-toggle="dropdown"
+                                                    aria-expanded="false">
+                                                <i class="lni lni-more-alt"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="moreAction">
+                                                <li class="dropdown-item">
+                                                    <a href="#0" class="text-gray">Add All</a>
+                                                </li>
+                                                <li class="dropdown-item">
+                                                    <a href="#0" class="text-gray">Remove All</a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="profile-info">
+                            <h5 class="text-bold mb-15">關於我</h5>
+                            <p class="text-sm mb-30">
+                                Hello there, I am an expert Web & UI/UX Designer. I am a
+                                full-time Freelancer and my passion is to satisfy my buyers
+                                by giving 100% best quality work. I will Design Landing
+                                page, UI/UX Design, web template design E-mail template
+                                design Flyer Design, All Print Media Design, etc..
+                                <a href="#0" class="text-medium text-dark">[Read More]</a>
+                            </p>
+
+                            <ul class="socials">
+                                <li>
+                                    <a href="#0"><i class="lni lni-facebook-fill"></i></a>
+                                </li>
+                                <li>
+                                    <a href="#0"><i class="lni lni-twitter-fill"></i></a>
+                                </li>
+                                <li>
+                                    <a href="#0"><i class="lni lni-instagram-fill"></i></a>
+                                </li>
+                                <li>
+                                    <a href="#0"><i class="lni lni-behance-original"></i></a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!-- end card -->
+                    <div class="card-style mb-30">
+                        <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                            <h6 class="mb-20">發起的活動</h6>
+                            <a href="#0" class="main-btn btn-sm primary-btn btn-hover mb-20">
+                                <i class="lni lni-plus mr-10"></i>
+                                新增活動
+                            </a>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 col-lg-12 col-xl-6">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">Lindy Uikit</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                        <p>I will Design Landing page, UI/UX ...</p>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-12 col-xl-6">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                        <p>I will Design Landing page, UI/UX ...</p>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            
+                            
+                        </div>
+                    </div>
+                <div class="card-style mb-30">
+                    <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                        <h6 class="mb-20">發起過的活動</h6>
+                        <a href="#0" class="main-btn btn-sm primary-btn btn-hover mb-20">
+                            <i class="lni lni-plus mr-10"></i>
+                            新增活動
+                        </a>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 col-lg-12 col-xl-6">
+                            <div class="card-style-6 mb-30">
+                                <div class="card-meta mb-25">
+                                    <div class="d-flex align-items-center flex-wrap mb-10">
+                                        <h5 class="text-bold mr-20">
+                                            <a href="#0" class="title">Lindy Uikit</a>
+                                        </h5>
+                                        <span>11 Jun, 2022</span>
+                                    </div>
+                                    <p>I will Design Landing page, UI/UX ...</p>
+                                </div>
+                                <div class="card-image">
+                                    <a href="#0">
+                                        <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
+                                    </a>
+                                </div>
+                                <div class="card-action">
+                                    <div class="action mr-20">
+                                        <button><i class="lni lni-thumbs-up"></i></button>
+                                        <a href="#0">434 Like</a>
+                                    </div>
+                                    <div class="action">
+                                        <button><i class="lni lni-comments"></i></button>
+                                        <a href="#0">43 Comments</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-12 col-xl-6">
+                            <div class="card-style-6 mb-30">
+                                <div class="card-meta mb-25">
+                                    <div class="d-flex align-items-center flex-wrap mb-10">
+                                        <h5 class="text-bold mr-20">
+                                            <a href="#0" class="title">EcommaerceHTML</a>
+                                        </h5>
+                                        <span>11 Jun, 2022</span>
+                                    </div>
+                                    <p>I will Design Landing page, UI/UX ...</p>
+                                </div>
+                                <div class="card-image">
+                                    <a href="#0">
+                                        <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
+                                    </a>
+                                </div>
+                                <div class="card-action">
+                                    <div class="action mr-20">
+                                        <button><i class="lni lni-thumbs-up"></i></button>
+                                        <a href="#0">434 Like</a>
+                                    </div>
+                                    <div class="action">
+                                        <button><i class="lni lni-comments"></i></button>
+                                        <a href="#0">43 Comments</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                </div>
+                <div class="card-style mb-30">
+                    <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                        <h6 class="mb-20">參加中的活動</h6>
+                        <a href="#0" class="main-btn btn-sm primary-btn btn-hover mb-20">
+                            <i class="lni lni-plus mr-10"></i>
+                            新增活動
+                        </a>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 col-lg-12 col-xl-6">
+                            <div class="card-style-6 mb-30">
+                                <div class="card-meta mb-25">
+                                    <div class="d-flex align-items-center flex-wrap mb-10">
+                                        <h5 class="text-bold mr-20">
+                                            <a href="#0" class="title">Lindy Uikit</a>
+                                        </h5>
+                                        <span>11 Jun, 2022</span>
+                                    </div>
+                                    <p>I will Design Landing page, UI/UX ...</p>
+                                </div>
+                                <div class="card-image">
+                                    <a href="#0">
+                                        <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
+                                    </a>
+                                </div>
+                                <div class="card-action">
+                                    <div class="action mr-20">
+                                        <button><i class="lni lni-thumbs-up"></i></button>
+                                        <a href="#0">434 Like</a>
+                                    </div>
+                                    <div class="action">
+                                        <button><i class="lni lni-comments"></i></button>
+                                        <a href="#0">43 Comments</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-12 col-xl-6">
+                            <div class="card-style-6 mb-30">
+                                <div class="card-meta mb-25">
+                                    <div class="d-flex align-items-center flex-wrap mb-10">
+                                        <h5 class="text-bold mr-20">
+                                            <a href="#0" class="title">EcommaerceHTML</a>
+                                        </h5>
+                                        <span>11 Jun, 2022</span>
+                                    </div>
+                                    <p>I will Design Landing page, UI/UX ...</p>
+                                </div>
+                                <div class="card-image">
+                                    <a href="#0">
+                                        <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
+                                    </a>
+                                </div>
+                                <div class="card-action">
+                                    <div class="action mr-20">
+                                        <button><i class="lni lni-thumbs-up"></i></button>
+                                        <a href="#0">434 Like</a>
+                                    </div>
+                                    <div class="action">
+                                        <button><i class="lni lni-comments"></i></button>
+                                        <a href="#0">43 Comments</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                </div>
+                <div class="card-style mb-30">
+                    <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                        <h6 class="mb-20">參加過的活動</h6>
+                        <a href="#0" class="main-btn btn-sm primary-btn btn-hover mb-20">
+                            <i class="lni lni-plus mr-10"></i>
+                            新增活動
+                        </a>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 col-lg-12 col-xl-6">
+                            <div class="card-style-6 mb-30">
+                                <div class="card-meta mb-25">
+                                    <div class="d-flex align-items-center flex-wrap mb-10">
+                                        <h5 class="text-bold mr-20">
+                                            <a href="#0" class="title">Lindy Uikit</a>
+                                        </h5>
+                                        <span>11 Jun, 2022</span>
+                                    </div>
+                                    <p>I will Design Landing page, UI/UX ...</p>
+                                </div>
+                                <div class="card-image">
+                                    <a href="#0">
+                                        <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
+                                    </a>
+                                </div>
+                                <div class="card-action">
+                                    <div class="action mr-20">
+                                        <button><i class="lni lni-thumbs-up"></i></button>
+                                        <a href="#0">434 Like</a>
+                                    </div>
+                                    <div class="action">
+                                        <button><i class="lni lni-comments"></i></button>
+                                        <a href="#0">43 Comments</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-12 col-xl-6">
+                            <div class="card-style-6 mb-30">
+                                <div class="card-meta mb-25">
+                                    <div class="d-flex align-items-center flex-wrap mb-10">
+                                        <h5 class="text-bold mr-20">
+                                            <a href="#0" class="title">EcommaerceHTML</a>
+                                        </h5>
+                                        <span>11 Jun, 2022</span>
+                                    </div>
+                                    <p>I will Design Landing page, UI/UX ...</p>
+                                </div>
+                                <div class="card-image">
+                                    <a href="#0">
+                                        <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
+                                    </a>
+                                </div>
+                                <div class="card-action">
+                                    <div class="action mr-20">
+                                        <button><i class="lni lni-thumbs-up"></i></button>
+                                        <a href="#0">434 Like</a>
+                                    </div>
+                                    <div class="action">
+                                        <button><i class="lni lni-comments"></i></button>
+                                        <a href="#0">43 Comments</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                    </div>
+                </div>
+                    <!-- end card -->
+                </div>
+                <!-- end col -->
+            </div>
+        </div>
+    </section>
