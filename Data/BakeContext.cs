@@ -1104,6 +1104,34 @@ public partial class BakeContext : DbContext
                 .HasConstraintName("FK_User_Profile_Auth");
         });
 
+        modelBuilder.Entity<ProductIngredient>(entity =>
+        {
+            entity.HasKey(e => e.ProductId).HasName("PK_Product_Ingredient");
+
+            entity.ToTable("Product_Ingredients", "Sales");
+
+            entity.Property(e => e.ProductId)
+                .ValueGeneratedNever()
+                .HasColumnName("product_id");
+
+            entity.Property(e => e.ShelfLifeNote)
+                .HasMaxLength(200)
+                .HasColumnName("shelf_life_note");
+
+            entity.Property(e => e.Ingredients)
+                .HasColumnName("ingredients");
+
+            entity.Property(e => e.NetWeight)
+                .HasMaxLength(100)
+                .HasColumnName("net_weight");
+
+            entity.HasOne(d => d.Product)
+                .WithOne(p => p.ProductIngredient)
+                .HasForeignKey<ProductIngredient>(d => d.ProductId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Ingredient_Product");
+        });
+
         OnModelCreatingPartial(modelBuilder);
     }
 

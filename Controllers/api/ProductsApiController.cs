@@ -54,7 +54,10 @@ namespace Bake.Controllers.api
                     productQuantity = p.ProductDetail.ProductQuantity,
                     expireDate = p.ProductDetail.ExpireDate,
                     shopName = p.User.Shop.ShopName,
-                    productDescription = p.ProductDescription
+                    productDescription = p.ProductDescription,
+                    ShelfLifeNote = p.ProductIngredient.ShelfLifeNote,
+                    Ingredient = p.ProductIngredient.Ingredients,
+                    NetWeight = p.ProductIngredient.NetWeight
                 })
                 .FirstOrDefault();
 
