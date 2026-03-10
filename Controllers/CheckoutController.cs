@@ -4,6 +4,7 @@ namespace Bake.Controllers
 {
     public class CheckoutController : Controller
     {
+        [HttpPost]
         public IActionResult Info()
         {
             return View();
