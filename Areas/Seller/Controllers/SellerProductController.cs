@@ -95,7 +95,7 @@ namespace Bake.Areas.Seller.Controllers
             {
                 return NotFound();
             }
-            var products = _context.Products
+            var product = _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.ProductDetail)
                 .Select(p => new ProductListViewModel
@@ -107,8 +107,58 @@ namespace Bake.Areas.Seller.Controllers
                     CategoryName = p.Category != null ? p.Category.CategoryName : "未分類",
                     ProductQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0
                 }).FirstOrDefaultAsync(m => m.ProductId == id);
-            return View(products);
+            if (product == null)
+            {
+                return NotFound();
+            }
+            return View(product);
         }
+        // POST: SellerProduct/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to.
+        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, [Bind("ProductId,ProductName,ProductDescription,ProductImage")] Product product)
+        {
+
+            if (ModelState.IsValid)
+            {
+                Product c = await _context.Products.FindAsync(product.ProductId);
+                if (Request.Form.Files["Picture"] != null)
+                {
+                    using (BinaryReader br = new BinaryReader(Request.Form.Files["ProductImage"].OpenReadStream()))
+                    {
+                        product.ProductImage = br.ReadBytes((int)Request.Form.Files(Path.Combine(_env.WebRootPath, "ProductPicture", fileName)).Length);
+                    }
+                }
+                else
+                {
+                    product.ProductImage = c.ProductImage;
+                }
+                _context.Entry(c).State = EntityState.Detached;
+                try
+                {
+                    _context.Update(product);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!ProductExists(product.ProductId))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return View(product);
+        }
+
+
+
 
         public IActionResult All()
         {
