@@ -36,23 +36,25 @@ namespace Bake.Areas.Seller.Controllers
         {
             if (ModelState.IsValid)
             {
+
                 var product = new Product
                 {
                     ProductName = item.ProductName!, 
                     ProductDescription = item.ProductDescription,
                     UserId = 1, // 暫時固定
                     ProductDate = DateTime.Now,
-                    CategoryId = item.CategoryId!.Value,
+                    CategoryId = item.CategoryId,
                     ProductMethod = "未設定"
                 };
 
                 var detail = new ProductDetail
                 {
-                    ProductId = product.ProductId,
-                    ProductPrice = item.ProductPrice ?? 1,
-                    ProductDiscount = item.ProductDiscount ??0,
-                    ProductQuantity = item.ProductQuantity ?? 0,
+                    ProductPrice = item.ProductPrice,
+                    ProductDiscount = item.ProductDiscount,
+                    ProductQuantity = item.ProductQuantity,
+                    ExpireDate= DateTime.Now,
                 };
+                product.ProductDetail = detail;
 
 
                 if (item.ProductImage != null && item.ProductImage.Length > 0)
@@ -75,7 +77,7 @@ namespace Bake.Areas.Seller.Controllers
                 .Select(c => new { c.CategoryId, c.CategoryName })
                 .ToListAsync();
                 TempData["Success"] = "商品新增成功！";
-                return RedirectToAction("All", "SellerProduct");
+                return RedirectToAction("All");
 
             }
             ViewBag.Categories = await _context.ProductCategories
@@ -95,7 +97,7 @@ namespace Bake.Areas.Seller.Controllers
             {
                 return NotFound();
             }
-            var products = _context.Products
+            var productData = await _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.ProductDetail)
                 .Select(p => new ProductListViewModel
@@ -106,10 +108,20 @@ namespace Bake.Areas.Seller.Controllers
                     ProductDescription = p.ProductDescription,
                     CategoryName = p.Category != null ? p.Category.CategoryName : "未分類",
                     ProductQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0
-                }).FirstOrDefaultAsync(m => m.ProductId == id);
-            return View(products);
-        }
+                })
+                .FirstOrDefaultAsync(m => m.ProductId == id);
 
+            if (productData == null)
+            {
+                return NotFound();
+            }
+
+            ViewBag.Categories = await _context.ProductCategories
+                    .Select(c => new { c.CategoryId, c.CategoryName })
+                    .ToListAsync();
+
+            return View(productData);
+        }
         public IActionResult All()
         {
             return View();
