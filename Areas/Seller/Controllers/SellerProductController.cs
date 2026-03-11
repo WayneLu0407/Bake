@@ -86,9 +86,7 @@ namespace Bake.Areas.Seller.Controllers
             return View(item);
         }
 
-
-
-
+        [HttpGet]
         [RequestFormLimits(MultipartBodyLengthLimit = 2048000)]
         [RequestSizeLimit(2048000)]
         public async Task<IActionResult> Edit(int? id)
@@ -97,7 +95,97 @@ namespace Bake.Areas.Seller.Controllers
             {
                 return NotFound();
             }
-            var productData = await _context.Products
+
+            var product = await _context.Products
+                .Include(p=>p.ProductDetail)
+                .Where(p => p.ProductId == id)
+                .Select(p => new ProductViewModel
+                {
+                ProductId = p.ProductId,
+                ProductName = p.ProductName,
+                ProductDescription = p.ProductDescription != null ? p.ProductDescription:null,
+                ProductImagePath = p.ProductImage,
+                ProductPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice: 0,
+                ProductDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : 0,
+                ProductQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0,
+                ExpireDate = p.ProductDetail != null && p.ProductDetail.ExpireDate != null
+                         ? p.ProductDetail.ExpireDate.Value
+                         : DateTime.Now,
+                }).FirstOrDefaultAsync(m => m.ProductId == id);
+
+
+            if (product == null)
+            {
+                return NotFound();
+            }
+            ViewBag.Categories = await _context.ProductCategories
+            .Select(c => new { c.CategoryId, c.CategoryName })
+            .ToListAsync();
+            return View(product);
+        }
+
+        [HttpPost]
+        [RequestFormLimits(MultipartBodyLengthLimit = 2048000)]
+        [RequestSizeLimit(2048000)]
+        public async Task<IActionResult> Edit(int? id,[Bind("ProductId,ProductName,ProductDescription,CategoryId,ProductImage,ProductPrice,ProductDiscount,ProductQuantity")] ProductViewModel item)
+        {
+            if (ModelState.IsValid)
+            {
+                var product = await _context.Products
+                .Include(p => p.ProductDetail)
+                .FirstOrDefaultAsync(p => p.ProductId == item.ProductId);
+
+                if (product == null) return NotFound();
+
+                product.ProductName = item.ProductName!;
+                product.ProductDescription = item.ProductDescription;
+                product.CategoryId = item.CategoryId;
+
+                if (item.ProductImage != null && item.ProductImage.Length > 0)
+                {
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(item.ProductImage.FileName);
+                    string savePath = Path.Combine(_env.WebRootPath, "ProductPicture", fileName);
+                    using (var stream = new FileStream(savePath, FileMode.Create))
+                    {
+                        await item.ProductImage.CopyToAsync(stream);
+                    }
+                    product.ProductImage = "ProductPicture/" + fileName;
+                }
+                if (product.ProductDetail != null)
+                {
+                    product.ProductDetail.ProductPrice = item.ProductPrice;
+                    product.ProductDetail.ProductDiscount = item.ProductDiscount;
+                    product.ProductDetail.ProductQuantity = item.ProductQuantity;
+                }
+
+                try
+                {
+                    _context.Update(product);
+                    await _context.SaveChangesAsync();
+                    TempData["Fixed"] = "商品修改成功！";
+                    return RedirectToAction("All");
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!_context.Products.Any(p => p.ProductId == item.ProductId))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
+            ViewBag.Categories = await _context.ProductCategories
+            .Select(c => new { c.CategoryId, c.CategoryName })
+            .ToListAsync();
+            return View(item);
+        }
+
+        public async Task<IActionResult> All()
+        {
+            var products = await _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.ProductDetail)
                 .Select(p => new ProductListViewModel
@@ -109,22 +197,9 @@ namespace Bake.Areas.Seller.Controllers
                     CategoryName = p.Category != null ? p.Category.CategoryName : "未分類",
                     ProductQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0
                 })
-                .FirstOrDefaultAsync(m => m.ProductId == id);
+                .ToListAsync();
 
-            if (productData == null)
-            {
-                return NotFound();
-            }
-
-            ViewBag.Categories = await _context.ProductCategories
-                    .Select(c => new { c.CategoryId, c.CategoryName })
-                    .ToListAsync();
-
-            return View(productData);
-        }
-        public IActionResult All()
-        {
-            return View();
+            return View(products); // ← 把資料傳給 View
         }
     }
 }
