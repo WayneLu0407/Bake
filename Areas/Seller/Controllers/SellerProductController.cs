@@ -2,6 +2,8 @@
 using Bake.Data;
 using Bake.Models.Sales;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 
 namespace Bake.Areas.Seller.Controllers
 {
@@ -19,27 +21,40 @@ namespace Bake.Areas.Seller.Controllers
         }
 
         [HttpGet]
-        public IActionResult New() => View();
+        public async Task<IActionResult> New()
+        {
+            ViewBag.Categories = await _context.ProductCategories
+                .Select(c => new { c.CategoryId, c.CategoryName })
+                .ToListAsync();
+            return View();
+        }
 
         // POST: Seller/New
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> New([Bind("ProductName,ProductDescription,CategoryId,ProductImage")] ProductViewModel item)
+        public async Task<IActionResult> New([Bind("ProductName,ProductDescription,CategoryId,ProductImage,ProductPrice,ProductDiscount,ProductQuantity")] ProductViewModel item)
         {
             if (ModelState.IsValid)
             {
                 var product = new Product
                 {
-                    ProductName = item.ProductName ?? "未命名商品",
+                    ProductName = item.ProductName!, 
                     ProductDescription = item.ProductDescription,
                     UserId = 1, // 暫時固定
                     ProductDate = DateTime.Now,
-                    CategoryId = 1, // 暫時固定
+                    CategoryId = item.CategoryId!.Value,
                     ProductMethod = "未設定"
                 };
 
+                var detail = new ProductDetail
+                {
+                    ProductId = product.ProductId,
+                    ProductPrice = item.ProductPrice ?? 1,
+                    ProductDiscount = item.ProductDiscount ??0,
+                    ProductQuantity = item.ProductQuantity ?? 0,
+                };
 
-                
+
                 if (item.ProductImage != null && item.ProductImage.Length > 0)
                 {
                     string fileName = Guid.NewGuid().ToString() + Path.GetExtension(item.ProductImage.FileName);
@@ -56,15 +71,43 @@ namespace Bake.Areas.Seller.Controllers
                 }
                 _context.Add(product);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Dashboard", "SellerDashboard");
+                ViewBag.Categories = await _context.ProductCategories
+                .Select(c => new { c.CategoryId, c.CategoryName })
+                .ToListAsync();
+                TempData["Success"] = "商品新增成功！";
+                return RedirectToAction("All", "SellerProduct");
 
             }
+            ViewBag.Categories = await _context.ProductCategories
+            .Select(c => new { c.CategoryId, c.CategoryName })
+            .ToListAsync();
             return View(item);
         }
 
-        public IActionResult Edit()
+
+
+
+        [RequestFormLimits(MultipartBodyLengthLimit = 2048000)]
+        [RequestSizeLimit(2048000)]
+        public async Task<IActionResult> Edit(int? id)
         {
-            return View();
+            if (id == null)
+            {
+                return NotFound();
+            }
+            var products = _context.Products
+                .Include(p => p.Category)
+                .Include(p => p.ProductDetail)
+                .Select(p => new ProductListViewModel
+                {
+                    ProductId = p.ProductId,
+                    ProductName = p.ProductName,
+                    ProductImage = p.ProductImage,
+                    ProductDescription = p.ProductDescription,
+                    CategoryName = p.Category != null ? p.Category.CategoryName : "未分類",
+                    ProductQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0
+                }).FirstOrDefaultAsync(m => m.ProductId == id);
+            return View(products);
         }
 
         public IActionResult All()

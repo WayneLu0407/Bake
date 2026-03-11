@@ -35,7 +35,7 @@
                                                 <p class="mb-0">You have {{totalCount}} items in your cart</p>
                                             </div>
                                         </div>
-                                        @*購物車清單內容*@
+                                        @*購物車清單內容  !!缺:加減數量*@
                                         <div class="card mb-3" v-for="item in cart" :key="item.productId">
                                             <div class="card-body">
                                                 <div class="d-flex justify-content-between">
@@ -56,7 +56,7 @@
                                                         <div style="width: 80px;">
                                                             <h5 class="mb-0">${{item.price}}</h5>
                                                         </div>
-                                                        <a href="#!" @@click.prevent="deleteItem(item.productId)" style="color: #cecece;"><i class="fas fa-trash-alt"></i></a>
+                                                        <a href="#!" @@click.prevent="deleteItem(item.productId)" style="color: darkgray;"><i class="fas fa-trash-alt"></i></a>
                                                     </div>
                                                 </div>
                                             </div>
@@ -195,7 +195,7 @@
                     body:JSON.stringify(productId)
                     })
                     this.fetchCart();  // 刷新側邊欄購物車資料
-                    window.dispatchEvent(new Event('cart-updated'));
+                    window.dispatchEvent(new Event('update-cart'));
                 },
                 async updateQuantity(productId, change){
                     //找出該品項，若目前數量為1，且要減1，則改為呼叫刪除
@@ -211,7 +211,7 @@
                         body:JSON.stringify({productId:productId, quantity:change})
                     }),
                     this.fetchCart();  // 刷新側邊欄購物車資料
-                    window.dispatchEvent(new Event('cart-updated'));
+                    window.dispatchEvent(new Event('update-cart'));
                 }
             },
             mounted(){
