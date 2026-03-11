@@ -23,7 +23,7 @@ public class HomeController : Controller
     {
         _context = context;  //HomeController 建構子 DI注入  
     }
-    
+
     public IActionResult Index()
     {
         return View();
@@ -51,26 +51,38 @@ public class HomeController : Controller
     }
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public  async Task<IActionResult> LoginAsync(LoginModel model)
+    public async Task<IActionResult> LoginAsync(LoginModel model)
     {
         var user = _context.AccountAuths.FirstOrDefault(x => x.Email == model.Account && x.PasswordHash == model.Password);  //把資料庫的資料找出來做比對
-        if (user == null) // 如果沒有資料為Null 則return 回登入畫面
+
+        if (ModelState.IsValid)
         {
-            return View();
-        }
-        var claims = new List<Claim>    //網站會員的身分證
+            if (user == null) // 如果沒有資料為Null 則return 回登入畫面
+            {
+                return View();
+            }
+
+
+
+            var claims = new List<Claim>    //網站會員的身分證
         {
             new Claim(ClaimTypes.Name,model.Account),
             new Claim(ClaimTypes.Role, "Admin"),
-            
-            
+
         };
-        var identity = new ClaimsIdentity(claims,CookieAuthenticationDefaults.AuthenticationScheme);
-        var claimPrincipal = new ClaimsPrincipal(identity);
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var claimPrincipal = new ClaimsPrincipal(identity);
 
-        await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimPrincipal); //將身分證發給user
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimPrincipal); //將身分證發給user
 
-        return RedirectToAction("index","home");   // 登入後 回首頁
+
+
+
+
+            return RedirectToAction("index", "home");   // 登入後 回首頁
+        }
+        return View(model);
+
     }
     public async Task<IActionResult> Logout()
     {
@@ -84,21 +96,25 @@ public class HomeController : Controller
     [HttpPost]
     public async Task<IActionResult> RegisterAsync(RegisterModel model)
     {
-        var isRegistered = _context.AccountAuths.Any(a => a.Email == model.Email);
-        if (isRegistered)
+        if (ModelState.IsValid)
         {
-            return View();
-        }
-        _context.AccountAuths.Add(new AccountAuth {UserName = model.Name,  Email = model.Email, PasswordHash = model.Password,ConfirmationToken = model.Comfirm });
-        _context.SaveChanges();
-        
-        //encrypt 加密
-        var encrypted = AesHelper.Encrypt(model.Email);
-        var encodedToken = System.Net.WebUtility.UrlEncode(encrypted);
-        var url = "https://localhost:7285/Home/Verifyemail?token=" + encodedToken;
-        var sh = new SmtpHelper();
+            if (model.Password == model.PasswordConfirm)
+            {
+                var isRegistered = _context.AccountAuths.Any(a => a.Email == model.Email);
+                if (isRegistered)
+                {
+                    return View();
+                }
+                _context.AccountAuths.Add(new AccountAuth { UserName = model.Name, Email = model.Email, PasswordHash = model.Password, ConfirmationToken = model.Comfirm });
+                _context.SaveChanges();
 
-        var body = $@"<!DOCTYPE html>
+                //encrypt 加密
+                var encrypted = AesHelper.Encrypt(model.Email);
+                var encodedToken = System.Net.WebUtility.UrlEncode(encrypted);
+                var url = "https://localhost:7285/Home/Verifyemail?token=" + encodedToken;
+                var sh = new SmtpHelper();
+
+                var body = $@"<!DOCTYPE html>
 <html lang=""zh-Hant"">
 <head>
     <meta charset=""UTF-8"">
@@ -171,11 +187,13 @@ public class HomeController : Controller
 </body>
 </html>
 ";
-        await sh.SendEmailAsync(model.Email, "註冊會員",body);
+                await sh.SendEmailAsync(model.Email, "註冊會員", body);
 
-        return RedirectToAction("Index", "Home");
-        
-        
+                return RedirectToAction("Index", "Home");
+            }
+            
+        }
+        return View();
     }
     [HttpGet]
     public IActionResult Verifyemail(string token)
@@ -201,7 +219,7 @@ public class HomeController : Controller
 
                 // 或是清空 Token 表示已驗證
                 user.ConfirmationToken = "Verified";
-
+                _context.Update(user.IsEmailConfirmed);
                 _context.SaveChanges();
 
                 ViewBag.Message = "電子郵件驗證成功！現在您可以登入。";
