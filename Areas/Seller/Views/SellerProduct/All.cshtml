@@ -1,5 +1,10 @@
 ﻿@model IEnumerable<Bake.Areas.Seller.ViewModels.ProductListViewModel>
-
+@if (TempData["Success"] != null)
+{
+    <script>
+        alert("@Html.Raw(TempData["Success"])");
+    </script>
+}
 <!-- ========== section start ========== -->
 <section>
     <div class="container-fluid">
@@ -18,7 +23,6 @@
         <!-- ======== card style start ========== -->
         <div class="card-style px-0 mb-30">
             <div class="title d-flex flex-wrap pl-30 pr-30 mb-10 align-items-center justify-content-between">
-
                 <div class="d-flex align-items-center">
                     <h6>排序:</h6>
                     <div class="select-style-1 mb-0 ml-10">

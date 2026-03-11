@@ -19,7 +19,12 @@ builder.Services.AddSession(Options => {
     Options.Cookie.SecurePolicy = CookieSecurePolicy.Always;  //要求cookie必須透過HTTPS連線傳送
 });
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    // 更改模型綁定的預設錯誤訊息
+    options.ModelBindingMessageProvider.SetValueMustBeANumberAccessor(
+        x => $"'{x}' 必須是有效的數字。");
+});
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme) //驗證身分證的關卡
 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, option =>

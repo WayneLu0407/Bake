@@ -36,23 +36,25 @@ namespace Bake.Areas.Seller.Controllers
         {
             if (ModelState.IsValid)
             {
+
                 var product = new Product
                 {
                     ProductName = item.ProductName!, 
                     ProductDescription = item.ProductDescription,
                     UserId = 1, // 暫時固定
                     ProductDate = DateTime.Now,
-                    CategoryId = item.CategoryId!.Value,
+                    CategoryId = item.CategoryId,
                     ProductMethod = "未設定"
                 };
 
                 var detail = new ProductDetail
                 {
-                    ProductId = product.ProductId,
-                    ProductPrice = item.ProductPrice ?? 1,
-                    ProductDiscount = item.ProductDiscount ??0,
-                    ProductQuantity = item.ProductQuantity ?? 0,
+                    ProductPrice = item.ProductPrice,
+                    ProductDiscount = item.ProductDiscount,
+                    ProductQuantity = item.ProductQuantity,
+                    ExpireDate= DateTime.Now,
                 };
+                product.ProductDetail = detail;
 
 
                 if (item.ProductImage != null && item.ProductImage.Length > 0)
@@ -75,7 +77,7 @@ namespace Bake.Areas.Seller.Controllers
                 .Select(c => new { c.CategoryId, c.CategoryName })
                 .ToListAsync();
                 TempData["Success"] = "商品新增成功！";
-                return RedirectToAction("All", "SellerProduct");
+                return RedirectToAction("All");
 
             }
             ViewBag.Categories = await _context.ProductCategories
@@ -95,7 +97,7 @@ namespace Bake.Areas.Seller.Controllers
             {
                 return NotFound();
             }
-            var product = _context.Products
+            var productData = await _context.Products
                 .Include(p => p.Category)
                 .Include(p => p.ProductDetail)
                 .Select(p => new ProductListViewModel
@@ -106,60 +108,20 @@ namespace Bake.Areas.Seller.Controllers
                     ProductDescription = p.ProductDescription,
                     CategoryName = p.Category != null ? p.Category.CategoryName : "未分類",
                     ProductQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0
-                }).FirstOrDefaultAsync(m => m.ProductId == id);
-            if (product == null)
+                })
+                .FirstOrDefaultAsync(m => m.ProductId == id);
+
+            if (productData == null)
             {
                 return NotFound();
             }
-            return View(product);
+
+            ViewBag.Categories = await _context.ProductCategories
+                    .Select(c => new { c.CategoryId, c.CategoryName })
+                    .ToListAsync();
+
+            return View(productData);
         }
-        // POST: SellerProduct/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductId,ProductName,ProductDescription,ProductImage")] Product product)
-        {
-
-            if (ModelState.IsValid)
-            {
-                Product c = await _context.Products.FindAsync(product.ProductId);
-                if (Request.Form.Files["Picture"] != null)
-                {
-                    using (BinaryReader br = new BinaryReader(Request.Form.Files["ProductImage"].OpenReadStream()))
-                    {
-                        product.ProductImage = br.ReadBytes((int)Request.Form.Files(Path.Combine(_env.WebRootPath, "ProductPicture", fileName)).Length);
-                    }
-                }
-                else
-                {
-                    product.ProductImage = c.ProductImage;
-                }
-                _context.Entry(c).State = EntityState.Detached;
-                try
-                {
-                    _context.Update(product);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProductExists(product.ProductId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            return View(product);
-        }
-
-
-
-
         public IActionResult All()
         {
             return View();
