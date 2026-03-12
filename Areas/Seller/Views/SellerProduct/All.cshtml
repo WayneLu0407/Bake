@@ -1,4 +1,17 @@
-﻿@model IEnumerable<Bake.Areas.Seller.ViewModels.ProductListViewModel>
+﻿@section Styles
+{
+    <link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.min.css" rel="stylesheet" />
+    <style>
+        .task-table .table td p {
+            text-align: center;
+            margin-bottom: 0;
+        }
+
+        .task-table .table td {
+            vertical-align: middle;
+        }
+    </style>
+}
 <!-- ========== section start ========== -->
 <section>
     <div class="container-fluid">
@@ -17,103 +30,25 @@
         <!-- ======== card style start ========== -->
         <div class="card-style px-0 mb-30">
             <div class="title d-flex flex-wrap pl-30 pr-30 mb-10 align-items-center justify-content-between">
-                <div class="d-flex align-items-center ">
-                    <h6>排序:</h6>
-                    <div class="select-style-1 mb-0 ml-10">
-                        <div class="select-position">
-                            <select class="p-0 pe-5 border-0">
-                                <option value="">價格</option>
-                                <option value="">品名</option>
-                                <option value="">過期日</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
                 <p>
                     <a asp-action="New" class="main-btn primary-btn btn-hover btn-sm"><i class="lni lni-plus mr-5"></i>新增</a>
                 </p>
             </div>
             <div class="table-wrapper table-responsive task-table">
-                <table class="table text-center">
+                <table id="productTable" class="table text-center">
                     <thead>
                         <tr>
-                            <th class="min-width">商品圖片</th>
-                            <th class="min-width">商品名稱</th>
-                            <th class="min-width">商品分類</th>
-                            <th class="min-width d-none d-md-table-cell" style="width:15%">商品描述</th>
-                            <th class="min-width" style="width:8%">商品價格</th>
-                            <th class="min-width d-none d-md-table-cell" style="width:8%">優惠折數</th>
-                            <th class="min-width" style="width:8%">商品數量</th>
-                            <th class="min-width d-none d-md-table-cell">商品過期日</th>
-                            <th class="min-width">編輯</th>
-                            <th class="min-width"></th>
+                            <th class=" text-center">商品圖片</th>
+                            <th class =" text-center">商品名稱</th>
+                            <th class=" text-center">商品分類</th>
+                            <th class=" text-center">商品價格</th>
+                            <th class=" text-center">優惠折數</th>
+                            <th class=" text-center">商品數量</th>
+                            <th class=" text-center">商品過期日</th>
+                            <th class=" text-center">操作</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td class="min-width">
-                                    <div>
-                                        <img src="@item.ProductImage" class="img-fluid rounded"
-                                             style="width:120px; height:90px; object-fit:cover;" alt="" />
-                                    </div>
-                                </td>
-                                <td class="min-width">
-                                    <p>
-                                        @item.ProductName
-                                    </p>
-                                </td>
-                                <td class="min-width ">
-                                    <p>
-                                        @item.CategoryName
-                                    </p>
-                                </td>
-                                <td class="min-width d-none d-md-table-cell">
-                                    <p>
-                                        @item.ProductDescription
-                                    </p>
-                                </td>
-                                <td class="min-width">
-                                    <p>
-                                        @item.ProductPrice
-                                    </p>
-                                </td>
-                                <td class="min-width d-none d-md-table-cell">
-                                    <p>
-                                        @item.ProductDiscount
-                                    </p>
-                                </td>
-                                <td class="min-width ">
-                                    <p> @item.ProductQuantity</p>
-                                </td>
-                                <td class="min-width d-none d-md-table-cell">
-                                    <p>
-                                        @item.ExpireDate
-                                    </p>
-                                </td>
-                                <!-- 修改按鈕 -->
-                                <td class="min-width">
-                                    <div class="action justify-content-end">
-                                        <button class="text-dark link-btn">
-                                            <a asp-area="Seller" asp-controller="SellerProduct" asp-action="Edit"
-                                               asp-route-id="@item.ProductId"style="display:inline"><i class="lni lni-pencil"></i></a>
-                                        </button>
-                                        <!-- 刪除按鈕，必須用 form POST -->
-                                        <form asp-area="Seller" asp-controller="SellerProduct"
-                                              asp-action="Delete" asp-route-id="@item.ProductId"
-                                              method="post" style="display:inline"
-                                              onsubmit="return confirm('確定要刪除【@item.ProductName】？')">
-                                            @Html.AntiForgeryToken()
-                                            <button type="submit" class="text-dark delete-btn ml-10">
-                                                <i class="lni lni-trash-can"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
+
                 </table>
                 <!-- end table -->
             </div>
@@ -124,3 +59,193 @@
     <!-- end container -->
 </section>
 <!-- ========== section end ========== -->
+<!-- ===== 編輯 Modal ===== -->
+<div class="modal fade" id="editModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">編輯商品</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div id="editErrors" class=" d-flex alert alert-danger d-none mx-auto" style="width:90%"></div>
+            <div class="modal-body">
+                <input type="hidden" id="editProductId" />
+                <div class="mb-3">
+                    <label class="form-label">商品名稱</label>
+                    <input type="text" id="editProductName" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">商品分類</label>
+                    <select id="editProductCategory" class="form-control">
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">商品價格</label>
+                    <input type="number" id="editProductPrice" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">商品數量</label>
+                    <input type="number" id="editProductQuantity" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">優惠折數</label>
+                    <input type="number" id="editProductDiscount" class="form-control" step="0.01" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">商品過期日</label>
+                    <input type="date" id="editExpireDate" class="form-control" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" id="saveEdit">儲存</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts
+{
+    <script src="https://cdn.datatables.net/2.3.7/js/dataTables.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // 初始化 DataTable
+            $("#productTable").dataTable({
+                ajax: {
+                    type: "POST",
+                    url: "@Url.Action("AllJson", "SellerProduct", new { area = "Seller" })",
+                    dataSrc: function (data) {
+                        return data;
+                    }
+                },
+                columns: [
+                    {
+                        data: "productImage",
+                        render: function (data) {
+                            return `<img src="${data}" class="rounded"
+                                         style="width:80px;height:60px;object-fit:cover;" />`;
+                        },
+                        orderable: false
+                    },
+                    { data: "productName" },
+                    { data: "categoryName" },
+                    { data: "productPrice" },
+                    { data: "productDiscount" },
+                    { data: "productQuantity" },
+                    { data: "expireDate" },
+                    {
+                        data: "productId",
+                        render: function (data, type, row) {
+                            return `
+                                <div class="d-flex justify-content-center gap-2 ">
+                                    <button class="btn btn-sm btn-primary edit-btn" data-id="${data}">
+                                        <i class="lni lni-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger delete-btn"
+                                            data-id="${data}"
+                                            data-name="${row.productName}">
+                                        <i class="lni lni-trash-can"></i>
+                                    </button>
+                                </div>
+                            `;
+                        },
+                        orderable: false
+                    }
+                ],
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/2.3.7/i18n/zh-HANT.json',
+                }
+            });
+
+            // 點編輯 → 撈資料填入 Modal
+            $(document).on("click", ".edit-btn", function () {
+                var id = $(this).data("id");
+                $.get("@Url.Action("GetProduct", "SellerProduct", new { area = "Seller" })/" + id, function (data) {
+                    $("#editProductId").val(data.productId);
+                    $("#editProductName").val(data.productName);
+                    $("#editProductPrice").val(data.productPrice);
+                    $("#editProductQuantity").val(data.productQuantity);
+                    $("#editProductDiscount").val(data.productDiscount);
+                    $("#editProductCategory").val(data.categoryId);
+                    $("#editModal").modal("show");
+                    if (data.expireDate) {
+                        var d = new Date(data.expireDate);
+                        var formatted = d.toISOString().split('T')[0];  // 轉成 "2026-04-10"
+                        $("#editExpireDate").val(formatted);
+                    } else {
+                        $("#editExpireDate").val('');
+                    }
+                });
+            });
+
+            $.get("@Url.Action("GetCategories", "SellerProduct", new { area = "Seller" })", function (data) {
+                var options = '<option value="">請選擇分類</option>';
+                data.forEach(function (c) {
+                    options += `<option value="${c.categoryId}">${c.categoryName}</option>`;
+                });
+                $("#editProductCategory").html(options);
+            });
+
+            // 點儲存
+            $("#saveEdit").click(function () {
+                var name = $("#editProductName").val().trim();
+                var price = $("#editProductPrice").val();
+                var quantity = $("#editProductQuantity").val();
+                var discount = $("#editProductDiscount").val();
+
+                var errors=[];
+                if(!name){errors.push("商品名稱不能為空");}
+                if(!price||parseFloat(price)<=0){errors.push("商品價格必須大於0");}
+                if(!quantity||parseInt(quantity)<=0){errors.push("商品數量必須大於0");}
+                if(discount&&(parseFloat(discount)<0)||parseFloat(discount)>1){errors.push("優惠折數必須在 0 ~ 1 之間");}
+
+                if (errors.length > 0) {
+                    $("#editErrors")
+                        .removeClass("d-none")
+                        .html(errors.join("<br>"));
+                    return;
+                } else {
+                    $("#editErrors").addClass("d-none");
+                }
+
+                // 驗證通過才送出
+                $.ajax({
+                    url: "@Url.Action("EditJson", "SellerProduct", new { area = "Seller" })",
+                    type: "POST",
+                    data: {
+                        ProductId: $("#editProductId").val(),
+                        ProductName: name,
+                        ProductPrice: price,
+                        ProductQuantity: quantity,
+                        ProductDiscount: discount,
+                        CategoryId: $("#editProductCategory").val(),
+                        ExpireDate: $("#editExpireDate").val()
+
+                    },
+                    success: function (result) {
+                        if (result.success) {
+                            $("#editModal").modal("hide");
+                            $("#productTable").DataTable().ajax.reload();
+                        } else {
+                            alert("儲存失敗：" + result.message);
+                        }
+                    }
+                });
+            });
+
+            // 點刪除
+            $(document).on("click", ".delete-btn", function () {
+                var id = $(this).data("id");
+                var name = $(this).data("name");
+                if (confirm("確定要刪除【" + name + "】？")) {
+                    $.post("@Url.Action("DeleteJson", "SellerProduct", new { area = "Seller" })",
+                        { id: id },
+                        function (result) {
+                            if (result.success) {
+                                $("#productTable").DataTable().ajax.reload();
+                            }
+                        });
+                }
+            });
+        });
+    </script>
+}
