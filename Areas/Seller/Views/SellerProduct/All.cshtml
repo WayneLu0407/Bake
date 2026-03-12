@@ -92,13 +92,12 @@
                                         @item.ExpireDate
                                     </p>
                                 </td>
-                                
+                                <!-- 修改按鈕 -->
                                 <td class="min-width">
                                     <div class="action justify-content-end">
                                         <button class="text-dark link-btn">
                                             <a asp-area="Seller" asp-controller="SellerProduct" asp-action="Edit"
-                                               asp-route-id="@item.ProductId"></a>
-                                            <i class="lni lni-pencil"></i>
+                                               asp-route-id="@item.ProductId"style="display:inline"><i class="lni lni-pencil"></i></a>
                                         </button>
                                         <!-- 刪除按鈕，必須用 form POST -->
                                         <form asp-area="Seller" asp-controller="SellerProduct"
