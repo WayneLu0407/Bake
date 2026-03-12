@@ -10,30 +10,18 @@
 </head>
 
 <body>
-    <section class="h-100 h-custom" style="background-color: #eee;">
-        <div class="container py-5 h-100">
+    <section class="h-100 h-custom" style="background-color: floralwhite;">
+        <div class="container py-5 h-100" id="checkoutApp">
             <div class="row d-flex justify-content-center align-items-center h-100">
-                <div class="col">
-                    <div class="card">
-                        <div class="card-body p-4">
-
-                            <div class="row" id="checkoutApp">
-
-                                @*左邊:購物車清單*@
-                               
-                                    <div class="col-lg-7">
-                                        <h5 class="mb-3">
-                                            <a asp-controller="Home" asp-action="shop" class="text-body">
-                                                <i class="fas fa-long-arrow-alt-left me-2"></i>Continue shopping
-                                            </a>
-                                        </h5>
-                                        <hr>
-
-                                        <div class="d-flex justify-content-between align-items-center mb-4">
-                                            <div>
-                                                <p class="mb-1">Shopping cart</p>
-                                                <p class="mb-0">You have {{totalCount}} items in your cart</p>
-                                            </div>
+                <div class="col-12">
+                    <div class="card card-registration card-registration-2" style="border-radius: 15px;">
+                        <div class="card-body p-0">
+                            <div class="row g-0">
+                                <div class="col-lg-8">
+                                    <div class="p-5">
+                                        <div class="d-flex justify-content-between align-items-center mb-5">
+                                            <h1 class="fw-bold mb-0">我的購物車</h1>
+                                            <h3 class="mb-0 text-muted">{{totalCount}} items</h3>
                                         </div>
                                         @*購物車清單內容  !!缺:加減數量*@
                                         <div class="card mb-3" v-for="item in cart" :key="item.productId">
@@ -60,102 +48,66 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="col-md-1 col-lg-1 col-xl-1 text-end">
+                                                <a href="#!" class="text-muted" v-on:click.prevent="deleteItem(item.productId)" ><i class="fas fa-trash-alt"></i></a>
+                                            </div>
+                                            <hr class="my-4">
+                                        </div>
+
+                                        <div class="pt-5">
+                                            <h6 class="mb-0">
+                                                <a asp-controller="Products" asp-action="Index" class="text-body">
+                                                    <i class="fas fa-long-arrow-alt-left me-2"></i>Back to shop
+                                                </a>
+                                            </h6>
                                         </div>
                                     </div>
-                                    @*右邊:結帳卡片細節*@
-                                    <div class="col-lg-5">
-                                        <div class="card bg-primary text-white rounded-3">
-                                            <div class="card-body">
-                                                <div class="d-flex justify-content-between align-items-center mb-4">
-                                                    <h5 class="mb-0">Card details</h5>
-                                                    <img src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/avatar-6.webp"
-                                                         class="img-fluid rounded-3" style="width: 45px;" alt="Avatar">
-                                                </div>
+                                </div>
+                                <div class="col-lg-4 bg-body-tertiary">
+                                    <div class="p-5">
+                                        <h3 class="fw-bold mb-5 mt-2 pt-1">Summary</h3>
+                                        <hr class="my-4">
 
-                                                @*選擇卡片類型Visa、Master、JBC等*@
-                                                <p class="small mb-2">Card type</p>
-                                                <a href="#!" type="submit" class="text-white">
-                                                    <i class="fab fa-cc-mastercard fa-2x me-2"></i>
-                                                </a>
-                                                <a href="#!" type="submit" class="text-white">
-                                                    <i class="fab fa-cc-visa fa-2x me-2"></i>
-                                                </a>
-                                                <a href="#!" type="submit" class="text-white">
-                                                    <i class="fab fa-cc-amex fa-2x me-2"></i>
-                                                </a>
-                                                <a href="#!" type="submit" class="text-white"><i class="fab fa-cc-paypal fa-2x"></i></a>
+                                        <div class="d-flex justify-content-between mb-4">
+                                            <h5 class="text-uppercase">items {{totalCount}}</h5>
+                                            <h5>$ {{totalPrice}}</h5>
+                                        </div>
 
-                                                @*卡片資訊form表單*@
-                                                <form class="mt-4" asp-controller="Checkout" asp-action="Info" method="post">
-                                                    <div data-mdb-input-init class="form-outline form-white mb-4">
-                                                        <input name="CardHolder" type="text" id="typeName" class="form-control form-control-lg" siez="17"
-                                                               placeholder="Cardholder's Name" />
-                                                        <label class="form-label" for="typeName">Cardholder's Name</label>
-                                                    </div>
+                                        <h5 class="text-uppercase mb-3">Shipping</h5>
 
-                                                    <div data-mdb-input-init class="form-outline form-white mb-4">
-                                                        <input name="CardNumber" type="text" id="typeText" class="form-control form-control-lg" siez="17"
-                                                               placeholder="1234 5678 9012 3457" minlength="19" maxlength="19" />
-                                                        <label class="form-label" for="typeText">Card Number</label>
-                                                    </div>
+                                        <div class="mb-4 pb-2">
+                                            <select data-mdb-select-init>
+                                                <option value="1">超商取貨付款-  $ 60</option>
+                                                <option value="2">Two</option>
+                                                <option value="3">Three</option>
+                                                <option value="4">Four</option>
+                                            </select>
+                                        </div>
 
-                                                    <div class="row mb-4">
-                                                        <div class="col-md-6">
-                                                            <div data-mdb-input-init class="form-outline form-white">
-                                                                <input name="CardExpireMonth" type="text" id="typeExp" class="form-control form-control-lg"
-                                                                       placeholder="MM/YYYY" size="7" id="exp" minlength="7" maxlength="7" />
-                                                                <label class="form-label" for="typeExp">Expiration</label>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <div data-mdb-input-init class="form-outline form-white">
-                                                                <input name="CVVcode" type="password" id="typeText" class="form-control form-control-lg"
-                                                                       placeholder="&#9679;&#9679;&#9679;" size="1" minlength="3" maxlength="3" />
-                                                                <label class="form-label" for="typeText">Cvv</label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                        <h5 class="text-uppercase mb-3">Give code</h5>
 
-                                                    <hr class="my-4">
-
-                                                    @*結算資訊*@
-                                                    <div class="d-flex justify-content-between">
-                                                        <p class="mb-2">Subtotal</p>
-                                                        <p class="mb-2">${{totalPrice}}</p>
-                                                    </div>
-
-                                                    <div class="d-flex justify-content-between">
-                                                        <p class="mb-2">Shipping</p>
-                                                        <p class="mb-2">$20.00</p>
-                                                    </div>
-
-                                                    <div class="d-flex justify-content-between mb-4">
-                                                        <p class="mb-2">Total(Incl. taxes)</p>
-                                                        <p class="mb-2">${{totalPrice+20}}</p>
-                                                    </div>
-                                                    @*送出表單按鈕*@
-                                                    <button class="btn btn-block w-100 py-3 shadow btn-lg"
-                                                            type="submit" data-mdb-button-init data-mdb-ripple-init
-                                                            style="background-color:#1A237E; color:white">
-                                                        <div class="d-flex justify-content-between fw-bold">
-                                                            <span>$ {{totalPrice+20}}</span>
-                                                            <span>Checkout <i class="fas fa-long-arrow-alt-right ms-2"></i></span>
-                                                        </div>
-                                                    </button>
-                                                </form>
-
-
-
+                                        <div class="mb-5">
+                                            <div data-mdb-input-init class="form-outline">
+                                                <input type="text" id="form3Examplea2" class="form-control form-control-lg" />
+                                                <label class="form-label" for="form3Examplea2">Enter your code</label>
                                             </div>
                                         </div>
 
+                                        <hr class="my-4">
+
+                                        <div class="d-flex justify-content-between mb-5">
+                                            <h5 class="text-uppercase">Total price</h5>
+                                            <h5>$ {{totalPrice +60 }} </h5>
+                                        </div>
+
+                                        <a asp-controller="Checkout" asp-action="Info" style="background-color: #ffc107;" data-mdb-button-init data-mdb-ripple-init class="btn btn-danger btn-block w-100 btn-lg"
+                                                data-mdb-ripple-color="dark">
+                                            結帳
+                                        </a>
+
                                     </div>
-                                
-
-
-
+                                </div>
                             </div>
-
                         </div>
                     </div>
                 </div>
