@@ -193,6 +193,9 @@ namespace Bake.Areas.Seller.Controllers
                     ProductId = p.ProductId,
                     ProductName = p.ProductName,
                     ProductImage = p.ProductImage,
+                    ProductPrice = p.ProductDetail.ProductPrice,
+                    ProductDiscount = p.ProductDetail.ProductDiscount != null ? p.ProductDetail.ProductDiscount : 0,
+                    ExpireDate = p.ProductDetail.ExpireDate,
                     ProductDescription = p.ProductDescription,
                     CategoryName = p.Category != null ? p.Category.CategoryName : "未分類",
                     ProductQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0
