@@ -23,7 +23,7 @@ public partial class AccountAuth
 
     public bool IsEmailConfirmed { get; set; }
 
-    public string ConfirmationToken { get; set; } = null!;
+    public string? ConfirmationToken { get; set; }
 
     public DateTime? EmailVerifiedAt { get; set; }
 
