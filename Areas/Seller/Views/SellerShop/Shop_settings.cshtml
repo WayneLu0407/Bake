@@ -1,5 +1,16 @@
-﻿@{
-    ViewData["Title"] = "店舖設定";
+﻿@model Bake.Areas.Seller.ViewModels.SellerShopSettingsReadViewModel
+
+@{
+    ViewData["Title"] = "Shop_settings";
+
+    string? shopImageUrl = null;
+
+    if (!string.IsNullOrWhiteSpace(Model?.ShopImg) &&
+        !Model.ShopImg.StartsWith("http://") &&
+        !Model.ShopImg.StartsWith("https://"))
+    {
+        shopImageUrl = Url.Content("~/" + Model.ShopImg.TrimStart('/'));
+    }
 }
 
 <div class="container my-4">
@@ -19,7 +30,25 @@
                     <!-- 頭像 + 店名 + 簡介 -->
                     <div class="d-flex flex-column flex-md-row gap-4 align-items-start">
                         <div class="position-relative">
-                            <div class="seller-avatar bg-secondary-subtle"></div>
+                            <!-- 功用：正式卡片顯示店鋪頭像 -->
+                            <!-- 若 shopImageUrl 有值就顯示圖片，否則顯示 📷 -->
+                            <div class="seller-avatar bg-secondary-subtle d-flex align-items-center justify-content-center overflow-hidden">
+                                @if (!string.IsNullOrWhiteSpace(shopImageUrl))
+                                {
+                                    <img src="@shopImageUrl"
+                                         alt="店舖圖片"
+                                         class="w-100 h-100"
+                                         style="object-fit:cover;"
+                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                                }
+
+                                <div class="shop-image-fallback d-flex align-items-center justify-content-center w-100 h-100"
+                                     style="display:@(string.IsNullOrWhiteSpace(shopImageUrl) ? "flex" : "none");">
+                                    📷
+                                </div>
+                            </div>
+
+                            <!-- 這個按鈕目前先保留樣式，不做功能 -->
                             <button type="button" class="btn btn-light btn-sm seller-avatar-btn" title="更換頭像">
                                 📷
                             </button>
@@ -27,20 +56,21 @@
 
                         <div class="flex-grow-1">
                             <div class="d-flex align-items-center gap-2 mb-2">
-                                <h3 class="mb-0 fw-bold">小森烘焙</h3>
+                                <!-- 顯示目前店鋪名稱 -->
+                                <h3 class="mb-0 fw-bold">@Model.ShopName</h3>
+                                <!-- 改成可套tagHelper&編輯還沒做 -->
                                 <button type="button" class="btn btn-outline-secondary btn-sm" title="編輯店名">✎</button>
                             </div>
 
                             <div class="d-flex align-items-start justify-content-between gap-2">
                                 <p class="text-muted mb-0" style="line-height:1.8;">
-                                    店舖介紹寫這邊店舖介紹寫這邊店舖介紹寫這邊店舖介紹寫這邊店舖介紹寫這邊
+                                    @Model.ShopDescription
                                 </p>
+                                <!-- 改成可套tagHelper&編輯還沒做 -->
                                 <button type="button" class="btn btn-outline-secondary btn-sm flex-shrink-0" title="編輯店舖介紹">
                                     ✎
                                 </button>
                             </div>
-                        </div>
-                    </div>
 
                     <hr class="my-4" />
 
