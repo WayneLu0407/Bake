@@ -1,5 +1,199 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@using Bake.ViewModel
+@model CheckoutViewModel
+
 @{
+    ViewData["Title"] = "Order Payment";
+    string ReceiverName = ViewBag.ReceiverName ?? "N/A";
+    string ReceiverPhone = ViewBag.ReceiverPhone ?? "N/A";
+    string ReceiverAddress = ViewBag.ReceiverAddress ?? "N/A";
+}
+
+<section class="h-100 h-custom" style="background-color: #f8f9fa;">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-lg-11 col-xl-10">
+                <div class="card shadow-lg border-0" style="border-radius: 1.5rem; overflow: hidden;">
+
+                    <div class="card-body p-0">
+                        <div class="row g-0">
+
+                            @* --- 左邊：確認資訊區 (亮黃色與收件資訊) --- *@
+                            <div class="col-lg-5 p-4 p-md-5" style="background-color: #fffbeb;">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="icon-shape bg-warning text-white rounded-circle p-3 me-3 shadow-sm">
+                                        <i class="fas fa-clipboard-check fa-lg"></i>
+                                    </div>
+                                    <h4 class="mb-0 fw-bold text-dark">Order Review</h4>
+                                </div>
+
+                                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-map-marker-alt text-warning me-2"></i>Shipping Details</h6>
+                                            <a asp-action="Info" class="text-muted small text-decoration-none">Edit</a>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted d-block">Recipient</small>
+                                            <span class="fw-bold">@ReceiverName</span>
+                                        </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted d-block">Phone</small>
+                                            <span class="fw-bold">@ReceiverPhone</span>
+                                        </div>
+                                        <div class="mb-0">
+                                            <small class="text-muted d-block">Address</small>
+                                            <span class="fw-bold" style="font-size: 0.9rem;">@ReceiverAddress</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="paymentPage">
+                                    <div class="mb-4">
+                                        <h6 class="fw-bold mb-3 text-dark px-1">Items</h6>
+                                        <div class="overflow-auto pe-2" style="max-height: 200px;">
+                                            @* 綁定 Vue 資料 *@
+
+                                            <div v-for="item in cart" :key="item.productId" class="d-flex align-items-center mb-3">
+                                                <img :src="item.imgUrl" class="rounded-3 shadow-sm" style="width: 50px; height: 50px; object-fit: cover; background-color: #fff;">
+                                                <div class="ms-3 flex-grow-1">
+                                                    <div class="small fw-bold text-dark text-truncate" style="max-width: 150px;">{{item.productName}}</div>
+                                                    <div class="text-muted" style="font-size: 0.8rem;">Qty: {{item.quantity}}</div>
+                                                </div>
+                                                <div class="text-end fw-bold small">${{item.price * item.quantity}}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <hr class="my-4 border-dashed">
+
+                                    <div class="d-flex justify-content-between align-items-center px-1">
+                                        <span class="text-dark fw-bold fs-5">Total Amount</span>
+                                        <h3 class="fw-bolder text-dark mb-0">${{totalPrice + 20}}</h3>
+                                    </div>
+                                </div>
+                                
+                            </div>
+
+                            @* --- 右邊：付款方式選擇 --- *@
+                            <div class="col-lg-7 p-4 p-md-5 bg-white">
+                                <h3 class="fw-bold text-dark mb-1">Final Step</h3>
+                                <p class="text-muted mb-5">Select your payment method and complete the purchase.</p>
+
+                                <form asp-controller="Checkout" asp-action="ConfirmPayment" method="post">
+                                    <input type="hidden" name="ReceiverName" value="@ReceiverName" />
+                                    <input type="hidden" name="PhoneNumber" value="@ReceiverPhone" />
+                                    <input type="hidden" name="ShippingAddress" value="@ReceiverAddress" />
+
+                                    @* 信用卡選項 *@
+                                    <div class="payment-option mb-3">
+                                        <input class="d-none" type="radio" name="PaymentMethod" id="creditCard" value="CreditCard" checked>
+                                        <label class="d-flex align-items-center p-4 rounded-4 border w-100 cursor-pointer shadow-sm active-payment" for="creditCard">
+                                            <i class="far fa-credit-card fa-2x me-3 text-muted icon-main"></i>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-bold text-dark">Credit Card</div>
+                                                <div class="small text-muted">Secure payment with Visa/Master/JCB</div>
+                                            </div>
+                                            <i class="fas fa-check-circle fa-lg text-warning check-icon"></i>
+                                        </label>
+                                    </div>
+
+                                    @* Line Pay 選項 *@
+                                    <div class="payment-option mb-5">
+                                        <input class="d-none" type="radio" name="PaymentMethod" id="linePay" value="LinePay">
+                                        <label class="d-flex align-items-center p-4 rounded-4 border w-100 cursor-pointer shadow-sm" for="linePay">
+                                            <i class="fab fa-line fa-2x me-3 text-muted icon-main"></i>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-bold text-dark">Line Pay</div>
+                                                <div class="small text-muted">Quick mobile payment</div>
+                                            </div>
+                                            <i class="fas fa-check-circle fa-lg text-warning check-icon d-none"></i>
+                                        </label>
+                                    </div>
+
+                                    <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill shadow-lg fw-bold btn-lg"
+                                            style="background-color: #1A237E; border: none; font-size: 1.2rem;">
+                                        PLACE ORDER NOW <i class="fas fa-arrow-right ms-2"></i>
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .cursor-pointer {
+        cursor: pointer;
+    }
+
+    .border-dashed {
+        border-top: 2px dashed #ddd;
+        opacity: 1;
+    }
+
+    /* 付款選項美化 */
+    .payment-option label {
+        transition: all 0.2s ease;
+        border: 2px solid #eee !important;
+    }
+
+        .payment-option label:hover {
+            background-color: #fffbeb;
+            border-color: #ffc107 !important;
+        }
+    /* 選中狀態 */
+    .payment-option input:checked + label {
+        border-color: #ffc107 !important;
+        background-color: #fff;
+    }
+
+        .payment-option input:checked + label .icon-main {
+            color: #ffc107 !important;
+        }
+
+        .payment-option input:checked + label .check-icon {
+            display: block !important;
+        }
+
+    /* 捲軸美化 */
+    .overflow-auto::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .overflow-auto::-webkit-scrollbar-thumb {
+        background: #E0E0E0;
+        border-radius: 10px;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        // 切換選中狀態的勾勾顯示
+        document.querySelectorAll('input[name="PaymentMethod"]').forEach(input => {
+            input.addEventListener('change', function() {
+                document.querySelectorAll('.check-icon').forEach(icon => icon.classList.add('d-none'));
+                if(this.checked) {
+                    this.nextElementSibling.querySelector('.check-icon').classList.remove('d-none');
+                }
+            });
+        });
+
+        //購物清單
+        const app = Vue.createApp({
+            data(){return{cart:[]}},
+            computed:{
+                totalPrice(){return this.cart.reduce((sum, item)=>sum+(item.price*item.quantity),0);}
+            },
+            methods:{
+                async fetchCart(){
+                const response = await fetch('/Cart/GetCartItems');
+                if(response.ok) this.cart = await response.json();
+                }
+            },
+            mounted(){this.fetchCart();}
+        }).mount('#paymentPage')
+    </script>
 }
