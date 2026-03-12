@@ -25,7 +25,7 @@ namespace Bake.Controllers
         [HttpGet]
         public IActionResult Payment()
         {
-            TempData.Keep(); //先keepy資料
+            TempData.Keep(); //先keep資料
 
             ViewBag.ReceiverName = TempData["ReceiverName"] ?? "測試員";
             ViewBag.ReceiverPhone = TempData["ReceiverPhone"];
