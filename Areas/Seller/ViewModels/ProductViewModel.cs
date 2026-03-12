@@ -8,12 +8,12 @@ namespace Bake.Areas.Seller.ViewModels
 
         [Required(ErrorMessage = "請輸入商品名稱")]
         [Display(Name = "商品名稱")]
-        public string ProductName { get; set; }
+        public string? ProductName { get; set; }
 
 
         [Required(ErrorMessage = "請輸入商品描述")]
         [Display(Name = "商品描述")]
-        public string ProductDescription { get; set; }
+        public string? ProductDescription { get; set; }
 
 
         [Display(Name = "上傳新圖片")]
