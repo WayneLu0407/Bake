@@ -4806,9 +4806,9 @@ h6,
 .task-table .table td.name-title {
   min-width: 200px;
 }
-.task-table .table td:first-child > * {
+/*.task-table .table td:first-child > * {
   padding-left: 30px;
-}
+}*/
 .task-table .table td:last-child > * {
   padding-right: 30px;
 }

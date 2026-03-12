@@ -28,9 +28,9 @@ namespace Bake.Controllers.api
                     productImage = p.ProductImage,
                     productRating = p.ProductRating,
                     productDate = p.ProductDate,
-                    productPrice = p.ProductDetail.ProductPrice,
-                    productDiscount = p.ProductDetail.ProductDiscount,
-                    shopName = p.User.Shop.ShopName,
+                    productPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : (decimal?)null,
+                    productDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : (decimal?)null,
+                    shopName = p.User.Shop != null ? p.User.Shop.ShopName : "未知店家",
                 })
                 .ToList();
             return Ok(prod);

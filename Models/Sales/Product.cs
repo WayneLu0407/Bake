@@ -27,4 +27,8 @@ public partial class Product
     public virtual ProductCategory Category { get; set; } = null!;
 
     public virtual AccountAuth User { get; set; } = null!;
+
+    public virtual ProductDetail? ProductDetail { get; set; }
+
+    public ProductIngredient? ProductIngredient { get; set; }
 }

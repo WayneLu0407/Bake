@@ -1,4 +1,5 @@
-﻿@{
+﻿@model Bake.Models.RegisterModel
+@{
 	Layout = "_Layout2";
 	ViewBag.Title = "會員註冊";
 }
@@ -33,13 +34,15 @@
 							<div class="input-style-1">
 								<label>姓名</label>
 								<input name="Name" type="text" placeholder="Name" />
+								<span asp-validation-for="Name" class="text-danger"></span>
 							</div>
 						</div>
 						<!-- end col -->
 						<div class="col-12">
 							<div class="input-style-1">
 								<label>電子郵件</label>
-								<input name="Email" type="email" placeholder="Email" />
+								<input name="Email" type="email" placeholder="name@example.com" />
+								<span asp-validation-for="Email" class="text-danger"></span>
 							</div>
 						</div>
 						<!-- end col -->
@@ -47,6 +50,15 @@
 							<div class="input-style-1">
 								<label>密碼</label>
 								<input name="Password" type="password" placeholder="Password" />
+								<span asp-validation-for="Password" class="text-danger"></span>
+							</div>
+						</div>
+						<!-- end col -->
+						<div class="col-12">
+							<div class="input-style-1">
+								<label>確認密碼</label>
+								<input name="PasswordConfirm" type="password" placeholder="PasswordConfirm" />
+								<span asp-validation-for="PasswordConfirm" class="text-danger"></span>
 							</div>
 						</div>
 						<!-- end col -->
