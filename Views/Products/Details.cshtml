@@ -17,22 +17,16 @@
             <div id="carouselExampleFade" class="carousel slide carousel-fade w-100">
                 <div class="carousel-inner  h-100" style="min-height: 400px;">
                     <div class="carousel-item active h-100">
-                        <img src="~/productpicture/cookie/cookie1-1.jpg" class="w-100 h-100" style="object-fit: cover;" alt="...">
-                    </div>
-                    <div class="carousel-item h-100">
-                        <img src="~/productpicture/cookie/cookie1-2.jpg" class="w-100 h-100" style="object-fit: cover;" alt="...">
-                    </div>
-                    <div class="carousel-item h-100">
-                        <img src="~/productpicture/cookie/cookie1-3.jpg" class="w-100 h-100" style="object-fit: cover;" alt="...">
+                        <img :src="product.productImage" :alt="product.productName" class="tab-image w-100 h-100" style="object-fit: cover;" alt="...">
                     </div>
                 </div>
-                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
+                @* <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Previous</span>
                 </button>
                 <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="next">
                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
+                    <span class="visually-hidden">Next</span> *@
                 </button>
             </div>
         </div>
@@ -69,7 +63,7 @@
                 <!-- FoodMart .btn-outline-light -->
                 <button class="btn btn-outline-light py-3 w-100">加入最愛</button>
             </div>
-
+        </div>
     </section>
 
     <section class="row g-5 mb-5">
@@ -119,11 +113,9 @@
         <div class="section-heading">商品資訊</div>
         <table class="info-table w-100">
             <tbody>
-                <tr><td>賞味期限</td><td>收到商品後 20 天</td></tr>
-                <tr><td>過敏原</td><td>蛋、牛奶、花生、堅果</td></tr>
-                <tr><td>保存方法</td><td>常溫</td></tr>
-                <tr><td>內容物</td><td>金香鳳梨酥：土鳳梨餡、日本麵粉、雞蛋、奶油、奶粉</td></tr>
-                <tr><td>內容量</td><td>30.0g x 12</td></tr>
+                <tr><td>賞味期限</td><td>{{product.shelfLifeNote}}</td></tr>
+                <tr><td>內容物</td><td>{{product.ingredient}}</td></tr>
+                <tr><td>內容量</td><td>{{product.netWeight}}</td></tr>
             </tbody>
         </table>
     </section>
@@ -174,7 +166,7 @@
                                         <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
                                     </a>
                                     <figure class="mb-3">
-                                        <a asp-controller="Products" asp-action="Details" asp-route-id="@@product.productId" title="Product Title">
+                                        <a :href="'/Products/Details/' + product.productId" title="Product Title">
                                             <img :src="product.productImage" :alt="product.productName" class="tab-image">
                                         </a>
                                     </figure>
