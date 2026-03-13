@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-var BakeconnectionString = builder.Configuration.GetConnectionString("bake"); // 和appsetting 連線字串相連
+var BakeconnectionString = builder.Configuration.GetConnectionString("Bake"); // 和appsetting 連線字串相連
 builder.Services.AddDbContext<BakeContext>(options =>
     options.UseSqlServer(BakeconnectionString));
 
@@ -19,7 +19,12 @@ builder.Services.AddSession(Options => {
     Options.Cookie.SecurePolicy = CookieSecurePolicy.Always;  //要求cookie必須透過HTTPS連線傳送
 });
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    // 更改模型綁定的預設錯誤訊息
+    options.ModelBindingMessageProvider.SetValueMustBeANumberAccessor(
+        x => $"'{x}' 必須是有效的數字。");
+});
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme) //驗證身分證的關卡
 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, option =>
@@ -29,7 +34,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 });
 
 var app = builder.Build();
-
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
