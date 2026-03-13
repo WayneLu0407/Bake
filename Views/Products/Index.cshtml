@@ -6,7 +6,7 @@
 
 
 
-    <section class="py-5 bg-light">
+    <section class="py-5" style="background-image: url('/images/background-pattern.jpg'); background-size: cover; background-position: center;">
         <div class="container-fluid text-center">
             <h2 class="fw-bold">所有商品</h2>
         </div>
@@ -31,14 +31,16 @@
                     <div class="mb-4">
                         <h5 class="fw-bold mb-3">商品分類</h5>
                         <ul class="list-unstyled">
-                            <li class="mb-1"><a href="#" class="nav-link px-0">法式甜點</a></li>
-                            <li class="mb-1"><a href="#" class="nav-link px-0">餅乾</a></li>
-                            <li class="mb-1"><a href="#" class="nav-link px-0">蛋糕</a></li>
-                            <li class="mb-1"><a href="#" class="nav-link px-0">布丁</a></li>
-                            <li class="mb-1"><a href="#" class="nav-link px-0">麵包</a></li>
-                            <li class="mb-1"><a href="#" class="nav-link px-0">甜甜圈</a></li>
-                            <li class="mb-1"><a href="#" class="nav-link px-0">巧克力</a></li>
-                            <li class="mb-1"><a href="#" class="nav-link px-0">糖果</a></li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0" :class="{ 'fw-bold text-primary': selectedCategory === 'all' }"  @@click.prevent="selectedCategory = 'all'">全部</a></li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0" :class="{'fw-bold text-primary':selectedCategory===1}" @@click.prevent="selectedCategory=1" >法式甜點</a></li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0" :class="{'fw-bold text-primary':selectedCategory===2}" @@click.prevent="selectedCategory=2">餅乾</a></li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0" :class="{'fw-bold text-primary':selectedCategory===3}" @@click.prevent="selectedCategory=3">蛋糕</a></li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0":class="{ 'fw-bold text-primary': selectedCategory === 4 }" @@click.prevent="selectedCategory = 4">布丁</a></li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0":class="{ 'fw-bold text-primary': selectedCategory === 5 }" @@click.prevent="selectedCategory = 5">麵包</a></li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0":class="{ 'fw-bold text-primary': selectedCategory === 6 }"@@click.prevent="selectedCategory = 6">泡芙</a></li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0":class="{ 'fw-bold text-primary': selectedCategory === 7 }" @@click.prevent="selectedCategory = 7">甜甜圈</a> </li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0":class="{ 'fw-bold text-primary': selectedCategory === 8 }"@@click.prevent="selectedCategory = 8">巧克力</a></li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0":class="{ 'fw-bold text-primary': selectedCategory === 9 }"@@click.prevent="selectedCategory = 9">糖果</a></li>
                         </ul>
                     </div>
 
@@ -188,7 +190,8 @@
                     pageSize: 12,
                     cart:[],
                     sortBy: 'default',
-                    priceRange:'all'
+                    priceRange:'all',
+                    selectedCategory:'all'
                 }
             },
             methods: {
@@ -223,6 +226,10 @@
                 sortedProducts(){
                 let list = [...this.products]
 
+                if(this.selectedCategory !== 'all'){
+                list = list.filter(p=>p.categoryId  === this.selectedCategory)
+                }
+
                 if(this.priceRange==='0-100'){list = list.filter(p=>p.productPrice<=100)}
                 if(this.priceRange==='100-300'){list = list.filter(p=>p.productPrice>100 && p.productPrice<=300)}
                 if(this.priceRange==='300-500'){list = list.filter(p=>p.productPrice > 300 && p.productPrice <= 500)}
@@ -246,6 +253,9 @@
               },
               priceRange(){
                   this.currentPage = 1
+              },
+              selectedCategory(){
+                  this.currentPage = 1
               }
             },
             // beforeCreat(){
@@ -256,6 +266,12 @@
             //     this.carts = cartDataArr || [];
             // },
             async mounted() {
+            const params = new URLSearchParams(window.location.search)
+            const cat = params.get('category')
+            if(cat){
+                this.selectedCategory = parseInt(cat)
+            }
+
             // 串接你的 API
             const res = await fetch('/api/Product/Get')
             this.products = await res.json()
