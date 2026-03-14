@@ -1,0 +1,49 @@
+﻿/* 讓 banner 有足夠高度，內容垂直置中 */
+.banner-ad .swiper-slide {
+    min-height: 420px;
+    display: flex;
+    align-items: center;
+}
+
+/* 商品圖片加上浮動感 */
+.img-wrapper img {
+    width: 120%;
+    filter: drop-shadow(0 20px 30px rgba(0,0,0,0.15));
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-12px);
+    }
+}
+
+/* categories 標籤文字（「新鮮出爐」那行）*/
+.banner-ad.large .banner-content .categories {
+    background: linear-gradient(90deg, #9F4D95, #BB3D00);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 700;
+}
+/* Swiper 容器本身也要有高度 */
+.main-swiper {
+    height: 100%;
+}
+
+.banner-ad.swiper-slide {
+    min-height: 420px;
+    display: flex;
+    align-items: center;
+}
+
+/* 讓 banner-content 的 row 撐滿整個 slide */
+.banner-content {
+    width: 100%;
+    min-height: 420px;
+    align-items: center;
+}
