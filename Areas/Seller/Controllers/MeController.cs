@@ -1,9 +1,17 @@
 ﻿using AspNetCoreGeneratedDocument;
 using Bake.Areas.Seller.Model;
+using Bake.Areas.Seller.ViewModels;
 using Bake.Data;
+using Bake.Models.User;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Identity.Client;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
+using System.Reflection.Metadata.Ecma335;
+using System.Security.Claims;
 
 namespace Bake.Areas.Seller.Controllers
 {
@@ -30,12 +38,49 @@ namespace Bake.Areas.Seller.Controllers
         {
             return View();
         }
-        
-        public IActionResult Settings()
+
+        //public IActionResult Settings()
+        //{
+        //    return View();
+        //}
+        [Authorize]
+        public async Task<IActionResult> Settings()
         {
-            return View();
+            string userAccount = User.Identity.Name ;
+            if (string.IsNullOrEmpty(userAccount)) return RedirectToAction("Login", "Home");
+            
+            var user = _context.AccountAuths.FirstOrDefault(c=>c.Email == userAccount);
+            if (user == null) return NotFound();
+
+            var ViewModel = new SettingsViewModel
+            {
+                Name = user.UserName,
+                Email = user.Email
+            };
+            
+            return View(ViewModel);
         }
-        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Settings(SettingsViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+            var user = await _context.AccountAuths.FirstOrDefaultAsync(c => c.Email == model.Email);
+            if( user == null )
+            {
+                return NotFound();
+            }
+            user.UserName = model.Name;
+            user.Email = model.Email;
+            user.PasswordHash = model.Password;
+            
+            _context.SaveChanges();
+            return RedirectToAction("Dashboard","Me", new {area = "Seller"});
+        }
+
         public IActionResult Profile()
         {
             return View();
@@ -76,15 +121,7 @@ namespace Bake.Areas.Seller.Controllers
             }
             return View(model);
         }
-        public IActionResult Password()
-        {
-            return View();
-        }
-        public IActionResult Password(PasswordModel model)
-        {
-            return View();
-        }
-
+        
         public IActionResult Verify_email()
         {
             return View();
