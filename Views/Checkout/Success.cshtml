@@ -1,0 +1,87 @@
+﻿@{
+    ViewData["Title"] = "Order Success";
+}
+
+<div class="container py-5 mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6 text-center">
+            <div class="mb-4">
+                <div class="success-checkmark">
+                    <div class="check-icon">
+                        <span class="icon-line line-tip"></span>
+                        <span class="icon-line line-long"></span>
+                        <div class="icon-circle"></div>
+                        <div class="icon-fix"></div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="fw-bold text-dark mb-3">Thank You for Your Order!</h2>
+            <p class="text-muted mb-4 fs-5">
+                We've received your order and our bakers are getting ready to prepare your treats.
+            </p>
+
+            <div class="card border-0 shadow-sm mb-5" style="border-radius: 15px; background-color: #fdfdfd;">
+                <div class="card-body p-4">
+                    <div class="row text-start">
+                        <div class="col-6 mb-3">
+                            <label class="text-muted small text-uppercase fw-bold">Order Number</label>
+                            <p class="fw-bold mb-0 text-primary">@ViewBag.OrderId</p>
+                        </div>
+                        <div class="col-6 mb-3 text-end">
+                            <label class="text-muted small text-uppercase fw-bold">Date</label>
+                            <p class="mb-0">@DateTime.Now.ToString("MMM dd, yyyy")</p>
+                        </div>
+                        <hr class="my-2 opacity-10">
+                        <div class="col-12 mt-2">
+                            <p class="small text-muted mb-0">
+                                <i class="fas fa-info-circle me-1"></i> 
+                                A confirmation email has been sent to your registered address.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-dark btn-lg px-4 rounded-pill fw-bold">
+                    Back to Shop
+                </a>
+                <a asp-controller="Member" asp-action="Orders" class="btn btn-primary btn-lg px-4 rounded-pill fw-bold shadow-sm" style="background-color: #1A237E; border: none;">
+                    View Order Status
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* 簡易成功勾選動畫 */
+    .success-checkmark {
+        width: 80px;
+        height: 115px;
+        margin: 0 auto;
+    }
+    .check-icon {
+        width: 80px;
+        height: 80px;
+        position: relative;
+        border-radius: 50%;
+        box-sizing: content-box;
+        border: 4px solid #4CAF50;
+    }
+    .check-icon::before {
+        content: "✔";
+        position: absolute;
+        font-size: 50px;
+        color: #4CAF50;
+        left: 18px;
+        top: 2px;
+    }
+    /* 讓按鈕與你的主題色一致 */
+    .btn-primary:hover {
+        background-color: #283593 !important;
+        transform: translateY(-2px);
+        transition: all 0.2s;
+    }
+</style>
