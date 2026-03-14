@@ -257,7 +257,7 @@
         </div>
     </section>
 </main>
-<div>
+</div>
 
 
 
@@ -290,7 +290,7 @@
                  return [...this.products].sort((a,b)=> b.productRating - a.productRating)
                  },
                  productsByDate(){
-                 return [...this.products].sort((a,b)=> new Date(b.productRating)  - new Date(a.productRating))
+                 return [...this.products].sort((a,b)=> new Date(b.productDate) - new Date(a.productDate))
                  },
                  productsByDiscount(){
                  return [...this.products].sort((a,b)=> b.productDiscount - a.productDiscount)
