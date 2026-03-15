@@ -44,6 +44,7 @@ namespace Bake.Areas.Seller.Controllers
                 .Include(p => p.Category)
                 .Select(p => new
                 {
+                    ProductDate = p.ProductDate,
                     productId = p.ProductId,
                     productName = p.ProductName,
                     categoryName = p.Category != null ? p.Category.CategoryName : "未分類",
@@ -67,7 +68,8 @@ namespace Bake.Areas.Seller.Controllers
                 p.productPrice,
                 p.productDiscount,
                 p.productQuantity,
-                expireDate = p.expireDate != null ? p.expireDate.Value.ToString("yyyy/MM/dd") : ""
+                expireDate = p.expireDate != null ? p.expireDate.Value.ToString("yyyy/MM/dd") : "",
+                ProductDate = p.ProductDate.ToString("yyyy/MM/dd") 
             });
 
             return Json(result);
@@ -83,6 +85,7 @@ namespace Bake.Areas.Seller.Controllers
                 productId = p.ProductId,
                 productName = p.ProductName,
                 categoryId = p.CategoryId,
+                productImage = p.ProductImage,
                 productPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : 0,
                 productDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : 0,
                 productQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0,
@@ -95,7 +98,7 @@ namespace Bake.Areas.Seller.Controllers
 
         // Modal 儲存用
         [HttpPost]
-        public async Task<JsonResult> EditJson(int ProductId, string ProductName,decimal ProductPrice, int ProductQuantity, decimal ProductDiscount, int CategoryId, DateTime? ExpireDate)
+        public async Task<JsonResult> EditJson(int ProductId, string ProductName,decimal ProductPrice, int ProductQuantity, decimal ProductDiscount, int CategoryId, DateTime? ExpireDate, IFormFile? ProductImage)
         {
             try
             {
@@ -107,8 +110,17 @@ namespace Bake.Areas.Seller.Controllers
 
                 product.ProductName = ProductName;
                 product.CategoryId = CategoryId;
-                
 
+                if (ProductImage != null && ProductImage.Length > 0)
+                {
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(ProductImage.FileName);
+                    string savePath = Path.Combine(_env.WebRootPath, "ProductPicture", fileName);
+                    using (var stream = new FileStream(savePath, FileMode.Create))
+                    {
+                        await ProductImage.CopyToAsync(stream);
+                    }
+                    product.ProductImage = "/ProductPicture/" + fileName;
+                }
                 if (product.ProductDetail != null)
                 {
                     product.ProductDetail.ProductPrice = ProductPrice;
@@ -211,11 +223,11 @@ namespace Bake.Areas.Seller.Controllers
                     {
                         await item.ProductImage.CopyToAsync(stream);
                     }
-                    product.ProductImage = "ProductPicture/" + fileName;
+                    product.ProductImage = "/ProductPicture/" + fileName;
                 }
                 else
                 {
-                    product.ProductImage = "ProductPicture/NoImage.jpg";
+                    product.ProductImage = "/ProductPicture/NoImage.jpg";
                 }
                 _context.Add(product);
                 await _context.SaveChangesAsync();

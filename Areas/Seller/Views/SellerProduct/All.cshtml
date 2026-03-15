@@ -44,6 +44,7 @@
                             <th class=" text-center">商品價格</th>
                             <th class=" text-center">優惠折數</th>
                             <th class=" text-center">商品數量</th>
+                            <th class=" text-center">商品上架日</th>
                             <th class=" text-center">商品過期日</th>
                             <th class=" text-center">操作</th>
                         </tr>
@@ -95,6 +96,12 @@
                     <label class="form-label">商品過期日</label>
                     <input type="date" id="editExpireDate" class="form-control" />
                 </div>
+                <div class="mb-3">
+                    <label class="form-label">照片修改</label>
+                    <img id="editImagePreview" src="~/ProductPicture/NoImage.jpg" style="height:270px; display:block; margin-bottom:15px;" />
+                    <input type="file" id="editProductImage" class="form-control" accept="image/*" />
+                   
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
@@ -131,6 +138,7 @@
                     { data: "productPrice" },
                     { data: "productDiscount" },
                     { data: "productQuantity" },
+                    { data: "productDate" },
                     { data: "expireDate" },
                     {
                         data: "productId",
@@ -174,6 +182,7 @@
                     } else {
                         $("#editExpireDate").val('');
                     }
+                    $("#editImagePreview").attr("src", data.productImage);
                 });
             });
 
@@ -185,6 +194,17 @@
                 $("#editProductCategory").html(options);
             });
 
+            $("#editProductImage").change(function(){
+                var file = this.files[0];
+                if(file){
+                    var reader = new FileReader();
+                    reader.onload = function(e){
+                    $("#editImagePreview").attr("src",e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            
+            });
             // 點儲存
             $("#saveEdit").click(function () {
                 var name = $("#editProductName").val().trim();
@@ -207,20 +227,28 @@
                     $("#editErrors").addClass("d-none");
                 }
 
+                var formData = new FormData();
+                formData.append("ProductId", $("#editProductId").val());
+                formData.append("ProductName", name);
+                formData.append("ProductPrice", price);
+                formData.append("ProductQuantity", quantity);
+                formData.append("ProductDiscount", discount);
+                formData.append("CategoryId", $("#editProductCategory").val());
+                formData.append("ExpireDate", $("#editExpireDate").val());
+
+                // 圖片（如果 user 有選的話）
+                var fileInput = $("#editProductImage")[0];
+                if (fileInput.files.length > 0) {
+                    formData.append("ProductImage", fileInput.files[0]);
+                }
+
                 // 驗證通過才送出
                 $.ajax({
                     url: "@Url.Action("EditJson", "SellerProduct", new { area = "Seller" })",
                     type: "POST",
-                    data: {
-                        ProductId: $("#editProductId").val(),
-                        ProductName: name,
-                        ProductPrice: price,
-                        ProductQuantity: quantity,
-                        ProductDiscount: discount,
-                        CategoryId: $("#editProductCategory").val(),
-                        ExpireDate: $("#editExpireDate").val()
-
-                    },
+                    data: formData,
+                    contentType: false,   // ← 必加，讓瀏覽器自己設定 boundary
+                    processData: false,   // ← 必加，告訴 jQuery 不要轉換 FormData
                     success: function (result) {
                         if (result.success) {
                             $("#editModal").modal("hide");
