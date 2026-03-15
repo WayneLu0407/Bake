@@ -127,7 +127,8 @@ public partial class BakeContext : DbContext
             entity.Property(e => e.AccountStatus).HasColumnName("account_status");
             entity.Property(e => e.ConfirmationToken)
                 .HasMaxLength(100)
-                .HasColumnName("confirmation_token");
+                .HasColumnName("confirmation_token")
+                .IsRequired(false);
             entity.Property(e => e.Email)
                 .HasMaxLength(255)
                 .HasColumnName("email");
@@ -750,9 +751,16 @@ public partial class BakeContext : DbContext
             entity.Property(e => e.ProductId)
                 .ValueGeneratedNever()
                 .HasColumnName("product_id");
+
+            entity.HasOne(d => d.Product)           // ProductDetail 有一個 Product
+            .WithOne(p => p.ProductDetail)      // Product 也有一個 ProductDetail
+            .HasForeignKey<ProductDetail>(d => d.ProductId) // 外鍵是 ProductId
+            .OnDelete(DeleteBehavior.Cascade);  // 如果刪除商品，明細也一起刪除 (選配)
+
             entity.Property(e => e.ExpireDate)
                 .HasColumnType("datetime")
-                .HasColumnName("expire_date");
+                .HasColumnName("expire_date")
+                .IsRequired(false);
             entity.Property(e => e.ProductDiscount)
                 .HasColumnType("decimal(3, 2)")
                 .HasColumnName("product_discount");
@@ -1102,6 +1110,34 @@ public partial class BakeContext : DbContext
                 .HasForeignKey<UserProfile>(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_User_Profile_Auth");
+        });
+
+        modelBuilder.Entity<ProductIngredient>(entity =>
+        {
+            entity.HasKey(e => e.ProductId).HasName("PK_Product_Ingredient");
+
+            entity.ToTable("Product_Ingredients", "Sales");
+
+            entity.Property(e => e.ProductId)
+                .ValueGeneratedNever()
+                .HasColumnName("product_id");
+
+            entity.Property(e => e.ShelfLifeNote)
+                .HasMaxLength(200)
+                .HasColumnName("shelf_life_note");
+
+            entity.Property(e => e.Ingredients)
+                .HasColumnName("ingredients");
+
+            entity.Property(e => e.NetWeight)
+                .HasMaxLength(100)
+                .HasColumnName("net_weight");
+
+            entity.HasOne(d => d.Product)
+                .WithOne(p => p.ProductIngredient)
+                .HasForeignKey<ProductIngredient>(d => d.ProductId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_Ingredient_Product");
         });
 
         OnModelCreatingPartial(modelBuilder);

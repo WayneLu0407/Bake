@@ -28,9 +28,10 @@ namespace Bake.Controllers.api
                     productImage = p.ProductImage,
                     productRating = p.ProductRating,
                     productDate = p.ProductDate,
-                    productPrice = p.ProductDetail.ProductPrice,
-                    productDiscount = p.ProductDetail.ProductDiscount,
-                    shopName = p.User.Shop.ShopName,
+                    categoryId = p.CategoryId,
+                    productPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : (decimal?)null,
+                    productDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : (decimal?)null,
+                    shopName = p.User.Shop != null ? p.User.Shop.ShopName : "未知店家",
                 })
                 .ToList();
             return Ok(prod);
@@ -54,7 +55,10 @@ namespace Bake.Controllers.api
                     productQuantity = p.ProductDetail.ProductQuantity,
                     expireDate = p.ProductDetail.ExpireDate,
                     shopName = p.User.Shop.ShopName,
-                    productDescription = p.ProductDescription
+                    productDescription = p.ProductDescription,
+                    ShelfLifeNote = p.ProductIngredient.ShelfLifeNote,
+                    Ingredient = p.ProductIngredient.Ingredients,
+                    NetWeight = p.ProductIngredient.NetWeight
                 })
                 .FirstOrDefault();
 

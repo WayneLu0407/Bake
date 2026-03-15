@@ -1,108 +1,107 @@
-﻿<div id="product">
+﻿@section Styles
+{
+<style>
+        <link rel="stylesheet" href="~/css/homeIndexCss.css" asp-append-version="true" / >
+</style>
+}
+
+<div id="product">
 
     <div class="container-fluid">
         <div class="row py-3 justify-content-center">
-            <div class="d-flex  justify-content-center align-items-center">
+            <div class="d-flex  justify-content-center align-items-center　">
                 <nav class="main-menu d-flex navbar navbar-expand-lg">
-
                     <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
                             aria-controls="offcanvasNavbar">
                         <span class="navbar-toggler-icon"></span>
                     </button>
-
                     <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-
                         <div class="offcanvas-header justify-content-center">
                             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
                         </div>
-
                         <div class="offcanvas-body">
-
                             <ul class="navbar-nav   menu-list list-unstyled d-flex gap-md-3 mb-0">
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">餅乾</a>
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index" asp-route-category="1">法式甜點</a>
                                 </li>
-
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index" asp-route-category="2">餅乾</a>
+                                </li>
                                 <li class="nav-item active">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">蛋糕</a>
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index" asp-route-category="3">蛋糕</a>
                                 </li>
                                 <li class="nav-item dropdown">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">布丁</a>
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index"asp-route-category="4">布丁</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">麵包</a>
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index" asp-route-category="5">麵包</a>
+                                </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Accessories" asp-action="Accessories">甜甜圈</a>
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index" asp-route-category="6">泡芙</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Accessories" asp-route-category="7">甜甜圈</a>
                                 </li>
                                 <li class="nav-item dropdown">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">巧克力</a>
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index" asp-route-category="8">巧克力</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">糖果</a>
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index" asp-route-category="9">糖果</a>
+                                </li>
                             </ul>
-
                         </div>
-
                     </div>
                 </nav>
             </div>
         </div>
     </div>
 
-
-
-
-
     <section class="py-3" style="background-image: url('images/background-pattern.jpg');background-repeat: no-repeat;background-size: cover;">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
-
                     <div class="banner-blocks">
-
-                        <div class="banner-ad large bg-info block-1">
-
+                        <div class="banner-ad large block-1">
                             <div class="swiper main-swiper">
                                 <div class="swiper-wrapper">
-
-                                    <div class="swiper-slide">
+                                    <div class="swiper-slide" style="background: url('ProductPicture/banner/3.jpg');background-repeat: no-repeat;background-position: right bottom;">
                                         <div class="row banner-content p-5">
-                                            <div class="content-wrapper col-md-7">
-                                                <div class="categories my-3">100% natural</div>
-                                                <h3 class="display-4">Fresh Smoothie & Summer Juice</h3>
-                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Dignissim massa diam elementum.</p>
-                                                <a href="#" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1 px-4 py-3 mt-3">Shop Now</a>
+                                            <div class="content-wrapper col-md-6"style="background: rgba(255,255,255,0.3); backdrop-filter: blur(3px); border-radius:16px;  padding: 1rem;">
+                                                <div class="categories my-3">新鮮出爐</div>
+                                                <h3 class="display-4">草莓季 美味蛋糕</h3>
+                                                <p>快來試試我們的新口味和甜點</p>
+                                                <a href="#" class="btn btn-outline-danger btn-lg text-uppercase fs-6 rounded-1 px-4 py-3 mt-3">了解更多<i class="fa-solid fa-cart-shopping fa-beat"></i></a>
                                             </div>
-                                            <div class="img-wrapper col-md-5">
-                                                <img src="~/images/product-thumb-1.png" class="img-fluid">
+                                            <div class="img-wrapper col-md-6">
+                                                <img src="~/ProductPicture/banner/cake2.png" class="img-fluid object-fit: cover" >
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="swiper-slide">
+                                        <div class="swiper-slide" style="background: url('ProductPicture/banner/1.jpg');background-repeat: no-repeat;background-position: right bottom;">
                                         <div class="row banner-content p-5">
-                                            <div class="content-wrapper col-md-7">
-                                                <div class="categories mb-3 pb-3">100% natural</div>
-                                                <h3 class="banner-title">Fresh Smoothie & Summer Juice</h3>
-                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Dignissim massa diam elementum.</p>
-                                                <a href="#" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">Shop Collection</a>
+                                                    <div class="content-wrapper col-md-6" style="background: rgba(255,255,255,0.3); backdrop-filter: blur(3px); border-radius:16px;  padding: 1rem;">
+                                                <div class="categories mb-3 pb-3">餅乾怪獸的最愛</div>
+                                                    <h3 class="banner-title">美國經典巧克力碎餅</h3>
+                                                <p>快來嘗鮮，不試準後悔</p>
+                                                <a href="#" class="btn btn-outline-danger btn-lg text-uppercase fs-6 rounded-1">了解更多<i class="fa-solid fa-cart-shopping fa-beat"></i></a>
                                             </div>
-                                            <div class="img-wrapper col-md-5">
-                                                <img src="~/images/product-thumb-1.png" class="img-fluid">
+                                                    <div class="img-wrapper col-md-6">
+                                                    <img src="~/ProductPicture/banner/cookie.png" class="img-fluid">
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="swiper-slide">
+                                    <div class="swiper-slide" style="background: url('ProductPicture/banner/2.jpg');background-repeat: no-repeat;background-position: right bottom;">
                                         <div class="row banner-content p-5">
-                                            <div class="content-wrapper col-md-7">
-                                                <div class="categories mb-3 pb-3">100% natural</div>
-                                                <h3 class="banner-title">Heinz Tomato Ketchup</h3>
-                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Dignissim massa diam elementum.</p>
-                                                <a href="#" class="btn btn-outline-dark btn-lg text-uppercase fs-6 rounded-1">Shop Collection</a>
+                                                        <div class="content-wrapper col-md-6" style="background: rgba(255,255,255,0.3); backdrop-filter: blur(3px); border-radius:16px;  padding: 1rem;">
+                                                <div class="categories mb-3 pb-3">風味升級 栗子香氣</div>
+                                                <h3 class="banner-title">法式經典蒙布朗</h3>
+                                                <p>嚴選新鮮栗子，綿密濃郁，回味無窮</p>
+                                                        <a href="#" class="btn btn-outline-danger btn-lg text-uppercase fs-6 rounded-1">了解更多<i class="fa-solid fa-cart-shopping fa-beat"></i></a>
                                             </div>
-                                            <div class="img-wrapper col-md-5">
-                                                <img src="~/images/product-thumb-2.png" class="img-fluid">
+                                            <div class="img-wrapper col-md-6">
+                                                <img src="~/ProductPicture/banner/cake3.png" class="img-fluid">
                                             </div>
                                         </div>
                                     </div>
@@ -114,96 +113,10 @@
                         </div>
                     </div>
                     <!-- / Banner Blocks -->
-
                 </div>
             </div>
         </div>
     </section>
-
-    @* <section class="py-5 overflow-hidden">
-        <iv class="container-fluid">
-            <div class="row">
-                <div class="col-md-12">
-
-                    <div class="section-header d-flex flex-wrap justify-content-between mb-5">
-                        <h2 class="section-title">Category</h2>
-
-                        <div class="d-flex align-items-center">
-                            <a href="#" class="btn-link text-decoration-none">View All Categories →</a>
-                            <div class="swiper-buttons">
-                                <button class="swiper-prev category-carousel-prev btn btn-yellow">❮</button>
-                                <button class="swiper-next category-carousel-next btn btn-yellow">❯</button>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div> *@
-
-
-            @* Category食物分類 *@
-            @* <div class="row">
-                <div class="col-md-12">
-
-                    <div class="category-carousel swiper">
-                        <div class="swiper-wrapper">
-                            <a href="index.html" class="nav-link category-item swiper-slide">
-                                <img src="~/images/icon-vegetables-broccoli.png" alt="Category Thumbnail">
-                                <h3 class="category-title">Fruits & Veges</h3>
-                            </a>
-                            <a href="index.html" class="nav-link category-item swiper-slide">
-                                <img src="~/images/icon-bread-baguette.png" alt="Category Thumbnail">
-                                <h3 class="category-title">Breads & Sweets</h3>
-                            </a>
-                            <a href="index.html" class="nav-link category-item swiper-slide">
-                                <img src="~/images/icon-soft-drinks-bottle.png" alt="Category Thumbnail">
-                                <h3 class="category-title">Fruits & Veges</h3>
-                            </a>
-                            <a href="index.html" class="nav-link category-item swiper-slide">
-                                <img src="~/images/icon-wine-glass-bottle.png" alt="Category Thumbnail">
-                                <h3 class="category-title">Fruits & Veges</h3>
-                            </a>
-                            <a href="index.html" class="nav-link category-item swiper-slide">
-                                <img src="~/images/icon-animal-products-drumsticks.png" alt="Category Thumbnail">
-                                <h3 class="category-title">Fruits & Veges</h3>
-                            </a>
-                            <a href="index.html" class="nav-link category-item swiper-slide">
-                                <img src="~/images/icon-bread-herb-flour.png" alt="Category Thumbnail">
-                                <h3 class="category-title">Fruits & Veges</h3>
-                            </a>
-                            <a href="index.html" class="nav-link category-item swiper-slide">
-                                <img src="~/images/icon-vegetables-broccoli.png" alt="Category Thumbnail">
-                                <h3 class="category-title">Fruits & Veges</h3>
-                            </a>
-                            <a href="index.html" class="nav-link category-item swiper-slide">
-                                <img src="~/images/icon-vegetables-broccoli.png" alt="Category Thumbnail">
-                                <h3 class="category-title">Fruits & Veges</h3>
-                            </a>
-                            <a href="index.html" class="nav-link category-item swiper-slide">
-                                <img src="~/images/icon-vegetables-broccoli.png" alt="Category Thumbnail">
-                                <h3 class="category-title">Fruits & Veges</h3>
-                            </a>
-                            <a href="index.html" class="nav-link category-item swiper-slide">
-                                <img src="~/images/icon-vegetables-broccoli.png" alt="Category Thumbnail">
-                                <h3 class="category-title">Fruits & Veges</h3>
-                            </a>
-                            <a href="index.html" class="nav-link category-item swiper-slide">
-                                <img src="~/images/icon-vegetables-broccoli.png" alt="Category Thumbnail">
-                                <h3 class="category-title">Fruits & Veges</h3>
-                            </a>
-                            <a href="index.html" class="nav-link category-item swiper-slide">
-                                <img src="~/images/icon-vegetables-broccoli.png" alt="Category Thumbnail">
-                                <h3 class="category-title">Fruits & Veges</h3>
-                            </a>
-
-                        </div>
-                    </div>
-
-                </div>
-            </div> *@
-
-    </section>
-
 
     <section class="py-5">
         <div class="container-fluid">
@@ -371,15 +284,11 @@
                                         </div>
                                     </div>
                                     <!-- / 單一商品 -->
-
                                 </div>
                                 <!-- / product-grid -->
-
                             </div>
-
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -390,32 +299,28 @@
             <div class="row">
 
                 <div class="col-md-6">
-                    <div class="banner-ad bg-danger mb-3" style="background: url('images/ad-image-3.png');background-repeat: no-repeat;background-position: right bottom;">
-                        <div class="banner-content p-5">
+                    <div class="banner-ad" style="background: url('ProductPicture/banner/pie.png') 90% center /40% no-repeat,linear-gradient(135deg, #FFFF37 0%, #f2ffc0 50%, #e8f5a3 100%);">
+                        <div class="p-3">
 
-                            <div class="categories text-primary fs-3 fw-bold">Upto 25% Off</div>
-                            <h3 class="banner-title">Luxa Dark Chocolate</h3>
-                            <p>Very tasty & creamy vanilla flavour creamy muffins.</p>
-                            <a href="#" class="btn btn-dark text-uppercase">Show Now</a>
+                            <div class="categories text-primary fs-3 fw-bold">改良配方</div>
+                            <h3 class="banner-title">檸檬塔酸爽滋味</h3>
+                            <p>快搶先跟上流行，千萬不能錯過！</p>
+                            <a href="#" class="btn btn-warning text-uppercase">搶先一覽 <i class="fa-solid fa-eye fa-fade"></i></a>
 
                         </div>
 
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="banner-ad bg-info" style="background: url('images/ad-image-4.png');background-repeat: no-repeat;background-position: right bottom;">
-                        <div class="banner-content p-5">
-
-                            <div class="categories text-primary fs-3 fw-bold">Upto 25% Off</div>
-                            <h3 class="banner-title">Creamy Muffins</h3>
-                            <p>Very tasty & creamy vanilla flavour creamy muffins.</p>
-                            <a href="#" class="btn btn-dark text-uppercase">Show Now</a>
-
+                    <div class="banner-ad" style="background:url('ProductPicture/banner/cake.png') 90% center / 30% no-repeat,linear-gradient(135deg, #FFECF5 0%, #FFD2D2 50%, #FFB5B5 100%)">
+                        <div class="p-3">
+                            <div class="categories text-primary fs-3 fw-bold">新品預告</div>
+                            <h3 class="banner-title">草莓夾心蛋糕</h3>
+                            <p>春天來了，讓人想食指大動的美味！</p>
+                            <a href="#" class="btn btn-warning text-uppercase">搶先一覽 <i class="fa-solid fa-arrow-pointer fa-fade"></i></a>
                         </div>
-
                     </div>
                 </div>
-
             </div>
         </div>
     </section>
@@ -489,23 +394,20 @@
                                 </div>
                             </div>
                             <!-- / 單一商品 -->
-
                         </div>
                     </div>
                     <!-- / products-carousel -->
-
                 </div>
             </div>
         </div>
     </section>
-
 
     <section class="py-5 overflow-hidden">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
 
-                    <div class="section-header d-flex justify-content-between">
+                    <div class="section-header d-flex justify-content-between my-5">
 
                         <h2 class="section-title">推薦商品</h2>
 
@@ -517,7 +419,6 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
             <div class="row">
@@ -572,7 +473,6 @@
                         </div>
                     </div>
                     <!-- / products-carousel -->
-
                 </div>
             </div>
         </div>
@@ -583,7 +483,7 @@
             <div class="row">
                 <div class="col-md-12">
 
-                    <div class="section-header d-flex flex-wrap flex-wrap justify-content-between mb-5">
+                    <div class="section-header d-flex flex-wrap justify-content-between my-5">
 
                         <h2 class="section-title">新商家推薦</h2>
 
@@ -595,7 +495,6 @@
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
             <div class="row">
@@ -703,7 +602,6 @@
     </section>
 </div>
 
-
 @section Scripts
 {
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
@@ -733,7 +631,7 @@
                  return [...this.products].sort((a,b)=> b.productRating - a.productRating)
                  },
                  productsByDate(){
-                 return [...this.products].sort((a,b)=> new Date(b.productRating)  - new Date(a.productRating))
+                 return [...this.products].sort((a,b)=> new Date(b.productDate) - new Date(a.productDate))
                  },
                  productsByDiscount(){
                  return [...this.products].sort((a,b)=> b.productDiscount - a.productDiscount)
@@ -760,27 +658,3 @@
     </script>
 
 }
-
-@* <section class="py-5">
-    <div class="container-fluid">
-        <h4 class="my-5">人們也在考慮</h4>
-        <a href="#" class="btn btn-warning me-2 mb-2">Blue diamon almonds</a>
-        <a href="#" class="btn btn-warning me-2 mb-2">Angie’s Boomchickapop Corn</a>
-        <a href="#" class="btn btn-warning me-2 mb-2">Salty kettle Corn</a>
-        <a href="#" class="btn btn-warning me-2 mb-2">Chobani Greek Yogurt</a>
-        <a href="#" class="btn btn-warning me-2 mb-2">Sweet Vanilla Yogurt</a>
-        <a href="#" class="btn btn-warning me-2 mb-2">Foster Farms Takeout Crispy wings</a>
-        <a href="#" class="btn btn-warning me-2 mb-2">Warrior Blend Organic</a>
-        <a href="#" class="btn btn-warning me-2 mb-2">Chao Cheese Creamy</a>
-        <a href="#" class="btn btn-warning me-2 mb-2">Chicken meatballs</a>
-        <a href="#" class="btn btn-warning me-2 mb-2">Blue diamon almonds</a>
-        <a href="#" class="btn btn-warning me-2 mb-2">Angie’s Boomchickapop Corn</a>
-        <a href="#" class="btn btn-warning me-2 mb-2">Salty kettle Corn</a>
-        <a href="#" class="btn btn-warning me-2 mb-2">Chobani Greek Yogurt</a>
-        <a href="#" class="btn btn-warning me-2 mb-2">Sweet Vanilla Yogurt</a>
-        <a href="#" class="btn btn-warning me-2 mb-2">Foster Farms Takeout Crispy wings</a>
-        <a href="#" class="btn btn-warning me-2 mb-2">Warrior Blend Organic</a>
-        <a href="#" class="btn btn-warning me-2 mb-2">Chao Cheese Creamy</a>
-        <a href="#" class="btn btn-warning me-2 mb-2">Chicken meatballs</a>
-    </div>
-</section> *@
