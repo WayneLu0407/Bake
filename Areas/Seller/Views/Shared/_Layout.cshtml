@@ -53,6 +53,7 @@
                         </span>
                     </a>
                 </li>
+                @if (User.IsInRole("Seller")){
                 <li class="nav-item nav-item-has-children">
                     <a href="#0" class="collapsed" data-bs-toggle="collapse" data-bs-target="#ddmenu_1" aria-controls="ddmenu_1"
                        aria-expanded="false" aria-label="Toggle navigation" >
@@ -113,7 +114,8 @@
                             </a>
                         </li>
                     </ul>
-                </li>
+					</li>
+				}
                 <li class="nav-item nav-item-has-children">
                     <a href="#0" class="collapsed" data-bs-toggle="collapse" data-bs-target="#ddmenu_2" aria-controls="ddmenu_2"
                        aria-expanded="false" aria-label="Toggle navigation">
@@ -128,6 +130,9 @@
                     <ul id="ddmenu_2" class="collapse dropdown-nav">
                         <li>
                             <a asp-area="Seller" asp-controller="Me" asp-action="Settings"> 個人資訊 </a>
+                        </li>
+                        <li>
+                            <a asp-area="Seller" asp-controller="Me" asp-action="SwitchSeller"> 我想成為賣家 </a>
                         </li>
                     </ul>
                 </li>
