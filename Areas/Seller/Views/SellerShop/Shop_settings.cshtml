@@ -26,85 +26,88 @@
                 </div>
 
                 <div class="seller-card bg-white rounded-4 p-4 shadow-sm">
+                    <!-- 店鋪設定編輯表單 -->
+                    <form asp-area="Seller" asp-controller="SellerShop" asp-action="Shop_settings" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
 
-                    <!-- 頭像 + 店名 + 簡介 -->
-                    <!-- 功用：
-                         1. 頭像固定大小，不再把版面撐開
-                         2. 頭像放在店名與介紹左側，接近 Figma 配置
-                         3. 先移除相機按鈕，避免現在出現多餘符號
-                    -->
-                    <div class="d-flex gap-4 align-items-start flex-wrap flex-md-nowrap">
-                        <!-- 左側：固定大小店鋪頭像 -->
-                        <div class="flex-shrink-0">
-                            <div class="seller-avatar bg-secondary-subtle d-flex align-items-center justify-content-center overflow-hidden"
-                                 style="width: 140px; height: 140px; border-radius: 50%;">
-                                @if (!string.IsNullOrWhiteSpace(shopImageUrl))
-                                {
-                                    <img src="@shopImageUrl"
-                                         alt="店舖圖片"
-                                         style="width:100%; height:100%; object-fit:cover;"
-                                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
-                                }
+                        <!-- 頭像 + 店名 + 簡介 -->
+                        <div class="d-flex gap-4 align-items-start flex-wrap flex-md-nowrap">
 
-                                <div class="shop-image-fallback d-flex align-items-center justify-content-center w-100 h-100"
-                                     style="display:@(string.IsNullOrWhiteSpace(shopImageUrl) ? "flex" : "none");">
-                                    📷
+                            <!-- 左側：固定大小店鋪頭像 -->
+                            <div class="flex-shrink-0">
+                                @* //顯示目前店鋪頭像 *@
+                                <div class="seller-avatar bg-secondary-subtle align-items-center justify-content-center overflow-hidden mb-2"
+                                     style="width: 140px; height: 140px; border-radius: 16px;">
+                                    @if (!string.IsNullOrWhiteSpace(shopImageUrl))
+                                    {
+                                        <img src="@shopImageUrl"
+                                             alt="店舖圖片"
+                                             style="width:100%; height:100%; object-fit:cover;"
+                                             onerror="this.style.display='none';" />
+                                    }
+                                    else
+                                    {
+                                        <div class="shop-image-fallback d-flex align-items-center justify-content-center w-100 h-100">
+                                            📷
+                                        </div>
+                                    }
+                                    @if (TempData["SuccessMessage"] != null)
+                                    {
+                                        <div class="alert alert-success py-2 px-3 mb-0">
+                                            @TempData["SuccessMessage"]
+                                        </div>
+                                    }
+                                </div>
+                                <input asp-for="ShopImageFile" type="file" class="form-control form-control-sm" accept=".jpg,.jpeg,.png" />
+                                <span asp-validation-for="ShopImageFile" class="text-danger"></span>
+                            </div>
+
+                            <div class="flex-grow-1" style="min-width: 0;">
+                                <div class="mb-3">
+                                    <label asp-for="ShopName" class="form-label fw-bold"></label>
+                                    <input asp-for="ShopName" class="form-control form-control-lg fw-bold" />
+                                    <span asp-validation-for="ShopName" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="ShopDescription" class="form-label fw-bold"></label>
+                                    <textarea asp-for="ShopDescription" class="form-control" rows="4"></textarea>
+                                    <span asp-validation-for="ShopDescription" class="text-danger"></span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 右側：店名 + 店鋪介紹 -->
-                        <div class="flex-grow-1" style="min-width: 0;">
-                            <div class="d-flex align-items-center gap-2 mb-3 flex-wrap">
-                                <!-- 顯示目前店鋪名稱 -->
-                                <h3 class="mb-0 fw-bold">@Model.ShopName</h3>
+                        <hr class="my-4" />
 
-                                <!-- 目前先保留樣式，不做功能 -->
-                                <button type="button" class="btn btn-outline-secondary btn-sm" title="編輯店名">✎</button>
-                            </div>
-
-                            <div class="d-flex align-items-start justify-content-between gap-3">
-                                <!-- 顯示目前店鋪介紹 -->
-                                <p class="text-muted mb-0" style="line-height:1.8;">
-                                    @Model.ShopDescription
-                                </p>
-
-                                <!-- 目前先保留樣式，不做功能 -->
-                                <button type="button" class="btn btn-outline-secondary btn-sm flex-shrink-0" title="編輯店舖介紹">
-                                    ✎
-                                </button>
-                            </div>
+                        <div class="mb-3">
+                            <label asp-for="FacebookUrl" class="form-label"></label>
+                            <input asp-for="FacebookUrl" class="form-control" placeholder="https://facebook.com/..." />
+                            <span asp-validation-for="FacebookUrl" class="text-danger"></span>
                         </div>
-                    </div>
 
-                    <hr class="my-4" />
+                        <div class="mb-3">
+                            <label asp-for="InstagramUrl" class="form-label"></label>
+                            <input asp-for="InstagramUrl" class="form-control" placeholder="https://instagram.com/..." />
+                            <span asp-validation-for="InstagramUrl" class="text-danger"></span>
+                        </div>
 
-                    <!-- 社群連結 -->
-                    <div class="mb-3">
-                        <label class="form-label">連結FB</label>
-                        <input class="form-control" placeholder="https://facebook.com/..." />
-                    </div>
+                        <div class="mb-3">
+                            <label asp-for="YoutubeUrl" class="form-label"></label>
+                            <input asp-for="YoutubeUrl" class="form-control" placeholder="https://youtube.com/..." />
+                            <span asp-validation-for="YoutubeUrl" class="text-danger"></span>
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">連結IG</label>
-                        <input class="form-control" placeholder="https://instagram.com/..." />
-                    </div>
+                        <div class="mb-4">
+                            <label asp-for="PinterestUrl" class="form-label"></label>
+                            <input asp-for="PinterestUrl" class="form-control" placeholder="https://pinterest.com/..." />
+                            <span asp-validation-for="PinterestUrl" class="text-danger"></span>
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">連結YT</label>
-                        <input class="form-control" placeholder="https://youtube.com/..." />
-                    </div>
-
-                    <div class="mb-4">
-                        <label class="form-label">連Pinterest</label>
-                        <input class="form-control" placeholder="https://pinterest.com/..." />
-                    </div>
-
-                    <!-- 按鈕 -->
-                    <div class="d-flex justify-content-end gap-2">
-                        <button type="button" class="btn btn-warning px-4">預覽</button>
-                        <button type="button" class="btn btn-warning px-4">儲存</button>
-                    </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button" class="btn btn-warning px-4">預覽</button>
+                            <button type="submit" class="btn btn-warning px-4">儲存</button>
+                        </div>
+                    </form>
 
                 </div>
             </div>
@@ -112,3 +115,7 @@
 
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
