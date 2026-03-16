@@ -23,6 +23,14 @@ public partial class Shop
 
     public byte StatusId { get; set; }
 
+    public string? FacebookUrl { get; set; }
+
+    public string? InstagramUrl { get; set; }
+
+    public string? YoutubeUrl { get; set; }
+
+    public string? PinterestUrl { get; set; }
+
     public virtual ICollection<SellerWallet> SellerWallets { get; set; } = new List<SellerWallet>();
 
     public virtual ShopStatus Status { get; set; } = null!;
