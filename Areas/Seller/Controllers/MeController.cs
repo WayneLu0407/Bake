@@ -156,7 +156,7 @@ namespace Bake.Areas.Seller.Controllers
                 users.Role = 1;
                 await _context.SaveChangesAsync();
             }
-
+            HttpContext.Session.Clear();
 
             //var user = User.FindFirstValue(ClaimTypes.NameIdentifier);
             //var claims = new List<Claim>
@@ -172,7 +172,7 @@ namespace Bake.Areas.Seller.Controllers
             //    CookieAuthenticationDefaults.AuthenticationScheme,
             //    new ClaimsPrincipal(claimsIdentity));
 
-            return RedirectToAction("Dashboard", "Me", new { area="Seller"});
+            return RedirectToAction("Login", "Home", new { area=""});
             
         }
 
