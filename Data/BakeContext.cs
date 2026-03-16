@@ -159,6 +159,7 @@ public partial class BakeContext : DbContext
             entity.ToTable("Account_Status_Definitions", "User");
 
             entity.Property(e => e.StatusId).HasColumnName("status_id");
+
             entity.Property(e => e.StatusName)
                 .HasMaxLength(20)
                 .HasColumnName("status_name");
@@ -931,6 +932,23 @@ public partial class BakeContext : DbContext
                 .HasDefaultValueSql("(sysdatetime())")
                 .HasColumnName("shop_time");
             entity.Property(e => e.StatusId).HasColumnName("status_id");
+
+            entity.Property(e => e.FacebookUrl)
+                .HasMaxLength(2048)
+                .HasColumnName("facebook_url");
+
+            entity.Property(e => e.InstagramUrl)
+                .HasMaxLength(2048)
+                .HasColumnName("instagram_url");
+
+            entity.Property(e => e.YoutubeUrl)
+                .HasMaxLength(2048)
+                .HasColumnName("youtube_url");
+
+            entity.Property(e => e.PinterestUrl)
+                .HasMaxLength(2048)
+                .HasColumnName("pinterest_url");
+
 
             entity.HasOne(d => d.Status).WithMany(p => p.Shops)
                 .HasForeignKey(d => d.StatusId)
