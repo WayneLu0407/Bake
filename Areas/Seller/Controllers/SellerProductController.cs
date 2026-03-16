@@ -1,13 +1,16 @@
 ﻿using Bake.Areas.Seller.ViewModels;
 using Bake.Data;
 using Bake.Models.Sales;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
+using System.Security.Claims;
 
 namespace Bake.Areas.Seller.Controllers
 {
     [Area("Seller")]
+    [Authorize(Roles = "Seller")]
     public class SellerProductController : Controller
     {
 
@@ -19,6 +22,12 @@ namespace Bake.Areas.Seller.Controllers
             _context = context;
             _env = env;
         }
+
+        private int GetCurrentUserId() //取得目前登入的 UserId
+        {
+            return int.Parse(User.FindFirstValue("UserId"));
+        }
+
 
 
         // GET: Products/Index
@@ -39,7 +48,9 @@ namespace Bake.Areas.Seller.Controllers
         [HttpPost]
         public async Task<JsonResult> AllJson()
         {
+            var userId = GetCurrentUserId();
             var products = await _context.Products
+                .Where(p => p.UserId == userId)
                 .Include(p => p.ProductDetail)
                 .Include(p => p.Category)
                 .Include(p => p.ProductIngredient)
@@ -84,9 +95,10 @@ namespace Bake.Areas.Seller.Controllers
         [HttpGet]
         public async Task<JsonResult> GetProduct(int id)
         {
+            var userId = GetCurrentUserId();
             var product = await _context.Products
             .Include(p => p.ProductDetail)
-            .Where(p => p.ProductId == id)
+            .Where(p => (p.ProductId == id && p.UserId == userId))
             .Select(p => new
             {
                 productId = p.ProductId,
@@ -114,7 +126,9 @@ namespace Bake.Areas.Seller.Controllers
         {
             try
             {
+                var userId = GetCurrentUserId();
                 var product = await _context.Products
+                    .Where(p => p.UserId == userId)
                     .Include(p => p.ProductDetail)
                     .Include(p => p.ProductIngredient)
                     .FirstOrDefaultAsync(p => p.ProductId == ProductId);
@@ -188,10 +202,11 @@ namespace Bake.Areas.Seller.Controllers
 
         // AJAX 刪除用
         [HttpPost]
-        [HttpPost]
         public async Task<JsonResult> DeleteJson(int id)
         {
+            var userId = GetCurrentUserId();
             var product = await _context.Products
+                .Where(p => p.UserId == userId)
                 .Include(p => p.ProductDetail)  // ← 一起載入
                 .FirstOrDefaultAsync(p => p.ProductId == id);
 
@@ -239,7 +254,7 @@ namespace Bake.Areas.Seller.Controllers
                 {
                     ProductName = item.ProductName!,
                     ProductDescription = item.ProductDescription,
-                    UserId = 1, // 暫時固定
+                    UserId = GetCurrentUserId(),
                     ProductDate = DateTime.Now,
                     CategoryId = item.CategoryId,
                     ProductMethod = "未設定"
