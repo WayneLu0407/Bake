@@ -45,6 +45,13 @@ namespace Bake.Areas.Seller.ViewModels
         [Required(ErrorMessage = "請輸入日期")]
         [Display(Name = "商品過期日")]
         public DateTime ExpireDate { get; set; }= DateTime.Now.AddDays(7);
+        [Display(Name = "保存方式")]
+        public string? ShelfLifeNote { get; set; }
+        [Display(Name = "成分")]
+        public string? Ingredients { get; set; }
+        [Display(Name = "淨重")]
+        public string? NetWeight { get; set; }
+
     }
 
 }
