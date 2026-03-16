@@ -2,6 +2,7 @@ using Bake.Data;
 using Bake.Helper;
 using Bake.Models;
 using Bake.Models.User;
+using Humanizer.Bytes;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
@@ -11,6 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal;
 using System.Diagnostics;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using static System.Collections.Specialized.BitVector32;
 
 namespace Bake.Controllers;
@@ -56,7 +59,7 @@ public class HomeController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> LoginAsync(LoginModel model)
     {
-        var user = _context.AccountAuths.FirstOrDefault(x => x.Email == model.Account && x.PasswordHash == model.Password);  //把資料庫的資料找出來做比對
+        var user = _context.AccountAuths.Include(u=>u.RoleNavigation).FirstOrDefault(x => x.Email == model.Account && x.PasswordHash == model.Password);  //把資料庫的資料找出來做比對
 
         if (ModelState.IsValid)
         {
@@ -69,8 +72,9 @@ public class HomeController : Controller
 
             var claims = new List<Claim>    //網站會員的身分證
         {
+            new Claim("UserId",user.UserId.ToString()),
             new Claim(ClaimTypes.Name,model.Account),
-            new Claim(ClaimTypes.Role, "Admin"),
+            new Claim(ClaimTypes.Role,user.RoleNavigation.StatusName)
 
         };
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -109,9 +113,14 @@ public class HomeController : Controller
                 {
                     return View();
                 }
-                _context.AccountAuths.Add(new AccountAuth { UserName = model.Name, Email = model.Email, PasswordHash = model.Password });
-                _context.SaveChanges();
-
+                //using(SHA256 sha256 = SHA256.Create())
+                //{
+                //    byte[] InputPassword = Encoding.UTF8.GetBytes(model.Password);
+                //    byte[] HashPassword = sha256.ComputeHash(InputPassword);
+                //}
+                    _context.AccountAuths.Add(new AccountAuth { UserName = model.Name, Email = model.Email, PasswordHash = model.Password });
+                    _context.SaveChanges();
+                
                 //encrypt 加密
                 var encrypted = AesHelper.Encrypt(model.Email);
                 var encodedToken = System.Net.WebUtility.UrlEncode(encrypted);

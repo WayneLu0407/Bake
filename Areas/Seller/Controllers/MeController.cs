@@ -3,6 +3,8 @@ using Bake.Areas.Seller.Model;
 using Bake.Areas.Seller.ViewModels;
 using Bake.Data;
 using Bake.Models.User;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +14,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Bake.Areas.Seller.Controllers
 {
@@ -125,6 +129,51 @@ namespace Bake.Areas.Seller.Controllers
         public IActionResult Verify_email()
         {
             return View();
+        }
+        public IActionResult SwitchSeller()
+        {
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SwitchSellerAsync(BankAccountModel model )
+        {
+            if (!ModelState.IsValid)   return View(model);
+            var userId = User.FindFirstValue("UserId");
+            var users = await _context.AccountAuths.FindAsync(int.Parse(userId));
+            using(SHA256 sha256  = SHA256.Create())
+            {
+                byte[] InputAccount = Encoding.UTF8.GetBytes(model.BankAccount);
+                byte[] HashAccount = sha256.ComputeHash(InputAccount);
+
+                _context.UserPaymentSecrets.Add(new UserPaymentSecret
+                {
+                    UserId = int.Parse(userId),
+                    EncryptedBankAcc = HashAccount 
+                });
+                
+                users.IsSeller = true;
+                users.Role = 1;
+                await _context.SaveChangesAsync();
+            }
+
+
+            //var user = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            //var claims = new List<Claim>
+            //{
+            //    new Claim(ClaimTypes.Name, User.Identity.Name),
+            //    new Claim(ClaimTypes.Role, "Seller")  // 動態新增賣家身分
+            //};
+
+            //var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            //// 3. 關鍵：執行 SignInAsync，這會覆蓋舊的 Cookie，讓權限立即生效
+            //await HttpContext.SignInAsync(
+            //    CookieAuthenticationDefaults.AuthenticationScheme,
+            //    new ClaimsPrincipal(claimsIdentity));
+
+            return RedirectToAction("Dashboard", "Me", new { area="Seller"});
+            
         }
 
         public IActionResult Logout()
