@@ -1,0 +1,31 @@
+﻿@model Bake.Areas.Seller.Model.BankAccountModel
+@{
+	ViewBag.Title = "我想成為賣家";
+}
+<div class="col-6 m-3" >
+	<h1 class="text-center">我想成為賣家</h1>
+</div>
+<div class="col-6 m-3">
+	<form asp-area="Seller" asp-controller="Me" asp-action="SwitchSeller" method="post">
+		<div class="row">
+			<div class="col-12">
+				
+				<div class="input-style-1">
+					<label> 銀行帳號</label>
+					<input asp-for="BankAccount" type="text" placeholder="012-345-67890123" />
+					<span asp-validation-for="BankAccount" class="text-danger"></span>
+				</div>
+			</div>
+			<div class="col-12">
+				<div class="button-group d-flex justify-content-center flex-wrap">
+					<button asp-area="Seller" asp-controller="Me" asp-action="SwitchSeller" type="submit" class="main-btn primary-btn btn-hover w-100 text-center">
+						成為賣家
+					</button>
+				</div>
+			</div>
+		</div>
+	</form>
+</div>
+
+
+
