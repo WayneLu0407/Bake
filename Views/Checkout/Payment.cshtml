@@ -80,12 +80,12 @@
 
                                 <form asp-controller="Checkout" asp-action="ConfirmPayment" method="post">
                                     <input type="hidden" name="ReceiverName" value="@ReceiverName" />
-                                    <input type="hidden" name="PhoneNumber" value="@ReceiverPhone" />
-                                    <input type="hidden" name="ShippingAddress" value="@ReceiverAddress" />
+                                    <input type="hidden" name="ReceiverPhone" value="@ReceiverPhone" />
+                                    <input type="hidden" name="ReceiverAddress" value="@ReceiverAddress" />
 
                                     @* 信用卡選項 *@
                                     <div class="payment-option mb-3">
-                                        <input class="d-none" type="radio" name="PaymentMethod" id="creditCard" value="CreditCard" checked>
+                                        <input class="d-none" type="radio" name="PaymentMethod" id="creditCard" value="1" checked>
                                         <label class="d-flex align-items-center p-4 rounded-4 border w-100 cursor-pointer shadow-sm active-payment" for="creditCard">
                                             <i class="far fa-credit-card fa-2x me-3 text-muted icon-main"></i>
                                             <div class="flex-grow-1">
@@ -98,7 +98,7 @@
 
                                     @* Line Pay 選項 *@
                                     <div class="payment-option mb-5">
-                                        <input class="d-none" type="radio" name="PaymentMethod" id="linePay" value="LinePay">
+                                        <input class="d-none" type="radio" name="PaymentMethod" id="linePay" value="2">
                                         <label class="d-flex align-items-center p-4 rounded-4 border w-100 cursor-pointer shadow-sm" for="linePay">
                                             <i class="fab fa-line fa-2x me-3 text-muted icon-main"></i>
                                             <div class="flex-grow-1">
