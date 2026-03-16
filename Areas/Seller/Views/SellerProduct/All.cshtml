@@ -1,15 +1,24 @@
 ﻿@section Styles
 {
     <link href="https://cdn.datatables.net/2.3.7/css/dataTables.dataTables.min.css" rel="stylesheet" />
+    <link href="https://cdn.datatables.net/responsive/3.0.4/css/responsive.dataTables.min.css" rel="stylesheet" />
     <style>
-        .task-table .table td p {
-            text-align: center;
-            margin-bottom: 0;
-        }
+    /* 讓上方的「顯示 10 筆」和「搜尋」往內縮 */
+    #productTable_wrapper .dt-layout-row {
+    padding: 0 30px;
+    margin-bottom: 10px;
+    }
 
-        .task-table .table td {
-            vertical-align: middle;
-        }
+    /* 所有欄位文字置中 */
+    #productTable tbody td {
+    text-align: center;
+    vertical-align: middle;
+    justify-content:center;
+    }
+    /* 下方的分頁也往內縮 */
+    #productTable_wrapper .dt-layout-row:last-child {
+    padding: 10px 30px;
+    }
     </style>
 }
 <!-- ========== section start ========== -->
@@ -41,9 +50,14 @@
                             <th class=" text-center">商品圖片</th>
                             <th class =" text-center">商品名稱</th>
                             <th class=" text-center">商品分類</th>
+                            <th class=" text-center">商品描述</th>
                             <th class=" text-center">商品價格</th>
                             <th class=" text-center">優惠折數</th>
                             <th class=" text-center">商品數量</th>
+                            <th class=" text-center">成分</th>
+                            <th class=" text-center">淨重</th>
+                            <th class=" text-center">保存方式</th>
+                            <th class=" text-center">商品上架日</th>
                             <th class=" text-center">商品過期日</th>
                             <th class=" text-center">操作</th>
                         </tr>
@@ -59,7 +73,7 @@
     <!-- end container -->
 </section>
 <!-- ========== section end ========== -->
-<!-- ===== 編輯 Modal ===== -->
+<!-- ===== 編輯 Edit Modal ===== -->
 <div class="modal fade" id="editModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -67,7 +81,6 @@
                 <h5 class="modal-title">編輯商品</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div id="editErrors" class=" d-flex alert alert-danger d-none mx-auto" style="width:90%"></div>
             <div class="modal-body">
                 <input type="hidden" id="editProductId" />
                 <div class="mb-3">
@@ -78,6 +91,10 @@
                     <label class="form-label">商品分類</label>
                     <select id="editProductCategory" class="form-control">
                     </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">商品描述</label>
+                    <textarea id="editProductDescription" class="form-control" rows="3"></textarea>
                 </div>
                 <div class="mb-3">
                     <label class="form-label">商品價格</label>
@@ -91,9 +108,28 @@
                     <label class="form-label">優惠折數</label>
                     <input type="number" id="editProductDiscount" class="form-control" step="0.01" />
                 </div>
+                <input type="hidden" id="editProductDate" />
                 <div class="mb-3">
                     <label class="form-label">商品過期日</label>
                     <input type="date" id="editExpireDate" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">成分</label>
+                    <textarea id="editIngredients" class="form-control" rows="1"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">淨重</label>
+                    <input type="text" id="editNetWeight" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">保存方式</label>
+                    <input type="text" id="editShelfLifeNote" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">照片修改</label>
+                    <img id="editImagePreview" src="~/ProductPicture/NoImage.jpg" style="width:100%; display:block; margin-bottom:15px;" />
+                    <input type="file" id="editProductImage" class="form-control" accept="image/*" />
+                   
                 </div>
             </div>
             <div class="modal-footer">
@@ -106,10 +142,14 @@
 @section Scripts
 {
     <script src="https://cdn.datatables.net/2.3.7/js/dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/responsive/3.0.4/js/dataTables.responsive.min.js"></script>
     <script>
         $(document).ready(function () {
             // 初始化 DataTable
             $("#productTable").dataTable({
+                responsive: true,
+                scrollX: false,
+                order: [[10, "desc"]],
                 ajax: {
                     type: "POST",
                     url: "@Url.Action("AllJson", "SellerProduct", new { area = "Seller" })",
@@ -119,21 +159,25 @@
                 },
                 columns: [
                     {
-                        data: "productImage",
+                        data: "productImage",responsivePriority: 1,
                         render: function (data) {
                             return `<img src="${data}" class="rounded"
                                          style="width:80px;height:60px;object-fit:cover;" />`;
                         },
                         orderable: false
                     },
-                    { data: "productName" },
-                    { data: "categoryName" },
-                    { data: "productPrice" },
-                    { data: "productDiscount" },
-                    { data: "productQuantity" },
-                    { data: "expireDate" },
-                    {
-                        data: "productId",
+                    { data: "productName", responsivePriority: 1 },
+                    { data: "categoryName",responsivePriority: 3 },
+                    { data: "productDescription",width: "16%",responsivePriority: 8  },
+                    { data: "productPrice", responsivePriority: 2 },
+                    { data: "productDiscount",responsivePriority: 5 },
+                    { data: "productQuantity", responsivePriority: 4 },
+                    { data: "ingredients", responsivePriority: 7  },
+                    { data: "netWeight" ,responsivePriority: 6},
+                    { data: "shelfLifeNote",responsivePriority: 6 },
+                    { data: "productDate",responsivePriority: 5  },
+                    { data: "productExpireDate" ,responsivePriority: 4 },
+                    { data: "productId",responsivePriority: 1,
                         render: function (data, type, row) {
                             return `
                                 <div class="d-flex justify-content-center gap-2 ">
@@ -166,14 +210,24 @@
                     $("#editProductQuantity").val(data.productQuantity);
                     $("#editProductDiscount").val(data.productDiscount);
                     $("#editProductCategory").val(data.categoryId);
+                    $("#editProductDescription").val(data.productDescription);
+                    $("#editIngredients").val(data.ingredients);
+                    $("#editNetWeight").val(data.netWeight);
+                    $("#editShelfLifeNote").val(data.shelfLifeNote);
                     $("#editModal").modal("show");
-                    if (data.expireDate) {
-                        var d = new Date(data.expireDate);
+                    if (data.productExpireDate ) {
+                    var d = new Date(data.productExpireDate);
                         var formatted = d.toISOString().split('T')[0];  // 轉成 "2026-04-10"
                         $("#editExpireDate").val(formatted);
                     } else {
                         $("#editExpireDate").val('');
                     }
+                    $("#editImagePreview").attr("src", data.productImage);
+                    var pd = new Date(data.productDate);
+                    var minDate = pd.toISOString().split('T')[0];
+                    $("#editProductDate").val(minDate);
+                    $("#editExpireDate").attr("min", minDate);
+
                 });
             });
 
@@ -185,42 +239,71 @@
                 $("#editProductCategory").html(options);
             });
 
+            $("#editProductImage").change(function(){
+                var file = this.files[0];
+                if(file){
+                    var reader = new FileReader();
+                    reader.onload = function(e){
+                    $("#editImagePreview").attr("src",e.target.result);
+                    };
+                    reader.readAsDataURL(file);
+                }
+            
+            });
             // 點儲存
             $("#saveEdit").click(function () {
                 var name = $("#editProductName").val().trim();
                 var price = $("#editProductPrice").val();
                 var quantity = $("#editProductQuantity").val();
                 var discount = $("#editProductDiscount").val();
+                var expireDate = $("#editExpireDate").val();
+                var productDate = $("#editProductDate").val();
 
                 var errors=[];
+                if (expireDate && productDate && expireDate < productDate) {
+                    errors.push("過期日不能早於上架日");
+                }
                 if(!name){errors.push("商品名稱不能為空");}
                 if(!price||parseFloat(price)<=0){errors.push("商品價格必須大於0");}
                 if(!quantity||parseInt(quantity)<=0){errors.push("商品數量必須大於0");}
                 if(discount&&(parseFloat(discount)<0)||parseFloat(discount)>1){errors.push("優惠折數必須在 0 ~ 1 之間");}
-
-                if (errors.length > 0) {
-                    $("#editErrors")
-                        .removeClass("d-none")
-                        .html(errors.join("<br>"));
-                    return;
-                } else {
-                    $("#editErrors").addClass("d-none");
+                var fileInput = $("#editProductImage")[0];
+                if(fileInput.files.length>0){
+                    if(!fileInput.files[0].type.startsWith("image/")){
+                        errors.push("只能上傳圖片檔案");
+                    }
+                    if(fileInput.files[0].size>5*1024*1024){
+                        errors.push("圖片不能超過5MB")
+                    }
                 }
-
+                if (errors.length > 0) {
+                    alert(errors.join("\n")); 
+                    return;
+                }
+                var formData = new FormData();
+                formData.append("ProductId", $("#editProductId").val());
+                formData.append("ProductName", name);
+                formData.append("ProductPrice", price);
+                formData.append("ProductQuantity", quantity);
+                formData.append("ProductDescription", $("#editProductDescription").val());
+                formData.append("ProductDiscount", discount);
+                formData.append("CategoryId", $("#editProductCategory").val());
+                formData.append("ExpireDate", $("#editExpireDate").val());
+                formData.append("Ingredients", $("#editIngredients").val());
+                formData.append("NetWeight", $("#editNetWeight").val());
+                formData.append("ShelfLifeNote", $("#editShelfLifeNote").val());
+                // 圖片（如果 user 有選的話）
+                var fileInput = $("#editProductImage")[0];
+                if (fileInput.files.length > 0) {
+                    formData.append("ProductImage", fileInput.files[0]);
+                }
                 // 驗證通過才送出
                 $.ajax({
                     url: "@Url.Action("EditJson", "SellerProduct", new { area = "Seller" })",
                     type: "POST",
-                    data: {
-                        ProductId: $("#editProductId").val(),
-                        ProductName: name,
-                        ProductPrice: price,
-                        ProductQuantity: quantity,
-                        ProductDiscount: discount,
-                        CategoryId: $("#editProductCategory").val(),
-                        ExpireDate: $("#editExpireDate").val()
-
-                    },
+                    data: formData,
+                    contentType: false,   // ← 必加，讓瀏覽器自己設定 boundary
+                    processData: false,   // ← 必加，告訴 jQuery 不要轉換 FormData
                     success: function (result) {
                         if (result.success) {
                             $("#editModal").modal("hide");
