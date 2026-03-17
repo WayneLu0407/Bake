@@ -22,7 +22,7 @@
     <script src="/lib/jquery/dist/jquery.min.js"></script>
     <script src="/lib/jquery-validation/dist/jquery.validate.min.js"></script>
     <script src="/lib/jquery-validation-unobtrusive/dist/jquery.validate.unobtrusive.min.js"></script>
-
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 
 <body>
@@ -35,7 +35,7 @@
     <aside class="sidebar-nav-wrapper">
         <div class="navbar-logo">
             <a href="index.html">
-                <img src="~/seller_assets/images/logo/logo.svg" alt="logo" />
+                <img src="~/productpicture/brand/logo.png" alt="logo" style="width: 150px; height: auto;" />
             </a>
         </div>
         <nav class="sidebar-nav">
@@ -53,6 +53,7 @@
                         </span>
                     </a>
                 </li>
+                @if (User.IsInRole("Seller")){
                 <li class="nav-item nav-item-has-children">
                     <a href="#0" class="collapsed" data-bs-toggle="collapse" data-bs-target="#ddmenu_1" aria-controls="ddmenu_1"
                        aria-expanded="false" aria-label="Toggle navigation" >
@@ -85,13 +86,6 @@
                             </a>
                         </li>
                         <li>
-                            <a asp-area="Seller" asp-controller="SellerProduct" asp-action="Edit">
-                                <span class="text">
-                                    修改商品
-                                </span>
-                            </a>
-                        </li>
-                        <li>
                             <a asp-area="Seller" asp-controller="SellerOrder" asp-action="Orders">
                                 <span class="text">
                                     查看訂單
@@ -120,7 +114,8 @@
                             </a>
                         </li>
                     </ul>
-                </li>
+					</li>
+				}
                 <li class="nav-item nav-item-has-children">
                     <a href="#0" class="collapsed" data-bs-toggle="collapse" data-bs-target="#ddmenu_2" aria-controls="ddmenu_2"
                        aria-expanded="false" aria-label="Toggle navigation">
@@ -137,11 +132,7 @@
                             <a asp-area="Seller" asp-controller="Me" asp-action="Settings"> 個人資訊 </a>
                         </li>
                         <li>
-                            <a asp-area="Seller" asp-controller="Me" asp-action="Password">
-                                <span class="text">
-                                    更改密碼
-                                </span>
-                            </a>
+                            <a asp-area="Seller" asp-controller="Me" asp-action="SwitchSeller"> 我想成為賣家 </a>
                         </li>
                     </ul>
                 </li>

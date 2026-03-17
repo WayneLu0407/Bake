@@ -127,7 +127,8 @@ public partial class BakeContext : DbContext
             entity.Property(e => e.AccountStatus).HasColumnName("account_status");
             entity.Property(e => e.ConfirmationToken)
                 .HasMaxLength(100)
-                .HasColumnName("confirmation_token");
+                .HasColumnName("confirmation_token")
+                .IsRequired(false);
             entity.Property(e => e.Email)
                 .HasMaxLength(255)
                 .HasColumnName("email");
@@ -158,6 +159,7 @@ public partial class BakeContext : DbContext
             entity.ToTable("Account_Status_Definitions", "User");
 
             entity.Property(e => e.StatusId).HasColumnName("status_id");
+
             entity.Property(e => e.StatusName)
                 .HasMaxLength(20)
                 .HasColumnName("status_name");
@@ -750,9 +752,16 @@ public partial class BakeContext : DbContext
             entity.Property(e => e.ProductId)
                 .ValueGeneratedNever()
                 .HasColumnName("product_id");
+
+            entity.HasOne(d => d.Product)           // ProductDetail 有一個 Product
+            .WithOne(p => p.ProductDetail)      // Product 也有一個 ProductDetail
+            .HasForeignKey<ProductDetail>(d => d.ProductId) // 外鍵是 ProductId
+            .OnDelete(DeleteBehavior.Cascade);  // 如果刪除商品，明細也一起刪除 (選配)
+
             entity.Property(e => e.ExpireDate)
                 .HasColumnType("datetime")
-                .HasColumnName("expire_date");
+                .HasColumnName("expire_date")
+                .IsRequired(false);
             entity.Property(e => e.ProductDiscount)
                 .HasColumnType("decimal(3, 2)")
                 .HasColumnName("product_discount");
@@ -923,6 +932,23 @@ public partial class BakeContext : DbContext
                 .HasDefaultValueSql("(sysdatetime())")
                 .HasColumnName("shop_time");
             entity.Property(e => e.StatusId).HasColumnName("status_id");
+
+            entity.Property(e => e.FacebookUrl)
+                .HasMaxLength(2048)
+                .HasColumnName("facebook_url");
+
+            entity.Property(e => e.InstagramUrl)
+                .HasMaxLength(2048)
+                .HasColumnName("instagram_url");
+
+            entity.Property(e => e.YoutubeUrl)
+                .HasMaxLength(2048)
+                .HasColumnName("youtube_url");
+
+            entity.Property(e => e.PinterestUrl)
+                .HasMaxLength(2048)
+                .HasColumnName("pinterest_url");
+
 
             entity.HasOne(d => d.Status).WithMany(p => p.Shops)
                 .HasForeignKey(d => d.StatusId)

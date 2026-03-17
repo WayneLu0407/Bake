@@ -27,9 +27,9 @@
 
                     <div class="row justify-content-center">
                         <div class="col-md-4">
-                <form asp-area="Seller" asp-controller="SellerProduct" asp-action="New" method="post" enctype="multipart/form-data" novalidate>
+                            <form asp-area="Seller" asp-controller="SellerProduct" asp-action="New" method="post" enctype="multipart/form-data" novalidate>
                                 @Html.AntiForgeryToken()
-                                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                                
                                 <div class="form-group">
                                     <label asp-for="ProductName" class="control-label"></label>
                                     <input asp-for="ProductName" class="form-control" />
@@ -50,22 +50,40 @@
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="ProductPrice" class="control-label"></label>
-                        <input asp-for="ProductPrice" class="form-control" type="text" data-val-number="請輸入有效的數字" />
+                                    <input asp-for="ProductPrice" class="form-control" type="text" data-val-number="請輸入有效的數字" />
                                     <span asp-validation-for="ProductPrice" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="ProductDiscount" class="control-label"></label>
-                        <input asp-for="ProductDiscount" class="form-control" type="text" data-val-number="請輸入有效的數字" min="0" min="0.99"  data-val-range="數字必須介於0到0.99之間" />
+                                    <input asp-for="ProductDiscount" class="form-control" type="text" data-val-number="請輸入有效的數字" min="0" min="0.99"  data-val-range="數字必須介於0到0.99之間" />
                                     <span asp-validation-for="ProductDiscount" class="text-danger"></span>
 
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="ProductQuantity" class="control-label"></label>
-                        <input asp-for="ProductQuantity" class="form-control" min="1" step="1" data-val-range="數量必須大於 0"
-                               data-val-number="請輸入有效的數字"
-                               data-val-step="請輸入整數 (不可有小數點)" />
+                                    <input asp-for="ProductQuantity" class="form-control" min="1" step="1" data-val-range="數量必須大於 0"
+                                    data-val-number="請輸入有效的數字" data-val-step="請輸入整數 (不可有小數點)" />
                                     <span asp-validation-for="ProductQuantity" class="text-danger"></span>
-
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="ExpireDate" class="control-label"></label>
+                                    <input asp-for="ExpireDate" class="form-control" type="date" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                                    <span asp-validation-for="ExpireDate" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="Ingredients" class="control-label"></label>
+                                    <input asp-for="Ingredients" class="form-control" rows="3" />
+                                    <span asp-validation-for="Ingredients" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="NetWeight" class="control-label"></label>
+                                    <input asp-for="NetWeight" class="form-control"  />
+                                    <span asp-validation-for="NetWeight" class="text-danger"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label asp-for="ShelfLifeNote" class="control-label"></label>
+                                    <input asp-for="ShelfLifeNote" class="form-control" />
+                                    <span asp-validation-for="ShelfLifeNote" class="text-danger"></span>
                                 </div>
                                 <div class="form-group">
                                     <label asp-for="ProductImage" class="control-label"></label>
@@ -131,6 +149,12 @@
         });
         function previewUploadImage(inputFile) {
             var file = inputFile.files[0];
+
+            if(file.size>5*1024*1024){
+                alert("圖片不能超過5MB");
+                inputFile.value="";
+                return;
+            }
             var allowTypes = "image.*";
             if (inputFile.files[0].type.match(allowTypes)) {
                 $('.btn').prop('disabled', false);

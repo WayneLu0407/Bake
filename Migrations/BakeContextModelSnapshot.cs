@@ -550,7 +550,7 @@ namespace Bake.Migrations
                         .HasColumnType("int")
                         .HasColumnName("product_id");
 
-                    b.Property<DateTime>("ExpireDate")
+                    b.Property<DateTime?>("ExpireDate")
                         .HasColumnType("datetime")
                         .HasColumnName("expire_date");
 
@@ -716,6 +716,21 @@ namespace Bake.Migrations
                         .HasColumnType("int")
                         .HasColumnName("user_id");
 
+                    b.Property<string>("FacebookUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)")
+                        .HasColumnName("facebook_url");
+
+                    b.Property<string>("InstagramUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)")
+                        .HasColumnName("instagram_url");
+
+                    b.Property<string>("PinterestUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)")
+                        .HasColumnName("pinterest_url");
+
                     b.Property<DateTime>("SellerApprovedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("seller_approved_at");
@@ -749,6 +764,11 @@ namespace Bake.Migrations
                     b.Property<byte>("StatusId")
                         .HasColumnType("tinyint")
                         .HasColumnName("status_id");
+
+                    b.Property<string>("YoutubeUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)")
+                        .HasColumnName("youtube_url");
 
                     b.HasKey("UserId")
                         .HasName("PK__Shop__B9BE370F36C4789E");
@@ -1340,7 +1360,6 @@ namespace Bake.Migrations
                         .HasColumnName("account_status");
 
                     b.Property<string>("ConfirmationToken")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("confirmation_token");
@@ -1648,17 +1667,19 @@ namespace Bake.Migrations
 
             modelBuilder.Entity("Bake.Models.Sales.ProductDetail", b =>
                 {
-                    b.HasOne("Bake.Models.Sales.Product", null)
+                    b.HasOne("Bake.Models.Sales.Product", "Product")
                         .WithOne("ProductDetail")
                         .HasForeignKey("Bake.Models.Sales.ProductDetail", "ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Bake.Models.Sales.ProductIngredient", b =>
                 {
                     b.HasOne("Bake.Models.Sales.Product", "Product")
-                        .WithOne()
+                        .WithOne("ProductIngredient")
                         .HasForeignKey("Bake.Models.Sales.ProductIngredient", "ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
@@ -2033,8 +2054,9 @@ namespace Bake.Migrations
 
             modelBuilder.Entity("Bake.Models.Sales.Product", b =>
                 {
-                    b.Navigation("ProductDetail")
-                        .IsRequired();
+                    b.Navigation("ProductDetail");
+
+                    b.Navigation("ProductIngredient");
                 });
 
             modelBuilder.Entity("Bake.Models.Sales.ProductCategory", b =>
