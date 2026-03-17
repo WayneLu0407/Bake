@@ -643,14 +643,48 @@
                 const res = await fetch('/api/Product/Get')
                 this.products = await res.json()
 
-                // 等 Vue 把 DOM 更新完再通知 Swiper
                 this.$nextTick(() => {
-                    if (document.querySelector('.products-carousel')?.swiper) {
-                        document.querySelector('.products-carousel').swiper.update()
-                    }
-                    if (document.querySelector('.products-carousel2')?.swiper) {
-                    document.querySelector('.products-carousel2').swiper.update()
-                    }
+                // 新品上市 — 銷毀再重建
+                const el1 = document.querySelector('.products-carousel')
+                if (el1 && el1.swiper) {
+                el1.swiper.destroy(true, true)
+                }
+                new Swiper('.products-carousel', {
+                loop: false,
+                spaceBetween: 30,
+                speed: 500,
+                navigation: {
+                nextEl: '.products-carousel-next',
+                prevEl: '.products-carousel-prev',
+                },
+                breakpoints: {
+                0:    { slidesPerView: 2 },
+                768:  { slidesPerView: 3 },
+                991:  { slidesPerView: 4 },
+                1200: { slidesPerView: 5 },
+                }
+                })
+
+                // 推薦商品 — 銷毀再重建
+                const el2 = document.querySelector('.products-carousel2')
+                if (el2 && el2.swiper) {
+                el2.swiper.destroy(true, true)
+                }
+                new Swiper('.products-carousel2', {
+                loop: false,
+                spaceBetween: 30,
+                speed: 500,
+                navigation: {
+                nextEl: '.products-carousel2-next',
+                prevEl: '.products-carousel2-prev',
+                },
+                breakpoints: {
+                0:    { slidesPerView: 2 },
+                768:  { slidesPerView: 3 },
+                991:  { slidesPerView: 4 },
+                1200: { slidesPerView: 5 },
+                }
+                })
                 })
             }
         });
