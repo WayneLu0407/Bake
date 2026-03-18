@@ -108,3 +108,22 @@
 .brand-carousel .swiper-wrapper {
     padding: 10px 0;
 }
+
+/* 分頁 — active 頁碼 */
+.pagination .page-item.active .page-link {
+    background-color: #FFC43F;
+    border-color: #FFC43F;
+    color: #222;
+}
+
+/* 分頁 — hover */
+.pagination .page-item .page-link:hover {
+    background-color: #F7A422;
+    border-color: #F7A422;
+    color: #222;
+}
+
+/* 分頁 — 一般狀態的文字色 */
+.pagination .page-item .page-link {
+    color: #222;
+}
