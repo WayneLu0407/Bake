@@ -1,5 +1,16 @@
-﻿@{
-    ViewData["Title"] = "店舖設定";
+﻿@model Bake.Areas.Seller.ViewModels.SellerShopSettingsReadViewModel
+
+@{
+    ViewData["Title"] = "Shop_settings";
+
+    string? shopImageUrl = null;
+
+    if (!string.IsNullOrWhiteSpace(Model?.ShopImg) &&
+        !Model.ShopImg.StartsWith("http://") &&
+        !Model.ShopImg.StartsWith("https://"))
+    {
+        shopImageUrl = Url.Content("~/" + Model.ShopImg.TrimStart('/'));
+    }
 }
 
 <div class="container my-4">
@@ -15,61 +26,88 @@
                 </div>
 
                 <div class="seller-card bg-white rounded-4 p-4 shadow-sm">
+                    <form asp-area="Seller" asp-controller="SellerShop" asp-action="Shop_settings" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
 
-                    <!-- 頭像 + 店名 + 簡介 -->
-                    <div class="d-flex flex-column flex-md-row gap-4 align-items-start">
-                        <div class="position-relative">
-                            <div class="seller-avatar bg-secondary-subtle"></div>
-                            <button type="button" class="btn btn-light btn-sm seller-avatar-btn" title="更換頭像">
-                                📷
-                            </button>
-                        </div>
+                        <!-- 頭像 + 店名 + 簡介 -->
+                        <div class="d-flex gap-4 align-items-start flex-wrap flex-md-nowrap">
 
-                        <div class="flex-grow-1">
-                            <div class="d-flex align-items-center gap-2 mb-2">
-                                <h3 class="mb-0 fw-bold">小森烘焙</h3>
-                                <button type="button" class="btn btn-outline-secondary btn-sm" title="編輯店名">✎</button>
+                            <div class="flex-shrink-0">
+                                @* //顯示目前店鋪頭像 *@
+                                <div class="seller-avatar bg-secondary-subtle align-items-center justify-content-center overflow-hidden mb-2"
+                                     style="width: 140px; height: 140px; border-radius: 16px;">
+                                    @if (!string.IsNullOrWhiteSpace(shopImageUrl))
+                                    {
+                                        <img src="@shopImageUrl"
+                                             alt="店舖圖片"
+                                             style="width:100%; height:100%; object-fit:cover;"
+                                             onerror="this.style.display='none';" />
+                                    }
+                                    else
+                                    {
+                                        <div class="shop-image-fallback d-flex align-items-center justify-content-center w-100 h-100">
+                                            📷
+                                        </div>
+                                    }
+                                    @if (TempData["SuccessMessage"] != null)
+                                    {
+                                        <div class="alert alert-success py-2 px-3 mb-0">
+                                            @TempData["SuccessMessage"]
+                                        </div>
+                                    }
+                                </div>
+                                <input asp-for="ShopImageFile" type="file" class="form-control form-control-sm" accept=".jpg,.jpeg,.png" />
+                                <span asp-validation-for="ShopImageFile" class="text-danger"></span>
                             </div>
 
-                            <div class="d-flex align-items-start justify-content-between gap-2">
-                                <p class="text-muted mb-0" style="line-height:1.8;">
-                                    店舖介紹寫這邊店舖介紹寫這邊店舖介紹寫這邊店舖介紹寫這邊店舖介紹寫這邊
-                                </p>
-                                <button type="button" class="btn btn-outline-secondary btn-sm flex-shrink-0" title="編輯店舖介紹">
-                                    ✎
-                                </button>
+                            <div class="flex-grow-1" style="min-width: 0;">
+                                <div class="mb-3">
+                                    <label asp-for="ShopName" class="form-label fw-bold"></label>
+                                    <input asp-for="ShopName" class="form-control form-control-lg fw-bold" />
+                                    <span asp-validation-for="ShopName" class="text-danger"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="ShopDescription" class="form-label fw-bold"></label>
+                                    <textarea asp-for="ShopDescription" class="form-control" rows="4"></textarea>
+                                    <span asp-validation-for="ShopDescription" class="text-danger"></span>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <hr class="my-4" />
+                        <hr class="my-4" />
 
-                    <!-- 社群連結 -->
-                    <div class="mb-3">
-                        <label class="form-label">連結FB</label>
-                        <input class="form-control" placeholder="https://facebook.com/..." />
-                    </div>
+                        <div class="mb-3">
+                            <label asp-for="FacebookUrl" class="form-label"></label>
+                            <input asp-for="FacebookUrl" class="form-control" placeholder="https://facebook.com/..." />
+                            <span asp-validation-for="FacebookUrl" class="text-danger"></span>
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">連結IG</label>
-                        <input class="form-control" placeholder="https://instagram.com/..." />
-                    </div>
+                        <div class="mb-3">
+                            <label asp-for="InstagramUrl" class="form-label"></label>
+                            <input asp-for="InstagramUrl" class="form-control" placeholder="https://instagram.com/..." />
+                            <span asp-validation-for="InstagramUrl" class="text-danger"></span>
+                        </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">連結YT</label>
-                        <input class="form-control" placeholder="https://youtube.com/..." />
-                    </div>
+                        <div class="mb-3">
+                            <label asp-for="YoutubeUrl" class="form-label"></label>
+                            <input asp-for="YoutubeUrl" class="form-control" placeholder="https://youtube.com/..." />
+                            <span asp-validation-for="YoutubeUrl" class="text-danger"></span>
+                        </div>
 
-                    <div class="mb-4">
-                        <label class="form-label">連Pinterest</label>
-                        <input class="form-control" placeholder="https://pinterest.com/..." />
-                    </div>
+                        <div class="mb-4">
+                            <label asp-for="PinterestUrl" class="form-label"></label>
+                            <input asp-for="PinterestUrl" class="form-control" placeholder="https://pinterest.com/..." />
+                            <span asp-validation-for="PinterestUrl" class="text-danger"></span>
+                        </div>
 
-                    <!-- 按鈕 -->
-                    <div class="d-flex justify-content-end gap-2">
-                        <button type="button" class="btn btn-warning px-4">預覽</button>
-                        <button type="button" class="btn btn-warning px-4">儲存</button>
-                    </div>
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="button"
+                                    id="openShopPreviewBtn"
+                                    class="btn btn-warning px-4">預覽</button>
+                            <button type="submit" class="btn btn-warning px-4">儲存</button>
+                        </div>
+                    </form>
 
                 </div>
             </div>
@@ -77,3 +115,57 @@
 
     </div>
 </div>
+
+<div class="modal fade" id="shopPreviewModal" tabindex="-1" aria-labelledby="shopPreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-4">
+            <div class="modal-header">
+                <h5 class="modal-title" id="shopPreviewModalLabel">店鋪預覽</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body" id="shopPreviewModalBody">
+                <div class="text-muted">載入預覽中...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(function () {
+            const previewUrl = '@Url.Action("PreviewPartial", "SellerShop", new { area = "Seller" })';
+
+            // 點擊事件
+            $("#openShopPreviewBtn").on("click", async function () {
+                const $modalBody = $("#shopPreviewModalBody");
+                const $modalElement = $("#shopPreviewModal");
+
+                $modalBody.html("<div class='text-muted'>載入預覽中...</div>");
+
+                try {
+                    // 3. 使用 jQuery 的 $.get 或是原本的 fetch (fetch 比較現代，建議保留)
+                    const response = await fetch(previewUrl, {
+                        headers: { "X-Requested-With": "XMLHttpRequest" }
+                    });
+
+                    const html = await response.text();
+                    
+                    // 塞入畫面
+                    $modalBody.html(html);
+
+                    // 5. Bootstrap 5 的 Modal 呼叫 (這部分通常還是用原生 JS 寫法，因為 BS5 脫離 jQuery 了)
+                    const modal = new bootstrap.Modal($modalElement[0]);
+                    modal.show();
+
+                } catch (error) {
+                    $modalBody.html("<div class='alert alert-danger mb-0'>預覽載入失敗。</div>");
+                    const modal = new bootstrap.Modal($modalElement[0]);
+                    modal.show();
+                }
+            });
+        });
+    </script>
+}
