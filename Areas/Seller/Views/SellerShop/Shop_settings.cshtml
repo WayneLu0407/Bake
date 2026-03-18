@@ -26,14 +26,12 @@
                 </div>
 
                 <div class="seller-card bg-white rounded-4 p-4 shadow-sm">
-                    <!-- 店鋪設定編輯表單 -->
                     <form asp-area="Seller" asp-controller="SellerShop" asp-action="Shop_settings" method="post" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
 
                         <!-- 頭像 + 店名 + 簡介 -->
                         <div class="d-flex gap-4 align-items-start flex-wrap flex-md-nowrap">
 
-                            <!-- 左側：固定大小店鋪頭像 -->
                             <div class="flex-shrink-0">
                                 @* //顯示目前店鋪頭像 *@
                                 <div class="seller-avatar bg-secondary-subtle align-items-center justify-content-center overflow-hidden mb-2"
@@ -104,7 +102,9 @@
                         </div>
 
                         <div class="d-flex justify-content-end gap-2">
-                            <button type="button" class="btn btn-warning px-4">預覽</button>
+                            <button type="button"
+                                    id="openShopPreviewBtn"
+                                    class="btn btn-warning px-4">預覽</button>
                             <button type="submit" class="btn btn-warning px-4">儲存</button>
                         </div>
                     </form>
@@ -116,6 +116,56 @@
     </div>
 </div>
 
+<div class="modal fade" id="shopPreviewModal" tabindex="-1" aria-labelledby="shopPreviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content rounded-4">
+            <div class="modal-header">
+                <h5 class="modal-title" id="shopPreviewModalLabel">店鋪預覽</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body" id="shopPreviewModalBody">
+                <div class="text-muted">載入預覽中...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        $(function () {
+            const previewUrl = '@Url.Action("PreviewPartial", "SellerShop", new { area = "Seller" })';
+
+            // 點擊事件
+            $("#openShopPreviewBtn").on("click", async function () {
+                const $modalBody = $("#shopPreviewModalBody");
+                const $modalElement = $("#shopPreviewModal");
+
+                $modalBody.html("<div class='text-muted'>載入預覽中...</div>");
+
+                try {
+                    // 3. 使用 jQuery 的 $.get 或是原本的 fetch (fetch 比較現代，建議保留)
+                    const response = await fetch(previewUrl, {
+                        headers: { "X-Requested-With": "XMLHttpRequest" }
+                    });
+
+                    const html = await response.text();
+                    
+                    // 塞入畫面
+                    $modalBody.html(html);
+
+                    // 5. Bootstrap 5 的 Modal 呼叫 (這部分通常還是用原生 JS 寫法，因為 BS5 脫離 jQuery 了)
+                    const modal = new bootstrap.Modal($modalElement[0]);
+                    modal.show();
+
+                } catch (error) {
+                    $modalBody.html("<div class='alert alert-danger mb-0'>預覽載入失敗。</div>");
+                    const modal = new bootstrap.Modal($modalElement[0]);
+                    modal.show();
+                }
+            });
+        });
+    </script>
 }
