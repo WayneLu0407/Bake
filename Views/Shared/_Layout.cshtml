@@ -4,7 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] 烘焙交流網</title>
-
+    <style>
+            [v-cloak] {
+                display: none !important;
+        }
+    </style>
+    @* 預連線*@
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
     @* 1. 字體 *@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,21 +21,22 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&family=Open+Sans:ital,wght@0,400;0,700;1,400;1,700&family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     @* 2. 框架：最先加載，讓後面的樣式可以覆蓋它 *@
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet"/>
 
     @* 3. 套件樣式 *@
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css">
-    <link rel="stylesheet" type="text/css" href="~/css/vendor.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css"/>
+    <link rel="stylesheet" type="text/css" href="~/css/vendor.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
     @* 4. 主樣式：這才是主角，路徑請務必檢查正確 *@
-    <link rel="stylesheet" type="text/css" href="~/css/style.css">
+    <link rel="stylesheet" type="text/css" href="~/css/style.css"/>
 
     @* 5. 個人微調：放最後面蓋掉所有人 *@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/MyStyleSheet -nav .css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/homeIndexCss.css" asp-append-version="true" />
 
     @await RenderSectionAsync("Styles", required: false)
 </head>
@@ -149,7 +158,7 @@
                 <div class="col-4 col-lg-2 text-start">
                     <div class="main-logo">
                         <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">
-                            <img src="~/images/logo.png" alt="logo" class="img-fluid">
+                            <img src="~/ProductPicture/brand/Logo.png" alt="logo" class="img-fluid">
                         </a>
                     </div>
                 </div>
@@ -162,23 +171,34 @@
                 </div>
 
 
-                <div class="col-lg-4 d-none d-lg-block">
-                    <div class="search-bar d-flex align-items-center bg-light px-3 my-2 rounded-4">
-                        <form asp-controller="Products" asp-action="Index" class="flex-grow-1 d-flex align-items-center" method="get">
-                            <input name="keyword" type="text" class="form-control border-0 bg-transparent" placeholder="請搜尋關鍵字" />
-                            <button type="submit" class="border-0 bg-transparent p-0">
+                    <div class="col-lg-4 d-none d-lg-block" id="search-app" v-cloak>
+                    <div class="search-bar d-flex align-items-center bg-light px-3 my-2 rounded-4 position-relative">
+                         <input type="text" class="form-control border-0 bg-transparent" placeholder="請搜尋關鍵字" v-model="keyword" @@input="search" @@focus="showDropdown=true" @@blur="hideDropdown"/>
+                            <a :href="'/Products/Index?keyword='+keyword" class="border-0 bg-transparent p-0">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
                                     <path fill="currentColor" d="M21.71 20.29L18 16.61A9 9 0 1 0 16.61 18l3.68 3.68a1 1 0 0 0 1.42 0a1 1 0 0 0 0-1.39ZM11 18a7 7 0 1 1 7-7a7 7 0 0 1-7 7Z" />
                                 </svg> 
-                            </button>
-                        </form>
-
+                            </a>
+                            <!-- 下拉選單 -->
+                            <ul v-if="showDropdown && results.length > 0"
+                                class="list-group position-absolute top-100 start-0 w-100 shadow-lg"
+                                style="top:100%; left: 0; z-index: 1050; max-height:300px; overflow-y:auto;">
+                                <li v-for="item in results" :key="item.productId"
+                                class="list-group-item list-group-item-action d-flex align-items-center gap-2"
+                                @@mousedown.prevent="goToProduct(item)">
+                                    <img :src="item.productImage" style="width:40px; height:40px; object-fit:cover; border-radius:4px;" />
+                                    <div>
+                                        <div class="fw-bold small">{{ item.productName }}</div>
+                                        <small class="text-muted">NT${{ item.productPrice }}</small>
+                                    </div>
+                                </li>
+                             </ul>
                     </div>
                 </div>
 
 
                 <div class="col-4 col-lg-4 d-flex justify-content-end gap-5 align-items-center mt-4 mt-sm-0 justify-content-center justify-content-sm-end">
-                    <div class="support-box text-end d-none d-xl-block">
+                        <div class="support-box text-center d-none d-xxl-block">
                         <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="posts"><h5 class="mb-0">交流分享區</h5></a>
                     </div>
 
@@ -279,17 +299,11 @@
 
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
     <script src="~/js/plugins.js"></script>
-
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-
     <script src="~/js/script.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-    @* <script src="~/js/myJavaScript-swiper2.js" asp-append-version="true"></script> *@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script>
 
@@ -320,6 +334,47 @@
             }
         }).mount("#cart-app");
     </script>
+    <script>
+        // 這裡是搜尋的 JavaScript 代碼，只有在需要時才會被渲染
+        const searchApp = Vue.createApp({
+            data() {
+                return {
+                    keyword: '',
+                    results: [],
+                    showDropdown: false,
+                    timer: null
+                }
+            },
+            methods: {
+                search() {
+                    clearTimeout(this.timer)
+                    const kw= this.keyword.trim()
+                    if(kw.length===0){
+                        this.results = [];
+                        return;
+                    }
+                    this.timer = setTimeout(async()=>{
+                        const res = await fetch('/api/Product/Search?keyword='+ encodeURIComponent(kw))
+                        this.results = await res.json()
+                    },300)
+                },
+                goToProduct(item){
+                    window.location.href = '/Products/Details/' + item.productId;
+                },
+                hideDropdown(){
+                    // 使用setTimeout確保在點擊下拉選單項目時不會立即隱藏
+                    setTimeout(() => {
+                        this.showDropdown = false;
+                    }, 200);
+                }
+                },
+            async mounted(){
+                const res= await fetch('/api/Product/Get'); 
+                this.allProducts = await res.json()
+            }
+        }).mount('#search-app')
+     </script>
     @await RenderSectionAsync("Scripts", required: false)
+    
 </body>
 </html>

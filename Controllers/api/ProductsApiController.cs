@@ -28,6 +28,7 @@ namespace Bake.Controllers.api
                     productImage = p.ProductImage,
                     productRating = p.ProductRating,
                     productDate = p.ProductDate,
+                    categoryId = p.CategoryId,
                     productPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : (decimal?)null,
                     productDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : (decimal?)null,
                     shopName = p.User.Shop != null ? p.User.Shop.ShopName : "未知店家",
@@ -57,12 +58,34 @@ namespace Bake.Controllers.api
                     productDescription = p.ProductDescription,
                     ShelfLifeNote = p.ProductIngredient.ShelfLifeNote,
                     Ingredient = p.ProductIngredient.Ingredients,
-                    NetWeight = p.ProductIngredient.NetWeight
+                    NetWeight = p.ProductIngredient.NetWeight,
+                    categoryId = p.CategoryId,
+                    categoryName = p.Category.CategoryName,
                 })
                 .FirstOrDefault();
 
             if (prod == null) return NotFound();
             return Ok(prod);
+        }
+        //api/Product/Search?keyword = 巧克力
+        [HttpGet]
+        public IActionResult Search(string keyword)
+        {
+            if (string.IsNullOrWhiteSpace(keyword))
+                return Ok(Array.Empty<object>());
+            var results = _db.Products
+                .Include(p => p.ProductDetail)
+                .Where(p => p.ProductName.Contains(keyword))
+                .Take(8)
+                .Select(p => new
+                {
+                    ProductId=p.ProductId,
+                    ProductName=p.ProductName,
+                    ProductImage = p.ProductImage,
+                    ProductPrice= p.ProductDetail != null ? p.ProductDetail.ProductPrice : (decimal?)null
+                })
+                .ToList();
+            return Ok(results);
         }
     }
 }

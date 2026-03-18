@@ -716,6 +716,21 @@ namespace Bake.Migrations
                         .HasColumnType("int")
                         .HasColumnName("user_id");
 
+                    b.Property<string>("FacebookUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)")
+                        .HasColumnName("facebook_url");
+
+                    b.Property<string>("InstagramUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)")
+                        .HasColumnName("instagram_url");
+
+                    b.Property<string>("PinterestUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)")
+                        .HasColumnName("pinterest_url");
+
                     b.Property<DateTime>("SellerApprovedAt")
                         .HasColumnType("datetime2")
                         .HasColumnName("seller_approved_at");
@@ -749,6 +764,11 @@ namespace Bake.Migrations
                     b.Property<byte>("StatusId")
                         .HasColumnType("tinyint")
                         .HasColumnName("status_id");
+
+                    b.Property<string>("YoutubeUrl")
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)")
+                        .HasColumnName("youtube_url");
 
                     b.HasKey("UserId")
                         .HasName("PK__Shop__B9BE370F36C4789E");
