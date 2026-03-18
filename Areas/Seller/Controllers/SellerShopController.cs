@@ -20,9 +20,27 @@ namespace Bake.Areas.Seller.Controllers
             _env = env;
         }
 
+        //對應到店鋪資料
+        //GET:Seller/SellerShop/Shop
+        [HttpGet]
         public IActionResult Shop()
         {
-            return View();
+            int? userId = GetCurrentUserIdFromEmailClaim();
+
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Home", new { area = "" });
+            }
+
+            var shop = _context.Shops.FirstOrDefault(x => x.UserId == userId.Value);
+
+            if (shop == null)
+            {
+                TempData["SuccessMessage"] = "請先完成店鋪設定後再預覽";
+                return RedirectToAction(nameof(Shop_settings));
+            }
+
+            return View(shop);
         }
 
         // Get:/Seller/SellerShop/Shop_settings
@@ -134,59 +152,33 @@ namespace Bake.Areas.Seller.Controllers
             return RedirectToAction(nameof(Shop_settings));
         }
 
-        public IActionResult Billing_account()
-        {
-            return View();
-        }
-
-        // 用登入的Cookie反推UserId
-        // !!!!!這段是臨時測試用，之後功能穩定後可以刪掉!!!!!!!!!!!!!
-        public IActionResult DebugCurrentSeller()
-        {
-            string? currentEmail = User.FindFirstValue(ClaimTypes.Name);
-
-            if (string.IsNullOrWhiteSpace(currentEmail))
-            {
-                return Content("目前沒有取得登入者 Email，可能尚未登入，或 Cookie 裡沒有 Name Claim。");
-            }
-
-            var user = _context.AccountAuths.FirstOrDefault(x => x.Email == currentEmail);
-
-            if (user == null)
-            {
-                return Content($"有拿到 Claim Email = {currentEmail}，但在 AccountAuths 找不到對應使用者。");
-            }
-
-            return Content($"目前登入者 Email = {currentEmail}，UserId = {user.UserId}");
-        }
-
-        // 用登入的Cookie反推UserId
-        // !!!!!這段是臨時測試用，之後功能穩定後可以刪掉!!!!!!!!!!!!!
-        public IActionResult DebugCurrentShop()
+        // 功用：提供店鋪預覽 modal 載入用的 Partial HTML
+        // 這一步只顯示「已儲存」資料，不顯示未儲存表單內容
+        [HttpGet]
+        public IActionResult PreviewPartial()
         {
             int? userId = GetCurrentUserIdFromEmailClaim();
 
             if (userId == null)
             {
-                return Content("目前無法取得登入者的 UserId。");
+                return Content("<div class='alert alert-warning mb-0'>請先登入後再預覽。</div>", "text/html");
             }
 
             var shop = _context.Shops.FirstOrDefault(x => x.UserId == userId.Value);
 
             if (shop == null)
             {
-                return Content($"目前賣家 UserId = {userId}，但還找不到 Shop 資料。");
+                return Content("<div class='alert alert-warning mb-0'>目前找不到店鋪資料，請先完成設定並儲存。</div>", "text/html");
             }
 
-            return Content(
-                $"目前賣家 UserId = {userId}\n" +
-                $"ShopName = {shop.ShopName}\n" +
-                $"ShopDescription = {shop.ShopDescription}\n" +
-                $"ShopImg = {shop.ShopImg}\n" +
-                $"StatusId = {shop.StatusId}"
-            );
+            // 明確指定全站共用 Partial 路徑，避免 Area 找 View 時混淆
+            return PartialView("~/Views/Shared/_ShopProfilePartial.cshtml", shop);
         }
 
+        public IActionResult Billing_account()
+        {
+            return View();
+        }
 
         // 用目前登入者Email反查UserId
         private int? GetCurrentUserIdFromEmailClaim()
