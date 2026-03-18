@@ -1,0 +1,329 @@
+/*
+ * SweetStack 後台色系覆蓋檔
+ * 用法：在後台 _Layout.cshtml 中，放在 main.css 之後引用
+ *       <link rel="stylesheet" href="~/css/sweetstack-admin-override.css" />
+ *
+ * 前台主色：#FFC43F (金黃)
+ * 後台原色：#365CF5 (藍) → 替換為暖色系
+ */
+
+/* ============================================
+   1. 色彩變數（方便日後統一調整）
+   ============================================ */
+/*
+ * SweetStack 後台色系覆蓋檔
+ * 用法：在後台 _Layout.cshtml 中，放在 main.css 之後引用
+ *       <link rel="stylesheet" href="~/css/sweetstack-admin-override.css" />
+ *
+ * 前台主色：#FFC43F (金黃)
+ * 後台原色：#365CF5 (藍) → 替換為暖色系
+ */
+
+/* ============================================
+   1. 色彩變數（方便日後統一調整）
+   ============================================ */
+:root {
+    --ss-primary: #E8913A; /* 主色：暖橘（按鈕、icon highlight） */
+    --ss-primary-hover: #D47E2E; /* 主色 hover */
+    --ss-primary-light: rgba(232, 145, 58, 0.10); /* 主色淺底 */
+    --ss-primary-medium: rgba(232, 145, 58, 0.15);
+    --ss-accent: #FFC43F; /* 強調色：與前台一致的金黃 */
+    --ss-dark: #222222; /* 深色文字：與前台一致 */
+    --ss-body-bg: #FDF8F3; /* 頁面底色：暖白（取代冷灰 #f1f5f9） */
+}
+
+/* ============================================
+   2. 全局底色 & 文字
+   ============================================ */
+body {
+    background: var(--ss-body-bg) !important;
+    font-family: "Open Sans", "Noto Sans TC", sans-serif !important;
+}
+
+a:hover {
+    color: var(--ss-primary) !important;
+}
+
+/* ============================================
+   3. 卡片下拉選單 hover
+   ============================================ */
+.card-style .dropdown-menu li:hover a {
+    color: var(--ss-primary) !important;
+}
+
+/* ============================================
+   4. 滾動回頂按鈕
+   ============================================ */
+.scroll-top {
+    background: var(--ss-primary);
+}
+
+    .scroll-top:hover {
+        background: var(--ss-primary-hover);
+    }
+
+/* ============================================
+   5. Badge（標籤）
+   ============================================ */
+.primary-badge {
+    background: var(--ss-primary);
+}
+
+.primary-badge-light {
+    background: var(--ss-primary-light);
+    color: var(--ss-primary);
+}
+
+    .primary-badge-light:hover {
+        color: var(--ss-primary);
+    }
+
+/* ============================================
+   6. 按鈕系列
+   ============================================ */
+/* 實心按鈕 */
+.primary-btn,
+.main-btn.primary-btn {
+    background: var(--ss-primary) !important;
+    border-color: var(--ss-primary) !important;
+    color: #fff !important;
+}
+
+    .primary-btn:hover,
+    .main-btn.primary-btn:hover {
+        background: var(--ss-primary-hover) !important;
+        border-color: var(--ss-primary-hover) !important;
+    }
+
+/* 外框按鈕 */
+.primary-btn-outline {
+    color: var(--ss-primary);
+    border-color: var(--ss-primary);
+}
+
+    .primary-btn-outline:hover {
+        background: var(--ss-primary);
+        color: #fff;
+    }
+
+/* 淺底按鈕 */
+.primary-btn-light {
+    background: var(--ss-primary-light);
+    color: var(--ss-primary);
+}
+
+    .primary-btn-light:hover {
+        color: var(--ss-primary);
+    }
+
+/* 按鈕群組 */
+.primary-btn-group {
+    color: var(--ss-primary);
+}
+
+    .primary-btn-group.active,
+    .primary-btn-group:hover {
+        background: var(--ss-primary);
+        border-color: var(--ss-primary) !important;
+        color: #fff;
+    }
+
+/* ============================================
+   7. 狀態按鈕
+   ============================================ */
+.status-btn.primary-btn {
+    background: var(--ss-primary-light);
+    color: var(--ss-primary);
+}
+
+/* ============================================
+   8. Alert
+   ============================================ */
+.primary-alert .left {
+    background: var(--ss-primary);
+}
+
+.primary-alert .alert {
+    color: var(--ss-primary);
+    border: 1px solid var(--ss-primary);
+    background: var(--ss-primary-light);
+}
+
+    .primary-alert .alert .alert-heading {
+        color: var(--ss-primary);
+    }
+
+/* ============================================
+   9. 側邊欄（白底 + 前台同款字色）
+   ============================================ */
+/* 字體與前台統一 */
+.sidebar-nav-wrapper {
+    font-family: "Open Sans", "Noto Sans TC", sans-serif !important;
+}
+
+    /* 一般選單文字：前台 nav-link 色 #747474 */
+    .sidebar-nav-wrapper .sidebar-nav ul .nav-item a {
+        color: #747474 !important;
+    }
+
+    /* 有子選單的項目 — 收合狀態 */
+    .sidebar-nav-wrapper .sidebar-nav ul .nav-item.nav-item-has-children > a.collapsed {
+        color: #747474 !important;
+    }
+
+    /* 有子選單的項目 — 展開狀態 */
+    .sidebar-nav-wrapper .sidebar-nav ul .nav-item.nav-item-has-children > a {
+        color: #222222 !important;
+    }
+
+        /* 展開時的 icon */
+        .sidebar-nav-wrapper .sidebar-nav ul .nav-item.nav-item-has-children > a:not(.collapsed) .icon {
+            color: #FFC43F !important;
+        }
+
+        /* 展開/收合箭頭 — 用前台金黃色取代藍灰 #9AA4CA */
+        .sidebar-nav-wrapper .sidebar-nav ul .nav-item.nav-item-has-children > a::after {
+            content: url("data:image/svg+xml,%3Csvg width='10' height='10' viewBox='0 0 10 10' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M5.34306 7.76387L9.02356 3.8071C9.32923 3.47851 9.11273 2.91666 8.68048 2.91666L1.31947 2.91666C0.887218 2.91666 0.670743 3.47851 0.976393 3.8071L4.6569 7.76387C4.8464 7.96758 5.15356 7.96758 5.34306 7.76387Z' fill='%23FFC43F'/%3E%3C/svg%3E%0A") !important;
+        }
+
+    /* 子選單內文字 */
+    .sidebar-nav-wrapper .sidebar-nav ul .nav-item.nav-item-has-children ul li a {
+        color: #747474 !important;
+    }
+
+        /* 子選單 active / hover */
+        .sidebar-nav-wrapper .sidebar-nav ul .nav-item.nav-item-has-children ul li a.active,
+        .sidebar-nav-wrapper .sidebar-nav ul .nav-item.nav-item-has-children ul li a:hover {
+            color: #FFC43F !important;
+        }
+
+    /* hover / active 文字：前台 hover 色 #FFC43F */
+    .sidebar-nav-wrapper .sidebar-nav ul .nav-item.active > a,
+    .sidebar-nav-wrapper .sidebar-nav ul .nav-item.active > a.collapsed,
+    .sidebar-nav-wrapper .sidebar-nav ul .nav-item:hover > a,
+    .sidebar-nav-wrapper .sidebar-nav ul .nav-item:hover > a.collapsed {
+        color: #FFC43F !important;
+    }
+
+        /* hover / active icon 顏色 */
+        .sidebar-nav-wrapper .sidebar-nav ul .nav-item.active > a .icon,
+        .sidebar-nav-wrapper .sidebar-nav ul .nav-item.active > a.collapsed .icon,
+        .sidebar-nav-wrapper .sidebar-nav ul .nav-item:hover > a .icon,
+        .sidebar-nav-wrapper .sidebar-nav ul .nav-item:hover > a.collapsed .icon {
+            color: #FFC43F !important;
+        }
+
+    /* SVG icon 填色 — 非 active 狀態用灰色，跟文字一致 */
+    .sidebar-nav-wrapper .sidebar-nav ul .nav-item a .icon svg {
+        fill: #747474 !important;
+    }
+
+    /* SVG icon 填色 — active / hover / 展開狀態用金黃 */
+    .sidebar-nav-wrapper .sidebar-nav ul .nav-item.active > a .icon svg,
+    .sidebar-nav-wrapper .sidebar-nav ul .nav-item:hover > a .icon svg,
+    .sidebar-nav-wrapper .sidebar-nav ul .nav-item.nav-item-has-children > a:not(.collapsed) .icon svg {
+        fill: #FFC43F !important;
+    }
+
+    /* style-2 子選單 */
+    .sidebar-nav-wrapper.style-2 .sidebar-nav ul .nav-item.nav-item-has-children ul li a.active,
+    .sidebar-nav-wrapper.style-2 .sidebar-nav ul .nav-item.nav-item-has-children ul li a:hover {
+        background: var(--ss-primary) !important;
+        border-color: var(--ss-primary) !important;
+        color: #fff !important;
+    }
+
+    /* pro-badge 標籤 */
+    .sidebar-nav-wrapper .sidebar-nav ul .nav-item a span.pro-badge,
+    .sidebar-nav-wrapper .sidebar-nav ul .nav-item.nav-item-has-children ul li a span.pro-badge {
+        background: var(--ss-accent);
+        color: #222;
+    }
+
+/* ============================================
+   10. 頂部 Header
+   ============================================ */
+/* Menu 按鈕 */
+.header .header-left .menu-toggle-btn .main-btn {
+    background: var(--ss-primary) !important;
+    border-color: var(--ss-primary) !important;
+}
+
+/* ============================================
+   11. 表單元素
+   ============================================ */
+.form-check-input:checked {
+    background-color: var(--ss-primary) !important;
+    border-color: var(--ss-primary) !important;
+}
+
+.form-control:focus {
+    border-color: var(--ss-accent) !important;
+}
+
+/* ============================================
+   12. 分頁元件
+   ============================================ */
+.dataTable-pagination .active a,
+.dataTable-pagination .active a:focus,
+.dataTable-pagination .active a:hover {
+    background-color: var(--ss-primary);
+    color: #fff;
+    border-radius: 4px;
+}
+
+/* ============================================
+   13. 通用 — 把殘留的藍色 rgba 換掉
+   ============================================ */
+/* 許多地方用了 rgba(54,92,245, 0.08~0.12) 做淺底色 */
+.primary-btn-light,
+.primary-badge-light,
+.status-btn.primary-btn {
+    background: var(--ss-primary-light) !important;
+}
+
+/* ============================================
+   14. 連結 & 文字強調色
+   ============================================ */
+a.primary,
+.text-primary {
+    color: var(--ss-primary) !important;
+}
+
+/* ============================================
+   15. 登入頁（Login.css 的 #6366f1 藍紫色覆蓋）
+   ============================================ */
+.input-wrapper input:focus,
+.input-wrapper input:valid,
+.input-wrapper input.has-value {
+    border-color: var(--ss-primary) !important;
+}
+
+    .input-wrapper input:focus + label,
+    .input-wrapper input:valid + label,
+    .input-wrapper input.has-value + label {
+        color: var(--ss-primary) !important;
+    }
+
+.login-btn {
+    background: var(--ss-primary) !important;
+}
+
+    .login-btn:hover {
+        background: var(--ss-primary-hover) !important;
+    }
+
+.forgot-password,
+.signup-link a {
+    color: var(--ss-primary) !important;
+}
+
+    .forgot-password:hover,
+    .signup-link a:hover {
+        color: var(--ss-primary-hover) !important;
+    }
+
+.remember-wrapper input[type="checkbox"]:checked ~ .checkbox-label .checkmark {
+    background: var(--ss-primary) !important;
+    border-color: var(--ss-primary) !important;
+}
