@@ -1,10 +1,10 @@
 ﻿
-<div id="product">
+<div id="product" v-cloak>
 
     <section class="py-5" style="background-image: url('/images/background-pattern.jpg'); background-size: cover; background-position: center;">
-        <div class="container-fluid text-center">
+        @* <div class="container-fluid text-center">
             <h2 class="fw-bold">所有商品</h2>
-        </div>
+        </div> *@
     </section>
 
     <!-- ② 主內容：側邊欄 + 商品格 -->
@@ -19,7 +19,9 @@
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb justify-content-start mb-3">
                             <li class="breadcrumb-item"><a asp-area="" asp-controller="Home" asp-action="Index">首頁</a></li>
-                            <li class="breadcrumb-item active">所有商品</li>
+                            <li v-if="!categoryName" class="breadcrumb-item active">所有商品</li>
+                            <li v-if="categoryName" class="breadcrumb-item"><a href="#" @@click.prevent="selectedCategory = 'all'">所有商品</a></li>
+                            <li v-if="categoryName" class="breadcrumb-item active">{{categoryName}}</li>
                         </ol>
                     </nav>
                     <!-- 商品分類 -->
@@ -119,18 +121,18 @@
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div class="input-group product-qty">
                                         <span class="input-group-btn">
-                                            <button type="button" class="quantity-left-minus btn btn-danger btn-number" data-type="minus">
+                                            <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
                                                 <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
                                             </button>
                                         </span>
-                                        <input type="text" id="quantity" name="quantity" class="form-control input-number" value="1">
+                                        <input type="text" class="form-control input-number" v-model.number="product.qty">
                                         <span class="input-group-btn">
-                                            <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
+                                            <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty += 1">
                                                 <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
                                             </button>
                                         </span>
                                     </div>
-                                    <a href="#" class="btn btn-danger btn-sm w-20 mt-1" v-on:click..prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                    <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                 </div>
                             </div>
                         </div>
@@ -202,7 +204,7 @@
                 const res = await fetch('/Cart/Add',{
                     method: 'POST',
                     headers: {'Content-Type':'application/json'},
-                    body: JSON.stringify({ productId:product.productId, quantity: 1}) //要與後端統一
+            body: JSON.stringify({ productId:product.productId, quantity: product.qty}) //要與後端統一
                 });
                 if(res.ok){
                     window.dispatchEvent(new Event('update-cart')); //觸發全局事件，通知購物車更新
@@ -235,6 +237,14 @@
                 if(this.sortBy ==='updated'){return list.sort((a,b)=>new Date(b.productDate) - new Date(a.productDate))}
                 if(this.sortBy ==='rating'){return list.sort((a,b)=>b.productRating-a.productRating)}
                 return list
+                },
+                categoryName(){
+                    const map={
+                        1: '法式甜點', 2: '餅乾', 3: '蛋糕',
+                        4: '布丁', 5: '麵包', 6: '泡芙',
+                        7: '甜甜圈', 8: '巧克力', 9: '糖果'
+                    }
+                    return map[this.selectedCategory]
                 }
             },
             watch:{
@@ -269,7 +279,8 @@
 
             // 串接你的 API
             const res = await fetch('/api/Product/Get')
-            this.products = await res.json()
+            const data = await res.json()
+            this.products = data.map(p => ({ ...p, qty: 1 }))
         }
         });
         app.mount('#product');
