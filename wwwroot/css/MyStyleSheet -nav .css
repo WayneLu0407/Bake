@@ -87,3 +87,24 @@
 [v-cloak] {
     display: none;
 }
+
+/* 店名：最多 1 行，超出省略 */
+.brand-carousel .card-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 描述：最多 2 行，超出省略 */
+.brand-carousel .shop-desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 解決陰影被切掉的問題 */
+.brand-carousel .swiper-wrapper {
+    padding: 10px 0;
+}
