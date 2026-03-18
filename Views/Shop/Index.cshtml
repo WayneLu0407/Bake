@@ -1,0 +1,370 @@
+﻿@model Bake.ViewModel.ShopFront.ShopProfilePageViewModel
+
+@{
+    ViewData["Title"] = Model.ShopInfo.ShopName;
+}
+
+@section Styles {
+    <style>
+        .shop-page-wrap {
+            padding-top: 1.5rem;
+            padding-bottom: 2rem;
+        }
+
+        .shop-page-shell {
+            width: 100%;
+            max-width: 1680px;
+            margin: 0 auto;
+            padding-left: clamp(16px, 2vw, 36px);
+            padding-right: clamp(16px, 2vw, 36px);
+        }
+
+        .shop-filter-card {
+            background: #fff;
+            border-radius: 24px;
+            box-shadow: 0 .125rem .5rem rgba(0,0,0,.06);
+            padding: 1.5rem;
+            position: sticky;
+            top: 100px;
+        }
+
+        .shop-filter-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1.25rem;
+        }
+
+        .shop-filter-section-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: .9rem;
+        }
+
+        .shop-category-link {
+            display: block;
+            color: #444;
+            text-decoration: none;
+            padding: .3rem 0;
+        }
+
+            .shop-category-link.active,
+            .shop-category-link:hover {
+                color: #f2a93b;
+                font-weight: 700;
+            }
+
+        .shop-price-option {
+            display: flex;
+            align-items: center;
+            gap: .55rem;
+            margin-bottom: .85rem;
+            color: #666;
+            cursor: pointer;
+        }
+
+            .shop-price-option input {
+                margin: 0;
+            }
+
+        #shop-product-section.shop-loading {
+            opacity: .45;
+            pointer-events: none;
+            transition: opacity .2s ease;
+        }
+
+        @@media (max-width: 991.98px) {
+            .shop-filter-card {
+                position: static;
+                top: auto;
+            }
+
+            .shop-page-shell {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+        }
+    </style>
+}
+
+<div class="container-fluid shop-page-wrap shop-page-shell">
+
+    @await Html.PartialAsync("_ShopProfilePartial", Model.ShopInfo)
+
+    <div class="d-flex justify-content-end mt-3 mb-4">
+        <button type="button" class="btn btn-warning rounded-pill px-4 py-2 fw-bold">
+            加入關注
+        </button>
+    </div>
+
+    <div class="row g-4">
+        <aside class="col-lg-3">
+            <div class="shop-filter-card">
+
+                <form id="shop-filter-form"
+                      method="get"
+                      asp-controller="Shop"
+                      asp-action="Index"
+                      asp-route-id="@Model.ShopInfo.UserId">
+
+                    <div class="mb-4">
+                        <div class="shop-filter-section-title">商品分類</div>
+
+                        <a class="shop-category-link @(Model.CategoryId == null ? "active" : "")"
+                               data-shop-ajax="true"
+                               asp-controller="Shop"
+                               asp-action="Index"
+                               asp-route-id="@Model.ShopInfo.UserId"
+                               asp-route-keyword="@Model.Keyword"
+                               asp-route-sort="@Model.Sort"
+                               asp-route-priceRange="@Model.PriceRange">
+                            全部
+                        </a>
+
+                        @foreach (var category in Model.Categories)
+                        {
+                            <a class="shop-category-link @(Model.CategoryId == category.CategoryId ? "active" : "")"
+                                   data-shop-ajax="true"
+                                   asp-controller="Shop"
+                                   asp-action="Index"
+                                   asp-route-id="@Model.ShopInfo.UserId"
+                                   asp-route-keyword="@Model.Keyword"
+                                   asp-route-categoryId="@category.CategoryId"
+                                   asp-route-sort="@Model.Sort"
+                                   asp-route-priceRange="@Model.PriceRange">
+                                @category.CategoryName
+                            </a>
+                        }
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="shop-filter-section-title">排序</div>
+                        <select name="sort" class="form-select">
+                            @if (Model.Sort == "latest")
+                            {
+                                <option value="latest" selected>最新</option>
+                            }
+                            else
+                            {
+                                <option value="latest">最新</option>
+                            }
+
+                            @if (Model.Sort == "rating")
+                            {
+                                <option value="rating" selected>評價高</option>
+                            }
+                            else
+                            {
+                                <option value="rating">評價高</option>
+                            }
+
+                            @if (Model.Sort == "price_asc")
+                            {
+                                <option value="price_asc" selected>價格低到高</option>
+                            }
+                            else
+                            {
+                                <option value="price_asc">價格低到高</option>
+                            }
+
+                            @if (Model.Sort == "price_desc")
+                            {
+                                <option value="price_desc" selected>價格高到低</option>
+                            }
+                            else
+                            {
+                                <option value="price_desc">價格高到低</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="shop-filter-section-title">金額</div>
+
+                        <label class="shop-price-option">
+                            @if (Model.PriceRange == "all")
+                            {
+                                <input type="radio" name="priceRange" value="all" checked />
+                            }
+                            else
+                            {
+                                <input type="radio" name="priceRange" value="all" />
+                            }
+                            <span>全部</span>
+                        </label>
+
+                        <label class="shop-price-option">
+                            @if (Model.PriceRange == "0-100")
+                            {
+                                <input type="radio" name="priceRange" value="0-100" checked />
+                            }
+                            else
+                            {
+                                <input type="radio" name="priceRange" value="0-100" />
+                            }
+                            <span>NT$100 以下</span>
+                        </label>
+
+                        <label class="shop-price-option">
+                            @if (Model.PriceRange == "100-300")
+                            {
+                                <input type="radio" name="priceRange" value="100-300" checked />
+                            }
+                            else
+                            {
+                                <input type="radio" name="priceRange" value="100-300" />
+                            }
+                            <span>NT$100 - 300</span>
+                        </label>
+
+                        <label class="shop-price-option">
+                            @if (Model.PriceRange == "300-500")
+                            {
+                                <input type="radio" name="priceRange" value="300-500" checked />
+                            }
+                            else
+                            {
+                                <input type="radio" name="priceRange" value="300-500" />
+                            }
+                            <span>NT$300 - 500</span>
+                        </label>
+
+                        <label class="shop-price-option">
+                            @if (Model.PriceRange == "500-up")
+                            {
+                                <input type="radio" name="priceRange" value="500-up" checked />
+                            }
+                            else
+                            {
+                                <input type="radio" name="priceRange" value="500-up" />
+                            }
+                            <span>NT$500 以上</span>
+                        </label>
+                    </div>
+
+                    <input type="hidden" name="categoryId" value="@Model.CategoryId" />
+                    <button type="submit" class="btn btn-dark w-100">套用篩選</button>
+                </form>
+            </div>
+        </aside>
+
+        <main class="col-lg-9">
+            <div id="shop-product-section">
+                @await Html.PartialAsync("_ShopProfileProductListPartial", Model)
+            </div>
+        </main>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (() => {
+            const filterForm = document.getElementById("shop-filter-form");
+            const productSection = document.getElementById("shop-product-section");
+
+            if (!filterForm || !productSection) return;
+
+            async function loadShopProducts(url, pushState = true) {
+                try {
+                    productSection.classList.add("shop-loading");
+
+                    const response = await fetch(url, {
+                        headers: {
+                            "X-Requested-With": "XMLHttpRequest"
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("載入失敗");
+                    }
+
+                    const html = await response.text();
+                    productSection.innerHTML = html;
+
+                    if (pushState) {
+                        history.pushState({}, "", url);
+                    }
+
+                    window.scrollTo({
+                        top: productSection.offsetTop - 100,
+                        behavior: "smooth"
+                    });
+                } catch (error) {
+                    window.location.href = url;
+                } finally {
+                    productSection.classList.remove("shop-loading");
+                }
+            }
+
+            function buildFormUrl() {
+                const url = new URL(filterForm.action, window.location.origin);
+                const formData = new FormData(filterForm);
+
+                const keyword = (formData.get("keyword") || "").toString().trim();
+                const categoryId = (formData.get("categoryId") || "").toString().trim();
+                const sort = (formData.get("sort") || "latest").toString().trim();
+                const priceRange = (formData.get("priceRange") || "all").toString().trim();
+
+                if (keyword) {
+                    url.searchParams.set("keyword", keyword);
+                }
+
+                if (categoryId) {
+                    url.searchParams.set("categoryId", categoryId);
+                }
+
+                if (sort) {
+                    url.searchParams.set("sort", sort);
+                }
+
+                if (priceRange) {
+                    url.searchParams.set("priceRange", priceRange);
+                }
+
+                url.searchParams.set("page", "1");
+
+                return url.toString();
+            }
+
+            filterForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+                loadShopProducts(buildFormUrl());
+            });
+
+            document.addEventListener("click", function (e) {
+                const link = e.target.closest("a[data-shop-ajax='true']");
+                if (!link) return;
+
+                e.preventDefault();
+
+                const hiddenCategory = filterForm.querySelector("input[name='categoryId']");
+                const linkUrl = new URL(link.href, window.location.origin);
+                const categoryIdFromLink = linkUrl.searchParams.get("categoryId") || "";
+
+                if (hiddenCategory) {
+                    hiddenCategory.value = categoryIdFromLink;
+                }
+
+                loadShopProducts(link.href);
+            });
+
+            const sortSelect = filterForm.querySelector("select[name='sort']");
+            const priceRadios = filterForm.querySelectorAll("input[name='priceRange']");
+
+            if (sortSelect) {
+                sortSelect.addEventListener("change", function () {
+                    loadShopProducts(buildFormUrl());
+                });
+            }
+
+            priceRadios.forEach(radio => {
+                radio.addEventListener("change", function () {
+                    loadShopProducts(buildFormUrl());
+                });
+            });
+
+            window.addEventListener("popstate", function () {
+                window.location.reload();
+            });
+        })();
+    </script>
+}
