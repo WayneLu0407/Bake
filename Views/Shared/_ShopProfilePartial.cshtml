@@ -1,0 +1,81 @@
+﻿@model Bake.Models.Sales.Shop
+
+@{
+    // 功用：整理店鋪圖片路徑，讓 Partial 可直接顯示圖片
+    // 目前先支援站內相對路徑，例如 ProductPicture/Shop/xxx.jpg
+    string? shopImageUrl = null;
+
+    if (!string.IsNullOrWhiteSpace(Model?.ShopImg) &&
+        !Model.ShopImg.StartsWith("http://") &&
+        !Model.ShopImg.StartsWith("https://"))
+    {
+        shopImageUrl = Url.Content("~/" + Model.ShopImg.TrimStart('/'));
+    }
+}
+
+
+<!-- 功用：店鋪資訊顯示區塊 -->
+<div class="bg-white rounded-4 shadow-sm p-4">
+    <div class="d-flex flex-column flex-md-row gap-4 align-items-start">
+        <!-- 左側：店鋪頭像 -->
+        <div class="flex-shrink-0">
+            <div class="bg-secondary-subtle d-flex align-items-center justify-content-center overflow-hidden"
+                 style="width: 140px; height: 140px; border-radius: 16px;">
+                @if (!string.IsNullOrWhiteSpace(shopImageUrl))
+                {
+                    <img src="@shopImageUrl"
+                         alt="店舖圖片"
+                         style="width:100%; height:100%; object-fit:cover;"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+                }
+                else
+                {
+                    <div class="d-flex align-items-center justify-content-center w-100 h-100">
+                        📷
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- 右側：店名 / 介紹 / 社群 -->
+        <div class="flex-grow-1 w-100" style="min-width:0;">
+            <h3 class="fw-bold mb-3">@Model.ShopName</h3>
+
+            <p class="text-muted mb-4" style="line-height:1.9;">
+                @Model.ShopDescription
+            </p>
+
+            <div class="d-flex align-items-center gap-3">
+                <span class="fw-bold me-1">分享</span> <div class="d-flex flex-wrap gap-2">
+                @if (!string.IsNullOrWhiteSpace(Model.FacebookUrl))
+                {
+                    <a href="@Model.FacebookUrl" target="_blank" rel="noopener noreferrer" class="social-icon">
+                        <i class="fa-brands fa-facebook"></i>
+                    </a>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.InstagramUrl))
+                {
+                    <a href="@Model.InstagramUrl" target="_blank" rel="noopener noreferrer" class="social-icon">
+                        <i class="fa-brands fa-instagram"></i>
+                    </a>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.PinterestUrl))
+                {
+                    <a href="@Model.PinterestUrl" target="_blank" rel="noopener noreferrer" class="social-icon">
+                        <i class="fa-brands fa-pinterest"></i>
+                    </a>
+                }
+
+                @if (!string.IsNullOrWhiteSpace(Model.YoutubeUrl))
+                {
+                    <a href="@Model.YoutubeUrl" target="_blank" rel="noopener noreferrer" class="social-icon">
+                        <i class="fa-brands fa-youtube"></i>
+                    </a>
+                }
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
