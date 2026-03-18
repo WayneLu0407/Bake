@@ -86,7 +86,7 @@ namespace Bake.Controllers
 
             ClearCart(); //清空購物車
 
-            return RedirectToAction("Success");
+            return RedirectToAction("Success", new { id = order.OrderId});
         }
 
         public IActionResult Success(int id)
@@ -109,7 +109,7 @@ namespace Bake.Controllers
 
         private void ClearCart()
         {
-            HttpContext.Session.Remove("Cart");
+            HttpContext.Session.Remove("UserCart");
         }
     }
 }
