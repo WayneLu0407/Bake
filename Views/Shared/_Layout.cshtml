@@ -4,7 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] 烘焙交流網</title>
-
+    <style>
+            [v-cloak] {
+                display: none !important;
+        }
+    </style>
+    @* 預連線*@
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://unpkg.com" crossorigin>
     @* 1. 字體 *@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -163,7 +171,7 @@
                 </div>
 
 
-                <div class="col-lg-4 d-none d-lg-block" id="search-app">
+                    <div class="col-lg-4 d-none d-lg-block" id="search-app" v-cloak>
                     <div class="search-bar d-flex align-items-center bg-light px-3 my-2 rounded-4 position-relative">
                          <input type="text" class="form-control border-0 bg-transparent" placeholder="請搜尋關鍵字" v-model="keyword" @@input="search" @@focus="showDropdown=true" @@blur="hideDropdown"/>
                             <a :href="'/Products/Index?keyword='+keyword" class="border-0 bg-transparent p-0">
@@ -190,7 +198,7 @@
 
 
                 <div class="col-4 col-lg-4 d-flex justify-content-end gap-5 align-items-center mt-4 mt-sm-0 justify-content-center justify-content-sm-end">
-                    <div class="support-box text-end d-none d-xl-block">
+                        <div class="support-box text-center d-none d-xxl-block">
                         <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="posts"><h5 class="mb-0">交流分享區</h5></a>
                     </div>
 
@@ -294,7 +302,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
     <script src="~/js/plugins.js"></script>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="~/js/script.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
@@ -333,21 +340,23 @@
             data() {
                 return {
                     keyword: '',
-                    allProducts: [],
                     results: [],
-                    showDropdown: false
+                    showDropdown: false,
+                    timer: null
                 }
             },
             methods: {
                 search() {
-                    const kw= this.keyword.trim().toLowerCase()
+                    clearTimeout(this.timer)
+                    const kw= this.keyword.trim()
                     if(kw.length===0){
                         this.results = [];
                         return;
                     }
-                    this.results = this.allProducts
-                    .filter(p => p.productName.toLowerCase().includes(kw))
-                    .slice(0,8)
+                    this.timer = setTimeout(async()=>{
+                        const res = await fetch('/api/Product/Search?keyword='+ encodeURIComponent(kw))
+                        this.results = await res.json()
+                    },300)
                 },
                 goToProduct(item){
                     window.location.href = '/Products/Details/' + item.productId;

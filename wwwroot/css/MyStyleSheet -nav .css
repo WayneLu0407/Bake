@@ -83,3 +83,7 @@
 .brand-stats strong {
     color: var(--dark-color);
 }
+/*屬性選擇器*/
+[v-cloak] {
+    display: none;
+}
