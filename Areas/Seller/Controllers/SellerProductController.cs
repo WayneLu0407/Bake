@@ -1,13 +1,16 @@
 ﻿using Bake.Areas.Seller.ViewModels;
 using Bake.Data;
 using Bake.Models.Sales;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json.Linq;
+using System.Security.Claims;
 
 namespace Bake.Areas.Seller.Controllers
 {
     [Area("Seller")]
+    [Authorize(Roles = "Seller")]
     public class SellerProductController : Controller
     {
 
@@ -19,6 +22,12 @@ namespace Bake.Areas.Seller.Controllers
             _context = context;
             _env = env;
         }
+
+        private int GetCurrentUserId() //取得目前登入的 UserId
+        {
+            return int.Parse(User.FindFirstValue("UserId"));
+        }
+
 
 
         // GET: Products/Index
@@ -39,11 +48,15 @@ namespace Bake.Areas.Seller.Controllers
         [HttpPost]
         public async Task<JsonResult> AllJson()
         {
+            var userId = GetCurrentUserId();
             var products = await _context.Products
+                .Where(p => p.UserId == userId)
                 .Include(p => p.ProductDetail)
                 .Include(p => p.Category)
+                .Include(p => p.ProductIngredient)
                 .Select(p => new
                 {
+                    ProductDate = p.ProductDate,
                     productId = p.ProductId,
                     productName = p.ProductName,
                     categoryName = p.Category != null ? p.Category.CategoryName : "未分類",
@@ -52,8 +65,11 @@ namespace Bake.Areas.Seller.Controllers
                     productPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : 0,
                     productDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : 0,
                     productQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0,
-                    expireDate = p.ProductDetail != null && p.ProductDetail.ExpireDate != null
-                    ? p.ProductDetail.ExpireDate: null
+                    productExpireDate = p.ProductDetail != null && p.ProductDetail.ExpireDate != null
+                    ? p.ProductDetail.ExpireDate: null,
+                    ingredients = p.ProductIngredient != null ? p.ProductIngredient.Ingredients : "",
+                    netWeight = p.ProductIngredient != null ? p.ProductIngredient.NetWeight : "",
+                    shelfLifeNote = p.ProductIngredient != null ? p.ProductIngredient.ShelfLifeNote : ""
                 }).ToListAsync();
 
             // 在 C# 端格式化日期
@@ -67,7 +83,11 @@ namespace Bake.Areas.Seller.Controllers
                 p.productPrice,
                 p.productDiscount,
                 p.productQuantity,
-                expireDate = p.expireDate != null ? p.expireDate.Value.ToString("yyyy/MM/dd") : ""
+                p.ingredients,
+                p.netWeight,
+                p.shelfLifeNote,
+                productExpireDate = p.productExpireDate != null ? p.productExpireDate.Value.ToString("yyyy/MM/dd") : "",
+                ProductDate = p.ProductDate.ToString("yyyy/MM/dd") 
             });
 
             return Json(result);
@@ -75,18 +95,25 @@ namespace Bake.Areas.Seller.Controllers
         [HttpGet]
         public async Task<JsonResult> GetProduct(int id)
         {
+            var userId = GetCurrentUserId();
             var product = await _context.Products
             .Include(p => p.ProductDetail)
-            .Where(p => p.ProductId == id)
+            .Where(p => (p.ProductId == id && p.UserId == userId))
             .Select(p => new
             {
                 productId = p.ProductId,
                 productName = p.ProductName,
+                productDate = p.ProductDate,
                 categoryId = p.CategoryId,
+                productImage = p.ProductImage,
+                productDescription = p.ProductDescription,
                 productPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : 0,
                 productDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : 0,
                 productQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0,
-                productExpireDate = p.ProductDetail != null ? p.ProductDetail.ExpireDate : null
+                productExpireDate = p.ProductDetail != null ? p.ProductDetail.ExpireDate : null,
+                ingredients = p.ProductIngredient != null ? p.ProductIngredient.Ingredients : null,
+                netWeight = p.ProductIngredient != null ? p.ProductIngredient.NetWeight : null,
+                shelfLifeNote = p.ProductIngredient != null ? p.ProductIngredient.ShelfLifeNote : null,
             })
             .FirstOrDefaultAsync();
 
@@ -95,26 +122,59 @@ namespace Bake.Areas.Seller.Controllers
 
         // Modal 儲存用
         [HttpPost]
-        public async Task<JsonResult> EditJson(int ProductId, string ProductName,decimal ProductPrice, int ProductQuantity, decimal ProductDiscount, int CategoryId, DateTime? ExpireDate)
+        public async Task<JsonResult> EditJson(int ProductId, string ProductName, string? ProductDescription, decimal ProductPrice, int ProductQuantity, decimal ProductDiscount, int CategoryId, DateTime? ExpireDate, IFormFile? ProductImage, string? Ingredients, string? NetWeight, string? ShelfLifeNote)
         {
             try
             {
+                var userId = GetCurrentUserId();
                 var product = await _context.Products
+                    .Where(p => p.UserId == userId)
                     .Include(p => p.ProductDetail)
+                    .Include(p => p.ProductIngredient)
                     .FirstOrDefaultAsync(p => p.ProductId == ProductId);
                 if (product == null)
                     return Json(new { success = false, message = "找不到商品" });
 
                 product.ProductName = ProductName;
+                product.ProductDescription = ProductDescription;
                 product.CategoryId = CategoryId;
-                
 
+                if (ProductImage != null && ProductImage.Length > 0)
+                {
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(ProductImage.FileName);
+                    string savePath = Path.Combine(_env.WebRootPath, "ProductPicture", fileName);
+                    using (var stream = new FileStream(savePath, FileMode.Create))
+                    {
+                        await ProductImage.CopyToAsync(stream);
+                    }
+                    product.ProductImage = "/ProductPicture/" + fileName;
+                }
                 if (product.ProductDetail != null)
                 {
                     product.ProductDetail.ProductPrice = ProductPrice;
                     product.ProductDetail.ProductDiscount = ProductDiscount;
                     product.ProductDetail.ProductQuantity = ProductQuantity;
                     product.ProductDetail.ExpireDate = ExpireDate;
+                }
+
+                if (product.ProductIngredient != null)
+                {
+                    product.ProductIngredient.Ingredients = Ingredients;
+                    product.ProductIngredient.NetWeight = NetWeight;
+                    product.ProductIngredient.ShelfLifeNote = ShelfLifeNote;
+                }
+                else 
+                {
+                    product.ProductIngredient = new ProductIngredient
+                    {
+                        Ingredients = Ingredients,
+                        NetWeight = NetWeight,
+                        ShelfLifeNote = ShelfLifeNote
+                    };
+                }
+                if (ExpireDate.HasValue && ExpireDate.Value < product.ProductDate.Date)
+                {
+                    return Json(new { success = false, message = "過期日不能早於上架日" });
                 }
                 await _context.SaveChangesAsync();
                 return Json(new { success = true });
@@ -142,10 +202,11 @@ namespace Bake.Areas.Seller.Controllers
 
         // AJAX 刪除用
         [HttpPost]
-        [HttpPost]
         public async Task<JsonResult> DeleteJson(int id)
         {
+            var userId = GetCurrentUserId();
             var product = await _context.Products
+                .Where(p => p.UserId == userId)
                 .Include(p => p.ProductDetail)  // ← 一起載入
                 .FirstOrDefaultAsync(p => p.ProductId == id);
 
@@ -178,8 +239,14 @@ namespace Bake.Areas.Seller.Controllers
         // POST: Seller/New
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> New([Bind("ProductName,ProductDescription,CategoryId,ProductImage,ProductPrice,ProductDiscount,ProductQuantity")] ProductViewModel item)
+        [RequestFormLimits(MultipartBodyLengthLimit = 5242880)]
+        [RequestSizeLimit(5242880)]
+        public async Task<IActionResult> New([Bind("ProductName,ProductDescription,CategoryId,ProductImage,ProductPrice,ProductDiscount,ProductQuantity,ShelfLifeNote,Ingredients,NetWeight,ExpireDate")] ProductViewModel item)
         {
+            if (item.ExpireDate < DateTime.Now.Date)
+            {
+                ModelState.AddModelError("ExpireDate", "過期日不能早於今天");
+            }
             if (ModelState.IsValid)
             {
 
@@ -187,7 +254,7 @@ namespace Bake.Areas.Seller.Controllers
                 {
                     ProductName = item.ProductName!,
                     ProductDescription = item.ProductDescription,
-                    UserId = 1, // 暫時固定
+                    UserId = GetCurrentUserId(),
                     ProductDate = DateTime.Now,
                     CategoryId = item.CategoryId,
                     ProductMethod = "未設定"
@@ -198,10 +265,17 @@ namespace Bake.Areas.Seller.Controllers
                     ProductPrice = item.ProductPrice,
                     ProductDiscount = item.ProductDiscount,
                     ProductQuantity = item.ProductQuantity,
-                    ExpireDate = DateTime.Now,
+                    ExpireDate = item.ExpireDate,
                 };
                 product.ProductDetail = detail;
 
+                var ingredient = new ProductIngredient
+                {
+                    ShelfLifeNote = item.ShelfLifeNote,
+                    Ingredients = item.Ingredients,
+                    NetWeight = item.NetWeight
+                };
+                product.ProductIngredient = ingredient;
 
                 if (item.ProductImage != null && item.ProductImage.Length > 0)
                 {
@@ -211,11 +285,11 @@ namespace Bake.Areas.Seller.Controllers
                     {
                         await item.ProductImage.CopyToAsync(stream);
                     }
-                    product.ProductImage = "ProductPicture/" + fileName;
+                    product.ProductImage = "/ProductPicture/" + fileName;
                 }
                 else
                 {
-                    product.ProductImage = "ProductPicture/NoImage.jpg";
+                    product.ProductImage = "/ProductPicture/NoImage.jpg";
                 }
                 _context.Add(product);
                 await _context.SaveChangesAsync();
@@ -233,8 +307,8 @@ namespace Bake.Areas.Seller.Controllers
         }
 
         [HttpGet]
-        [RequestFormLimits(MultipartBodyLengthLimit = 2048000)]
-        [RequestSizeLimit(2048000)]
+        [RequestFormLimits(MultipartBodyLengthLimit = 5242880)]
+        [RequestSizeLimit(5242880)]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -331,227 +405,3 @@ namespace Bake.Areas.Seller.Controllers
 
     }
 }     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//namespace Bake.Areas.Seller.Controllers
-//{
-//    [Area("Seller")]
-//    public class SellerProductController : Controller
-//    {
-
-//        private readonly BakeContext _context;
-//        private readonly IWebHostEnvironment _env;
-
-//        public SellerProductController(BakeContext context, IWebHostEnvironment env)
-//        {
-//            _context = context;
-//            _env = env;
-//        }
-
-//        [HttpGet]
-//        public async Task<IActionResult> New()
-//        {
-//            ViewBag.Categories = await _context.ProductCategories
-//                .Select(c => new { c.CategoryId, c.CategoryName })
-//                .ToListAsync();
-//            return View();
-//        }
-
-//        // POST: Seller/New
-//        [HttpPost]
-//        [ValidateAntiForgeryToken]
-//        public async Task<IActionResult> New([Bind("ProductName,ProductDescription,CategoryId,ProductImage,ProductPrice,ProductDiscount,ProductQuantity")] ProductViewModel item)
-//        {
-//            if (ModelState.IsValid)
-//            {
-
-//                var product = new Product
-//                {
-//                    ProductName = item.ProductName!, 
-//                    ProductDescription = item.ProductDescription,
-//                    UserId = 1, // 暫時固定
-//                    ProductDate = DateTime.Now,
-//                    CategoryId = item.CategoryId,
-//                    ProductMethod = "未設定"
-//                };
-
-//                var detail = new ProductDetail
-//                {
-//                    ProductPrice = item.ProductPrice,
-//                    ProductDiscount = item.ProductDiscount,
-//                    ProductQuantity = item.ProductQuantity,
-//                    ExpireDate= DateTime.Now,
-//                };
-//                product.ProductDetail = detail;
-
-
-//                if (item.ProductImage != null && item.ProductImage.Length > 0)
-//                {
-//                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(item.ProductImage.FileName);
-//                    string savePath = Path.Combine(_env.WebRootPath, "ProductPicture", fileName);
-//                    using (var stream = new FileStream(savePath, FileMode.Create))
-//                    {
-//                        await item.ProductImage.CopyToAsync(stream);
-//                    }
-//                    product.ProductImage = "ProductPicture/" + fileName;
-//                }
-//                else
-//                {
-//                    product.ProductImage = "ProductPicture/NoImage.jpg";
-//                }
-//                _context.Add(product);
-//                await _context.SaveChangesAsync();
-//                ViewBag.Categories = await _context.ProductCategories
-//                .Select(c => new { c.CategoryId, c.CategoryName })
-//                .ToListAsync();
-//                TempData["Success"] = "商品新增成功！";
-//                return RedirectToAction("All");
-
-//            }
-//            ViewBag.Categories = await _context.ProductCategories
-//            .Select(c => new { c.CategoryId, c.CategoryName })
-//            .ToListAsync();
-//            return View(item);
-//        }
-
-//        [HttpGet]
-//        [RequestFormLimits(MultipartBodyLengthLimit = 2048000)]
-//        [RequestSizeLimit(2048000)]
-//        public async Task<IActionResult> Edit(int? id)
-//        {
-//            if (id == null)
-//            {
-//                return NotFound();
-//            }
-
-//            var product = await _context.Products
-//                .Include(p=>p.ProductDetail)
-//                .Where(p => p.ProductId == id)
-//                .Select(p => new ProductViewModel
-//                {
-//                ProductId = p.ProductId,
-//                ProductName = p.ProductName,
-//                ProductDescription = p.ProductDescription != null ? p.ProductDescription:null,
-//                ProductImagePath = p.ProductImage,
-//                ProductPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice: 0,
-//                ProductDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : 0,
-//                ProductQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0,
-//                ExpireDate = p.ProductDetail != null && p.ProductDetail.ExpireDate != null
-//                         ? p.ProductDetail.ExpireDate.Value
-//                         : DateTime.Now,
-//                }).FirstOrDefaultAsync(m => m.ProductId == id);
-
-
-//            if (product == null)
-//            {
-//                return NotFound();
-//            }
-//            ViewBag.Categories = await _context.ProductCategories
-//            .Select(c => new { c.CategoryId, c.CategoryName })
-//            .ToListAsync();
-//            return View(product);
-//        }
-
-//        [HttpPost]
-//        [RequestFormLimits(MultipartBodyLengthLimit = 2048000)]
-//        [RequestSizeLimit(2048000)]
-//        public async Task<IActionResult> Edit(int? id,[Bind("ProductId,ProductName,ProductDescription,CategoryId,ProductImage,ProductPrice,ProductDiscount,ProductQuantity")] ProductViewModel item)
-//        {
-//            if (ModelState.IsValid)
-//            {
-//                var product = await _context.Products
-//                .Include(p => p.ProductDetail)
-//                .FirstOrDefaultAsync(p => p.ProductId == item.ProductId);
-
-//                if (product == null) return NotFound();
-
-//                product.ProductName = item.ProductName!;
-//                product.ProductDescription = item.ProductDescription;
-//                product.CategoryId = item.CategoryId;
-
-//                if (item.ProductImage != null && item.ProductImage.Length > 0)
-//                {
-//                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(item.ProductImage.FileName);
-//                    string savePath = Path.Combine(_env.WebRootPath, "ProductPicture", fileName);
-//                    using (var stream = new FileStream(savePath, FileMode.Create))
-//                    {
-//                        await item.ProductImage.CopyToAsync(stream);
-//                    }
-//                    product.ProductImage = "ProductPicture/" + fileName;
-//                }
-//                if (product.ProductDetail != null)
-//                {
-//                    product.ProductDetail.ProductPrice = item.ProductPrice;
-//                    product.ProductDetail.ProductDiscount = item.ProductDiscount;
-//                    product.ProductDetail.ProductQuantity = item.ProductQuantity;
-//                }
-
-//                try
-//                {
-//                    _context.Update(product);
-//                    await _context.SaveChangesAsync();
-//                    TempData["Fixed"] = "商品修改成功！";
-//                    return RedirectToAction("All");
-//                }
-//                catch (DbUpdateConcurrencyException)
-//                {
-//                    if (!_context.Products.Any(p => p.ProductId == item.ProductId))
-//                    {
-//                        return NotFound();
-//                    }
-//                    else
-//                    {
-//                        throw;
-//                    }
-//                }
-//            }
-//            ViewBag.Categories = await _context.ProductCategories
-//            .Select(c => new { c.CategoryId, c.CategoryName })
-//            .ToListAsync();
-//            return View(item);
-//        }
-
-//        public async Task<IActionResult> All()
-//        {
-//            var products = await _context.Products
-//                .Include(p => p.Category)
-//                .Include(p => p.ProductDetail)
-//                .Select(p => new ProductListViewModel
-//                {
-//                    ProductId = p.ProductId,
-//                    ProductName = p.ProductName,
-//                    ProductImage = p.ProductImage,
-//                    ProductPrice = p.ProductDetail.ProductPrice,
-//                    ProductDiscount = p.ProductDetail.ProductDiscount != null ? p.ProductDetail.ProductDiscount : 0,
-//                    ExpireDate = p.ProductDetail.ExpireDate,
-//                    ProductDescription = p.ProductDescription,
-//                    CategoryName = p.Category != null ? p.Category.CategoryName : "未分類",
-//                    ProductQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0
-//                })
-//                .ToListAsync();
-
-//            return View(products); // ← 把資料傳給 View
-//        }
-//    }
-//}
