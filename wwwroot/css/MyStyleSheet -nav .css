@@ -83,3 +83,47 @@
 .brand-stats strong {
     color: var(--dark-color);
 }
+/*屬性選擇器*/
+[v-cloak] {
+    display: none;
+}
+
+/* 店名：最多 1 行，超出省略 */
+.brand-carousel .card-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 描述：最多 2 行，超出省略 */
+.brand-carousel .shop-desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 解決陰影被切掉的問題 */
+.brand-carousel .swiper-wrapper {
+    padding: 10px 0;
+}
+
+/* 分頁 — active 頁碼 */
+.pagination .page-item.active .page-link {
+    background-color: #FFC43F;
+    border-color: #FFC43F;
+    color: #222;
+}
+
+/* 分頁 — hover */
+.pagination .page-item .page-link:hover {
+    background-color: #F7A422;
+    border-color: #F7A422;
+    color: #222;
+}
+
+/* 分頁 — 一般狀態的文字色 */
+.pagination .page-item .page-link {
+    color: #222;
+}

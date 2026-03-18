@@ -127,13 +127,13 @@
                     <div class="bootstrap-tabs product-tabs">
                         <div class="tabs-header d-flex justify-content-between border-bottom my-5">
                             <h3>熱門商品</h3>
-                            <nav>
+                            @* <nav>
                                 <div class="nav nav-tabs" id="nav-tab" role="tablist">
                                     <a href="#" class="nav-link text-uppercase fs-6 active" id="nav-all-tab" data-bs-toggle="tab" data-bs-target="#nav-all" value="default">全部</a>
                                     <a href="#" class="nav-link text-uppercase fs-6" id="nav-fruits-tab" data-bs-toggle="tab" data-bs-target="#nav-fruits" ">法式</a>
                                     <a href="#" class="nav-link text-uppercase fs-6" id="nav-juices-tab" data-bs-toggle="tab" data-bs-target="#nav-juices" >日式</a>
                                 </div>
-                            </nav>
+                            </nav> *@
                         </div>
                         <div class="tab-content" id="nav-tabContent">
                             <div class="tab-pane fade show active" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab">
@@ -165,13 +165,13 @@
                                             <div class="d-flex align-items-center justify-content-between">
                                                 <div class="input-group product-qty">
                                                     <span class="input-group-btn">
-                                                        <button type="button" class="quantity-left-minus btn btn-danger btn-number" data-type="minus">
+                                                        <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent ="product.qty = Math.max(1, product.qty - 1)">
                                                             <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
                                                         </button>
                                                     </span>
-                                                    <input type="text" id="quantity" name="quantity" class="form-control input-number" value="1">
+                                                        <input type="text" class="form-control input-number" v-model.number="product.qty">
                                                     <span class="input-group-btn">
-                                                        <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
+                                                        <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent ="product.qty += 1">
                                                             <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
                                                         </button>
                                                     </span>
@@ -214,23 +214,23 @@
                                                     NT${{ originalPrice(product.productPrice, product.productDiscount) }}
                                                 </del>
                                             </div>
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div class="input-group product-qty">
-                                                    <span class="input-group-btn">
-                                                        <button type="button" class="quantity-left-minus btn btn-danger btn-number" data-type="minus">
-                                                            <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
-                                                        </button>
-                                                    </span>
-                                                    <input type="text" id="quantity" name="quantity" class="form-control input-number" value="1">
-                                                    <span class="input-group-btn">
-                                                        <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
-                                                            <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
-                                                        </button>
-                                                    </span>
+                                                <div class="d-flex align-items-center justify-content-between">
+                                                    <div class="input-group product-qty">
+                                                        <span class="input-group-btn">
+                                                            <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
+                                                                <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
+                                                            </button>
+                                                        </span>
+                                                        <input type="text" class="form-control input-number" v-model.number="product.qty">
+                                                        <span class="input-group-btn">
+                                                            <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty += 1">
+                                                                <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
+                                                            </button>
+                                                        </span>
+                                                    </div>
+                                                    <a href="#" class="btn btn-danger btn-sm w-20 mt-1">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                                 </div>
-                                                <a href="#" class="btn btn-danger btn-sm w-20 mt-1">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
-                                            </div>
-                                        </div>
+                                          </div>
                                     </div>
                                     <!-- / 單一商品 -->
                                 </div>
@@ -265,22 +265,22 @@
                                                     NT${{ originalPrice(product.productPrice, product.productDiscount) }}
                                                 </del>
                                             </div>
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div class="input-group product-qty">
-                                                    <span class="input-group-btn">
-                                                        <button type="button" class="quantity-left-minus btn btn-danger btn-number" data-type="minus">
-                                                            <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
-                                                        </button>
-                                                    </span>
-                                                    <input type="text" id="quantity" name="quantity" class="form-control input-number" value="1">
-                                                    <span class="input-group-btn">
-                                                        <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
-                                                            <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
-                                                        </button>
-                                                    </span>
+                                                <div class="d-flex align-items-center justify-content-between">
+                                                    <div class="input-group product-qty">
+                                                        <span class="input-group-btn">
+                                                            <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
+                                                                <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
+                                                            </button>
+                                                        </span>
+                                                        <input type="text" class="form-control input-number" v-model.number="product.qty">
+                                                        <span class="input-group-btn">
+                                                            <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty += 1">
+                                                                <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
+                                                            </button>
+                                                        </span>
+                                                    </div>
+                                                    <a href="#" class="btn btn-danger btn-sm w-20 mt-1">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                                 </div>
-                                                <a href="#" class="btn btn-danger btn-sm w-20 mt-1">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
-                                            </div>
                                         </div>
                                     </div>
                                     <!-- / 單一商品 -->
@@ -375,24 +375,24 @@
                                             NT${{ originalPrice(product.productPrice, product.productDiscount) }}
                                         </del>
                                     </div>
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div class="input-group product-qty">
-                                            <span class="input-group-btn">
-                                                <button type="button" class="quantity-left-minus btn btn-danger btn-number" data-type="minus">
-                                                    <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
-                                                </button>
-                                            </span>
-                                            <input type="text" id="quantity" name="quantity" class="form-control input-number" value="1">
-                                            <span class="input-group-btn">
-                                                <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
-                                                    <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
-                                                </button>
-                                            </span>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="input-group product-qty">
+                                                <span class="input-group-btn">
+                                                    <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
+                                                        <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
+                                                    </button>
+                                                </span>
+                                                <input type="text" class="form-control input-number" v-model.number="product.qty">
+                                                <span class="input-group-btn">
+                                                    <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty += 1">
+                                                        <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                            <a href="#" class="btn btn-danger btn-sm w-20 mt-1">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                         </div>
-                                        <a href="#" class="btn btn-danger btn-sm w-20 mt-1">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                     </div>
                                 </div>
-                            </div>
                             <!-- / 單一商品 -->
                         </div>
                     </div>
@@ -451,24 +451,24 @@
                                             NT${{ originalPrice(product.productPrice, product.productDiscount) }}
                                         </del>
                                     </div>
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div class="input-group product-qty">
-                                            <span class="input-group-btn">
-                                                <button type="button" class="quantity-left-minus btn btn-danger btn-number" data-type="minus">
-                                                    <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
-                                                </button>
-                                            </span>
-                                            <input type="text" id="quantity" name="quantity" class="form-control input-number" value="1">
-                                            <span class="input-group-btn">
-                                                <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
-                                                    <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
-                                                </button>
-                                            </span>
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <div class="input-group product-qty">
+                                                <span class="input-group-btn">
+                                                    <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
+                                                        <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
+                                                    </button>
+                                                </span>
+                                                <input type="text" class="form-control input-number" v-model.number="product.qty">
+                                                <span class="input-group-btn">
+                                                    <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty += 1">
+                                                        <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
+                                                    </button>
+                                                </span>
+                                            </div>
+                                            <a href="#" class="btn btn-danger btn-sm w-20 mt-1">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                         </div>
-                                        <a href="#" class="btn btn-danger btn-sm w-20 mt-1">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                     </div>
                                 </div>
-                            </div>
                             <!-- / 單一商品 -->
                         </div>
                     </div>
@@ -487,13 +487,13 @@
 
                         <h2 class="section-title">新商家推薦</h2>
 
-                        <div class="d-flex align-items-center">
+                        @* <div class="d-flex align-items-center">
                             <a class="btn-link text-decoration-none" asp-area="" asp-controller="Products" asp-action="Index">查看更多</a>
                             <div class="swiper-buttons">
                                 <button class="swiper-prev brand-carousel-prev btn btn-yellow">❮</button>
                                 <button class="swiper-next brand-carousel-next btn btn-yellow">❯</button>
                             </div>
-                        </div>
+                        </div> *@
                     </div>
                 </div>
             </div>
@@ -501,101 +501,26 @@
                 <div class="col-md-12">
 
                     <div class="brand-carousel swiper">
-                        <div class="swiper-wrapper">
-
-                            <div class="swiper-slide">
+                        <div class="swiper-wrapper" >
+                            <!-- 單一店家 — 複製此區塊重複使用 -->
+                              <div class="swiper-slide" v-for="shop in shops" :key="shop.userId">
                                 <div class="card mb-3 p-3 rounded-4 shadow border-0">
                                     <div class="row g-0">
                                         <div class="col-md-4">
-                                            <img src="~/images/product-thumb-11.jpg" class="img-fluid rounded" alt="Card title">
+                                           <img :src="shop.shopImg" class="img-fluid rounded" :alt="shop.shopName">
                                         </div>
                                         <div class="col-md-8">
                                             <div class="card-body py-0">
-                                                <p class="text-muted mb-0">Amber Jar</p>
-                                                <h5 class="card-title">Honey best nectar you wish to get</h5>
+                                                <h5 class="card-title">{{ shop.shopName }}</h5>
+                                                <p class="text-muted mb-0 shop-desc">{{ shop.shopDescription }}</p>
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card mb-3 p-3 rounded-4 shadow border-0">
-                                    <div class="row g-0">
-                                        <div class="col-md-4">
-                                            <img src="~/images/product-thumb-12.jpg" class="img-fluid rounded" alt="Card title">
-                                        </div>
-                                        <div class="col-md-8">
-                                            <div class="card-body py-0">
-                                                <p class="text-muted mb-0">Amber Jar</p>
-                                                <h5 class="card-title">Honey best nectar you wish to get</h5>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card mb-3 p-3 rounded-4 shadow border-0">
-                                    <div class="row g-0">
-                                        <div class="col-md-4">
-                                            <img src="~/images/product-thumb-13.jpg" class="img-fluid rounded" alt="Card title">
-                                        </div>
-                                        <div class="col-md-8">
-                                            <div class="card-body py-0">
-                                                <p class="text-muted mb-0">Amber Jar</p>
-                                                <h5 class="card-title">Honey best nectar you wish to get</h5>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card mb-3 p-3 rounded-4 shadow border-0">
-                                    <div class="row g-0">
-                                        <div class="col-md-4">
-                                            <img src="~/images/product-thumb-14.jpg" class="img-fluid rounded" alt="Card title">
-                                        </div>
-                                        <div class="col-md-8">
-                                            <div class="card-body py-0">
-                                                <p class="text-muted mb-0">Amber Jar</p>
-                                                <h5 class="card-title">Honey best nectar you wish to get</h5>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card mb-3 p-3 rounded-4 shadow border-0">
-                                    <div class="row g-0">
-                                        <div class="col-md-4">
-                                            <img src="~/images/product-thumb-11.jpg" class="img-fluid rounded" alt="Card title">
-                                        </div>
-                                        <div class="col-md-8">
-                                            <div class="card-body py-0">
-                                                <p class="text-muted mb-0">Amber Jar</p>
-                                                <h5 class="card-title">Honey best nectar you wish to get</h5>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card mb-3 p-3 rounded-4 shadow border-0">
-                                    <div class="row g-0">
-                                        <div class="col-md-4">
-                                            <img src="~/images/product-thumb-12.jpg" class="img-fluid rounded" alt="Card title">
-                                        </div>
-                                        <div class="col-md-8">
-                                            <div class="card-body py-0">
-                                                <p class="text-muted mb-0">Amber Jar</p>
-                                                <h5 class="card-title">Honey best nectar you wish to get</h5>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            </div> 
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -611,7 +536,8 @@
                 return{
                     products: [],
                     product:{},
-                    sortBy: 'default'
+                    sortBy: 'default',
+                    shops:[],
                 }
             },
             methods: {
@@ -641,17 +567,73 @@
             async mounted() {
 
                 const res = await fetch('/api/Product/Get')
-                this.products = await res.json()
+                const data = await res.json()
+                this.products = data.map(p => ({ ...p, qty: 1 }))
+                const sho = await fetch('/api/Shop/Get')
+                this.shops = await sho.json()
 
-                // 等 Vue 把 DOM 更新完再通知 Swiper
                 this.$nextTick(() => {
-                    if (document.querySelector('.products-carousel')?.swiper) {
-                        document.querySelector('.products-carousel').swiper.update()
-                    }
-                    if (document.querySelector('.products-carousel2')?.swiper) {
-                    document.querySelector('.products-carousel2').swiper.update()
-                    }
+                // 新品上市 — 銷毀再重建
+                const el1 = document.querySelector('.products-carousel')
+                if (el1 && el1.swiper) {
+                el1.swiper.destroy(true, true)
+                }
+                new Swiper('.products-carousel', {
+                loop: false,
+                spaceBetween: 30,
+                speed: 500,
+                navigation: {
+                nextEl: '.products-carousel-next',
+                prevEl: '.products-carousel-prev',
+                },
+                breakpoints: {
+                0:    { slidesPerView: 2 },
+                768:  { slidesPerView: 3 },
+                991:  { slidesPerView: 4 },
+                1200: { slidesPerView: 5 },
+                }
                 })
+
+                // 推薦商品 — 銷毀再重建
+                const el2 = document.querySelector('.products-carousel2')
+                if (el2 && el2.swiper) {
+                el2.swiper.destroy(true, true)
+                }
+                new Swiper('.products-carousel2', {
+                loop: false,
+                spaceBetween: 30,
+                speed: 500,
+                navigation: {
+                nextEl: '.products-carousel2-next',
+                prevEl: '.products-carousel2-prev',
+                },
+                breakpoints: {
+                0:    { slidesPerView: 2 },
+                768:  { slidesPerView: 3 },
+                991:  { slidesPerView: 4 },
+                1200: { slidesPerView: 5 },
+                }
+                })
+                const el3 = document.querySelector('.brand-carousel')
+                if (el3 && el3.swiper) {
+                el3.swiper.destroy(true, true)
+                }
+                new Swiper('.brand-carousel', {
+                loop: false,
+                spaceBetween: 20,
+                speed: 500,
+                navigation: {
+                nextEl: '.brand-carousel-next',
+                prevEl: '.brand-carousel-prev',
+                },
+                breakpoints: {
+                0:    { slidesPerView: 1 },
+                768:  { slidesPerView: 2 },
+                991:  { slidesPerView: 3 },
+                1200: { slidesPerView: 4 },
+                }
+                })
+               })
             }
         });
         app.mount('#product');
