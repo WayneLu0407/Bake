@@ -1,0 +1,343 @@
+﻿@model Bake.ViewModel.Products.ProductDetailsViewModel
+<div id="product" v-cloak>
+    <div class="container-fluid  border-bottom">
+            <div class="row py-3 justify-content-center">
+                <div class="d-flex  justify-content-center align-items-center　">
+                    <nav class="main-menu d-flex navbar navbar-expand-lg">
+                        <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar"
+                                aria-controls="offcanvasNavbar">
+                            <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+                            <div class="offcanvas-header justify-content-center">
+                                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                            </div>
+                            <div class="offcanvas-body">
+                                <ul class="navbar-nav   menu-list list-unstyled d-flex gap-md-3 mb-0">
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index" asp-route-category="1">法式甜點</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index" asp-route-category="2">餅乾</a>
+                                </li>
+                                <li class="nav-item active">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index" asp-route-category="3">蛋糕</a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index"asp-route-category="4">布丁</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index" asp-route-category="5">麵包</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index" asp-route-category="6">泡芙</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index" asp-route-category="7">甜甜圈</a>
+                                </li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index" asp-route-category="8">巧克力</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Products" asp-action="Index" asp-route-category="9">糖果</a>
+                                </li>
+                            </ul>
+                            </div>
+                        </div>
+                    </nav>
+                </div>
+            </div>
+        </div>
+<main class="container">
+    
+    <nav aria-label="breadcrumb" class="my-3">
+        <ol class="breadcrumb" >
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">首頁</a></li>
+                <li class="breadcrumb-item"><a :href="'/Products/Index?category='+product.categoryId">{{ product.categoryName }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ product.productName }}</li>
+        </ol>
+    </nav>
+    <!-- 載入中的佔位畫面 -->
+    <section v-if="loading"></section>
+
+    <!-- 商品主區 -->
+    <section v-else class="row g-5 mb-5" style="background-image: url('/images/background-pattern.jpg'); background-size: cover; background-position: center;">
+        <!-- 左：圖片 -->
+        <div class="col-12 col-lg-6 d-flex">
+            <div id="carouselExampleFade" class="carousel slide carousel-fade w-100">
+                <div class="carousel-inner  h-100" style="min-height: 400px;">
+                    <div class="carousel-item active h-100">
+                        <img :src="product.productImage" :alt="product.productName" class="tab-image w-100 h-100" style="object-fit: cover;" alt="...">
+                    </div>
+                </div>
+                @* <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleFade" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span> *@
+                </button>
+            </div>
+        </div>
+        <!-- 右：商品資訊 -->
+        <div class="col-12 col-lg-6 d-flex flex-column gap-3">
+            <!-- 品牌名 + 商品標題 -->
+            <div>
+                <p class="qty mb-1">{{product.shopName }}</p>   <!-- FoodMart .qty = 小字灰色 -->
+                <h1 class="fs-2 mb-0">{{ product.productName }}</h1>
+            </div>
+
+            <!-- 售價 -->
+            <div class="d-flex flex-column gap-2">
+                <span class="fs-1 fw-bold" style="color: #e02020;">NT${{ product.productPrice }}</span>
+                <span v-if="originalPrice(product.productPrice, product.productDiscount)" class="text-muted text-decoration-line-through">NT${{ originalPrice(product.productPrice, product.productDiscount) }}</span>
+            </div>
+
+            <!-- 數量 -->
+            <div>
+                <p class="qty mb-1">數量</p>
+                <select class="form-select" style="width: 20%;">
+                    <option>1</option>
+                    <option>2</option>
+                    <option>3</option>
+                    <option>4</option>
+                    <option>5</option>
+                </select>
+            </div>
+
+            <!-- 按鈕組 -->
+            <div class="d-flex flex-column gap-2 mt-2">
+                <!-- FoodMart .btn-primary -->
+                <button class="btn btn-primary py-3 w-100" style="color: #e02020;">放入購物車</button>
+                <!-- FoodMart .btn-outline-light -->
+                <button class="btn btn-light py-3 w-100">加入最愛</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="row g-5 mb-5">
+
+        <!-- 左：商品介紹 -->
+        <div class="col-12 col-lg-6">
+            <div class="section-heading">商品介紹</div>
+            <p class="lh-lg">
+                {{product.productDescription}}
+            </p>
+        </div>
+
+        <!-- 右：品牌側欄 -->
+        <aside class="col-12 col-lg-6">
+
+            <!-- 標題列 -->
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="section-heading mb-0 border-0 pb-0">關於品牌</div>
+                <!-- FoodMart .btn-outline-light -->
+                <button class="btn btn-outline-light btn-sm">來去逛逛</button>
+            </div>
+
+            <!-- 品牌卡（FoodMart .brand-item） -->
+            <div class="brand-item d-flex align-items-center gap-3 mb-3">
+                <img src="" alt="品牌Logo" class="review-avatar" />
+                <div>
+                    <p class="fw-bold mb-0" style="color:var(--dark-color);">{{product.shopName}}</p>
+                    <p class="qty mb-0">台灣</p>
+                </div>
+            </div>
+
+            <!-- 品牌資訊 -->
+            <div class="brand-stats">
+                <p>上次上線：<strong>1～3 天前</strong></p>
+                <p>回應率：<strong>100%</strong></p>
+                <p>回應速度：<strong>1 日內</strong></p>
+                <p>平均出貨速度：<strong>一週內</strong></p>
+            </div>
+        </aside>
+    </section>
+
+    <!-- =========================================
+           商品資訊（table）
+      ========================================= -->
+
+    <section class="mb-5">
+        <div class="section-heading">商品資訊</div>
+        <table class="info-table w-100">
+            <tbody>
+                <tr><td>賞味期限</td><td>{{product.shelfLifeNote}}</td></tr>
+                <tr><td>內容物</td><td>{{product.ingredient}}</td></tr>
+                <tr><td>內容量</td><td>{{product.netWeight}}</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- =========================================
+           購買評價
+      ========================================= -->
+
+    @await Html.PartialAsync("_ProductReviewsPartial", Model.Reviews)
+
+    <!-- =========================================
+         推薦商品
+         FoodMart .product-item 卡片
+         Bootstrap row g-3 排列
+    ========================================= -->
+
+    <section class="py-5 overflow-hidden">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="section-header d-flex justify-content-between">
+
+                        <h2 class="section-title">推薦商品</h2>
+
+                        <div class="d-flex align-items-center">
+                            <a class="btn-link text-decoration-none" asp-area="" asp-controller="Products" asp-action="Index">查看更多</a>
+                            <div class="swiper-buttons">
+                                <button class="swiper-prev products-carousel2-prev btn btn-primary">❮</button>
+                                <button class="swiper-next products-carousel2-next btn btn-primary">❯</button>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="products-carousel2 swiper">
+                        <div class="swiper-wrapper">
+
+                            <!-- 單一商品 — 複製此區塊重複使用 -->
+                            <div class="swiper-slide" v-for="product in productsByDiscount.slice(0, 10)" :key="product.productId">
+                                <div class="product-item">
+                                    <span v-if="discountLabel(product.productDiscount)" class="badge bg-success position-absolute m-3">{{ discountLabel(product.productDiscount) }}</span>
+                                    <a href="#" class="btn-wishlist">
+                                        <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
+                                    </a>
+                                    <figure class="mb-3">
+                                        <a :href="'/Products/Details/' + product.productId" title="Product Title">
+                                            <img :src="product.productImage" :alt="product.productName" class="tab-image">
+                                        </a>
+                                    </figure>
+                                    <h3>{{product.productName }}</h3>
+                                    <span class="qty">{{ product.shopName }}</span>
+                                    <span class="rating">
+                                        <iconify-icon icon="ph:star-fill" style="color:#FFC43F; font-size:16px; vertical-align:-2px;"></iconify-icon>
+                                        {{ product.productRating }}
+                                    </span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="price">NT${{ product.productPrice }}</span>
+                                        <del v-if="originalPrice(product.productPrice, product.productDiscount)" class="text-muted small">
+                                            NT${{ originalPrice(product.productPrice, product.productDiscount) }}
+                                        </del>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="input-group product-qty">
+                                            <span class="input-group-btn">
+                                                <button type="button" class="quantity-left-minus btn btn-danger btn-number" data-type="minus">
+                                                    <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
+                                                </button>
+                                            </span>
+                                            <input type="text" id="quantity" name="quantity" class="form-control input-number" value="1">
+                                            <span class="input-group-btn">
+                                                <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
+                                                    <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
+                                                </button>
+                                            </span>
+                                        </div>
+                                        <a href="#" class="btn btn-danger btn-sm w-20 mt-1">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- / 單一商品 -->
+                        </div>
+                    </div>
+                    <!-- / products-carousel -->
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+</div>
+
+
+
+@section Scripts
+{
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <script>
+        const app=Vue.createApp({
+            data(){
+                return{
+                    products: [],
+                    product: {},
+                    loading: true,
+                    sortBy: 'productsByDiscount'
+                }
+            },
+            methods: {
+                discountLabel(discount) {
+                if (!discount || discount <= 0) return null
+                return `-${Math.round(discount * 100)}%`   // 0.20 → "-20%"
+                },
+                originalPrice(price, discount) {
+                if (!discount || discount <= 0) return null
+                return Math.round(price / (1 - discount))  // 100 / 0.8 = 125
+                }
+
+            },
+            computed:{
+
+                 productsByRating(){
+                 return [...this.products].sort((a,b)=> b.productRating - a.productRating)
+                 },
+                 productsByDate(){
+                 return [...this.products].sort((a,b)=> new Date(b.productDate) - new Date(a.productDate))
+                 },
+                 productsByDiscount(){
+                 return [...this.products].sort((a,b)=> b.productDiscount - a.productDiscount)
+                 },
+                 categoryName(){
+                 const map = {
+                        1: '法式甜點',
+                        2: '餅乾',
+                        3: '蛋糕',
+                        4: '布丁',
+                        5: '麵包',
+                        6: '泡芙',
+                        7: '甜甜圈',
+                        8: '巧克力',
+                        9: '糖果'
+                     }
+                     return map [this.product.categoryId] || null
+                 }
+            },
+            async mounted() {
+                // 從網址 /Products/Details/3 取出最後的數字 3
+                const id = window.location.pathname.split('/').pop()
+
+                // 抓單筆商品（頁面主角）
+                const res1 = await fetch(`/api/Product/GetById/${id}`)
+                this.product = await res1.json()
+
+                // 抓全部商品（推薦商品輪播）
+                const res2 = await fetch('/api/Product/Get')
+                this.products = await res2.json()
+                this.loading = false
+
+                // 等 Vue 把 DOM 更新完再通知 Swiper
+                this.$nextTick(() => {
+                    if (document.querySelector('.products-carousel')?.swiper) {
+                        document.querySelector('.products-carousel').swiper.update()
+                    }
+                    if (document.querySelector('.products-carousel2')?.swiper) {
+                    document.querySelector('.products-carousel2').swiper.update()
+                    }
+                })
+            }
+        });
+        app.mount('#product');
+    </script>
+
+}

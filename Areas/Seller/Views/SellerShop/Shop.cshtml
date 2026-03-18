@@ -1,0 +1,29 @@
+﻿@model Bake.Models.Sales.Shop
+
+@{
+    ViewData["Title"] = "店鋪預覽";
+
+    // 功用：這頁雖然從 Seller 路由進來，但先吃前台版面
+    // 之後你正式店鋪頁若搬去前台 Controller，也能延用相同顯示邏輯
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container my-4">
+    <!-- 頁首：預覽頁說明 + 返回編輯 -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">店鋪預覽</h2>
+            <div class="text-muted">目前顯示的是已儲存的店鋪資料</div>
+        </div>
+
+        <a asp-area="Seller"
+               asp-controller="SellerShop"
+               asp-action="Shop_settings"
+               class="btn btn-outline-secondary">
+            返回編輯
+        </a>
+    </div>
+
+    <!-- 功用：引用共用的店鋪資訊顯示區塊 -->
+    <partial name="_ShopProfilePartial" model="Model" />
+</div>

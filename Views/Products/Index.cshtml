@@ -1,0 +1,288 @@
+﻿
+<div id="product" v-cloak>
+
+    <section class="py-5" style="background-image: url('/images/background-pattern.jpg'); background-size: cover; background-position: center;">
+        @* <div class="container-fluid text-center">
+            <h2 class="fw-bold">所有商品</h2>
+        </div> *@
+    </section>
+
+    <!-- ② 主內容：側邊欄 + 商品格 -->
+    <section class="py-5">
+        <div class="container-fluid">
+            <div class="row">
+
+                <!-- 左側篩選欄 -->
+                <aside class="col-4 col-lg-3 mb-4">
+
+                    <!--  麵包屑 Hero 區 -->
+                    <nav aria-label="breadcrumb">
+                        <ol class="breadcrumb justify-content-start mb-3">
+                            <li class="breadcrumb-item"><a asp-area="" asp-controller="Home" asp-action="Index">首頁</a></li>
+                            <li v-if="!categoryName" class="breadcrumb-item active">所有商品</li>
+                            <li v-if="categoryName" class="breadcrumb-item"><a href="#" @@click.prevent="selectedCategory = 'all'">所有商品</a></li>
+                            <li v-if="categoryName" class="breadcrumb-item active">{{categoryName}}</li>
+                        </ol>
+                    </nav>
+                    <!-- 商品分類 -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3">商品分類</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-1"><a href="#" class="nav-link px-0" :class="{ 'fw-bold text-primary': selectedCategory === 'all' }"  @@click.prevent="selectedCategory = 'all'">全部</a></li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0" :class="{'fw-bold text-primary':selectedCategory===1}" @@click.prevent="selectedCategory=1" >法式甜點</a></li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0" :class="{'fw-bold text-primary':selectedCategory===2}" @@click.prevent="selectedCategory=2">餅乾</a></li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0" :class="{'fw-bold text-primary':selectedCategory===3}" @@click.prevent="selectedCategory=3">蛋糕</a></li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0":class="{ 'fw-bold text-primary': selectedCategory === 4 }" @@click.prevent="selectedCategory = 4">布丁</a></li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0":class="{ 'fw-bold text-primary': selectedCategory === 5 }" @@click.prevent="selectedCategory = 5">麵包</a></li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0":class="{ 'fw-bold text-primary': selectedCategory === 6 }"@@click.prevent="selectedCategory = 6">泡芙</a></li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0":class="{ 'fw-bold text-primary': selectedCategory === 7 }" @@click.prevent="selectedCategory = 7">甜甜圈</a> </li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0":class="{ 'fw-bold text-primary': selectedCategory === 8 }"@@click.prevent="selectedCategory = 8">巧克力</a></li>
+                            <li class="mb-1"><a href="#" class="nav-link px-0":class="{ 'fw-bold text-primary': selectedCategory === 9 }"@@click.prevent="selectedCategory = 9">糖果</a></li>
+                        </ul>
+                    </div>
+
+                    <hr>
+
+                    <!-- 篩選 -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3">排序</h5>
+                        <select class="form-select w-auto" v-model="sortBy">
+                            <option value="default">全部</option>
+                            <option value="updated">最新</option>
+                            <option value="rating">評價高到低</option>
+                            <option value="price-asc">價格低到高</option>
+                            <option value="price-desc">價格高到低</option>
+                        </select>
+                    </div>
+
+                    <!-- 金額篩選 -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-3">金額</h5>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio"
+                                   v-model="priceRange" value="all" id="price0">
+                            <label class="form-check-label" for="price0">全部</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio"
+                                   v-model="priceRange" value="0-100" id="price1">
+                            <label class="form-check-label" for="price1">NT$100 以下</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio"
+                                   v-model="priceRange" value="100-300" id="price2">
+                            <label class="form-check-label" for="price2">NT$100 - 300</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio"
+                                   v-model="priceRange" value="300-500" id="price3">
+                            <label class="form-check-label" for="price3">NT$300 - 500</label>
+                        </div>
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" type="radio"
+                                   v-model="priceRange" value="500-9999" id="price4">
+                            <label class="form-check-label" for="price4">NT$500 以上</label>
+                        </div>
+                    </div>
+
+                </aside>
+
+                <!-- 右側商品區 col-lg-9 -->
+                <div class="col-8 col-lg-9">
+
+
+                    <!-- 商品格：4欄，小螢幕2欄 -->
+                    <div class="product-grid row row-cols-1 row-cols-md-2 row-cols-lg row-cols-xl-4 g-3">
+
+                        <!-- 單一商品 — 複製此區塊重複使用 -->
+                        <div class="col" v-for="product in pagedProducts" :key="product.productId">
+                            <div class="product-item">
+                                <span v-if="discountLabel(product.productDiscount)" class="badge bg-success position-absolute m-3">{{ discountLabel(product.productDiscount) }}</span>
+                                <a href="#" class="btn-wishlist">
+                                    <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
+                                </a>
+                                <figure class="mb-3">
+                                    <a :href="'/Products/Details/' + product.productId" title="Product Title">
+                                        <img :src="product.productImage" :alt="product.productName" class="tab-image">
+                                    </a>
+                                </figure>
+                                <h3>{{product.productName }}</h3>
+                                <span class="qty">{{ product.shopName }}</span>
+                                <span class="rating">
+                                    <iconify-icon icon="ph:star-fill" style="color:#FFC43F; font-size:16px; vertical-align:-2px;"></iconify-icon>
+                                    {{ product.productRating }}
+                                </span>
+                                <div class="d-flex align-items-center gap-2">
+                                <span class="price">NT${{ product.productPrice }}</span>
+                                <del v-if="originalPrice(product.productPrice, product.productDiscount)" class="text-muted small">
+                                     NT${{ originalPrice(product.productPrice, product.productDiscount) }}
+                                 </del>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="input-group product-qty">
+                                        <span class="input-group-btn">
+                                            <button type="button" class="quantity-left-minus btn btn-danger btn-number" data-type="minus">
+                                                <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
+                                            </button>
+                                        </span>
+                                        <input type="text" id="quantity" name="quantity" class="form-control input-number" value="1">
+                                        <span class="input-group-btn">
+                                            <button type="button" class="quantity-right-plus btn btn-success btn-number" data-type="plus">
+                                                <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
+                                            </button>
+                                        </span>
+                                    </div>
+                                    <a href="#" class="btn btn-danger btn-sm w-20 mt-1" v-on:click..prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- / 單一商品 -->
+
+                    </div>
+                    <!-- / product-grid -->
+                    <!-- ③ 分頁 -->
+                    <div class="d-flex justify-content-center align-items-center gap-2 mt-5">
+                        <nav>
+                            <ul class="pagination mb-0">
+                                <li class="page-item" :disabled="currentPage === 1 ">
+                                    <a class="page-link" href="#" @@click.prevent ="currentPage--">«</a>
+                                </li>
+                                <li class="page-item"
+                                    v-for="page in totalPages" :key="page"
+                                    :class="{ active: page === currentPage }">
+                                    <a class="page-link rounded-3" href="#" @@click.prevent ="currentPage = page">
+                                        {{ page }}
+                                    </a>
+                                </li>
+                                <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                                    <a class="page-link" href="#" @@click.prevent ="currentPage++">»</a>
+                                </li>
+                            </ul>
+                        </nav>
+                        <div class="d-flex align-items-center gap-2 ms-3">
+                            <span class="text-muted small">前往頁面</span>
+                            <input type="number" class="form-control form-control-sm" style="width: 60px;" value="1" min="1">
+                        </div>
+                    </div>
+                    <!-- / 分頁 -->
+
+                </div>
+                <!-- / 右側商品區 -->
+
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts
+{
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <script>
+        const app=Vue.createApp({
+            data(){
+                return{
+                    products: [],
+                    product:{},
+                    currentPage: 1, 
+                    pageSize: 12,
+                    cart:[],
+                    sortBy: 'default',
+                    priceRange:'all',
+                    selectedCategory:'all'
+                }
+            },
+            methods: {
+                discountLabel(discount) {
+                if (!discount || discount <= 0) return null
+                return `-${Math.round(discount * 100)}%`   // 0.20 → "-20%"
+                },
+                originalPrice(price, discount) {
+                if (!discount || discount <= 0) return null
+                return Math.round(price / (1 - discount))  // 100 / 0.8 = 125
+                },
+                async addCart(product){
+                const res = await fetch('/Cart/Add',{
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({ productId:product.productId, quantity: 1}) //要與後端統一
+                });
+                if(res.ok){
+                    window.dispatchEvent(new Event('update-cart')); //觸發全局事件，通知購物車更新
+                    alert('已加入購物車！');
+                    }
+                }
+            },
+            computed: {
+                totalPages() {
+                    return Math.ceil(this.sortedProducts.length / this.pageSize)
+                },
+                pagedProducts() {
+                    const start = (this.currentPage - 1) * this.pageSize
+                    return this.sortedProducts.slice(start, start + this.pageSize)
+                },
+                sortedProducts(){
+                let list = [...this.products]
+
+                if(this.selectedCategory !== 'all'){
+                list = list.filter(p=>p.categoryId  === this.selectedCategory)
+                }
+
+                if(this.priceRange==='0-100'){list = list.filter(p=>p.productPrice<=100)}
+                if(this.priceRange==='100-300'){list = list.filter(p=>p.productPrice>100 && p.productPrice<=300)}
+                if(this.priceRange==='300-500'){list = list.filter(p=>p.productPrice > 300 && p.productPrice <= 500)}
+                if(this.priceRange==='500-9999'){list = list.filter(p=>p.productPrice>500)}
+
+                if(this.sortBy ==='price-desc'){return list.sort((a,b)=>b.productPrice-a.productPrice)}
+                if(this.sortBy ==='price-asc'){return list.sort((a,b)=>a.productPrice-b.productPrice)}
+                if(this.sortBy ==='updated'){return list.sort((a,b)=>new Date(b.productDate) - new Date(a.productDate))}
+                if(this.sortBy ==='rating'){return list.sort((a,b)=>b.productRating-a.productRating)}
+                return list
+                },
+                categoryName(){
+                    const map={
+                        1: '法式甜點', 2: '餅乾', 3: '蛋糕',
+                        4: '布丁', 5: '麵包', 6: '泡芙',
+                        7: '甜甜圈', 8: '巧克力', 9: '糖果'
+                    }
+                    return map[this.selectedCategory]
+                }
+            },
+            watch:{
+              // cart:{
+              //     handler(newValue, oldeValue){
+              //           localStorage.setItem("cart", JSON.stringify(newValue));
+              //     },deep: true
+              // },
+              sortBy() {
+                    this.currentPage = 1
+              },
+              priceRange(){
+                  this.currentPage = 1
+              },
+              selectedCategory(){
+                  this.currentPage = 1
+              }
+            },
+            // beforeCreat(){
+            // },
+            // created(){
+            //     var cartDataStr = localStorage.getItem("carts");
+            //     var cartDataArr = JSON.parse(cartDataStr);
+            //     this.carts = cartDataArr || [];
+            // },
+            async mounted() {
+            const params = new URLSearchParams(window.location.search)
+            const cat = params.get('category')
+            if(cat){
+                this.selectedCategory = parseInt(cat)
+            }
+
+            // 串接你的 API
+            const res = await fetch('/api/Product/Get')
+            this.products = await res.json()
+        }
+        });
+        app.mount('#product');
+    </script>
+
+}

@@ -52,7 +52,7 @@
           slidesPerView: 4,
         },
         1500: {
-          slidesPerView: 6,
+          slidesPerView: 5,
         },
       }
     });
@@ -82,16 +82,18 @@
     });
 
     var products_swiper = new Swiper(".products-carousel", {
-      slidesPerView: 5,
+      loop: false,
       spaceBetween: 30,
-      speed: 500,
+        speed: 500,
+        observer: true,
+        observeParents: true,
       navigation: {
         nextEl: ".products-carousel-next",
         prevEl: ".products-carousel-prev",
       },
       breakpoints: {
         0: {
-          slidesPerView: 1,
+          slidesPerView: 2,
         },
         768: {
           slidesPerView: 3,
@@ -99,11 +101,37 @@
         991: {
           slidesPerView: 4,
         },
-        1500: {
-          slidesPerView: 6,
+        1200: {
+          slidesPerView: 5,
         },
       }
     });
+
+      var products_swiper2 = new Swiper(".products-carousel2", {
+          loop: false,
+          spaceBetween: 30,
+          speed: 500,
+          observer: true, 
+          observeParents: true,
+          navigation: {
+              nextEl: ".products-carousel2-next",
+              prevEl: ".products-carousel2-prev",
+          },
+          breakpoints: {
+              0: {
+                  slidesPerView: 2,
+              },
+              768: {
+                  slidesPerView: 3,
+              },
+              991: {
+                  slidesPerView: 4,
+              },
+              1200: {
+                  slidesPerView: 5,
+              },
+          }
+      });
   }
 
   var initProductQty = function(){

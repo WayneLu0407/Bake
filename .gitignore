@@ -46,6 +46,7 @@ x64/
 *.scc
 .vs/
 appsettings.json
+appsettings.Development.json
 
 # Visual C++ cache files
 ipch/
@@ -135,3 +136,4 @@ $RECYCLE.BIN/
 
 _NCrunch*
 /appsettings.json
+/appsettings.Development.json

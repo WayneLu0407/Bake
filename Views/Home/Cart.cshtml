@@ -1,5 +1,177 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿<head>
+    <style>
+        /* 響應式規則：螢幕大於 1025px 時 */
+        @@media (min-width: 1025px) {
+            .h-custom {
+                height: 100vh !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <section class="h-100 h-custom" style="background-color: floralwhite;">
+        <div class="container py-5 h-100" id="checkoutApp">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col-12">
+                    <div class="card card-registration card-registration-2" style="border-radius: 15px;">
+                        <div class="card-body p-0">
+                            <div class="row g-0">
+                                <div class="col-lg-8">
+                                    <div class="p-5">
+                                        <div class="d-flex justify-content-between align-items-center mb-5">
+                                            <h1 class="fw-bold mb-0">我的購物車</h1>
+                                            <h3 class="mb-0 text-muted">{{totalCount}} items</h3>
+                                        </div>
+                                        <hr class="my-4">
+
+                                        <div v-for="item in cart" :key="item.productId" class="row mb-4 d-flex justify-content-between align-items-center">
+                                            <div class="col-md-2 col-lg-2 col-xl-2">
+                                                <img :src="item.imgUrl"
+                                                     class="img-fluid rounded-3" alt="Cotton T-shirt">
+                                            </div>
+                                            <div class="col-md-3 col-lg-3 col-xl-3">
+                                                <h5 class="text-muted">{{item.productName}}</h5>
+                                                @* <h6 class="mb-0">Cotton T-shirt</h6> *@
+                                            </div>
+                                            <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
+                                                <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
+                                                        onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+
+                                                <input id="form1" min="0" name="quantity" value="1" type="number"
+                                                       class="form-control form-control-sm" />
+
+                                                <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
+                                                        onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+                                            </div>
+                                            <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
+                                                <h6 class="mb-0">{{item.price}}</h6>
+                                            </div>
+                                            <div class="col-md-1 col-lg-1 col-xl-1 text-end">
+                                                <a href="#!" class="text-muted" v-on:click.prevent="deleteItem(item.productId)"><i class="fas fa-trash-alt"></i></a>
+                                            </div>
+                                            <hr class="my-4">
+                                        </div>
+
+                                        <div class="pt-5">
+                                            <h6 class="mb-0">
+                                                <a asp-controller="Products" asp-action="Index" class="text-body">
+                                                    <i class="fas fa-long-arrow-alt-left me-2"></i>Back to shop
+                                                </a>
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 bg-body-tertiary">
+                                    <div class="p-5">
+                                        <h3 class="fw-bold mb-5 mt-2 pt-1">Summary</h3>
+                                        <hr class="my-4">
+
+                                        <div class="d-flex justify-content-between mb-4">
+                                            <h5 class="text-uppercase">items {{totalCount}}</h5>
+                                            <h5>$ {{totalPrice}}</h5>
+                                        </div>
+
+                                        <h5 class="text-uppercase mb-3">Shipping</h5>
+
+                                        <div class="mb-4 pb-2">
+                                            <select data-mdb-select-init>
+                                                <option value="1">超商取貨付款-  $ 60</option>
+                                                <option value="2">Two</option>
+                                                <option value="3">Three</option>
+                                                <option value="4">Four</option>
+                                            </select>
+                                        </div>
+
+                                        <h5 class="text-uppercase mb-3">Give code</h5>
+
+                                        <div class="mb-5">
+                                            <div data-mdb-input-init class="form-outline">
+                                                <input type="text" id="form3Examplea2" class="form-control form-control-lg" />
+                                                <label class="form-label" for="form3Examplea2">Enter your code</label>
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-4">
+
+                                        <div class="d-flex justify-content-between mb-5">
+                                            <h5 class="text-uppercase">Total price</h5>
+                                            <h5>$ {{totalPrice +60 }} </h5>
+                                        </div>
+
+                                        <a asp-controller="Checkout" asp-action="Info" style="background-color: #ffc107;" data-mdb-button-init data-mdb-ripple-init class="btn btn-danger btn-block w-100 btn-lg"
+                                           data-mdb-ripple-color="dark">
+                                            結帳
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</body>
+
+@section Scripts
+{
+    <script>
+        const app = Vue.createApp({
+            data(){
+                return{
+                    cart:[]
+                }
+            },
+            computed:{
+                totalPrice(){
+                    return this.cart.reduce((sum,item)=>sum+(item.price * item.quantity),0);
+                },
+                totalCount(){
+                    return this.cart.reduce((sum,item)=>sum+item.quantity,0);
+                }
+            },
+            methods:{
+                async fetchCart(){
+                    const response = await fetch('/Cart/GetCartItems')
+                    this.cart = await response.json();
+                },
+                async deleteItem(productId){
+                    if(!confirm('確定移除?')) return;
+                    await fetch('/Cart/Remove',{
+                    method:'POST',
+                    headers:{'Content-Type':'application/json'},
+                    body:JSON.stringify(productId)
+                    })
+                    this.fetchCart();  // 刷新側邊欄購物車資料
+                    window.dispatchEvent(new Event('update-cart'));
+                },
+                async updateQuantity(productId, change){
+                    //找出該品項，若目前數量為1，且要減1，則改為呼叫刪除
+                    const item = this.cart.find(i=>i.productId===productId);
+                    if(item.quantity ===1 && change ===-1){
+                        this.deleteItem(productId);
+                        return;
+                    }
+
+                    await fetch('/Cart/Add',{ // 這裡重複使用 Add 來增加或減少數量，change 可為正或負
+                        method:'POST',
+                        headers:{'Content-Type':'application/json'},
+                        body:JSON.stringify({productId:productId, quantity:change})
+                    }),
+                    this.fetchCart();  // 刷新側邊欄購物車資料
+                    window.dispatchEvent(new Event('update-cart'));
+                }
+            },
+            mounted(){
+                this.fetchCart();
+            }
+        }).mount('#checkoutApp');
+    </script>
 }
