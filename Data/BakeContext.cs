@@ -37,6 +37,8 @@ public partial class BakeContext : DbContext
 
     public virtual DbSet<ChatRoomMember> ChatRoomMembers { get; set; }
 
+    public virtual DbSet<ChatRoomType> ChatRoomTypes { get; set; }
+
     public virtual DbSet<EventDetail> EventDetails { get; set; }
 
     public virtual DbSet<EventRegistration> EventRegistrations { get; set; }
@@ -248,6 +250,11 @@ public partial class BakeContext : DbContext
                 .HasForeignKey(d => d.SenderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Message_Profile");
+
+            entity.HasOne(d => d.Room).WithMany(p => p.ChatMessages)
+                .HasForeignKey(d => d.RoomId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Message_Room");
         });
 
         modelBuilder.Entity<ChatRoom>(entity =>
@@ -260,6 +267,13 @@ public partial class BakeContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(sysdatetime())")
                 .HasColumnName("created_at");
+
+            entity.Property(e => e.RoomType).HasColumnName("room_type");
+
+            entity.HasOne(d => d.RoomTypeNavigation).WithMany(p => p.ChatRooms)
+                .HasForeignKey(d => d.RoomType)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Room_Type");
         });
 
         modelBuilder.Entity<ChatRoomMember>(entity =>
@@ -281,6 +295,24 @@ public partial class BakeContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Member_Profile");
+        });
+
+        modelBuilder.Entity<ChatRoomType>(entity =>
+        {
+            entity.HasKey(e => e.TypeId).HasName("PK_Chat_Room_Type");
+
+            entity.ToTable("Chat_Room_Type", "Service");
+
+            entity.Property(e => e.TypeId).HasColumnName("type_id");
+            entity.Property(e => e.TypeName)
+                .HasMaxLength(20)
+                .HasColumnName("type_name");
+
+            entity.HasData(
+                new ChatRoomType { TypeId = 0, TypeName = "一對一" },
+                new ChatRoomType { TypeId = 1, TypeName = "群組" },
+                new ChatRoomType { TypeId = 2, TypeName = "AI客服" }
+            );
         });
 
         modelBuilder.Entity<EventDetail>(entity =>
