@@ -4,6 +4,7 @@ using Bake.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bake.Migrations
 {
     [DbContext(typeof(BakeContext))]
-    partial class BakeContextModelSnapshot : ModelSnapshot
+    [Migration("20260319043008_AddPaymentMethodTable")]
+    partial class AddPaymentMethodTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -472,7 +475,7 @@ namespace Bake.Migrations
 
                     b.HasKey("PaymentMethodId");
 
-                    b.ToTable("PaymentMethod", "Sales");
+                    b.ToTable("PaymentMethod", (string)null);
 
                     b.HasData(
                         new

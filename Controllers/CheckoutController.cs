@@ -54,7 +54,7 @@ namespace Bake.Controllers
                 UserId = 1,
                 ShippingAddress = checkoutViewModel.ReceiverAddress,
                 TotalAmount = 0, //這裡先設為0，實際金額應該從購物車計算
-                PaymentMethod = byte.Parse(PaymentMethod),
+                PaymentMethodId = byte.Parse(PaymentMethod),
                 StatusId = 1, //1代表待出貨
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,

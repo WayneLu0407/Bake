@@ -133,12 +133,12 @@
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <div class="section-heading mb-0 border-0 pb-0">關於品牌</div>
                 <!-- FoodMart .btn-outline-light -->
-                <button class="btn btn-outline-light btn-sm">來去逛逛</button>
+                <button class="btn btn-outline-warning btn-sm">來去逛逛</button>
             </div>
 
             <!-- 品牌卡（FoodMart .brand-item） -->
             <div class="brand-item d-flex align-items-center gap-3 mb-3">
-                <img src="" alt="品牌Logo" class="review-avatar" />
+                <img :src="product.shopImg" alt="品牌Logo" class="review-avatar" style="width: 100px; height: 100px; object-fit: cover; border-radius: 50%;" />
                 <div>
                     <p class="fw-bold mb-0" style="color:var(--dark-color);">{{product.shopName}}</p>
                     <p class="qty mb-0">台灣</p>
