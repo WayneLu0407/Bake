@@ -15,7 +15,7 @@ public partial class Order
 
     public decimal TotalAmount { get; set; }
 
-    public byte PaymentMethod { get; set; }
+    public byte PaymentMethodId { get; set; }
 
     public byte StatusId { get; set; }
 
@@ -34,4 +34,5 @@ public partial class Order
     public virtual OrderStatus Status { get; set; } = null!;
 
     public virtual UserProfile User { get; set; } = null!;
+    public virtual PaymentMethod PaymentMethod { get; set; } = null!;
 }

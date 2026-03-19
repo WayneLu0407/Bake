@@ -109,7 +109,7 @@ public partial class BakeContext : DbContext
 
     public virtual DbSet<UserProfile> UserProfiles { get; set; }
 
-    
+    public DbSet<PaymentMethod> PaymentMethods { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -427,7 +427,7 @@ public partial class BakeContext : DbContext
 
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");
-            entity.Property(e => e.PaymentMethod).HasColumnName("payment_method");
+            entity.Property(e => e.PaymentMethodId).HasColumnName("payment_method");
             entity.Property(e => e.ShippingAddress)
                 .HasMaxLength(500)
                 .HasColumnName("shipping_address");
@@ -447,6 +447,10 @@ public partial class BakeContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Orders_Profile");
+
+            entity.HasOne(o => o.PaymentMethod)
+                  .WithMany(p => p.Orders)
+                  .HasForeignKey(o => o.PaymentMethodId);
         });
 
         modelBuilder.Entity<OrderItem>(entity =>
@@ -1157,6 +1161,27 @@ public partial class BakeContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Ingredient_Product");
         });
+
+        modelBuilder.Entity<PaymentMethod>(entity =>
+        {
+            entity.ToTable("PaymentMethod", "Sales");
+
+            // PK 不要自動遞增（因為你要手動指定 0, 1, 2）
+            entity.Property(e => e.PaymentMethodId)
+                  .ValueGeneratedNever();
+
+            entity.Property(e => e.Name)
+                  .IsRequired()
+                  .HasMaxLength(20);
+
+            // 種子資料
+            entity.HasData(
+                new PaymentMethod { PaymentMethodId = 0, Name = "信用卡" },
+                new PaymentMethod { PaymentMethodId = 1, Name = "轉帳" },
+                new PaymentMethod { PaymentMethodId = 2, Name = "貨到付款" }
+            );
+        });
+
 
         OnModelCreatingPartial(modelBuilder);
     }
