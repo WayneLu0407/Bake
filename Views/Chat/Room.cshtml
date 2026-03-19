@@ -1,0 +1,38 @@
+﻿@model Bake.ViewModel.ChatRoomPageViewModel
+
+@{
+    ViewData["Title"] = "聊天室";
+}
+
+<div class="container py-4">
+    <h2 class="mb-3">@Model.RoomTitle</h2>
+
+    <input type="hidden" id="roomId" value="@Model.RoomId" />
+
+    <div class="card">
+        <div class="card-body" id="messageContainer" style="height: 420px; overflow-y: auto;">
+            <ul id="messageList" class="list-unstyled mb-0">
+                @foreach (var item in Model.Messages)
+                {
+                    <li class="mb-3 border-bottom pb-2">
+                        <div class="fw-bold">@item.SenderName</div>
+                        <div>@item.Message</div>
+                        <small class="text-muted">@item.CreateDate.ToString("yyyy-MM-dd HH:mm:ss")</small>
+                    </li>
+                }
+            </ul>
+        </div>
+
+        <div class="card-footer">
+            <div class="input-group">
+                <input id="messageInput" type="text" class="form-control" placeholder="輸入訊息..." />
+                <button id="sendButton" class="btn btn-primary" type="button">送出</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+    <script src="~/js/chat-room.js"></script>
+}
