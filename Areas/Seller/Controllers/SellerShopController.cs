@@ -4,10 +4,12 @@ using System.Security.Claims;
 using Bake.Areas.Seller.ViewModels;
 using Bake.Models.Sales;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Bake.Areas.Seller.Controllers
 
 {
+    [Authorize]
     [Area("Seller")]
     public class SellerShopController : Controller
     {
@@ -25,7 +27,7 @@ namespace Bake.Areas.Seller.Controllers
         [HttpGet]
         public IActionResult Shop()
         {
-            int? userId = GetCurrentUserIdFromEmailClaim();
+            int? userId = GetCurrentUserIdFromClaim();
 
             if (userId == null)
             {
@@ -47,7 +49,7 @@ namespace Bake.Areas.Seller.Controllers
         [HttpGet]
         public IActionResult Shop_settings()
         {
-            int? userId = GetCurrentUserIdFromEmailClaim();
+            int? userId = GetCurrentUserIdFromClaim();
 
             if (userId == null)
             {
@@ -78,7 +80,7 @@ namespace Bake.Areas.Seller.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Shop_settings(SellerShopSettingsReadViewModel vm)
         {
-            int? userId = GetCurrentUserIdFromEmailClaim();
+            int? userId = GetCurrentUserIdFromClaim();
 
             if (userId == null)
             {
@@ -157,7 +159,7 @@ namespace Bake.Areas.Seller.Controllers
         [HttpGet]
         public IActionResult PreviewPartial()
         {
-            int? userId = GetCurrentUserIdFromEmailClaim();
+            int? userId = GetCurrentUserIdFromClaim();
 
             if (userId == null)
             {
@@ -181,18 +183,15 @@ namespace Bake.Areas.Seller.Controllers
         }
 
         // 用目前登入者Email反查UserId
-        private int? GetCurrentUserIdFromEmailClaim()
+        private int? GetCurrentUserIdFromClaim()
         {
-            string? currentEmail = User.FindFirstValue(ClaimTypes.Name);
+            string? userIdClaim = User.FindFirstValue("UserId");
 
-            if (string.IsNullOrWhiteSpace(currentEmail))
+            if (!int.TryParse(userIdClaim, out int userId))
             {
                 return null;
             }
-
-            var user = _context.AccountAuths.FirstOrDefault(x => x.Email == currentEmail);
-
-            return user?.UserId;
+            return userId;
         }
 
         // 功用：儲存店鋪頭像到 wwwroot/ProductPicture/Shop
@@ -200,7 +199,7 @@ namespace Bake.Areas.Seller.Controllers
         // 失敗時回傳 null
         private string? SaveShopImage(IFormFile file)
         {
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png"};
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
             string extension = Path.GetExtension(file.FileName).ToLowerInvariant();
 
             if (!allowedExtensions.Contains(extension))
