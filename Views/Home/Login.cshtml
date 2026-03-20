@@ -37,7 +37,7 @@
 						
 						<input type="password" id="password" name="password" required autocomplete="current-password">
 						<span asp-validation-for="Password" class="text-danger"></span>
-						<button type="button" class="password-toggle" id="passwordToggle" aria-label="Toggle password visibility">
+						<button type="button" class="password-toggle" id="passwordToggle" onclick="togglePassword()" aria-label="Toggle password visibility">
 							<span class="eye-icon"></span>
 						</button>
 					</div>
@@ -66,10 +66,25 @@
 	</div>
 </body>
 
-
+<script>
+	function togglePassword()
+	{
+	
+	const password = document.getElementById('password');
+	if (password.type === 'password')
+	{
+	password.type = 'text';
+	} else
+	{
+	password.type = 'password';
+	}
+	}
+		
+</script>
 
 @section Scripts {
 	@{
 		await Html.RenderPartialAsync("_ValidationScriptsPartial");
 	}
+	
 }
