@@ -24,7 +24,7 @@ namespace Bake.Hubs
 
         public async Task SendMessage(int roomId, string message)
         {
-            int senderId = GetUserId();
+            int senderId = await GetUserId();
 
             var chatMessage = new ChatMessage
             {
@@ -53,14 +53,27 @@ namespace Bake.Hubs
             });
         }
 
-        private int GetUserId()
+        private async Task<int> GetUserId()
         {
             var claim = Context.User?.FindFirst(ClaimTypes.NameIdentifier);
             if (claim != null && int.TryParse(claim.Value, out int userId))
             {
                 return userId;
             }
-            throw new HubException("無法取得登入者 ID");
+            var email = Context.User?.FindFirst(ClaimTypes.Name)?.Value;
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                throw new HubException("找不到登入資訊");
+            }
+            int dbUserId = await _context.AccountAuths
+                .Where(x => x.Email == email)
+                .Select(x => x.UserId)
+                .FirstOrDefaultAsync();
+            if (dbUserId == 0)
+            {
+                throw new HubException("找不到對應的使用者");
+            }
+            return dbUserId;
         }
     }
 }
