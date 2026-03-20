@@ -8,6 +8,7 @@
     <h2 class="mb-3">@Model.RoomTitle</h2>
 
     <input type="hidden" id="roomId" value="@Model.RoomId" />
+    <input type="hidden" id="currentUserId" value="@Model.CurrentUserId" />
 
     <div class="card">
         <div class="card-body" id="messageContainer" style="height: 420px; overflow-y: auto;">
@@ -33,6 +34,6 @@
 </div>
 
 @section Scripts {
-    <script src="~/lib/microsoft-signalr/signalr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
     <script src="~/js/chat-room.js"></script>
 }

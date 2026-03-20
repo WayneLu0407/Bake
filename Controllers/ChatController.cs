@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Bake.Models.Service;
 
 namespace Bake.Controllers
 {
@@ -49,13 +50,13 @@ namespace Bake.Controllers
         {
             int userId = await GetCurrentUserIdAsync();
 
-            //bool isMember = await _context.ChatRoomMembers
-            //    .AnyAsync(x => x.RoomId == id && x.UserId == userId);
+            bool isMember = await _context.ChatRoomMembers
+                .AnyAsync(x => x.RoomId == id && x.UserId == userId);
 
-            //if (!isMember)
-            //{
-            //    return Forbid();
-            //}
+            if (!isMember)
+            {
+                return Forbid();
+            }
 
             var messages = await _context.ChatMessages
                 .Where(x => x.RoomId == id)
@@ -78,6 +79,7 @@ namespace Bake.Controllers
             var vm = new ChatRoomPageViewModel
             {
                 RoomId = id,
+                CurrentUserId = userId,
                 RoomTitle = memberNames.Count > 0
                     ? string.Join("、", memberNames)
                     : $"聊天室 {id}",
@@ -85,6 +87,42 @@ namespace Bake.Controllers
             };
 
             return View(vm);
+        }
+
+        public async Task<IActionResult> StartChat(int sellerId) 
+        {
+            int buyerId = await GetCurrentUserIdAsync();
+            if (buyerId == sellerId)
+                return BadRequest("無法與自己聊天");
+            var existingRoom = await _context.ChatRooms
+                .Where(r => r.RoomType == 0)
+                .Where(r => 
+                    r.ChatRoomMembers.Any(m => m.UserId == buyerId)&&
+                    r.ChatRoomMembers.Any(m => m.UserId == sellerId))
+                .Select(r=>r.RoomId)
+                .FirstOrDefaultAsync();
+            if(existingRoom != 0)
+            {
+                return RedirectToAction("Room", new { id = existingRoom });
+            }
+            // 3. 建立新的聊天室
+            var newRoom = new ChatRoom
+            {
+                RoomType = 0,
+                CreatedAt = DateTime.Now
+            };
+            _context.ChatRooms.Add(newRoom);
+            await _context.SaveChangesAsync();
+            
+            // 4. 用 SQL 插入成員（繞過 EF 的關聯追蹤問題）
+            await _context.Database.ExecuteSqlInterpolatedAsync($@"
+            INSERT INTO Service.Chat_Room_Member (room_id, user_id, joined_at) 
+            VALUES ({newRoom.RoomId}, {buyerId}, SYSDATETIME()),
+                   ({newRoom.RoomId}, {sellerId}, SYSDATETIME())
+            ");
+
+            // 5. 跳轉到聊天室頁面
+            return RedirectToAction("Room", new { id = newRoom.RoomId });
         }
     }
 }
