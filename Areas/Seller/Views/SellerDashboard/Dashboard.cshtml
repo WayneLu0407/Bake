@@ -1,6 +1,7 @@
-﻿
+﻿@model Bake.Areas.Seller.ViewModels.DashboardViewModel
+
 <body>
-    <main class="main-wrapper">
+    <main class="main-wrapper" style="margin-left: 0; padding-left: 0;">
         <!-- ========== Analytics Dashboard start ========== -->
         <section class="section">
             <div class="container-fluid">
@@ -9,7 +10,7 @@
                     <div class="row align-items-center">
                         <div class="col-md-6">
                             <div class="title">
-                                <h2>Analytics Dashboard</h2>
+                                <h2>營運總覽</h2>
                             </div>
                         </div>
                         <!-- end col -->
@@ -31,16 +32,17 @@
                     </div>
                     <!-- end row -->
                 </div>
-                <!-- ========== title-wrapper end ========== -->
+                <!-- ========== 卡片:今日營收、待出貨訂單、本月總訂單數、低庫存警示* ========== -->
                 <div class="row">
-                    <div class="col-xl-3 col-lg-4 col-sm-6">
+                    <!-- 今日營收 -->
+                    <div class="col">
                         <div class="icon-card mb-30">
                             <div class="icon purple">
                                 <i class="lni lni-users"></i>
                             </div>
                             <div class="content">
-                                <h6 class="mb-10">Users</h6>
-                                <h3 class="text-bold mb-10">6453</h3>
+                                <h6 class="mb-10">今日營收</h6>
+                                <h3 class="text-bold mb-10">@Model.TodayRevenue</h3>
                                 <p class="text-sm text-success">
                                     <i class="lni lni-arrow-up"></i> +23.4%
                                 </p>
@@ -48,31 +50,60 @@
                         </div>
                         <!-- End Icon Cart -->
                     </div>
-                    <!-- End Col -->
-                    <div class="col-xl-3 col-lg-4 col-sm-6">
+                    <!-- 本月總營收 -->
+                    <div class="col">
+                        <div class="icon-card mb-30">
+                            <div class="icon orange">
+                                <i class="lni lni-pie-chart"></i>
+                            </div>
+                            <div class="content">
+                                <h6 class="mb-10">本月總營收</h6>
+                                <h3 class="text-bold mb-10">@Model.MonthRevenue</h3>
+                                <p class="text-sm text-success">
+                                    <i class="lni lni-arrow-up"></i> +23.4%
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 待出貨訂單 -->
+                    <div class="col">
                         <div class="icon-card mb-30">
                             <div class="icon success">
                                 <i class="lni lni-eye"></i>
                             </div>
                             <div class="content">
-                                <h6 class="mb-10">Page views</h6>
-                                <h3 class="text-bold mb-10">876</h3>
+                                <h6 class="mb-10">待出貨訂單</h6>
+                                <h3 class="text-bold mb-10">@Model.PendingOrdersCount</h3>
                                 <p class="text-sm text-danger">
                                     <i class="lni lni-arrow-down"></i> -12.00%
                                 </p>
                             </div>
                         </div>
-                        <!-- End Icon Cart -->
                     </div>
-                    <!-- End Col -->
-                    <div class="col-xl-3 col-lg-4 col-sm-6">
+                    <!-- 本月總訂單數 -->
+                    <div class="col">
+                        <div class="icon-card mb-30">
+                            <div class="icon orange">
+                                <i class="lni lni-pie-chart"></i>
+                            </div>
+                            <div class="content">
+                                <h6 class="mb-10">本月總訂單數</h6>
+                                <h3 class="text-bold mb-10">@Model.TotalOrdersMonth</h3>
+                                <p class="text-sm text-success">
+                                    <i class="lni lni-arrow-up"></i> +23.4%
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 在架商品總數 -->
+                    <div class="col">
                         <div class="icon-card mb-30">
                             <div class="icon primary">
                                 <i class="lni lni-thumbs-up"></i>
                             </div>
                             <div class="content">
-                                <h6 class="mb-10">Impressions</h6>
-                                <h3 class="text-bold mb-10">976</h3>
+                                <h6 class="mb-10">在架商品總數</h6>
+                                <h3 class="text-bold mb-10">@Model.TotalProductsCount</h3>
                                 <p class="text-sm text-danger">
                                     <i class="lni lni-arrow-down"></i> -2.00%
                                 </p>
@@ -80,25 +111,12 @@
                         </div>
                         <!-- End Icon Cart -->
                     </div>
-                    <!-- End Col -->
-                    <div class="col-xl-3 col-lg-4 col-sm-6">
-                        <div class="icon-card mb-30">
-                            <div class="icon orange">
-                                <i class="lni lni-pie-chart"></i>
-                            </div>
-                            <div class="content">
-                                <h6 class="mb-10">Bounce Rate</h6>
-                                <h3 class="text-bold mb-10">346</h3>
-                                <p class="text-sm text-success">
-                                    <i class="lni lni-arrow-up"></i> +23.4%
-                                </p>
-                            </div>
-                        </div>
-                        <!-- End Icon Cart -->
-                    </div>
-                    <!-- End Col -->
                 </div>
-                <!-- End Row -->
+                <!-- 卡片資訊結束 -->
+                <!-- ========== 低庫存警示
+                                趨勢圖：顯示過去 7 天的訂單量變化。 
+                                圓餅圖：顯示不同類別產品的銷售佔比。
+                                商品牆：列出目前賣最好的前幾名甜點。========== -->
                 <div class="row">
                     <div class="col-lg-5">
                         <div class="card-style mb-30">
