@@ -10,15 +10,40 @@
     <input type="hidden" id="roomId" value="@Model.RoomId" />
     <input type="hidden" id="currentUserId" value="@Model.CurrentUserId" />
 
+    <style>
+        .msg-right {
+            display: flex;
+            justify-content: flex-end;
+        }
+        .msg-left {
+            display: flex;
+            justify-content: flex-start;
+        }
+        .msg-bubble {
+            max-width: 70%;
+            padding: 8px 14px;
+            border-radius: 16px;
+            margin-bottom: 8px;
+        }
+        .msg-right .msg-bubble {
+            background-color: #dcf8c6;
+        }
+        .msg-left .msg-bubble {
+            background-color: #f0f0f0;
+        }
+    </style>
+
     <div class="card">
         <div class="card-body" id="messageContainer" style="height: 420px; overflow-y: auto;">
             <ul id="messageList" class="list-unstyled mb-0">
                 @foreach (var item in Model.Messages)
                 {
-                    <li class="mb-3 border-bottom pb-2">
-                        <div class="fw-bold">@item.SenderName</div>
-                        <div>@item.Message</div>
-                        <small class="text-muted">@item.CreateDate.ToString("yyyy-MM-dd HH:mm:ss")</small>
+                    <li class="@(item.SenderId == Model.CurrentUserId?"msg-right":"msg-left")">
+                        <div class="msg-bubble">
+                            <div class="fw-bold">@item.SenderName</div>
+                            <div>@item.Message</div>
+                            <small class="text-muted">@item.CreateDate.ToString("yyyy-MM-dd HH:mm:ss")</small>
+                        </div>
                     </li>
                 }
             </ul>

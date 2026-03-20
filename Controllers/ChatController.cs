@@ -89,16 +89,16 @@ namespace Bake.Controllers
             return View(vm);
         }
 
-        public async Task<IActionResult> StartChat(int sellerId) 
+        public async Task<IActionResult> StartChat(int targetId) 
         {
-            int buyerId = await GetCurrentUserIdAsync();
-            if (buyerId == sellerId)
+            int currentUserId = await GetCurrentUserIdAsync();
+            if (currentUserId == targetId)
                 return BadRequest("無法與自己聊天");
             var existingRoom = await _context.ChatRooms
                 .Where(r => r.RoomType == 0)
                 .Where(r => 
-                    r.ChatRoomMembers.Any(m => m.UserId == buyerId)&&
-                    r.ChatRoomMembers.Any(m => m.UserId == sellerId))
+                    r.ChatRoomMembers.Any(m => m.UserId == currentUserId) &&
+                    r.ChatRoomMembers.Any(m => m.UserId == targetId))
                 .Select(r=>r.RoomId)
                 .FirstOrDefaultAsync();
             if(existingRoom != 0)
@@ -113,12 +113,12 @@ namespace Bake.Controllers
             };
             _context.ChatRooms.Add(newRoom);
             await _context.SaveChangesAsync();
-            
+            return Content($"currentUserId={currentUserId}, targetId={targetId}");
             // 4. 用 SQL 插入成員（繞過 EF 的關聯追蹤問題）
             await _context.Database.ExecuteSqlInterpolatedAsync($@"
             INSERT INTO Service.Chat_Room_Member (room_id, user_id, joined_at) 
-            VALUES ({newRoom.RoomId}, {buyerId}, SYSDATETIME()),
-                   ({newRoom.RoomId}, {sellerId}, SYSDATETIME())
+            VALUES ({newRoom.RoomId}, {currentUserId}, SYSDATETIME()),
+                   ({newRoom.RoomId}, {targetId}, SYSDATETIME())
             ");
 
             // 5. 跳轉到聊天室頁面
