@@ -4,6 +4,7 @@ using Bake.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bake.Migrations
 {
     [DbContext(typeof(BakeContext))]
-    partial class BakeContextModelSnapshot : ModelSnapshot
+    [Migration("20260319044037_MovePaymentMethodToSalesSchema")]
+    partial class MovePaymentMethodToSalesSchema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -866,8 +869,6 @@ namespace Bake.Migrations
                     b.HasKey("MessageId")
                         .HasName("PK__Chat_Mes__0BBF6EE670CE81C2");
 
-                    b.HasIndex("RoomId");
-
                     b.HasIndex("SenderId");
 
                     b.ToTable("Chat_Message", "Service");
@@ -888,14 +889,8 @@ namespace Bake.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(sysdatetime())");
 
-                    b.Property<byte>("RoomType")
-                        .HasColumnType("tinyint")
-                        .HasColumnName("room_type");
-
                     b.HasKey("RoomId")
                         .HasName("PK__Chat_Roo__19675A8A5EAF03AF");
-
-                    b.HasIndex("RoomType");
 
                     b.ToTable("Chat_Room", "Service");
                 });
@@ -920,41 +915,6 @@ namespace Bake.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Chat_Room_Member", "Service");
-                });
-
-            modelBuilder.Entity("Bake.Models.Service.ChatRoomType", b =>
-                {
-                    b.Property<byte>("TypeId")
-                        .HasColumnType("tinyint")
-                        .HasColumnName("type_id");
-
-                    b.Property<string>("TypeName")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("type_name");
-
-                    b.HasKey("TypeId")
-                        .HasName("PK_Chat_Room_Type");
-
-                    b.ToTable("Chat_Room_Type", "Service");
-
-                    b.HasData(
-                        new
-                        {
-                            TypeId = (byte)0,
-                            TypeName = "一對一"
-                        },
-                        new
-                        {
-                            TypeId = (byte)1,
-                            TypeName = "群組"
-                        },
-                        new
-                        {
-                            TypeId = (byte)2,
-                            TypeName = "AI客服"
-                        });
                 });
 
             modelBuilder.Entity("Bake.Models.Service.NotifyType", b =>
@@ -1824,32 +1784,13 @@ namespace Bake.Migrations
 
             modelBuilder.Entity("Bake.Models.Service.ChatMessage", b =>
                 {
-                    b.HasOne("Bake.Models.Service.ChatRoom", "Room")
-                        .WithMany("ChatMessages")
-                        .HasForeignKey("RoomId")
-                        .IsRequired()
-                        .HasConstraintName("FK_Message_Room");
-
                     b.HasOne("Bake.Models.User.UserProfile", "Sender")
                         .WithMany("ChatMessages")
                         .HasForeignKey("SenderId")
                         .IsRequired()
                         .HasConstraintName("FK_Message_Profile");
 
-                    b.Navigation("Room");
-
                     b.Navigation("Sender");
-                });
-
-            modelBuilder.Entity("Bake.Models.Service.ChatRoom", b =>
-                {
-                    b.HasOne("Bake.Models.Service.ChatRoomType", "RoomTypeNavigation")
-                        .WithMany("ChatRooms")
-                        .HasForeignKey("RoomType")
-                        .IsRequired()
-                        .HasConstraintName("FK_Room_Type");
-
-                    b.Navigation("RoomTypeNavigation");
                 });
 
             modelBuilder.Entity("Bake.Models.Service.ChatRoomMember", b =>
@@ -2190,14 +2131,7 @@ namespace Bake.Migrations
 
             modelBuilder.Entity("Bake.Models.Service.ChatRoom", b =>
                 {
-                    b.Navigation("ChatMessages");
-
                     b.Navigation("ChatRoomMembers");
-                });
-
-            modelBuilder.Entity("Bake.Models.Service.ChatRoomType", b =>
-                {
-                    b.Navigation("ChatRooms");
                 });
 
             modelBuilder.Entity("Bake.Models.Service.NotifyType", b =>

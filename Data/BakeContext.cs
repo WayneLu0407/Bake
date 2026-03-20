@@ -37,6 +37,8 @@ public partial class BakeContext : DbContext
 
     public virtual DbSet<ChatRoomMember> ChatRoomMembers { get; set; }
 
+    public virtual DbSet<ChatRoomType> ChatRoomTypes { get; set; }
+
     public virtual DbSet<EventDetail> EventDetails { get; set; }
 
     public virtual DbSet<EventRegistration> EventRegistrations { get; set; }
@@ -109,7 +111,7 @@ public partial class BakeContext : DbContext
 
     public virtual DbSet<UserProfile> UserProfiles { get; set; }
 
-    
+    public DbSet<PaymentMethod> PaymentMethods { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -248,6 +250,11 @@ public partial class BakeContext : DbContext
                 .HasForeignKey(d => d.SenderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Message_Profile");
+
+            entity.HasOne(d => d.Room).WithMany(p => p.ChatMessages)
+                .HasForeignKey(d => d.RoomId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Message_Room");
         });
 
         modelBuilder.Entity<ChatRoom>(entity =>
@@ -260,6 +267,13 @@ public partial class BakeContext : DbContext
             entity.Property(e => e.CreatedAt)
                 .HasDefaultValueSql("(sysdatetime())")
                 .HasColumnName("created_at");
+
+            entity.Property(e => e.RoomType).HasColumnName("room_type");
+
+            entity.HasOne(d => d.RoomTypeNavigation).WithMany(p => p.ChatRooms)
+                .HasForeignKey(d => d.RoomType)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Room_Type");
         });
 
         modelBuilder.Entity<ChatRoomMember>(entity =>
@@ -281,6 +295,24 @@ public partial class BakeContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Member_Profile");
+        });
+
+        modelBuilder.Entity<ChatRoomType>(entity =>
+        {
+            entity.HasKey(e => e.TypeId).HasName("PK_Chat_Room_Type");
+
+            entity.ToTable("Chat_Room_Type", "Service");
+
+            entity.Property(e => e.TypeId).HasColumnName("type_id");
+            entity.Property(e => e.TypeName)
+                .HasMaxLength(20)
+                .HasColumnName("type_name");
+
+            entity.HasData(
+                new ChatRoomType { TypeId = 0, TypeName = "一對一" },
+                new ChatRoomType { TypeId = 1, TypeName = "群組" },
+                new ChatRoomType { TypeId = 2, TypeName = "AI客服" }
+            );
         });
 
         modelBuilder.Entity<EventDetail>(entity =>
@@ -427,7 +459,7 @@ public partial class BakeContext : DbContext
 
             entity.Property(e => e.OrderId).HasColumnName("order_id");
             entity.Property(e => e.CreatedAt).HasColumnName("created_at");
-            entity.Property(e => e.PaymentMethod).HasColumnName("payment_method");
+            entity.Property(e => e.PaymentMethodId).HasColumnName("payment_method");
             entity.Property(e => e.ShippingAddress)
                 .HasMaxLength(500)
                 .HasColumnName("shipping_address");
@@ -447,6 +479,10 @@ public partial class BakeContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Orders_Profile");
+
+            entity.HasOne(o => o.PaymentMethod)
+                  .WithMany(p => p.Orders)
+                  .HasForeignKey(o => o.PaymentMethodId);
         });
 
         modelBuilder.Entity<OrderItem>(entity =>
@@ -1157,6 +1193,27 @@ public partial class BakeContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("FK_Ingredient_Product");
         });
+
+        modelBuilder.Entity<PaymentMethod>(entity =>
+        {
+            entity.ToTable("PaymentMethod", "Sales");
+
+            // PK 不要自動遞增（因為你要手動指定 0, 1, 2）
+            entity.Property(e => e.PaymentMethodId)
+                  .ValueGeneratedNever();
+
+            entity.Property(e => e.Name)
+                  .IsRequired()
+                  .HasMaxLength(20);
+
+            // 種子資料
+            entity.HasData(
+                new PaymentMethod { PaymentMethodId = 0, Name = "信用卡" },
+                new PaymentMethod { PaymentMethodId = 1, Name = "轉帳" },
+                new PaymentMethod { PaymentMethodId = 2, Name = "貨到付款" }
+            );
+        });
+
 
         OnModelCreatingPartial(modelBuilder);
     }
