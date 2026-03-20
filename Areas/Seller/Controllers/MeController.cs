@@ -2,12 +2,16 @@
 using Bake.Areas.Seller.Model;
 using Bake.Areas.Seller.ViewModels;
 using Bake.Data;
+using Bake.Models.Platform;
+using Bake.Models.Sales;
 using Bake.Models.User;
+using Humanizer;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Client;
 using Microsoft.IdentityModel.Tokens;
@@ -16,6 +20,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using BuyerOrderListViewModel = Bake.Areas.Seller.ViewModels.BuyerOrderListViewModel;
 
 namespace Bake.Areas.Seller.Controllers
 {
@@ -37,16 +42,35 @@ namespace Bake.Areas.Seller.Controllers
         {
             return View();
         }
-        
-        public IActionResult Orders()
+        [Authorize]
+        public async Task<IActionResult> Orders()
         {
-            return View();
+            var userId = User.FindFirst("UserId")?.Value;
+
+            var orderList = await _context.OrderItems
+                .Where(x => x.Order.UserId == int.Parse(userId))
+                .GroupBy(o=>o.OrderId)
+                .Select(g => new BuyerOrderListViewModel
+                {
+                    OrderId = g.Key,
+                    // 取分組中第一筆的訂單共用資訊
+                    ShippingAddress = g.First().Order.ShippingAddress,
+                    TotalAmount = g.First().Order.TotalAmount,
+                    PaymentMethod = g.First().Order.PaymentMethod.Name,
+                    CreatedAt = g.First().Order.CreatedAt,
+                    StatusName = g.First().Order.Status.StatusName,
+                    ProductsList = g.First().Order.OrderItems.Select(oi => new Item
+                    {
+                        ProductName = oi.Product.ProductName, // 從訂單項目關聯到產品名稱
+                        Quantity = oi.ItemQuantity,
+                    }).ToList()
+                }).OrderBy(c => c.OrderId)
+                .ToListAsync();
+
+            return View(orderList);
         }
 
-        //public IActionResult Settings()
-        //{
-        //    return View();
-        //}
+        
         [Authorize]
         public async Task<IActionResult> Settings()
         {
@@ -139,6 +163,7 @@ namespace Bake.Areas.Seller.Controllers
         public async Task<IActionResult> SwitchSellerAsync(BankAccountModel model )
         {
             if (!ModelState.IsValid)   return View(model);
+            
             var userId = User.FindFirstValue("UserId");
             var users = await _context.AccountAuths.FindAsync(int.Parse(userId));
             using(SHA256 sha256  = SHA256.Create())
@@ -156,23 +181,23 @@ namespace Bake.Areas.Seller.Controllers
                 users.Role = 1;
                 await _context.SaveChangesAsync();
             }
-            HttpContext.Session.Clear();
+            //HttpContext.Session.Clear();
 
-            //var user = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            //var claims = new List<Claim>
-            //{
-            //    new Claim(ClaimTypes.Name, User.Identity.Name),
-            //    new Claim(ClaimTypes.Role, "Seller")  // 動態新增賣家身分
-            //};
+            var user = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, User.Identity.Name),
+                new Claim(ClaimTypes.Role, "Seller")  // 動態新增賣家身分
+            };
 
-            //var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-            //// 3. 關鍵：執行 SignInAsync，這會覆蓋舊的 Cookie，讓權限立即生效
-            //await HttpContext.SignInAsync(
-            //    CookieAuthenticationDefaults.AuthenticationScheme,
-            //    new ClaimsPrincipal(claimsIdentity));
+            // 3. 關鍵：執行 SignInAsync，這會覆蓋舊的 Cookie，讓權限立即生效
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity));
 
-            return RedirectToAction("Login", "Home", new { area=""});
+            return RedirectToAction("Dashboard", "Me", new { area="Seller"});
             
         }
 
@@ -181,5 +206,6 @@ namespace Bake.Areas.Seller.Controllers
             HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
         }
+        
     }
 }

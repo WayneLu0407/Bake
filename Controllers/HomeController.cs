@@ -230,8 +230,7 @@ public class HomeController : Controller
 
             if (user != null)
             {
-                // 3. 修改驗證狀態 (假設你有一個 IsEmailConfirmed 欄位)
-                //user.IsEmailConfirmed = true;
+                
 
                 _context.SaveChanges();
                 TempData["ResetEmail"] = decryptedEmail;
