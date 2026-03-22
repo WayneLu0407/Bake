@@ -85,29 +85,43 @@
 
                                     @* 信用卡選項 *@
                                     <div class="payment-option mb-3">
-                                        <input class="d-none" type="radio" name="PaymentMethod" id="creditCard" value="1" checked>
+                                        <input class="d-none" type="radio" name="PaymentMethod" id="creditCard" value="0" checked>
                                         <label class="d-flex align-items-center p-4 rounded-4 border w-100 cursor-pointer shadow-sm active-payment" for="creditCard">
                                             <i class="far fa-credit-card fa-2x me-3 text-muted icon-main"></i>
                                             <div class="flex-grow-1">
-                                                <div class="fw-bold text-dark">Credit Card</div>
+                                                <div class="fw-bold text-dark">信用卡</div>
                                                 <div class="small text-muted">Secure payment with Visa/Master/JCB</div>
                                             </div>
                                             <i class="fas fa-check-circle fa-lg text-warning check-icon"></i>
                                         </label>
                                     </div>
 
-                                    @* Line Pay 選項 *@
-                                    <div class="payment-option mb-5">
-                                        <input class="d-none" type="radio" name="PaymentMethod" id="linePay" value="2">
-                                        <label class="d-flex align-items-center p-4 rounded-4 border w-100 cursor-pointer shadow-sm" for="linePay">
-                                            <i class="fab fa-line fa-2x me-3 text-muted icon-main"></i>
+                                    @* 轉帳 *@
+                                    <div class="payment-option mb-3">
+                                        <input class="d-none" type="radio" name="PaymentMethod" id="Transfer" value="1">
+                                        <label class="d-flex align-items-center p-4 rounded-4 border w-100 cursor-pointer shadow-sm" for="Transfer">
+                                            <i class="fas fa-university fa-2x me-3 text-muted icon-main"></i>
                                             <div class="flex-grow-1">
-                                                <div class="fw-bold text-dark">Line Pay</div>
+                                                <div class="fw-bold text-dark">轉帳</div>
                                                 <div class="small text-muted">Quick mobile payment</div>
                                             </div>
                                             <i class="fas fa-check-circle fa-lg text-warning check-icon d-none"></i>
                                         </label>
                                     </div>
+
+                                    @* 貨到付款 *@
+                                    <div class="payment-option mb-5">
+                                        <input class="d-none" type="radio" name="PaymentMethod" id="PayWhenDelivered" value="2">
+                                        <label class="d-flex align-items-center p-4 rounded-4 border w-100 cursor-pointer shadow-sm" for="PayWhenDelivered">
+                                            <i class="fas fa-shipping-fast fa-2x me-3 text-muted icon-main"></i>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-bold text-dark">貨到付款</div>
+                                                <div class="small text-muted">Quick mobile payment</div>
+                                            </div>
+                                            <i class="fas fa-check-circle fa-lg text-warning check-icon d-none"></i>
+                                        </label>
+                                    </div>
+
 
                                     <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill shadow-lg fw-bold btn-lg"
                                             style="background-color: #1A237E; border: none; font-size: 1.2rem;">
