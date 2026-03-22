@@ -24,6 +24,7 @@ namespace Bake.Controllers.api
                 .Include(p => p.User).ThenInclude(u => u.Shop)
                 .Select(p => new {
                     productId = p.ProductId,
+                    userId = p.UserId,
                     productName = p.ProductName,
                     productImage = p.ProductImage,
                     productRating = p.ProductRating,
@@ -47,6 +48,7 @@ namespace Bake.Controllers.api
                 .Where(p => p.ProductId == id)
                 .Select(p => new {
                     productId = p.ProductId,
+                    userId = p.UserId,
                     productName = p.ProductName,
                     productImage = p.ProductImage,
                     productRating = p.ProductRating,

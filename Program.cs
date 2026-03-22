@@ -33,6 +33,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     option.LoginPath = "/Home/Login";
 });
 
+builder.Services.AddSignalR();//聊天室注入
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -59,6 +61,7 @@ app.MapAreaControllerRoute(
     areaName: "Seller",
     pattern: "Seller/{controller=Default}/{action=Index}/{id?}");
 
+app.MapHub<Bake.Hubs.ChatHub>("/chathub"); //聊天室Hubs服務
 
 app.MapStaticAssets();
 
