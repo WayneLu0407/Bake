@@ -1,11 +1,11 @@
 ﻿<head>
     <style>
-        /* 響應式規則：螢幕大於 1025px 時 */
-        @@media (min-width: 1025px) {
-            .h-custom {
-                height: 100vh !important;
+            /* 響應式規則：螢幕大於 1025px 時 */
+            @@media (min-width: 1025px) {
+                .h-custom {
+                    height: 100vh !important;
+                }
             }
-        }
     </style>
 </head>
 
@@ -34,19 +34,21 @@
                                                 <h5 class="text-muted">{{item.productName}}</h5>
                                                 @* <h6 class="mb-0">Cotton T-shirt</h6> *@
                                             </div>
-                                            <div class="col-md-3 col-lg-3 col-xl-2 d-flex">
+                                            @* 數量增減 *@
+                                            <div class="col-md-3 col-lg-3 col-xl-2 d-flex align-items-center">
                                                 <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
-                                                        onclick="this.parentNode.querySelector('input[type=number]').stepDown()">
+                                                        v-on:click="updateQuantity(item.productId, -1)">
                                                     <i class="fas fa-minus"></i>
                                                 </button>
 
-                                                <input id="form1" min="0" name="quantity" value="1" type="number"
-                                                       class="form-control form-control-sm" />
+                                                <input id="form1" min="0" name="quantity" :value="item.quantity" type="number" readonly
+                                                       class="form-control form-control-sm text-center" style="width: 50px" />
 
                                                 <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
-                                                        onclick="this.parentNode.querySelector('input[type=number]').stepUp()">
+                                                        v-on:click="updateQuantity(item.productId, 1)">
                                                     <i class="fas fa-plus"></i>
                                                 </button>
+
                                             </div>
                                             <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
                                                 <h6 class="mb-0">{{item.price}}</h6>
@@ -104,7 +106,7 @@
                                         </div>
 
                                         <a asp-controller="Checkout" asp-action="Info" style="background-color: #ffc107;" data-mdb-button-init data-mdb-ripple-init class="btn btn-danger btn-block w-100 btn-lg"
-                                           data-mdb-ripple-color="dark">
+                                               data-mdb-ripple-color="dark">
                                             結帳
                                         </a>
 
@@ -160,14 +162,19 @@
                         return;
                     }
 
-                    await fetch('/Cart/Add',{ // 這裡重複使用 Add 來增加或減少數量，change 可為正或負
+                    const response = await fetch('/Cart/Add',{ // 這裡重複使用 Add 來增加或減少數量，change 可為正或負
                         method:'POST',
                         headers:{'Content-Type':'application/json'},
                         body:JSON.stringify({productId:productId, quantity:change})
-                    }),
-                    this.fetchCart();  // 刷新側邊欄購物車資料
+                    });
+
+                    if(response.ok){
+                    await this.fetchCart();  // 刷新側邊欄購物車資料
                     window.dispatchEvent(new Event('update-cart'));
+                    }
+    
                 }
+
             },
             mounted(){
                 this.fetchCart();
