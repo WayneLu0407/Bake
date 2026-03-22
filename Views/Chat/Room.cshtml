@@ -49,7 +49,9 @@
                             @(item.LastMessage.Length>20?item.LastMessage.Substring(0, 20) + "...":item.LastMessage)
                         </small>
                         <br />
-                        <small>@item.LastMessageTime.ToString("MM/dd HH:mm")</small>
+                        <small> @(item.LastMessageTime > DateTime.MinValue
+                            ? item.LastMessageTime.ToString("MM/dd HH:mm")
+                            : "尚無訊息")</small>
                     </a>
                 }
             </div>
