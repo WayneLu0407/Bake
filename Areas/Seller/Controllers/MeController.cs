@@ -23,16 +23,225 @@ namespace Bake.Areas.Seller.Controllers
     public class MeController : Controller
     {
         private readonly BakeContext _context;
-        public MeController(BakeContext context)
+        //為了存圖片要建立所以新增
+        private readonly IWebHostEnvironment _env;
+        public MeController(BakeContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
-        public IActionResult Dashboard()
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> Dashboard()
         {
-            return View();
+            int? userId = GetCurrentUserIdFromClaim();
+
+            if (userId == null)
+            {
+                return RedirectToAction("Login", "Home", new { area = "" });
+            }
+
+            var user = await _context.AccountAuths
+                .AsNoTracking()
+                .Include(x => x.UserProfile)
+                .Include(x => x.RoleNavigation)
+                .Include(x => x.AccountStatusNavigation)
+                .Include(x => x.Shop)
+                .FirstOrDefaultAsync(x => x.UserId == userId.Value);
+
+            if (user == null)
+            {
+                return RedirectToAction("Login", "Home", new { area = "" });
+            }
+
+            var vm = new MemberDashboardViewModel
+            {
+                UserId = user.UserId,
+                FullName = user.UserProfile?.FullName ?? user.UserName,
+                //RoleName = user.RoleNavigation?.StatusName ?? string.Empty,
+                IsEmailConfirmed = user.IsEmailConfirmed,
+                Bio = user.UserProfile?.Bio,
+                AvatarUrl = user.UserProfile?.AvatarUrl,
+
+                //PostCount = await _context.Posts
+                //    .AsNoTracking()
+                //    .CountAsync(p => p.AuthorId == user.UserId),
+
+                //FollowersCount = await _context.Follows
+                //    .AsNoTracking()
+                //    .CountAsync(f => f.BefollowedId == user.UserId),
+
+                //FollowingCount = await _context.Follows
+                //    .AsNoTracking()
+                //    .CountAsync(f => f.FollowerId == user.UserId),
+
+                //HasShop = user.Shop != null,
+                //ShopName = user.Shop?.ShopName
+            };
+
+            return View(vm);
         }
-        
+
+        private int? GetCurrentUserIdFromClaim()
+        {
+            string? userIdClaim = User.FindFirstValue("UserId");
+
+            if (!int.TryParse(userIdClaim, out int userId))
+            {
+                return null;
+            }
+
+            return userId;
+        }
+
+        private async Task<string?> SaveAvatarImageAsync(IFormFile file)
+        {
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+            string extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+            if (!allowedExtensions.Contains(extension))
+            {
+                return null;
+            }
+
+            string folderPath = Path.Combine(_env.WebRootPath, "ProfilePicture", "User");
+            Directory.CreateDirectory(folderPath);
+
+            string fileName = $"{Guid.NewGuid()}{extension}";
+            string fullPath = Path.Combine(folderPath, fileName);
+
+            await using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            return $"ProfilePicture/User/{fileName}";
+        }
+
+        [Authorize]
+        [HttpGet]
+        public async Task<JsonResult> GetProfileEditJson()
+        {
+            int? userId = GetCurrentUserIdFromClaim();
+
+            if (userId == null)
+            {
+                return Json(new { success = false, message = "請重新登入" });
+            }
+
+            var user = await _context.AccountAuths
+                .AsNoTracking()
+                .Include(x => x.UserProfile)
+                .FirstOrDefaultAsync(x => x.UserId == userId.Value);
+
+            if (user == null)
+            {
+                return Json(new { success = false, message = "找不到會員資料" });
+            }
+
+            var genderOptions = await _context.UserGenderStatusDefinitions
+                .AsNoTracking()
+                .OrderBy(x => x.StatusId)
+                .Select(x => new
+                {
+                    value = x.StatusId,
+                    text = x.StatusName
+                })
+                .ToListAsync();
+
+            string avatarUrl = !string.IsNullOrWhiteSpace(user.UserProfile?.AvatarUrl)
+                ? (user.UserProfile.AvatarUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                    ? user.UserProfile.AvatarUrl
+                    : Url.Content("~/" + user.UserProfile.AvatarUrl.TrimStart('/')))
+                : Url.Content("~/seller_assets/images/profile/profile-image.png");
+
+            return Json(new
+            {
+                success = true,
+                data = new
+                {
+                    userName = user.UserName,
+                    fullName = user.UserProfile?.FullName ?? user.UserName,
+                    bio = user.UserProfile?.Bio ?? "",
+                    avatarUrl = avatarUrl,
+                    genderOptions = genderOptions
+                }
+            });
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<JsonResult> UpdateProfileJson(MemberDashboardEditViewModel vm)
+        {
+            int? userId = GetCurrentUserIdFromClaim();
+
+            if (userId == null)
+            {
+                return Json(new { success = false, message = "請重新登入" });
+            }
+
+            var user = await _context.AccountAuths
+                .Include(x => x.UserProfile)
+                .FirstOrDefaultAsync(x => x.UserId == userId.Value);
+
+            if (user == null)
+            {
+                return Json(new { success = false, message = "找不到會員資料" });
+            }
+
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => string.IsNullOrWhiteSpace(e.ErrorMessage) ? "資料格式不正確" : e.ErrorMessage)
+                    .ToList();
+
+                return Json(new { success = false, errors = errors });
+            }
+
+            user.UserName = vm.FullName.Trim();
+
+            if (user.UserProfile == null)
+            {
+                user.UserProfile = new UserProfile
+                {
+                    UserId = user.UserId,
+                    FullName = vm.FullName.Trim(),
+                    AvatarUrl = "seller_assets/images/profile/profile-image.png",
+                    Bio = string.IsNullOrWhiteSpace(vm.Bio) ? null : vm.Bio.Trim(),
+                };
+
+                _context.UserProfiles.Add(user.UserProfile);
+            }
+            else
+            {
+                user.UserProfile.FullName = vm.FullName.Trim();
+                user.UserProfile.Bio = string.IsNullOrWhiteSpace(vm.Bio) ? null : vm.Bio.Trim();
+            }
+
+            if (vm.AvatarFile != null && vm.AvatarFile.Length > 0)
+            {
+                string? avatarPath = await SaveAvatarImageAsync(vm.AvatarFile);
+
+                if (avatarPath == null)
+                {
+                    return Json(new
+                    {
+                        success = false,
+                        errors = new[] { "只允許上傳 jpg、jpeg、png 圖片" }
+                    });
+                }
+
+                user.UserProfile!.AvatarUrl = avatarPath;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "會員資料已更新" });
+        }
+
         public IActionResult Favorites()
         {
             return View();
@@ -43,10 +252,6 @@ namespace Bake.Areas.Seller.Controllers
             return View();
         }
 
-        //public IActionResult Settings()
-        //{
-        //    return View();
-        //}
         [Authorize]
         public async Task<IActionResult> Settings()
         {
@@ -183,3 +388,7 @@ namespace Bake.Areas.Seller.Controllers
         }
     }
 }
+
+
+
+
