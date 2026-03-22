@@ -70,7 +70,7 @@
                     <ul id="ddmenu_1" class="collapse dropdown-nav">
                         <li>
                             <a asp-area="Seller" asp-controller="SellerDashboard" asp-action="Dashboard">
-                                商店與商品管理
+                                    經營分析中心
                             </a>
                         </li>
                         <li>
@@ -133,9 +133,12 @@
                         <li>
                             <a asp-area="Seller" asp-controller="Me" asp-action="Settings"> 個人資訊 </a>
                         </li>
-                        <li>
+                        @if (!User.IsInRole("Seller"))
+                            {
+                            <li>
                             <a asp-area="Seller" asp-controller="Me" asp-action="SwitchSeller"> 我想成為賣家 </a>
                         </li>
+                            }
                     </ul>
                 </li>
                 <li class="nav-item">
