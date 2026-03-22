@@ -39,6 +39,10 @@ namespace Bake.Controllers
             if (existingItem != null)
             {
                 existingItem.Quantity += request.Quantity; //如果已經有了，就增加數量
+                if (existingItem.Quantity <= 0) //原本有，想要刪除
+                {
+                    cart.Remove(existingItem);
+                }
             }
             else
             {
