@@ -1,10 +1,11 @@
 ﻿using Bake.Data;
+using Bake.Models.Service;
 using Bake.ViewModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Plugins;
 using System.Security.Claims;
-using Bake.Models.Service;
 
 namespace Bake.Controllers
 {
@@ -65,26 +66,63 @@ namespace Bake.Controllers
                 {
                     MessageId = x.MessageId,
                     SenderId = x.SenderId,
-                    SenderName = x.Sender.FullName,
+                    //SenderName =  = x.Sender.FullName?? x.Sender.FullName,
                     Message = x.Message,
                     CreateDate = x.CreateDate
                 })
                 .ToListAsync();
 
-            var memberNames = await _context.ChatRoomMembers
-                .Where(x => x.RoomId == id)
-                .Select(x => x.User.FullName)
-                .ToListAsync();
+            var otherMember = await _context.ChatRoomMembers
+                .Where(m => m.RoomId == id && m.UserId != userId)
+                .Select(m => new 
+                {
+                    UserName = m.User.FullName,
+                    shopName=_context.Shops.Where(s => s.UserId == m.UserId)
+                        .Select(s => s.ShopName)
+                        .FirstOrDefault()
+                })
+                .FirstOrDefaultAsync();
+
+            var roomTile = otherMember != null ? (otherMember.shopName??otherMember.UserName):"聊天室";
+
+            //聊天列表：顯示我參與的所有聊天室
+
+            var chatList = await _context.ChatRoomMembers
+                .Where(m=>m.UserId == userId)
+                .Select(m => new ChatListItemViewModel
+                {
+                    RoomId = m.RoomId,
+
+                    OtherName = m.Room.ChatRoomMembers
+                    .Where(x => x.UserId != userId)
+                    .Select(x =>
+                        _context.Shops
+                            .Where(s => s.UserId == x.UserId)
+                            .Select(s => s.ShopName)
+                            .FirstOrDefault()
+                        ?? x.User.FullName)
+                    .FirstOrDefault() ?? "未知",
+
+                    LastMessage = m.Room.ChatMessages
+                    .OrderByDescending(msg => msg.CreateDate)
+                    .Select(msg => msg.Message)
+                    .FirstOrDefault() ?? "",
+
+                    LastMessageTime = m.Room.ChatMessages
+                    .OrderByDescending(msg => msg.CreateDate)
+                    .Select(msg => msg.CreateDate)
+                    .FirstOrDefault()
+
+                }).OrderByDescending(x => x.LastMessageTime).ToListAsync();
 
             var vm = new ChatRoomPageViewModel
-            {
-                RoomId = id,
-                CurrentUserId = userId,
-                RoomTitle = memberNames.Count > 0
-                    ? string.Join("、", memberNames)
-                    : $"聊天室 {id}",
-                Messages = messages
-            };
+                {
+                    RoomId = id,
+                    CurrentUserId = userId,
+                    RoomTitle = roomTile,
+                    Messages = messages,
+                    ChatList = chatList
+                };
 
             return View(vm);
         }
@@ -113,7 +151,7 @@ namespace Bake.Controllers
             };
             _context.ChatRooms.Add(newRoom);
             await _context.SaveChangesAsync();
-            return Content($"currentUserId={currentUserId}, targetId={targetId}");
+            
             // 4. 用 SQL 插入成員（繞過 EF 的關聯追蹤問題）
             await _context.Database.ExecuteSqlInterpolatedAsync($@"
             INSERT INTO Service.Chat_Room_Member (room_id, user_id, joined_at) 

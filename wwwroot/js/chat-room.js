@@ -37,7 +37,6 @@ connection.on("ReceiveMessage", function (data) {
 
     li.innerHTML = `
         <div class="msg-bubble">
-            <div class="fw-bold small">${data.senderName}</div>
             <div>${data.message}</div>
             <small class="text-muted">${data.createDate}</small>
         </div>

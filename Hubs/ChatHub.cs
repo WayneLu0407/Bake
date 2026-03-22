@@ -38,18 +38,18 @@ namespace Bake.Hubs
             _context.ChatMessages.Add(chatMessage);
             await _context.SaveChangesAsync();
 
-            string senderName = await _context.UserProfiles
-                .Where(u => u.UserId == senderId)
-                .Select(u => u.FullName)
-                .FirstOrDefaultAsync() ?? "未知";
+            //string senderName = await await _context.UserProfiles
+            //    .Where(u => u.UserId == senderId)
+            //    .Select(u => u.FullName)
+            //    .FirstOrDefaultAsync() ?? "未知";
 
             await Clients.Group($"Room-{roomId}").SendAsync("ReceiveMessage", new
             {
                 MessageId = chatMessage.MessageId,
                 SenderId = senderId,
-                SenderName = senderName,
+                //SenderName = senderName,
                 Message = message,
-                CreateDate = chatMessage.CreateDate.ToString("yyyy-MM-dd HH:mm:ss")
+                CreateDate = chatMessage.CreateDate.ToString("MM/dd HH:mm")
             });
         }
 
