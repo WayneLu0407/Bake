@@ -14,6 +14,8 @@ namespace Bake.Controllers
             _bakeContext = bakeContext;
         }
 
+        // 將抓取 ID 的邏輯封裝，全 Controller 通用
+        private int CurrentUserId => int.Parse(User.FindFirst("UserId")?.Value ?? "0");
 
         public IActionResult Info()
         {
@@ -51,7 +53,7 @@ namespace Bake.Controllers
             //1. 建立Order物件實體，並將checkoutdata資料填入Order物件中
             var order = new Order
             {
-                UserId = 1,
+                UserId = CurrentUserId,
                 ShippingAddress = checkoutViewModel.ReceiverAddress,
                 TotalAmount = 0, //這裡先設為0，實際金額應該從購物車計算
                 PaymentMethodId = byte.Parse(PaymentMethod),
