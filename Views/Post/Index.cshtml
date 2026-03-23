@@ -175,7 +175,9 @@
                                     <h5 class="categories mb-2 text-white">不只是買賣，更是一個社群</h5>
                                     <h2 class="text-white fw-bold">一起烤 一起吃 一起玩</h2>
                                     <h5 class="text-white">發起手作工作坊 · 揪團嘗鮮 · 和烘焙同好面對面交流</h5>
-                                </div>
+                            </div>
+                            <div class="swiper-slide text-center py-5">
+                                <h4 class="text-muted">Banner 2</h4>
                             </div>
                         </div>
                         <div class="swiper-pagination"></div>
@@ -269,17 +271,22 @@
             <div class="container-fluid">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h3 class="section-heading">熱門活動分類</h3>
+                    <div class="swiper-buttons">
+                        <button class="swiper-prev cat-prev btn btn-primary btn-sm">❮</button>
+                        <button class="swiper-next cat-next btn btn-primary btn-sm">❯</button>
+                    </div>
                 </div>
                 <div class="row g-4">
                     <div class="col-3" v-for="cat in categories.filter(c=>c.eventTypeId!==0)" :key="cat.eventTypeId">
-                        <a :href="'/Home/Posts?category=' + cat.eventTypeId" class="text-decoration-none text-dark"> 
+                            <a :href="'/Home/Posts?category=' + cat.eventTypeId" class="text-decoration-none text-dark">
                             <div class="category-icon-card text-center">
                                 <div class="icon-circle">
                                     <i class="fa-solid" :class="cat.icon"></i>
                                 </div>
                                 <p class="mt-2 fw-bold mb-0">{{ cat.eventTypeName }}</p>
-                            </div>
-                        </a>
+                                </div>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -363,9 +370,9 @@
                             ...c,
                             icon: iconMap[c.eventTypeId] || 'fa-tag'
                         }))
-                    } catch (err) {
-                        console.error('EventTypes 失敗:', err)
-                    }
+                } catch (err) { 
+                    console.error('EventTypes 失敗:', err) 
+                }
 
                 // 揪團活動
                 try {
