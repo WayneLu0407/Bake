@@ -311,7 +311,7 @@ namespace Bake.Areas.Seller.Controllers
             }
             user.UserName = model.Name;
             user.Email = model.Email;
-            user.PasswordHash = model.Password;
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
             
             _context.SaveChanges();
             return RedirectToAction("Dashboard","Me", new {area = "Seller"});
@@ -344,7 +344,7 @@ namespace Bake.Areas.Seller.Controllers
                     var user = _context.AccountAuths.FirstOrDefault(a=>a.Email == email);
                     if(user != null)
                     {
-                        user.PasswordHash = model.Password;
+                        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
                         _context.AccountAuths.Update(user);
                         _context.SaveChanges();
                         return RedirectToAction("Login", "Home", new { area = "" });
