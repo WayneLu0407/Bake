@@ -116,13 +116,46 @@
         font-size: 1.25rem;
         font-weight: 700;
     }
-    .swiper:not(.swiper-initialized) .swiper-slide {
-    width: 20%;      /* 預設顯示 4 張的寬度 */
-    flex-shrink: 0;
+
+    .category-icon-card {
+    padding: 24px 16px;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    background: #fff;
+    transition: box-shadow .25s, transform .2s;
     }
+    .category-icon-card:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,.1);
+        transform: translateY(-2px);
+    }
+    .icon-circle {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background-color: #FFF3E0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+    .icon-circle i {
+        font-size: 1.6rem;
+        color: #F5A623;
+    }
+
+    /* Swiper 還沒初始化前的預約束 */
     .swiper:not(.swiper-initialized) .swiper-wrapper {
         display: flex;
         overflow: hidden;
+    }
+    .swiper:not(.swiper-initialized) .swiper-slide {
+        width: 20%;
+        flex-shrink: 0;
+    }
+
+    /* hero banner 一次只顯示一張 */
+    .hero-swiper:not(.swiper-initialized) .swiper-slide {
+        width: 100%;
     }
 </style>
 }
@@ -131,18 +164,25 @@
     <!-- ========== 橘色標題橫幅 ========== -->
     <div class="community-banner">交流分享區</div>
     <!-- ========== 1. 頂部輪播 ========== -->
-    <section class="py-3" style="background-color: #d9d9d9;">
+    <section class="py-3">
         <div class="container-fluid">
             <div class="banner-blocks">
                 <div class="banner-ad large">
                     <div class="swiper hero-swiper">
                         <div class="swiper-wrapper">
-                            <!-- 放你自己的 banner 圖；這裡先用 placeholder -->
-                            <div class="swiper-slide text-center py-5">
-                                <h4 class="text-muted">旋轉木馬</h4>
+                            <div class="swiper-slide" style="background: url('postimage/banner/banner1.jpg') no-repeat center / cover;">
+                                <div class="w-100 d-flex flex-column align-items-center justify-content-center text-center" style="min-height: 300px;text-shadow: 2px 2px 6px rgba(0,0,0,0.6);">
+                                    <h5 class="categories mb-2 text-white">烘焙人的秘密基地</h5>
+                                    <h2 class="text-white fw-bold">分享你的甜點故事</h2>
+                                    <h5 class="text-white">食譜交流 · 活動揪團 · 找到和你一樣熱愛烘焙的人</h5>
+                                </div>
                             </div>
-                            <div class="swiper-slide text-center py-5">
-                                <h4 class="text-muted">Banner 2</h4>
+                            <div class="swiper-slide" style="background: url('postimage/banner/banner3.jpg') no-repeat center / cover;">
+                                <div class="w-100 d-flex flex-column align-items-center justify-content-center text-center" style="min-height: 300px;text-shadow: 2px 2px 6px rgba(0,0,0,0.6);">
+                                    <h5 class="categories mb-2 text-white">不只是買賣，更是一個社群</h5>
+                                    <h2 class="text-white fw-bold">一起烤 一起吃 一起玩</h2>
+                                    <h5 class="text-white">發起手作工作坊 · 揪團嘗鮮 · 和烘焙同好面對面交流</h5>
+                                </div>
                             </div>
                         </div>
                         <div class="swiper-pagination"></div>
@@ -157,7 +197,7 @@
         <!-- ========== 3. 搜尋列 + 按鈕 ========== -->
         <section class="px-4">
             <div class="container-fluid">
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-5">
                     <!-- 搜尋 -->
                     <div class="post-search-bar position-relative flex-grow-1">
                         <input type="text" class="form-control" placeholder="搜尋" v-model="keyword" />
@@ -167,7 +207,7 @@
                     </div>
                     <!-- 按鈕 -->
                     <div class="d-flex gap-2">
-                         <a asp-controller="Home" asp-action="CreatePost" class="btn btn-post-action">全部</a>
+                        <a asp-controller="Home" asp-action="CreatePost" class="btn btn-post-action">全部</a>
                         <a asp-controller="Home" asp-action="CreatePost" class="btn btn-post-action">新增貼文</a>
                         <a asp-controller="Home" asp-action="CreateActivity" class="btn btn-post-action">新增活動</a>
                     </div>
@@ -232,23 +272,19 @@
         </section>
 
         <!-- ========== 6. 熱門活動分類 ========== -->
-        <section class="py-4 overflow-hidden">
+        <section class="py-4">
             <div class="container-fluid">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h3 class="section-heading">熱門活動分類</h3>
-                    <div class="swiper-buttons">
-                        <button class="swiper-prev cat-prev btn btn-primary btn-sm">❮</button>
-                        <button class="swiper-next cat-next btn btn-primary btn-sm">❯</button>
-                    </div>
                 </div>
-                <div class="swiper category-carousel">
-                    <div class="swiper-wrapper">
-                        <div class="swiper-slide" v-for="cat in categories" :key="cat.eventTypeId">
+                <div class="row g-4">
+                    <div class="col-3" v-for="cat in categories.filter(c=>c.eventTypeId!==0)" :key="cat.eventTypeId">
                             <a :href="'/Home/Posts?category=' + cat.eventTypeId" class="text-decoration-none text-dark">
-                                <div class="category-card">
-                                    <img v-if="cat.image" :src="cat.image" :alt="cat.eventTypeName" />
-                                    <div v-else class="card-thumb-placeholder" style="aspect-ratio:5/3; background:#e8e8e8;"></div>
-                                    <div class="cat-label">{{ cat.eventTypeName }}</div>
+                            <div class="category-icon-card text-center">
+                                <div class="icon-circle">
+                                    <i class="fa-solid" :class="cat.icon"></i>
+                                </div>
+                                <p class="mt-2 fw-bold mb-0">{{ cat.eventTypeName }}</p>
                                 </div>
                             </a>
                         </div>
@@ -324,8 +360,17 @@
                 // 熱門活動分類
                 try {
                     const res3 = await fetch('/api/PostApi/EventTypes')
-                    this.categories  = await res3.json()
-                    console.log('EventTypes:', this.categories )    // 確認有拿到資料
+                    const raw = await res3.json()
+                    const iconMap = {
+                        1: 'fa-cookie-bite',      // 手作實作
+                        2: 'fa-comments',         // 經驗分享
+                        3: 'fa-mug-hot',          // 品嚐聚會
+                        4: 'fa-basket-shopping',  // 食材揪團
+                    }
+                    this.categories = raw.map(c => ({
+                            ...c,
+                            icon: iconMap[c.eventTypeId] || 'fa-tag'
+                        }))
                 } catch (err) { 
                     console.error('EventTypes 失敗:', err) 
                 }
