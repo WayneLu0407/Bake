@@ -1,10 +1,12 @@
-﻿using Bake.Data;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using Bake.Areas.Seller.ViewModels;
+﻿using Bake.Areas.Seller.ViewModels;
+using Bake.Data;
 using Bake.Models.Sales;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Bake.Areas.Seller.Controllers
 
@@ -20,6 +22,16 @@ namespace Bake.Areas.Seller.Controllers
         {
             _context = context;
             _env = env;
+        }
+
+        private async Task<IEnumerable<SelectListItem>> GetStatusName()
+        {
+            return await _context.ShopStatuses
+                .Select(s => new SelectListItem
+                {
+                    Value = s.StatusId.ToString(), // tinyint 轉 string
+                    Text = s.StatusName            // 營業中 / 打烊中
+                }).ToListAsync();
         }
 
         //對應到店鋪資料
@@ -47,7 +59,7 @@ namespace Bake.Areas.Seller.Controllers
 
         // Get:/Seller/SellerShop/Shop_settings
         [HttpGet]
-        public IActionResult Shop_settings()
+        public async Task<IActionResult> Shop_settings()
         {
             int? userId = GetCurrentUserIdFromClaim();
 
@@ -71,6 +83,11 @@ namespace Bake.Areas.Seller.Controllers
                 vm.InstagramUrl = shop.InstagramUrl;
                 vm.YoutubeUrl = shop.YoutubeUrl;
                 vm.PinterestUrl = shop.PinterestUrl;
+                vm.StatusName = await GetStatusName();
+            }
+            else
+            {
+                vm.StatusName = await GetStatusName();
             }
 
             return View(vm);
@@ -113,7 +130,7 @@ namespace Bake.Areas.Seller.Controllers
                     ShopRating = 0m,
                     ShopTime = DateTime.Now,
                     SellerApprovedAt = DateTime.Now,
-                    StatusId = 1,
+                    StatusId = shop.StatusId,
                     FacebookUrl = vm.FacebookUrl?.Trim(),
                     InstagramUrl = vm.InstagramUrl?.Trim(),
                     YoutubeUrl = vm.YoutubeUrl?.Trim(),
@@ -131,6 +148,7 @@ namespace Bake.Areas.Seller.Controllers
                 shop.InstagramUrl = vm.InstagramUrl?.Trim();
                 shop.YoutubeUrl = vm.YoutubeUrl?.Trim();
                 shop.PinterestUrl = vm.PinterestUrl?.Trim();
+                shop.StatusId = vm.StatusId.Value;
             }
 
             // 圖片存到 wwwroot/ProductPicture/Shop
