@@ -1,5 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 
 namespace Bake.Areas.Seller.ViewModels
 {    
@@ -17,6 +18,8 @@ namespace Bake.Areas.Seller.ViewModels
         public string? ShopImg { get; set; }
 
         public IFormFile? ShopImageFile { get; set; }
+
+        public IEnumerable<SelectListItem>? StatusName { get; set; }
 
         // 目前先保留顯示用
         public byte? StatusId { get; set; }
