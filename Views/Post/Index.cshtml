@@ -116,14 +116,6 @@
         font-size: 1.25rem;
         font-weight: 700;
     }
-    .swiper:not(.swiper-initialized) .swiper-slide {
-    width: 20%;      /* 預設顯示 4 張的寬度 */
-    flex-shrink: 0;
-    }
-    .swiper:not(.swiper-initialized) .swiper-wrapper {
-        display: flex;
-        overflow: hidden;
-    }
 
     .category-icon-card {
     padding: 24px 16px;
@@ -150,6 +142,21 @@
         font-size: 1.6rem;
         color: #F5A623;
     }
+
+    /* Swiper 還沒初始化前的預約束 */
+    .swiper:not(.swiper-initialized) .swiper-wrapper {
+        display: flex;
+        overflow: hidden;
+    }
+    .swiper:not(.swiper-initialized) .swiper-slide {
+        width: 20%;
+        flex-shrink: 0;
+    }
+
+    /* hero banner 一次只顯示一張 */
+    .hero-swiper:not(.swiper-initialized) .swiper-slide {
+        width: 100%;
+    }
 </style>
 }
 
@@ -175,9 +182,7 @@
                                     <h5 class="categories mb-2 text-white">不只是買賣，更是一個社群</h5>
                                     <h2 class="text-white fw-bold">一起烤 一起吃 一起玩</h2>
                                     <h5 class="text-white">發起手作工作坊 · 揪團嘗鮮 · 和烘焙同好面對面交流</h5>
-                            </div>
-                            <div class="swiper-slide text-center py-5">
-                                <h4 class="text-muted">Banner 2</h4>
+                                </div>
                             </div>
                         </div>
                         <div class="swiper-pagination"></div>
@@ -192,7 +197,7 @@
         <!-- ========== 3. 搜尋列 + 按鈕 ========== -->
         <section class="px-4">
             <div class="container-fluid">
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-5">
                     <!-- 搜尋 -->
                     <div class="post-search-bar position-relative flex-grow-1">
                         <input type="text" class="form-control" placeholder="搜尋" v-model="keyword" />
@@ -202,7 +207,7 @@
                     </div>
                     <!-- 按鈕 -->
                     <div class="d-flex gap-2">
-                         <a asp-controller="Home" asp-action="CreatePost" class="btn btn-post-action">全部</a>
+                        <a asp-controller="Home" asp-action="CreatePost" class="btn btn-post-action">全部</a>
                         <a asp-controller="Home" asp-action="CreatePost" class="btn btn-post-action">新增貼文</a>
                         <a asp-controller="Home" asp-action="CreateActivity" class="btn btn-post-action">新增活動</a>
                     </div>
@@ -271,10 +276,6 @@
             <div class="container-fluid">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h3 class="section-heading">熱門活動分類</h3>
-                    <div class="swiper-buttons">
-                        <button class="swiper-prev cat-prev btn btn-primary btn-sm">❮</button>
-                        <button class="swiper-next cat-next btn btn-primary btn-sm">❯</button>
-                    </div>
                 </div>
                 <div class="row g-4">
                     <div class="col-3" v-for="cat in categories.filter(c=>c.eventTypeId!==0)" :key="cat.eventTypeId">
