@@ -265,10 +265,10 @@
                         </li>
                     </ul>
                     @*購物車header部分*@
-                    <div class="cart text-end d-none d-lg-block dropdown">
+                    <div class="cart text-end d-none d-lg-block dropdown" id="headerCart">
                         <button class="border-0 bg-transparent d-flex flex-column gap-2 lh-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart" aria-controls="offcanvasCart">
                             <span class="fs-6 text-muted dropdown-toggle">購物車</span>
-                            <span class="cart-total fs-5 fw-bold">$1290.00</span>
+                            <span class="cart-total fs-5 fw-bold">{{totalPrice}}</span>
                         </button>
                     </div>
                 </div>
@@ -310,7 +310,11 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script>
 
-        // 這裡是購物車的 JavaScript 代碼，只有在需要時才會被渲染
+        // 購物車JavaScript 代碼，只有在需要時才會被渲染
+        const getCartData = async() =>{
+            const response = await fetch('/Cart/GetCartItems'); //向後端API請求購物車資料
+            return await response.json(); //將回傳的JSON資料
+        }
         const cartApp = Vue.createApp({
             data() {
                 return { cart: []}
@@ -324,21 +328,34 @@
                 },
             },
             methods:{
-                async fetchCart() {
-                    const response = await fetch('/Cart/GetCartItems'); //向後端API請求購物車資料
-                    this.cart = await response.json(); //將回傳的JSON資料賦值給cart
-                }
-            },
-            created() {
-                this.fetchCart();  // 提早發請求，不用 await 擋住
+                async refresh() {this.cart = await getCartData();}
             },
             mounted() {
                 // addEventListener 跟 DOM 有關，留在 mounted
+                this.refresh();
                 window.addEventListener('update-cart', () => {
-                    this.fetchCart();
+                    this.refresh();
                 })
             }
         }).mount("#cart-app");
+        
+        const cartHeader = Vue.createApp({
+            data(){return {cart:[]}},
+            computed:{
+                totalPrice(){
+                    return this.cart.reduce((sum,item)=>sum+(item.price*(item.quantity || 1)),0);
+                }
+            },
+            methods:{
+                async refresh() {this.cart = await getCartData();}
+            },
+            mounted(){
+            this.refresh();
+            window.addEventListener('update-cart', () =>{
+                this.refresh();
+             })
+            }
+        }).mount("#headerCart")
     </script>
     <script>
         // 這裡是搜尋的 JavaScript 代碼，只有在需要時才會被渲染
