@@ -58,7 +58,23 @@
                                 </div>
                                 <input asp-for="ShopImageFile" type="file" class="form-control form-control-sm" accept=".jpg,.jpeg,.png" />
                                 <span asp-validation-for="ShopImageFile" class="text-danger"></span>
+                                <div>
+                                    <div class="mb-3 w-50">
+                                        <label asp-for="StatusId" class="form-label font-weight-bold">商店營業狀態</label>
+        
+                                        @* 使用 Model 中的 StatusOptions，即使報錯也不會消失 *@
+                                        <select asp-for="StatusId"
+                                                class="form-select border-primary"
+                                                asp-items="Model.StatusName">
+                                            <option value="">-- 請選擇 --</option>
+                                        </select>
+                                        
+   
+                                    </div>
+                                    <span asp-validation-for="StatusId" class="text-danger"></span>
+                                </div>
                             </div>
+                            
 
                             <div class="flex-grow-1" style="min-width: 0;">
                                 <div class="mb-3">
@@ -72,6 +88,7 @@
                                     <textarea asp-for="ShopDescription" class="form-control" rows="4"></textarea>
                                     <span asp-validation-for="ShopDescription" class="text-danger"></span>
                                 </div>
+                                
                             </div>
                         </div>
 
