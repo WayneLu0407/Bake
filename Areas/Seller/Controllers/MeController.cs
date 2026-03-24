@@ -389,7 +389,7 @@ namespace Bake.Areas.Seller.Controllers
                 users.Role = 1;
                 await _context.SaveChangesAsync();
             }
-            //HttpContext.Session.Clear();
+            
 
             var user = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var claims = new List<Claim>
@@ -414,7 +414,29 @@ namespace Bake.Areas.Seller.Controllers
             HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
         }
-        
+
+        public IActionResult BankAccountChange()
+        {
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BankAccountChangeAsync(BankAccountChangeModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+            var userId = User.FindFirstValue("UserId");
+            var users = await _context.AccountAuths.Include(a=>a.UserPaymentSecret).FirstOrDefaultAsync(a=>a.UserId == int.Parse(userId));
+            
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] InputAccount = Encoding.UTF8.GetBytes(model.BankAccount);
+                byte[] HashAccount = sha256.ComputeHash(InputAccount);
+                users.UserPaymentSecret.EncryptedBankAcc = HashAccount;
+                _context.UserPaymentSecrets.Update(users.UserPaymentSecret);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("Dashboard", "Me", new { area = "Seller" });
+        }
     }
 }
 

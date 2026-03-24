@@ -59,6 +59,7 @@ public class HomeController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> LoginAsync(LoginModel model)
     {
+        
         var user = _context.AccountAuths.Include(u=>u.RoleNavigation).FirstOrDefault(x => x.Email == model.Account);  //把資料庫的資料找出來做比對
 
         if (ModelState.IsValid)
@@ -67,6 +68,8 @@ public class HomeController : Controller
             {
                 return View();
             }
+
+
 
 
 
