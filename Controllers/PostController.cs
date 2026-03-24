@@ -8,10 +8,12 @@ namespace Bake.Controllers
         {
             return View();
         }
-        public IActionResult Latest()
+
+        public IActionResult PostList()
         {
             return View();
         }
+
         public IActionResult Trending()
         {
             return View();
