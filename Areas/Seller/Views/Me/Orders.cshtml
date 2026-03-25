@@ -86,7 +86,11 @@
 													</td>
 													<td>
 														@foreach(var product in item.ProductsList){
-															<p>@product.ProductName</p><p>x @product.Quantity</p>
+															@* <p>@product.ProductName</p><p>x @product.Quantity</p> *@
+															<div class="mb-2">
+																<p class="mb-0">@product.ProductName</p>
+																<small class="text-muted">x @product.Quantity</small>
+															</div>
 														}
 														
 													</td>
@@ -107,7 +111,21 @@
 														<p>@item.StatusName</p>
 													</td>
 													<td>
-														<button >讚</button>
+														@foreach (var product in item.ProductsList)
+														{
+															<div class="mb-2">
+																@if (product.IsReviewed)
+																{
+																	<button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+																		已評論
+																	</button>
+																}
+																else
+																{
+																	<a asp-area="" asp-controller="ProductReview" asp-action="Create" asp-route-productId="@product.ProductId" asp-route-orderId="@item.OrderId" class="btn btn-warning btn-sm">評論商品</a>
+																}
+															</div>
+														}
 													</td>
 												</tr>
 												}
