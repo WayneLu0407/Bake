@@ -28,7 +28,7 @@ namespace Bake.Areas.Seller.Controllers
     public class MeController : Controller
     {
         private readonly BakeContext _context;
-        //為了存圖片要建立所以新增
+        
         private readonly IWebHostEnvironment _env;
         public MeController(BakeContext context, IWebHostEnvironment env)
         {
@@ -251,10 +251,19 @@ namespace Bake.Areas.Seller.Controllers
         {
             return View();
         }
+
         [Authorize]
         public async Task<IActionResult> Orders()
         {
             var userId = User.FindFirst("UserId")?.Value;
+            //避免他人抓到別人的訂單
+            if (!int.TryParse(userId, out var currentUserId)) return RedirectToAction("Login", "Home", new { area = "" });
+
+            var reviewedSet = (await _context.ProductReviews
+            .Where(r => r.UserId == currentUserId)
+            .Select(r => $"{r.OrderId}_{r.ProductId}")
+            .ToListAsync())
+            .ToHashSet(); //不重複抓取
 
             var orderList = await _context.OrderItems
                 .Where(x => x.Order.UserId == int.Parse(userId))
@@ -270,11 +279,25 @@ namespace Bake.Areas.Seller.Controllers
                     StatusName = g.First().Order.Status.StatusName,
                     ProductsList = g.First().Order.OrderItems.Select(oi => new Item
                     {
+                        ProductId = oi.ProductId, // 評論需要
                         ProductName = oi.Product.ProductName, // 從訂單項目關聯到產品名稱
                         Quantity = oi.ItemQuantity,
+                        IsReviewed = false, 
                     }).ToList()
                 }).OrderBy(c => c.OrderId)
                 .ToListAsync();
+
+            foreach (var order in orderList) // 評論需要 不能寫裡面因為SQL讀不到
+            {
+                foreach (var item in order.ProductsList)
+                {
+                    // 在這裡用字串插值，C# 絕對聽得懂
+                    if (reviewedSet.Contains($"{order.OrderId}_{item.ProductId}"))
+                    {
+                        item.IsReviewed = true; // 對獎成功，標註為已評論
+                    }
+                }
+            }
 
             return View(orderList);
         }

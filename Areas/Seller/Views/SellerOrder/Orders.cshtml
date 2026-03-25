@@ -93,11 +93,10 @@
                                                         <p><a href="mailto:@item.Email">@item.Email</a></p>
                                                     </td>
                                                     <td class="min-width">
-                                                            @foreach (var product in item.Products)
-                                                            {
-                                                            <p>@product.ProductName</p> <p>數量：@product.Quantity</p>
-                                                            
-                                                            }
+                                                        @foreach (var product in item.Products)
+                                                        {
+                                                        <p>@product.ProductName</p> <p>數量：@product.Quantity</p>
+                                                        }
                                                     </td>
                                                     <td>
                                                         @{
