@@ -291,10 +291,10 @@ namespace Bake.Areas.Seller.Controllers
             {
                 foreach (var item in order.ProductsList)
                 {
-                    // 在這裡用字串插值，C# 絕對聽得懂
+                    
                     if (reviewedSet.Contains($"{order.OrderId}_{item.ProductId}"))
                     {
-                        item.IsReviewed = true; // 對獎成功，標註為已評論
+                        item.IsReviewed = true; 
                     }
                 }
             }
