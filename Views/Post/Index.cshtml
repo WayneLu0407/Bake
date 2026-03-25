@@ -279,7 +279,7 @@
                 </div>
                 <div class="row g-4">
                     <div class="col-3" v-for="cat in categories.filter(c=>c.eventTypeId!==0)" :key="cat.eventTypeId">
-                            <a :href="'/Home/Posts?category=' + cat.eventTypeId" class="text-decoration-none text-dark">
+                            <a :href="'/Post/PostList?category=' + cat.eventTypeId" class="text-decoration-none text-dark">
                             <div class="category-icon-card text-center">
                                 <div class="icon-circle">
                                     <i class="fa-solid" :class="cat.icon"></i>
@@ -290,7 +290,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
         </section>
 
         <!-- ========== 7. 揪團中的活動（第一組） ========== -->
