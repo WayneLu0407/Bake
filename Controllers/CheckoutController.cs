@@ -21,8 +21,7 @@ namespace Bake.Controllers
         private int CurrentUserId
         {
             get
-            {
-                // 嘗試三種抓取方式：自定義、標準 ID、以及 NameIdentifier
+            { 
                 var claimValue = User.FindFirst("UserId")?.Value
                               ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
@@ -48,6 +47,7 @@ namespace Bake.Controllers
                 TempData["ReceiverName"] = model.ReceiverName;
                 TempData["ReceiverPhone"] = model.ReceiverPhone;
                 TempData["ReceiverAddress"] = model.ReceiverAddress;
+                TempData["ReceiverEmail"] = model.ReceiverEmail;
                 return RedirectToAction("Payment");
             }
             return View(model);
@@ -61,6 +61,7 @@ namespace Bake.Controllers
             ViewBag.ReceiverName = TempData["ReceiverName"] ?? "測試員";
             ViewBag.ReceiverPhone = TempData["ReceiverPhone"];
             ViewBag.ReceiverAddress = TempData["ReceiverAddress"];
+            ViewBag.ReceiverEmail = TempData["ReceiverEmail"];
 
             return View();
         }
