@@ -165,5 +165,43 @@ namespace Bake.Controllers.api
                 .ToList();
             return Ok(results);
         }
+
+        // 全部文章+活動（給 PostList 頁用）
+        [HttpGet("All")]
+        public async Task<IActionResult> All()
+        {
+            var list = await BaseQuery()
+                .OrderByDescending(p => p.CreatedAt)
+                .Select(p => new
+                {
+                    p.PostId,
+                    p.Title,
+                    Content = p.Content.Length > 100 ? p.Content.Substring(0, 100) + "..." : p.Content,
+                    p.TypeId,
+                    p.ViewCount,
+                    p.CreatedAt,
+
+                    Image = p.PostAttachments
+                        .Where(a => a.IsCover == true)
+                        .Select(a => a.FileUrl)
+                        .FirstOrDefault(),
+                    EventTypeId = (int?)p.EventDetails
+                        .Select(e => (int?)e.EventTypeId)
+                        .FirstOrDefault(),
+                    EventTypeName = p.EventDetails
+                        .Select(e => e.EventType.EventTypeName)
+                        .FirstOrDefault(),
+                    Price = p.EventDetails
+                        .Select(e => e.Price)
+                        .FirstOrDefault(),
+                    EventTime = p.EventDetails
+                        .Select(e => (DateTime?)e.EventTime)
+                        .FirstOrDefault(),
+                    LocationCity = p.EventDetails
+                        .Select(e => e.LocationCity)
+                        .FirstOrDefault(),
+                }).ToListAsync();
+            return Ok(list);
+        }
     }
 }
