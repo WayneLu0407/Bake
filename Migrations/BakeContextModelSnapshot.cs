@@ -367,7 +367,7 @@ namespace Bake.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("created_at");
 
-                    b.Property<byte>("PaymentMethod")
+                    b.Property<byte>("PaymentMethodId")
                         .HasColumnType("tinyint")
                         .HasColumnName("payment_method");
 
@@ -395,6 +395,8 @@ namespace Bake.Migrations
 
                     b.HasKey("OrderId")
                         .HasName("PK__Orders__4659622948DE6D11");
+
+                    b.HasIndex("PaymentMethodId");
 
                     b.HasIndex("StatusId");
 
@@ -456,6 +458,38 @@ namespace Bake.Migrations
                         .HasName("PK__Order_St__3683B531F0F39FA7");
 
                     b.ToTable("Order_Status", "Sales");
+                });
+
+            modelBuilder.Entity("Bake.Models.Sales.PaymentMethod", b =>
+                {
+                    b.Property<byte>("PaymentMethodId")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("PaymentMethodId");
+
+                    b.ToTable("PaymentMethod", "Sales");
+
+                    b.HasData(
+                        new
+                        {
+                            PaymentMethodId = (byte)0,
+                            Name = "信用卡"
+                        },
+                        new
+                        {
+                            PaymentMethodId = (byte)1,
+                            Name = "轉帳"
+                        },
+                        new
+                        {
+                            PaymentMethodId = (byte)2,
+                            Name = "貨到付款"
+                        });
                 });
 
             modelBuilder.Entity("Bake.Models.Sales.Product", b =>
@@ -832,6 +866,8 @@ namespace Bake.Migrations
                     b.HasKey("MessageId")
                         .HasName("PK__Chat_Mes__0BBF6EE670CE81C2");
 
+                    b.HasIndex("RoomId");
+
                     b.HasIndex("SenderId");
 
                     b.ToTable("Chat_Message", "Service");
@@ -852,8 +888,14 @@ namespace Bake.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("(sysdatetime())");
 
+                    b.Property<byte>("RoomType")
+                        .HasColumnType("tinyint")
+                        .HasColumnName("room_type");
+
                     b.HasKey("RoomId")
                         .HasName("PK__Chat_Roo__19675A8A5EAF03AF");
+
+                    b.HasIndex("RoomType");
 
                     b.ToTable("Chat_Room", "Service");
                 });
@@ -878,6 +920,41 @@ namespace Bake.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Chat_Room_Member", "Service");
+                });
+
+            modelBuilder.Entity("Bake.Models.Service.ChatRoomType", b =>
+                {
+                    b.Property<byte>("TypeId")
+                        .HasColumnType("tinyint")
+                        .HasColumnName("type_id");
+
+                    b.Property<string>("TypeName")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("type_name");
+
+                    b.HasKey("TypeId")
+                        .HasName("PK_Chat_Room_Type");
+
+                    b.ToTable("Chat_Room_Type", "Service");
+
+                    b.HasData(
+                        new
+                        {
+                            TypeId = (byte)0,
+                            TypeName = "一對一"
+                        },
+                        new
+                        {
+                            TypeId = (byte)1,
+                            TypeName = "群組"
+                        },
+                        new
+                        {
+                            TypeId = (byte)2,
+                            TypeName = "AI客服"
+                        });
                 });
 
             modelBuilder.Entity("Bake.Models.Service.NotifyType", b =>
@@ -1618,6 +1695,12 @@ namespace Bake.Migrations
 
             modelBuilder.Entity("Bake.Models.Sales.Order", b =>
                 {
+                    b.HasOne("Bake.Models.Sales.PaymentMethod", "PaymentMethod")
+                        .WithMany("Orders")
+                        .HasForeignKey("PaymentMethodId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Bake.Models.Sales.OrderStatus", "Status")
                         .WithMany("Orders")
                         .HasForeignKey("StatusId")
@@ -1629,6 +1712,8 @@ namespace Bake.Migrations
                         .HasForeignKey("UserId")
                         .IsRequired()
                         .HasConstraintName("FK_Orders_Profile");
+
+                    b.Navigation("PaymentMethod");
 
                     b.Navigation("Status");
 
@@ -1739,13 +1824,32 @@ namespace Bake.Migrations
 
             modelBuilder.Entity("Bake.Models.Service.ChatMessage", b =>
                 {
+                    b.HasOne("Bake.Models.Service.ChatRoom", "Room")
+                        .WithMany("ChatMessages")
+                        .HasForeignKey("RoomId")
+                        .IsRequired()
+                        .HasConstraintName("FK_Message_Room");
+
                     b.HasOne("Bake.Models.User.UserProfile", "Sender")
                         .WithMany("ChatMessages")
                         .HasForeignKey("SenderId")
                         .IsRequired()
                         .HasConstraintName("FK_Message_Profile");
 
+                    b.Navigation("Room");
+
                     b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("Bake.Models.Service.ChatRoom", b =>
+                {
+                    b.HasOne("Bake.Models.Service.ChatRoomType", "RoomTypeNavigation")
+                        .WithMany("ChatRooms")
+                        .HasForeignKey("RoomType")
+                        .IsRequired()
+                        .HasConstraintName("FK_Room_Type");
+
+                    b.Navigation("RoomTypeNavigation");
                 });
 
             modelBuilder.Entity("Bake.Models.Service.ChatRoomMember", b =>
@@ -2052,6 +2156,11 @@ namespace Bake.Migrations
                     b.Navigation("Orders");
                 });
 
+            modelBuilder.Entity("Bake.Models.Sales.PaymentMethod", b =>
+                {
+                    b.Navigation("Orders");
+                });
+
             modelBuilder.Entity("Bake.Models.Sales.Product", b =>
                 {
                     b.Navigation("ProductDetail");
@@ -2081,7 +2190,14 @@ namespace Bake.Migrations
 
             modelBuilder.Entity("Bake.Models.Service.ChatRoom", b =>
                 {
+                    b.Navigation("ChatMessages");
+
                     b.Navigation("ChatRoomMembers");
+                });
+
+            modelBuilder.Entity("Bake.Models.Service.ChatRoomType", b =>
+                {
+                    b.Navigation("ChatRooms");
                 });
 
             modelBuilder.Entity("Bake.Models.Service.NotifyType", b =>

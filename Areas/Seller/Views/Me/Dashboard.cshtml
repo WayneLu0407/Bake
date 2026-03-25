@@ -1,5 +1,23 @@
-﻿@{
+﻿@model Bake.Areas.Seller.ViewModels.MemberDashboardViewModel
+
+
+@{
     ViewBag.Title = "會員資料";
+
+    // 替代圖片
+    string avatarUrl = !string.IsNullOrWhiteSpace(Model.AvatarUrl)
+    ? (Model.AvatarUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+        ? Model.AvatarUrl
+        : Url.Content("~/" + Model.AvatarUrl.TrimStart('/')))
+    : Url.Content("~/seller_assets/images/profile/NoImage.png");
+
+    // string profileTitle = !string.IsNullOrWhiteSpace(Model.Persona)
+    //     ? Model.Persona
+    //     : Model.RoleName;
+
+    string aboutText = !string.IsNullOrWhiteSpace(Model.Bio)
+        ? Model.Bio
+        : "目前尚未填寫個人介紹";
 }
     <!-- ========== section start ========== -->
     <section class="section">
@@ -12,22 +30,6 @@
                             <h2>個人檔案</h2>
                         </div>
                     </div>
-                    <!-- end col -->
-                    <div class="col-md-6">
-                        <div class="breadcrumb-wrapper">
-                            <nav aria-label="breadcrumb">
-                                <ol class="breadcrumb">
-                                    <li class="breadcrumb-item">
-                                        <a href="#0">Dashboard</a>
-                                    </li>
-                                    <li class="breadcrumb-item active" aria-current="page">
-                                        Page
-                                    </li>
-                                </ol>
-                            </nav>
-                        </div>
-                    </div>
-                    <!-- end col -->
                 </div>
                 <!-- end row -->
             </div>
@@ -48,15 +50,18 @@
                         <div class="d-md-flex">
                             <div class="profile-photo">
                                 <div class="image">
-                                    <img src="~/seller_assets/images/profile/profile-image.png" alt="profile" />
-                                    <div class="update-image">
+                                    @* <img src="~/seller_assets/images/profile/profile-image.png" alt="profile" /> *@
+                                    <img src="@avatarUrl" alt="profile" />
+                                    @* <div class="update-image">
                                         <input type="file" />
                                         <label for=""><i class="lni lni-camera"></i></label>
-                                    </div>
+                                    </div> *@
                                 </div>
                                 <div class="profile-meta pt-25">
-                                    <h5 class="text-bold mb-10">John Doe</h5>
-                                    <p class="text-sm">Founder, Abc Company</p>
+                                    @* <h5 class="text-bold mb-10">John Doe</h5> *@
+                                    <h5 class="text-bold mb-10">@Model.FullName</h5>
+                                    @* <p class="text-sm">Founder, Abc Company</p> *@
+                                    @* <p class="text-sm">@profileTitle</p> 找不到這個欄位*@
                                 </div>
                             </div>
                             <div class="profiles-activities w-100 pt-30">
@@ -70,7 +75,24 @@
                                     <li class="mr-30">
                                         <p><strong>4K</strong><br></>關注</p>
                                     </li>
+                                    @* <li class="mr-30">
+                                        <p><strong>@Model.PostCount</strong><br />貼文</p>
+                                    </li>
+                                    <li class="mr-30">
+                                        <p><strong>@Model.FollowersCount</strong><br />粉絲</p>
+                                    </li>
+                                    <li class="mr-30">
+                                        <p><strong>@Model.FollowingCount</strong><br />關注</p>
+                                    </li> *@
                                     <li class="ms-auto">
+                                        <button type="button"
+                                                id="openProfileEditModal"
+                                                class="main-btn primary-btn btn-hover btn-sm">
+                                            <i class="lni lni-pencil-alt mr-10"></i>
+                                            編輯個人資料
+                                        </button>
+                                    </li>
+                                    @* <li class="ms-auto">
                                         <div class="more-btn-wrapper">
                                             <button class="more-btn dropdown-toggle" id="moreAction" data-bs-toggle="dropdown"
                                                     aria-expanded="false">
@@ -82,22 +104,18 @@
                                                 </li>
                                                 <li class="dropdown-item">
                                                     <a href="#0" class="text-gray">Remove All</a>
-                                                </li>
+                                                </li> 
                                             </ul>
                                         </div>
-                                    </li>
+                                    </li>*@
                                 </ul>
                             </div>
                         </div>
                         <div class="profile-info">
                             <h5 class="text-bold mb-15">關於我</h5>
                             <p class="text-sm mb-30">
-                                Hello there, I am an expert Web & UI/UX Designer. I am a
-                                full-time Freelancer and my passion is to satisfy my buyers
-                                by giving 100% best quality work. I will Design Landing
-                                page, UI/UX Design, web template design E-mail template
-                                design Flyer Design, All Print Media Design, etc..
-                                <a href="#0" class="text-medium text-dark">[Read More]</a>
+                                @aboutText
+                                @* <a href="#0" class="text-medium text-dark">[Read More]</a> *@
                             </p>
 
                             <ul class="socials">
@@ -393,8 +411,6 @@
                             </div>
                         </div>
 
-
-
                     </div>
                 </div>
                     <!-- end card -->
@@ -403,3 +419,148 @@
             </div>
         </div>
     </section>
+<!-- Bootstrap編輯的modal畫面 -->
+    <div class="modal fade" id="profileEditModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">編輯個人資料</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div id="profileEditErrors" class="alert alert-danger d-none"></div>
+
+                    <form id="profileEditForm" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <img id="editAvatarPreview"
+                                         src="~/seller_assets/images/profile/NoImage.png"
+                                         alt="頭像預覽"
+                                         style="width:100%; max-width:220px; border-radius:16px; object-fit:cover;" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">頭像</label>
+                                    <input type="file"
+                                           id="editAvatarFile"
+                                           name="AvatarFile"
+                                           class="form-control"
+                                           accept=".jpg,.jpeg,.png" />
+                                </div>
+                            </div>
+
+                            <div class="col-md-8">
+
+                                <div class="mb-3">
+                                    <label class="form-label">顯示名稱</label>
+                                    <input type="text" id="editFullName" name="FullName" class="form-control" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label">個人介紹</label>
+                                    <textarea id="editBio" name="Bio" class="form-control" rows="5"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" id="saveProfileBtn" class="btn btn-primary">儲存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- modal的JS資料弄進去 -->
+
+@section Scripts {
+    <script>
+        $(function () {
+
+            $("#openProfileEditModal").on("click", function () {
+                $("#profileEditErrors").addClass("d-none").empty();
+
+                $.get('@Url.Action("GetProfileEditJson", "Me", new { area = "Seller" })', function (res) {
+                    if (!res.success) {
+                        alert(res.message || "讀取資料失敗");
+                        return;
+                    }
+
+                    const data = res.data;
+
+                    $("#editFullName").val(data.fullName);
+                    $("#editBio").val(data.bio);
+                    $("#editAvatarPreview").attr("src", data.avatarUrl);
+                    $("#editAvatarFile").val("");
+
+                    $("#profileEditModal").modal("show");
+                }).fail(function () {
+                    alert("讀取資料失敗，請稍後再試");
+                });
+            });
+
+            $("#editAvatarFile").on("change", function () {
+                const file = this.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    $("#editAvatarPreview").attr("src", e.target.result);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            $("#saveProfileBtn").on("click", function () {
+                $("#profileEditErrors").addClass("d-none").empty();
+
+                const form = $("#profileEditForm")[0];
+                const formData = new FormData(form); //配合傳圖
+
+                $.ajax({
+                    url: '@Url.Action("UpdateProfileJson", "Me", new { area = "Seller" })',
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (res) {
+                        if (res.success) {
+                            $("#profileEditModal").modal("hide");
+                            location.reload();
+                            return;
+                        }
+
+                        let messages = [];
+
+                        if (res.errors && res.errors.length > 0) {
+                            messages = res.errors;
+                        } else if (res.message) {
+                            messages = [res.message];
+                        } else {
+                            messages = ["儲存失敗"];
+                        }
+
+                        let html = "<ul class='mb-0'>";
+                        $.each(messages, function (index, msg) {
+                            html += `<li>${msg}</li>`;
+                        });
+                        html += "</ul>";
+
+                        $("#profileEditErrors").html(html).removeClass("d-none");
+                    },
+                    error: function () {
+                        $("#profileEditErrors")
+                            .html("<ul class='mb-0'><li>系統忙碌中，請稍後再試</li></ul>")
+                            .removeClass("d-none");
+                    }
+                });
+            });
+
+        });
+    </script>
+}

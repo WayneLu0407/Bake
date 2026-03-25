@@ -4,6 +4,10 @@ namespace Bake.Controllers
 {
     public class PostController : Controller
     {
+        public IActionResult Index()
+        {
+            return View();
+        }
         public IActionResult Latest()
         {
             return View();

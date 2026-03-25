@@ -1,5 +1,173 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<Bake.Areas.Seller.ViewModels.BuyerOrderListViewModel>
+@inject Bake.Data.BakeContext context
 @{
+	ViewBag.Title = "購買紀錄";
 }
+
+
+<body>
+
+
+	<!-- ========== table components start ========== -->
+	<section class="table-components">
+		<div class="container-fluid">
+			<!-- ========== title-wrapper start ========== -->
+			<div class="title-wrapper pt-30">
+				<div class="row align-items-center">
+					<div class="col-md-6">
+						<div class="title">
+							<h2>購買紀錄</h2>
+						</div>
+					</div>
+					<!-- end col -->
+					<div class="col-md-6">
+						<div class="breadcrumb-wrapper">
+							<nav aria-label="breadcrumb">
+								<ol class="breadcrumb">
+									<li class="breadcrumb-item">
+										<a asp-area="Seller" asp-controller="Me" asp-action="Dashboard">會員中心</a>
+									</li>
+									<li class="breadcrumb-item active" aria-current="page">
+										購買紀錄
+									</li>
+								</ol>
+							</nav>
+						</div>
+					</div>
+					<!-- end col -->
+				</div>
+				<!-- end row -->
+			</div>
+			<!-- ========== title-wrapper end ========== -->
+			<!-- ========== tables-wrapper start ========== -->
+			<div class="tables-wrapper">
+				<div class="row">
+					<div class="col-lg-12">
+						<div class="card-style mb-30">
+                
+							<div class="table-responsive">
+								<table id="table" class="table">
+									<thead>
+										<tr>
+											<th>
+												<h6>訂單編號</h6>
+											</th>
+											<th>
+												<h6>訂單品項</h6>
+											</th>
+											<th>
+												<h6>送貨地址</h6>
+											</th>
+											<th>
+												<h6>總金額</h6>
+											</th>
+											<th>
+												<h6>支付方式</h6>
+											</th>
+											<th data-type="date" data-format="YYYY/MM/DD">
+												<h6>購買日期</h6>
+											</th>
+											<th>
+												<h6>訂單狀態</h6>
+											</th>
+											<th>
+												<h6>留下評論</h6>
+											</th>
+										</tr>
+									</thead>
+									<tbody>
+										@if (Model != null && Model.Any())
+											{
+												foreach(var item in Model){
+												
+												<tr>
+													<td>
+														<p>@item.OrderId</p>
+													</td>
+													<td>
+														@foreach(var product in item.ProductsList){
+															@* <p>@product.ProductName</p><p>x @product.Quantity</p> *@
+															<div class="mb-2">
+																<p class="mb-0">@product.ProductName</p>
+																<small class="text-muted">x @product.Quantity</small>
+															</div>
+														}
+														
+													</td>
+													
+													<td>
+														<p>@item.ShippingAddress</p>
+													</td>
+													<td>
+														<p>@item.TotalAmount</p>
+													</td>
+													<td>
+														<p>@item.PaymentMethod</p>
+													</td>
+													<td>
+														<p>@item.CreatedAt.ToString("yyyy/MM/dd")</p>
+													</td>
+													<td>
+														<p>@item.StatusName</p>
+													</td>
+													<td>
+														@foreach (var product in item.ProductsList)
+														{
+															<div class="mb-2">
+																@if (product.IsReviewed)
+																{
+																	<button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+																		已評論
+																	</button>
+																}
+																else
+																{
+																	<a asp-area="" asp-controller="ProductReview" asp-action="Create" asp-route-productId="@product.ProductId" asp-route-orderId="@item.OrderId" class="btn btn-warning btn-sm">評論商品</a>
+																}
+															</div>
+														}
+													</td>
+												</tr>
+												}
+											}
+											else
+											{
+												<p>查無訂單資料</p>
+											}
+										</tbody>
+								</table>
+							</div>
+						</div>
+						<!-- end card -->
+					</div>
+					<!-- end col -->
+				</div>
+				<!-- end row -->
+			</div>
+			<!-- ========== tables-wrapper end ========== -->
+		</div>
+		<!-- end container -->
+	</section>
+	<!-- ========== table components end ========== -->
+
+    
+
+ 
+
+  
+	<script>
+			const dataTable = new simpleDatatables.DataTable("#table", {
+			  searchable: true,
+			});
+	</script>
+
+@section Scripts {
+	<link rel="stylesheet" href="https://cdn.datatables.net" />
+	<script src="https://cdn.datatables.net"></script>
+	<script>
+		$(document).ready(function () {
+		$('#orderTable').DataTable();
+		});
+	</script>
+}
+</body>

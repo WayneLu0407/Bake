@@ -1,6 +1,7 @@
-﻿
+﻿@model Bake.Areas.Seller.ViewModels.DashboardViewModel
+
 <body>
-    <main class="main-wrapper">
+    <main class="main-wrapper" style="margin-left: 0; padding-left: 0;">
         <!-- ========== Analytics Dashboard start ========== -->
         <section class="section">
             <div class="container-fluid">
@@ -9,7 +10,7 @@
                     <div class="row align-items-center">
                         <div class="col-md-6">
                             <div class="title">
-                                <h2>Analytics Dashboard</h2>
+                                <h2>營運總覽</h2>
                             </div>
                         </div>
                         <!-- end col -->
@@ -31,16 +32,17 @@
                     </div>
                     <!-- end row -->
                 </div>
-                <!-- ========== title-wrapper end ========== -->
+                <!-- ========== 卡片:今日營收、待出貨訂單、本月總訂單數、低庫存警示* ========== -->
                 <div class="row">
-                    <div class="col-xl-3 col-lg-4 col-sm-6">
+                    <!-- 今日營收 -->
+                    <div class="col">
                         <div class="icon-card mb-30">
                             <div class="icon purple">
                                 <i class="lni lni-users"></i>
                             </div>
                             <div class="content">
-                                <h6 class="mb-10">Users</h6>
-                                <h3 class="text-bold mb-10">6453</h3>
+                                <h6 class="mb-10">今日營收</h6>
+                                <h3 class="text-bold mb-10">@Model.TodayRevenue</h3>
                                 <p class="text-sm text-success">
                                     <i class="lni lni-arrow-up"></i> +23.4%
                                 </p>
@@ -48,31 +50,60 @@
                         </div>
                         <!-- End Icon Cart -->
                     </div>
-                    <!-- End Col -->
-                    <div class="col-xl-3 col-lg-4 col-sm-6">
+                    <!-- 本月總營收 -->
+                    <div class="col">
+                        <div class="icon-card mb-30">
+                            <div class="icon orange">
+                                <i class="lni lni-pie-chart"></i>
+                            </div>
+                            <div class="content">
+                                <h6 class="mb-10">本月總營收</h6>
+                                <h3 class="text-bold mb-10">@Model.MonthRevenue</h3>
+                                <p class="text-sm text-success">
+                                    <i class="lni lni-arrow-up"></i> +23.4%
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 待出貨訂單 -->
+                    <div class="col">
                         <div class="icon-card mb-30">
                             <div class="icon success">
                                 <i class="lni lni-eye"></i>
                             </div>
                             <div class="content">
-                                <h6 class="mb-10">Page views</h6>
-                                <h3 class="text-bold mb-10">876</h3>
+                                <h6 class="mb-10">待出貨訂單</h6>
+                                <h3 class="text-bold mb-10">@Model.PendingOrdersCount</h3>
                                 <p class="text-sm text-danger">
                                     <i class="lni lni-arrow-down"></i> -12.00%
                                 </p>
                             </div>
                         </div>
-                        <!-- End Icon Cart -->
                     </div>
-                    <!-- End Col -->
-                    <div class="col-xl-3 col-lg-4 col-sm-6">
+                    <!-- 本月總訂單數 -->
+                    <div class="col">
+                        <div class="icon-card mb-30">
+                            <div class="icon orange">
+                                <i class="lni lni-pie-chart"></i>
+                            </div>
+                            <div class="content">
+                                <h6 class="mb-10">本月總訂單數</h6>
+                                <h3 class="text-bold mb-10">@Model.TotalOrdersMonth</h3>
+                                <p class="text-sm text-success">
+                                    <i class="lni lni-arrow-up"></i> +23.4%
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 在架商品總數 -->
+                    <div class="col">
                         <div class="icon-card mb-30">
                             <div class="icon primary">
                                 <i class="lni lni-thumbs-up"></i>
                             </div>
                             <div class="content">
-                                <h6 class="mb-10">Impressions</h6>
-                                <h3 class="text-bold mb-10">976</h3>
+                                <h6 class="mb-10">在架商品總數</h6>
+                                <h3 class="text-bold mb-10">@Model.TotalProductsCount</h3>
                                 <p class="text-sm text-danger">
                                     <i class="lni lni-arrow-down"></i> -2.00%
                                 </p>
@@ -80,818 +111,183 @@
                         </div>
                         <!-- End Icon Cart -->
                     </div>
-                    <!-- End Col -->
-                    <div class="col-xl-3 col-lg-4 col-sm-6">
-                        <div class="icon-card mb-30">
-                            <div class="icon orange">
-                                <i class="lni lni-pie-chart"></i>
-                            </div>
-                            <div class="content">
-                                <h6 class="mb-10">Bounce Rate</h6>
-                                <h3 class="text-bold mb-10">346</h3>
-                                <p class="text-sm text-success">
-                                    <i class="lni lni-arrow-up"></i> +23.4%
-                                </p>
-                            </div>
-                        </div>
-                        <!-- End Icon Cart -->
-                    </div>
-                    <!-- End Col -->
                 </div>
-                <!-- End Row -->
+                <!-- 卡片資訊結束 -->
+                <!-- 趨勢圖：顯示過去 7 天的訂單量變化。 -->
                 <div class="row">
-                    <div class="col-lg-5">
+                    <div class="col-lg">
                         <div class="card-style mb-30">
                             <div class="title d-flex justify-content-between">
                                 <div class="left">
-                                    <h6 class="text-medium mb-2">Audience Overview</h6>
+                                    <h6 class="text-medium mb-20">過去 7 天訂單量變化</h6>
                                 </div>
                             </div>
                             <!-- End Title -->
                             <div class="chart">
-                                <div id="legend4">
-                                    <ul class="legend3 d-flex flex-wrap align-items-center mb-30">
-                                        <li>
-                                            <div class="d-flex">
-                                                <span class="bg-color primary-bg"> </span>
-                                                <div class="text">
-                                                    <p class="text-sm text-success">
-                                                        <span class="text-dark">New Visitor</span>
-                                                        +25.55%
-                                                        <i class="lni lni-arrow-up"></i>
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="d-flex">
-                                                <span class="bg-color danger-bg"></span>
-                                                <div class="text">
-                                                    <p class="text-sm text-success">
-                                                        <span class="text-dark">Unique Visitor</span>
-                                                        -2.05%
-                                                        <i class="lni lni-arrow-up"></i>
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <canvas id="Chart4" style="width: 100%; height: 420px; margin-left: -35px"></canvas>
+                                <canvas id="trendChart" style="width: 100%; height: 400px;"></canvas>
                             </div>
                             <!-- End Chart -->
                         </div>
                     </div>
                     <!-- End Col -->
-                    <div class="col-lg-7">
+                </div>
+                <div class="row">
+                    <!-- 圓餅圖：顯示不同類別產品的銷售佔比。 -->
+                    <div class="col-lg-6">
                         <div class="card-style mb-30">
-                            <div class="title d-flex flex-wrap align-items-center justify-content-between">
+                            <div class="title d-flex justify-content-between">
                                 <div class="left">
-                                    <h6 class="text-medium mb-2">Web Traffic</h6>
-                                </div>
-                                <div class="right">
-                                    <div class="select-style-1 mb-2">
-                                        <div class="select-position select-sm">
-                                            <select class="light-bg">
-                                                <option value="">Last Month</option>
-                                                <option value="">Last 3 Months</option>
-                                                <option value="">Last Year</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <!-- end select -->
+                                    <h6 class="text-medium mb-20">類別產品銷售佔比</h6>
                                 </div>
                             </div>
                             <!-- End Title -->
-                            <div class="chart">
-                                <div id="legend3">
-                                    <ul class="legend3 d-flex align-items-center mb-30">
-                                        <li>
-                                            <div class="d-flex">
-                                                <span class="bg-color primary-bg"> </span>
-                                                <div class="text">
-                                                    <p class="text-sm text-dark">Store Visits</p>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="d-flex">
-                                                <span class="bg-color purple-bg"></span>
-                                                <div class="text">
-                                                    <p class="text-sm text-dark">Visitors</p>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <canvas id="Chart3" style="width: 100%; height: 400px; margin-left: -35px;"></canvas>
+                            <div class="chart max-w-350 mx-auto">
+                                <canvas id="categoryChart" style="width: 100%; height: 350px"></canvas>
                             </div>
                         </div>
                     </div>
-                    <!-- End Col -->
-                </div>
-                <!-- End Row -->
-                <div class="row">
+                    <!-- 低庫存警示 -->
                     <div class="col-lg-6">
-                        <div class="card-style mb-30">
-                            <div class="title d-flex justify-content-between align-items-center">
-                                <h6 class="mb-10">Revenue By Device</h6>
-                                <div class="more-btn-wrapper mb-10">
-                                    <button class="more-btn dropdown-toggle" id="moreAction" data-bs-toggle="dropdown"
-                                            aria-expanded="false">
-                                        <i class="lni lni-more-alt"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="moreAction">
-                                        <li class="dropdown-item">
-                                            <a href="#0" class="text-gray">Add All</a>
-                                        </li>
-                                        <li class="dropdown-item">
-                                            <a href="#0" class="text-gray">Remove All</a>
-                                        </li>
-                                    </ul>
+                        <div class="card shadow-sm mb-4">
+                            <div class="card-header bg-white py-3 d-flex align-items-center">
+                                <h6 class="m-0 font-weight-bold text-primary">
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>低庫存警示 ⚠️
+                                </h6>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle mb-3">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th class="ps-3">商品名稱</th>
+                                                <th class="text-center">目前庫存</th>
+                                                <th class="text-center">狀態</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (Model.LowStock != null && Model.LowStock.Any())
+                                            {
+                                                @foreach (var item in Model.LowStock)
+                                                {
+                                                    <tr>
+                                                        <td class="ps-3 fw-bold">@item.LowPName</td>
+                                                        <td class="text-center">
+                                                            <span class="badge @(item.Stock <= 2 ? "bg-danger" : "bg-warning text-dark")">
+                                                                @item.Stock
+                                                            </span>
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <a href="#" class="btn btn-sm btn-outline-primary">補貨</a>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <tr>
+                                                    <td colspan="3" class="text-center py-4 text-muted">
+                                                        <i class="fas fa-check-circle text-success me-1"></i> 目前庫存充足
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
                                 </div>
-                            </div>
-                            <div class="chart">
-                                <div id="doughnutChart1" style="width: 100%; height: 350px"></div>
-                                <div class="doughnutChart-legend">
-                                    <ul>
-                                        <li class="primary">
-                                            <span class="left">Desktop</span>
-                                            <span class="right">49%</span>
-                                        </li>
-                                        <li class="orange">
-                                            <span class="left">Tablet</span>
-                                            <span class="right">19%</span>
-                                        </li>
-                                        <li class="danger">
-                                            <span class="left">Mobile</span>
-                                            <span class="right">30%</span>
-                                        </li>
-                                        <li class="warning">
-                                            <span class="left">Others</span>
-                                            <span class="right">5%</span>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- end card -->
-                        <div class="card-style clients-table-card mb-30">
-                            <div class="title d-flex justify-content-between align-items-center">
-                                <h6 class="mb-10">New User</h6>
-                                <div class="more-btn-wrapper mb-10">
-                                    <button class="more-btn dropdown-toggle" id="moreAction" data-bs-toggle="dropdown"
-                                            aria-expanded="false">
-                                        <i class="lni lni-more-alt"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="moreAction">
-                                        <li class="dropdown-item">
-                                            <a href="#0" class="text-gray">Add All</a>
-                                        </li>
-                                        <li class="dropdown-item">
-                                            <a href="#0" class="text-gray">Remove All</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="table-wrapper table-responsive">
-                                <table class="table">
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                <div class="employee-image">
-                                                    <img src="assets/images/lead/lead-1.png" alt="" />
-                                                </div>
-                                            </td>
-                                            <td class="employee-info">
-                                                <h5 class="text-medium">Arlene McCoy</h5>
-                                                <p>6391 Elgin St. Celina, Delaware....</p>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <button class="status-btn close-btn border-0 m-1">
-                                                        Cancel
-                                                    </button>
-                                                    <button class="status-btn primary-btn border-0 m-1">
-                                                        Add
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <div class="employee-image">
-                                                    <img src="assets/images/lead/lead-2.png" alt="" />
-                                                </div>
-                                            </td>
-                                            <td class="employee-info">
-                                                <h5 class="text-medium">Ralph Edwards</h5>
-                                                <p>2464 Royal Ln. Mesa, New Jersey,,,</p>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <button class="status-btn close-btn border-0 m-1">
-                                                        Cancel
-                                                    </button>
-                                                    <button class="status-btn primary-btn border-0 m-1">
-                                                        Add
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <div class="employee-image">
-                                                    <img src="assets/images/lead/lead-3.png" alt="" />
-                                                </div>
-                                            </td>
-                                            <td class="employee-info">
-                                                <h5 class="text-medium">Dianne Russell</h5>
-                                                <p>4140 Parker Rd. Allentown, New,,,</p>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <button class="status-btn close-btn border-0 m-1">
-                                                        Cancel
-                                                    </button>
-                                                    <button class="status-btn primary-btn border-0 m-1">
-                                                        Add
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <div class="employee-image">
-                                                    <img src="assets/images/lead/lead-4.png" alt="" />
-                                                </div>
-                                            </td>
-                                            <td class="employee-info">
-                                                <h5 class="text-medium">Jane Cooper</h5>
-                                                <p>1901 Thornridge Cir. Shiloh,,,</p>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <button class="status-btn close-btn border-0 m-1">
-                                                        Cancel
-                                                    </button>
-                                                    <button class="status-btn primary-btn border-0 m-1">
-                                                        Add
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <div class="employee-image">
-                                                    <img src="assets/images/lead/lead-5.png" alt="" />
-                                                </div>
-                                            </td>
-                                            <td class="employee-info">
-                                                <h5 class="text-medium">Jane Cooper</h5>
-                                                <p>1901 Thornridge Cir. Shiloh,,,</p>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <button class="status-btn close-btn border-0 m-1">
-                                                        Cancel
-                                                    </button>
-                                                    <button class="status-btn primary-btn border-0 m-1">
-                                                        Add
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <div class="employee-image">
-                                                    <img src="assets/images/lead/lead-6.png" alt="" />
-                                                </div>
-                                            </td>
-                                            <td class="employee-info">
-                                                <h5 class="text-medium">Brooklyn Simmons</h5>
-                                                <p>4517 Washington Ave. Manchester,,,</p>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <button class="status-btn close-btn border-0 m-1">
-                                                        Cancel
-                                                    </button>
-                                                    <button class="status-btn primary-btn border-0 m-1">
-                                                        Add
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <div class="employee-image">
-                                                    <img src="assets/images/lead/lead-1.png" alt="" />
-                                                </div>
-                                            </td>
-                                            <td class="employee-info">
-                                                <h5 class="text-medium">Arlene McCoy</h5>
-                                                <p>6391 Elgin St. Celina, Delaware....</p>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <button class="status-btn close-btn border-0 m-1">
-                                                        Cancel
-                                                    </button>
-                                                    <button class="status-btn primary-btn border-0 m-1">
-                                                        Add
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <div class="employee-image">
-                                                    <img src="assets/images/lead/lead-6.png" alt="" />
-                                                </div>
-                                            </td>
-                                            <td class="employee-info">
-                                                <h5 class="text-medium">Brooklyn Simmons</h5>
-                                                <p>4517 Washington Ave. Manchester,,,</p>
-                                            </td>
-                                            <td>
-                                                <div class="d-flex justify-content-end">
-                                                    <button class="status-btn close-btn border-0 m-1">
-                                                        Cancel
-                                                    </button>
-                                                    <button class="status-btn primary-btn border-0 m-1">
-                                                        Add
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                    </tbody>
-                                </table>
-                                <!-- end table -->
-                            </div>
-                        </div>
-                        <!-- end card -->
-                    </div>
-                    <!-- End Col -->
-                    <div class="col-lg-6">
-                        <div class="card-style mb-30">
-                            <div class="title d-flex justify-content-between align-items-center">
-                                <h6 class="mb-10">Browser States</h6>
-                                <div class="more-btn-wrapper mb-10">
-                                    <button class="more-btn dropdown-toggle" id="moreAction" data-bs-toggle="dropdown"
-                                            aria-expanded="false">
-                                        <i class="lni lni-more-alt"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="moreAction">
-                                        <li class="dropdown-item">
-                                            <a href="#0" class="text-gray">Clear All</a>
-                                        </li>
-                                        <li class="dropdown-item">
-                                            <a href="#0" class="text-gray">Delete Cookies</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div id="map" style="width: 100%; height: 400px"></div>
-                            <div class="table-wrapper">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>
-                                                <h5 class="text-sm text-medium">Countries</h5>
-                                            </th>
-                                            <th>
-                                                <h5 class="text-sm text-medium">Orders</h5>
-                                            </th>
-                                            <th>
-                                                <h5 class="text-sm text-medium">Earnings</h5>
-                                            </th>
-                                        </tr>
-                                        <!-- end table row -->
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                <p class="text-sm">United State</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">23,543</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">$35,4457</p>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <p class="text-sm">United Kingdom</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">23,543</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">$35,4457</p>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <p class="text-sm">Canada</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">23,543</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">$35,4457</p>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <p class="text-sm">U A E</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">83,543</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">$95,4457</p>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <p class="text-sm">Spain</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">3,543</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">$15,4457</p>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <p class="text-sm">Germany</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">33,543</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">$45,4457</p>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                    </tbody>
-                                </table>
-                                <!-- end table -->
                             </div>
                         </div>
 
-                        <!-- End Card Style -->
-
-                        <div class="card-style clients-table-card mb-30">
-                            <div class="title d-flex justify-content-between align-items-center">
-                                <h6 class="mb-10">Browser States</h6>
-                                <div class="more-btn-wrapper mb-10">
-                                    <button class="more-btn dropdown-toggle" id="moreAction" data-bs-toggle="dropdown"
-                                            aria-expanded="false">
-                                        <i class="lni lni-more-alt"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="moreAction">
-                                        <li class="dropdown-item">
-                                            <a href="#0" class="text-gray">Clear All</a>
-                                        </li>
-                                        <li class="dropdown-item">
-                                            <a href="#0" class="text-gray">Delete Cookies</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="table-wrapper">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>
-                                                <h5 class="text-sm text-medium">Browser</h5>
-                                            </th>
-                                            <th>
-                                                <h5 class="text-sm text-medium">Sessions</h5>
-                                            </th>
-                                            <th>
-                                                <h5 class="text-sm text-medium">Bounce Rate</h5>
-                                            </th>
-                                        </tr>
-                                        <!-- end table row -->
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>
-                                                <p class="text-sm">Chrome</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">10853(52%)</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">52.80%</p>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <p class="text-sm">Safari</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">10853(52%)</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">52.80%</p>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <p class="text-sm">FireFox</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">10853(52%)</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">52.80%</p>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <p class="text-sm">Opera</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">10853(52%)</p>
-                                            </td>
-                                            <td>
-                                                <p class="text-sm">52.80%</p>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                    </tbody>
-                                </table>
-                                <!-- end table -->
-                            </div>
-                        </div>
-                        <!-- end card -->
                     </div>
-                    <!-- End Col -->
                 </div>
-                <!-- End Row -->
+                <!-- 商品牆：列出目前賣最好的前幾名甜點。 -->
                 <div class="row">
-                    <div class="col-12">
-                        <div class="card-style referrals-table-card mb-30">
-                            <div class="title d-flex flex-wrap justify-content-between align-items-center">
-                                <h6 class="mb-10">Top Referrals</h6>
-                                <div class="right d-flex align-items-center justify-content-between justify-content-sm-end">
-                                    <div class="select-style-1 mb-2">
-                                        <div class="select-position select-sm">
-                                            <select class="light-bg">
-                                                <option value="">Last Month</option>
-                                                <option value="">Last 3 Months</option>
-                                                <option value="">Last Year</option>
+                    <div class="col-lg-12">
+                        <div class="card-style mb-30">
+                            <div class="title d-flex justify-content-between align-items-center mb-20">
+                                <div class="left">
+                                    <h6 class="text-medium">熱門商品排行 (Top 5)</h6>
+                                </div>
+                                <div class="right">
+                                    <div class="select-style-1 mb-0">
+                                        <div class="select-position">
+                                            <select class="bg-transparent border-0 lni-text-size">
+                                                <option value="">本月</option>
+                                                <option value="">上月</option>
+                                                <option value="">年度</option>
                                             </select>
                                         </div>
                                     </div>
-                                    <!-- end select -->
-                                    <div class="more-btn-wrapper mb-2 ms-3">
-                                        <button class="more-btn dropdown-toggle" id="moreAction" data-bs-toggle="dropdown"
-                                                aria-expanded="false">
-                                            <i class="lni lni-more-alt"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="moreAction">
-                                            <li class="dropdown-item">
-                                                <a href="#0" class="text-gray">Clear All</a>
-                                            </li>
-                                            <li class="dropdown-item">
-                                                <a href="#0" class="text-gray">Delete Cookies</a>
-                                            </li>
-                                        </ul>
-                                    </div>
                                 </div>
                             </div>
-                            <div class="table-wrapper table-responsive">
-                                <table class="table referrals-table">
+                            <div class="table-responsive">
+                                <table class="table top-selling-table">
+                                    <thead>
+                                        <tr>
+                                            <th>排行</th>
+                                            <th>商品</th>
+                                            <th class="text-center">類別</th>
+                                            <th class="text-center">銷量</th>
+                                            <th class="text-center">累積營收</th>
+                                            <th class="text-end">趨勢</th>
+                                        </tr>
+                                    </thead>
                                     <tbody>
-                                        <tr>
-                                            <td>
-                                                <h5 class="text-medium">#1</h5>
-                                            </td>
-                                            <td>
-                                                <div class="referrals-image d-flex align-items-center">
-                                                    <div class="image me-3">
-                                                        <img src="assets/images/refarrals/uideck.svg" alt="" />
-                                                    </div>
-                                                    <h5 class="text-medium">UIdeck</h5>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="text-center">
-                                                    <h5 class="text-medium">7653</h5>
-                                                    <p class="text-sm">Hit</p>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="chart" style="width: 145px; margin: auto">
-                                                    <canvas id="referralsChart1" style="width: 100%; height: 45px"></canvas>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <h5 class="text-medium d-flex align-items-center">
-                                                    <span class="text-sm text-success me-2">
-                                                        <i class="lni lni-arrow-up"></i>
-                                                    </span>
-                                                    12.45%
-                                                </h5>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <h5 class="text-medium">#2</h5>
-                                            </td>
-                                            <td>
-                                                <div class="referrals-image d-flex align-items-center">
-                                                    <div class="image me-3">
-                                                        <img src="assets/images/refarrals/graygrids.svg" alt="" />
-                                                    </div>
-                                                    <h5 class="text-medium">GrayGrids</h5>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="text-center">
-                                                    <h5 class="text-medium">7653</h5>
-                                                    <p class="text-sm">Hit</p>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="chart" style="width: 145px; margin: auto">
-                                                    <canvas id="referralsChart2" style="width: 100%; height: 45px"></canvas>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <h5 class="text-medium d-flex align-items-center">
-                                                    <span class="text-sm text-danger me-2">
-                                                        <i class="lni lni-arrow-down"></i>
-                                                    </span>
-                                                    1.05%
-                                                </h5>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <h5 class="text-medium">#3</h5>
-                                            </td>
-                                            <td>
-                                                <div class="referrals-image d-flex align-items-center">
-                                                    <div class="image me-3">
-                                                        <img src="assets/images/refarrals/ayroui.svg" alt="" />
-                                                    </div>
-                                                    <h5 class="text-medium">Ayro UI</h5>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="text-center">
-                                                    <h5 class="text-medium">7653</h5>
-                                                    <p class="text-sm">Hit</p>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="chart" style="width: 145px; margin: auto">
-                                                    <canvas id="referralsChart3" style="width: 100%; height: 45px"></canvas>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <h5 class="text-medium d-flex align-items-center">
-                                                    <span class="text-sm text-success me-2">
-                                                        <i class="lni lni-arrow-up"></i>
-                                                    </span>
-                                                    12.45%
-                                                </h5>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <h5 class="text-medium">#4</h5>
-                                            </td>
-                                            <td>
-                                                <div class="referrals-image d-flex align-items-center">
-                                                    <div class="image me-3">
-                                                        <img src="assets/images/refarrals/tailgrids.svg" alt="" />
-                                                    </div>
-                                                    <h5 class="text-medium">TailGrids</h5>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="text-center">
-                                                    <h5 class="text-medium">7653</h5>
-                                                    <p class="text-sm">Hit</p>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="chart" style="width: 145px; margin: auto">
-                                                    <canvas id="referralsChart4" style="width: 100%; height: 45px; margin-left: -35px;"></canvas>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <h5 class="text-medium d-flex align-items-center">
-                                                    <span class="text-sm text-danger me-2">
-                                                        <i class="lni lni-arrow-down"></i>
-                                                    </span>
-                                                    2.04%
-                                                </h5>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <h5 class="text-medium">#5</h5>
-                                            </td>
-                                            <td>
-                                                <div class="referrals-image d-flex align-items-center">
-                                                    <div class="image me-3">
-                                                        <img src="assets/images/refarrals/ecomhtml.svg" alt="" />
-                                                    </div>
-                                                    <h5 class="text-medium">eCommerceHTML</h5>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="text-center">
-                                                    <h5 class="text-medium">7653</h5>
-                                                    <p class="text-sm">Hit</p>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="chart" style="width: 145px; margin: auto">
-                                                    <canvas id="referralsChart5" style="width: 100%; height: 45px"></canvas>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <h5 class="text-medium d-flex align-items-center">
-                                                    <span class="text-sm text-success me-2">
-                                                        <i class="lni lni-arrow-up"></i>
-                                                    </span>
-                                                    12.45%
-                                                </h5>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
-                                        <tr>
-                                            <td>
-                                                <h5 class="text-medium">#6</h5>
-                                            </td>
-                                            <td>
-                                                <div class="referrals-image d-flex align-items-center">
-                                                    <div class="image me-3">
-                                                        <img src="assets/images/refarrals/lineicons.svg" alt="" />
-                                                    </div>
-                                                    <h5 class="text-medium">Lineicons</h5>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="text-center">
-                                                    <h5 class="text-medium">7653</h5>
-                                                    <p class="text-sm">Hit</p>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div class="chart" style="width: 145px; margin: auto">
-                                                    <canvas id="referralsChart6" style="width: 100%; height: 45px"></canvas>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <h5 class="text-medium d-flex align-items-center">
-                                                    <span class="text-sm text-success me-2">
-                                                        <i class="lni lni-arrow-up"></i>
-                                                    </span>
-                                                    12.45%
-                                                </h5>
-                                            </td>
-                                        </tr>
-                                        <!-- end table row -->
+                                        @if (Model.TopProducts != null && Model.TopProducts.Any())
+                                        {
+                                            int rank = 1;
+                                            foreach (var product in Model.TopProducts)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        <div class="check-input-primary-light">
+                                                            @if (rank <= 3)
+                                                            {
+                                                                <span class="badge rounded-pill bg-primary">No.@rank</span>
+                                                            }
+                                                            else
+                                                            {
+                                                                <span class="badge rounded-pill bg-light text-dark">@rank</span>
+                                                            }
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="product d-flex align-items-center">
+                                                            <div class="image me-3" style="width: 50px; height: 50px; overflow: hidden; border-radius: 8px;">
+                                                                <img src="@product.ImageUrl" alt="@product.ProductName" style="width: 100%; height: 100%; object-fit: cover;" />
+                                                            </div>
+                                                            <p class="text-sm fw-bold">@product.ProductName</p>
+                                                        </div>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <p class="text-sm">@product.CategoryName</p>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <p class="text-sm fw-bold">@product.TotalSales 件</p>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <p class="text-sm text-success fw-bold">$@product.Revenue.ToString("N0")</p>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <div class="action">
+                                                            <button class="text-primary border-0 bg-transparent">
+                                                                <i class="lni lni-stats-up"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                rank++;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <tr>
+                                                <td colspan="6" class="text-center py-4 text-muted">暫無銷售統計數據</td>
+                                            </tr>
+                                        }
                                     </tbody>
                                 </table>
-                                <!-- end table -->
                             </div>
                         </div>
-                        <!-- end card -->
                     </div>
-                    <!-- End Col -->
                 </div>
                 <!-- End Row -->
             </div>
@@ -1012,996 +408,100 @@
                     <!-- End Col -->
                 </div>
                 <!-- End Row -->
-                <div class="row">
-                    <div class="col-lg-8">
-                        <div class="card-style mb-30">
-                            <div class="title d-flex flex-wrap align-items-center justify-content-between mb-10">
-                                <div class="left">
-                                    <h6 class="cards-title text-semi-bold mb-1">Campaign Visitors</h6>
-                                    <p class="text-gray text-sm">
-                                        Detailed analytics of this campaing
-                                    </p>
-                                </div>
-                                <div class="right">
-                                    <div class="select-style-1 mb-2">
-                                        <div class="select-position select-sm">
-                                            <select class="light-bg">
-                                                <option value="">Monthly</option>
-                                                <option value="">Yearly</option>
-                                                <option value="">Weekly</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <!-- end select -->
-                                </div>
-                            </div>
-                            <!-- End Title -->
-                            <div class="chart">
-                                <canvas id="Chart4" style="width: 100%; height: 420px; margin-left: -35px;"></canvas>
-                                <div id="legend4">
-                                    <ul class="legend-marketing d-flex gap-5 flex-wrap mt-30">
-                                        <li>
-                                            <div class="d-flex">
-                                                <div class="icon">
-                                                    <svg width="10" height="21" viewBox="0 0 10 21" fill="none"
-                                                         xmlns="http://www.w3.org/2000/svg">
-                                                        <path d="M5.0868 20.2701C4.7667 20.2701 4.5019 20.1442 4.2926 19.8923C4.0832 19.6545 3.9786 19.3607 3.9786 19.0109V17.29L4.4773 17.7937C3.6276 17.7657 2.88881 17.6468 2.26081 17.4369C1.6328 17.2271 1.10947 16.9962 0.6908 16.7444C0.4199 16.5905 0.229039 16.3806 0.118209 16.1148C0.0196994 15.849 -0.0172404 15.5762 0.00738962 15.2963C0.0320196 15.0025 0.118209 14.7507 0.265979 14.5408C0.413739 14.317 0.60461 14.1701 0.83857 14.1001C1.08484 14.0302 1.3619 14.0861 1.66974 14.268C1.96527 14.4499 2.37779 14.6388 2.90728 14.8346C3.4368 15.0165 4.0832 15.1075 4.8467 15.1075C5.4131 15.1075 5.8687 15.0375 6.2135 14.8976C6.5583 14.7437 6.8046 14.5478 6.9523 14.31C7.1124 14.0721 7.1925 13.7993 7.1925 13.4915C7.1925 13.2397 7.1371 13.0158 7.0262 12.8199C6.9277 12.6241 6.7492 12.4562 6.4906 12.3163C6.2443 12.1624 5.9118 12.0365 5.4932 11.9385L3.4614 11.4348C2.32853 11.155 1.48504 10.6793 0.93092 10.0078C0.3768 9.32224 0.0997396 8.44084 0.0997396 7.36353C0.0997396 6.52408 0.278289 5.77556 0.635389 5.11799C1.0048 4.46042 1.50967 3.92876 2.14998 3.52303C2.80261 3.11729 3.5661 2.87245 4.4403 2.7885L3.9786 3.12429V1.52932C3.9786 1.17955 4.0832 0.885742 4.2926 0.647892C4.5019 0.396062 4.7667 0.270142 5.0868 0.270142C5.3947 0.270142 5.6532 0.396062 5.8626 0.647892C6.0719 0.885742 6.1766 1.17955 6.1766 1.52932V3.12429L5.7148 2.74653C6.2197 2.77451 6.7615 2.88644 7.3402 3.08231C7.9313 3.26419 8.4423 3.53002 8.8733 3.87979C9.1073 4.04768 9.2673 4.25755 9.3535 4.50938C9.452 4.76122 9.4767 5.01306 9.4274 5.26489C9.3905 5.51673 9.2981 5.74058 9.1504 5.93646C9.0026 6.11834 8.8056 6.23726 8.5593 6.29322C8.3253 6.3352 8.0483 6.26524 7.7281 6.08336C7.3956 5.90148 7.0324 5.74758 6.6383 5.62166C6.2443 5.49574 5.7579 5.43278 5.1792 5.43278C4.4527 5.43278 3.8862 5.60068 3.4799 5.93646C3.0858 6.27224 2.88881 6.70596 2.88881 7.23761C2.88881 7.62936 3.0058 7.94415 3.2397 8.182C3.486 8.41984 3.9108 8.61574 4.5142 8.76964L6.5645 9.27324C7.7343 9.56714 8.5962 10.0427 9.1504 10.7003C9.7168 11.3579 10 12.2113 10 13.2607C10 14.0861 9.8215 14.8206 9.4644 15.4642C9.1073 16.0938 8.6147 16.6045 7.9867 16.9962C7.3587 17.388 6.626 17.6398 5.7887 17.7517L6.1766 17.269V19.0109C6.1766 19.3607 6.0719 19.6545 5.8626 19.8923C5.6656 20.1442 5.407 20.2701 5.0868 20.2701Z"
-                                                              fill="#365CF5" />
-                                                    </svg>
-                                                </div>
-                                                <div>
-                                                    <h3 class="fw-semibold">$63,489.50</h3>
-                                                    <p class="text-sm">Total Earnings</p>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="d-flex">
-                                                <span class="bg-color primary-bg"> </span>
-                                                <div class="text">
-                                                    <p class="text-sm">Earnings this month</p>
-                                                    <h5 class="fw-semibold">$48,820</h5>
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <li>
-                                            <div class="d-flex">
-                                                <span class="bg-color blue-light-bg"></span>
-                                                <div class="text">
-                                                    <p class="text-sm">Expense this month</p>
-                                                    <h5 class="fw-semibold">$26,498</h5>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Col -->
-                    <div class="col-lg-4">
-                        <div class="card-style card-click-rate mb-30">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="cards-title fw-600">Click Rate</h5>
-                                    <h4 class="fw-600 mt-20">36,358</h4>
-
-                                    <p class="mt-15 text-sm">
-                                        <svg width="20" height="21" viewBox="0 0 20 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <rect y="0.279999" width="20" height="20" rx="10" fill="#EEFFFC" />
-                                            <path d="M12.6406 13.0156C12.5469 13.0156 12.4531 12.9843 12.3906 12.9062L7.6875 8.20309L7.65625 11.9531C7.65625 12.1406 7.5 12.3125 7.29687 12.2968C7.10937 12.2968 6.95312 12.1406 6.95312 11.9375L7 7.34372C7 7.15622 7.15625 6.99997 7.34375 6.99997L11.9531 6.95309C12.1406 6.95309 12.2969 7.10934 12.2969 7.29684C12.2969 7.48434 12.1406 7.65622 11.9531 7.65622L8.17187 7.68747L12.8906 12.4062C13.0312 12.5468 13.0312 12.7656 12.8906 12.9062C12.8281 12.9687 12.7344 13.0156 12.6406 13.0156Z"
-                                                  fill="#0DBC9C" />
-                                        </svg>
-                                        <span class="text-dark"> +9% </span>
-                                        last year
-                                    </p>
-
-                                    <ul class="device-list mt-3">
-                                        <li><span></span> Desktop</li>
-                                        <li><span></span> Tablet</li>
-                                        <li><span></span> Mobile</li>
-                                    </ul>
-                                </div>
-                                <div>
-                                    <div id="clickRateChart" style="width: 100%; height: 110px"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- end card -->
-                        <div class="card-style clients-table-card mb-30">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="cards-title fw-600">External Links</h5>
-                                <div class="more-btn-wrapper">
-                                    <button class="more-btn dropdown-toggle" id="moreAction" data-bs-toggle="dropdown"
-                                            aria-expanded="false">
-                                        <i class="lni lni-more-alt"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="moreAction">
-                                        <li class="dropdown-item">
-                                            <a href="#0" class="text-gray">Add All</a>
-                                        </li>
-                                        <li class="dropdown-item">
-                                            <a href="#0" class="text-gray">Remove All</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <p class="text-sm mt-1">Most used resources</p>
-
-                            <div class="external-link mt-25">
-                                <a href="#" class="link-item">
-                                    <div class="link-name">
-                                        <svg width="21" height="24" viewBox="0 0 21 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M15 2.86363V20.8636C15 22.8793 16.3892 24 17.8636 24C19.2273 24 20.7273 23.0454 20.7273 20.8636V2.99999C20.7273 1.15483 19.3636 0 17.8636 0C16.3636 0 15 1.27415 15 2.86363Z"
-                                                  fill="#F8AB00" />
-                                            <path d="M7.5 12V20.8636C7.5 22.8792 8.8892 24 10.3636 24C11.7273 24 13.2273 23.0454 13.2273 20.8636V12.1363C13.2273 10.2912 11.8636 9.13635 10.3636 9.13635C8.86364 9.13635 7.5 10.4105 7.5 12Z"
-                                                  fill="#E37300" />
-                                            <path d="M5.72727 21.1363C5.72727 22.7173 4.4446 24 2.86364 24C1.28267 24 0 22.7173 0 21.1363C0 19.5554 1.28267 18.2727 2.86364 18.2727C4.4446 18.2727 5.72727 19.5554 5.72727 21.1363Z"
-                                                  fill="#E37300" />
-                                        </svg>
-                                        <h6 class="fw-500">Google Analytics</h6>
-                                    </div>
-                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M14.4339 9.44983C14.4339 9.03446 14.7719 8.69723 15.1883 8.69723C15.6046 8.69723 15.9426 9.03446 15.9426 9.44983V13.7714C15.9426 14.3847 15.692 14.942 15.2874 15.3457C14.8829 15.7493 14.3243 15.9993 13.7096 15.9993H2.23295C1.61827 15.9993 1.05971 15.7493 0.655139 15.3457C0.250571 14.942 0 14.3847 0 13.7714V2.23759C0 1.62431 0.250571 1.06702 0.655139 0.663372C1.05971 0.259726 1.61827 0.00972578 2.23295 0.00972578H6.53703C6.95334 0.00972578 7.29135 0.346965 7.29135 0.76233C7.29135 1.17769 6.95334 1.51493 6.53703 1.51493H2.23295C2.03458 1.51493 1.85449 1.59697 1.72268 1.72717C1.59086 1.85868 1.50995 2.03837 1.50995 2.23629V13.7701C1.50995 13.9681 1.59217 14.1477 1.72268 14.2793C1.85449 14.4108 2.03458 14.4915 2.23295 14.4915H13.7109C13.9093 14.4915 14.0894 14.4095 14.2212 14.2793C14.353 14.149 14.4339 13.9681 14.4339 13.7701V9.44983ZM14.6715 2.27275L7.04861 9.97327C6.75759 10.2688 6.27993 10.2727 5.98369 9.98238C5.68744 9.69202 5.68352 9.21546 5.97455 8.91988L13.3038 1.51493H10.2525C9.83622 1.51493 9.49821 1.17769 9.49821 0.76233C9.49821 0.346965 9.83622 0.00972578 10.2525 0.00972578H13.7109C14.3791 0.00972578 15.2405 -0.103555 15.7533 0.413372C16.077 0.740194 16.0052 3.34566 15.9635 4.85478C15.953 5.2454 15.9439 5.54358 15.9439 5.75712C15.9439 6.17249 15.6059 6.50973 15.1896 6.50973C14.7732 6.50973 14.4352 6.17249 14.4352 5.75712C14.4352 5.71676 14.4457 5.32483 14.46 4.81441C14.4809 4.02796 14.6075 2.98629 14.6715 2.27275Z"
-                                              fill="#5A6A85" />
-                                    </svg>
-                                </a>
-                                <a href="#" class="link-item">
-                                    <div class="link-name">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <g clip-path="url(#clip0_2232_16351)">
-                                                <path d="M12 0.375C5.55 0.375 0.375 5.55 0.375 12C0.375 18.45 5.55 23.625 12 23.625C18.45 23.625 23.625 18.45 23.625 12C23.625 5.55 18.45 0.375 12 0.375ZM15.075 7.4625C14.6625 7.4625 14.325 7.4625 13.9125 7.4625C13.3875 7.4625 13.05 7.725 13.05 8.2125C13.0125 8.625 13.05 9.075 13.05 9.4125C13.05 9.5625 13.0875 9.5625 13.2 9.5625C13.7625 9.5625 14.3625 9.5625 14.925 9.5625C15.075 9.5625 15.15 9.6 15.15 9.7875C15.1125 10.4625 15 11.175 15 11.85C15 12 14.9625 12 14.775 12C14.2875 12 13.875 12 13.3875 12C13.0875 12 13.125 11.9625 13.125 12.2625C13.125 14.4375 13.125 16.5 13.125 18.675C13.125 18.9 13.0875 18.9375 12.8625 18.9375C12.075 18.9375 11.2875 18.9375 10.5 18.9375C10.275 18.9375 10.2375 18.9 10.2375 18.675C10.2375 17.55 10.2375 16.5 10.2375 15.45C10.2375 14.4 10.2375 13.275 10.2375 12.1875C10.2375 12.0375 10.2 11.925 10.0125 11.9625C9.7125 11.9625 9.3375 11.9625 9 11.9625C8.775 12.075 8.775 12 8.775 11.85C8.775 11.175 8.775 10.5375 8.775 9.7875C8.775 9.6375 8.8125 9.6375 8.925 9.6375C9.3 9.6375 9.6 9.6375 9.975 9.6375C10.2 9.6375 10.2375 9.6 10.2375 9.375C10.2375 8.85 10.2375 8.3625 10.2375 7.8C10.2375 7.1625 10.3875 6.6 10.7625 6.075C11.25 5.4375 11.925 5.1375 12.675 5.0625C13.4625 5.025 14.25 5.0625 15.0375 5.025C15.15 5.025 15.1875 5.0625 15.1875 5.175C15.1875 5.85 15.1875 6.5625 15.1875 7.2375C15.225 7.3875 15.1875 7.4625 15.075 7.4625Z"
-                                                      fill="#4285F4" />
-                                            </g>
-                                            <defs>
-                                                <clipPath id="clip0_2232_16351">
-                                                    <rect width="24" height="24" fill="white" />
-                                                </clipPath>
-                                            </defs>
-                                        </svg>
-                                        <h6 class="fw-500">Facebook Ads</h6>
-                                    </div>
-                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M14.4339 9.44983C14.4339 9.03446 14.7719 8.69723 15.1883 8.69723C15.6046 8.69723 15.9426 9.03446 15.9426 9.44983V13.7714C15.9426 14.3847 15.692 14.942 15.2874 15.3457C14.8829 15.7493 14.3243 15.9993 13.7096 15.9993H2.23295C1.61827 15.9993 1.05971 15.7493 0.655139 15.3457C0.250571 14.942 0 14.3847 0 13.7714V2.23759C0 1.62431 0.250571 1.06702 0.655139 0.663372C1.05971 0.259726 1.61827 0.00972578 2.23295 0.00972578H6.53703C6.95334 0.00972578 7.29135 0.346965 7.29135 0.76233C7.29135 1.17769 6.95334 1.51493 6.53703 1.51493H2.23295C2.03458 1.51493 1.85449 1.59697 1.72268 1.72717C1.59086 1.85868 1.50995 2.03837 1.50995 2.23629V13.7701C1.50995 13.9681 1.59217 14.1477 1.72268 14.2793C1.85449 14.4108 2.03458 14.4915 2.23295 14.4915H13.7109C13.9093 14.4915 14.0894 14.4095 14.2212 14.2793C14.353 14.149 14.4339 13.9681 14.4339 13.7701V9.44983ZM14.6715 2.27275L7.04861 9.97327C6.75759 10.2688 6.27993 10.2727 5.98369 9.98238C5.68744 9.69202 5.68352 9.21546 5.97455 8.91988L13.3038 1.51493H10.2525C9.83622 1.51493 9.49821 1.17769 9.49821 0.76233C9.49821 0.346965 9.83622 0.00972578 10.2525 0.00972578H13.7109C14.3791 0.00972578 15.2405 -0.103555 15.7533 0.413372C16.077 0.740194 16.0052 3.34566 15.9635 4.85478C15.953 5.2454 15.9439 5.54358 15.9439 5.75712C15.9439 6.17249 15.6059 6.50973 15.1896 6.50973C14.7732 6.50973 14.4352 6.17249 14.4352 5.75712C14.4352 5.71676 14.4457 5.32483 14.46 4.81441C14.4809 4.02796 14.6075 2.98629 14.6715 2.27275Z"
-                                              fill="#5A6A85" />
-                                    </svg>
-                                </a>
-                                <a href="#" class="link-item">
-                                    <div class="link-name">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <g clip-path="url(#clip0_2232_16347)">
-                                                <path d="M23.5875 7.2C23.55 6 23.325 5.1375 23.0625 4.35C22.8 3.5625 22.3875 2.925 21.75 2.2875C21.1125 1.65 20.475 1.275 19.725 0.975C18.975 0.675 18.15 0.4875 16.875 0.45C15.5625 0.375 15.1875 0.375 12 0.375C8.8125 0.375 8.475 0.375 7.2 0.4125C5.925 0.45 5.1375 0.675 4.35 0.9375C3.5625 1.2 2.925 1.65 2.2875 2.2875C1.65 2.925 1.2375 3.5625 0.975 4.35C0.675 5.1 0.4875 5.925 0.45 7.2C0.4125 8.475 0.375 8.8125 0.375 12C0.375 15.1875 0.375 15.525 0.4125 16.8C0.45 18.075 0.675 18.8625 0.9375 19.65C1.2 20.4375 1.6125 21.075 2.25 21.7125C2.8875 22.35 3.5625 22.7625 4.3125 23.025C5.0625 23.2875 5.8875 23.5125 7.1625 23.55C8.4375 23.625 8.775 23.625 11.9625 23.625C15.15 23.625 15.4875 23.625 16.7625 23.5875C18.0375 23.55 18.825 23.325 19.6125 23.0625C20.4 22.8 21.0375 22.3875 21.675 21.75C22.3125 21.1125 22.725 20.4375 22.9875 19.6875C23.25 18.9375 23.475 18.1125 23.5125 16.8375C23.55 15.6375 23.55 15.2625 23.55 12.075C23.55 8.8875 23.625 8.475 23.5875 7.2ZM21.4875 16.6875C21.45 17.8125 21.225 18.4125 21.075 18.8625C20.85 19.3875 20.5875 19.8 20.175 20.175C19.7625 20.5875 19.3875 20.8125 18.8625 21.075C18.45 21.225 17.85 21.45 16.6875 21.4875C15.4875 21.4875 15.1125 21.4875 12.0375 21.4875C8.9625 21.4875 8.55 21.4875 7.35 21.45C6.225 21.4125 5.625 21.1875 5.175 21.0375C4.65 20.8125 4.2375 20.55 3.8625 20.1375C3.45 19.725 3.225 19.35 2.9625 18.825C2.8125 18.4125 2.5875 17.8125 2.55 16.65C2.55 15.4875 2.55 15.1125 2.55 12C2.55 8.8875 2.55 8.5125 2.5875 7.3125C2.625 6.1875 2.85 5.5875 3 5.1375C3.225 4.6125 3.4875 4.2 3.8625 3.825C4.275 3.4125 4.65 3.1875 5.175 2.9625C5.5875 2.8125 6.1875 2.5875 7.35 2.55C8.55 2.5125 8.925 2.5125 12.0375 2.5125C15.15 2.5125 15.525 2.5125 16.725 2.55C17.85 2.5875 18.45 2.8125 18.9 2.9625C19.425 3.1875 19.8375 3.45 20.2125 3.825C20.625 4.2375 20.85 4.6125 21.1125 5.1375C21.2625 5.55 21.4875 6.15 21.525 7.3125C21.5625 8.5125 21.5625 8.8875 21.5625 12C21.5625 15.1125 21.525 15.4875 21.4875 16.6875Z"
-                                                      fill="url(#paint0_linear_2232_16347)" />
-                                                <path d="M12.0006 6.03735C8.66309 6.03735 6.03809 8.73735 6.03809 11.9999C6.03809 15.3374 8.73809 17.9624 12.0006 17.9624C15.2631 17.9624 18.0006 15.3374 18.0006 11.9999C18.0006 8.66235 15.3381 6.03735 12.0006 6.03735ZM12.0006 15.8999C9.82559 15.8999 8.10059 14.1374 8.10059 11.9999C8.10059 9.86235 9.86309 8.09985 12.0006 8.09985C14.1756 8.09985 15.9006 9.82485 15.9006 11.9999C15.9006 14.1749 14.1756 15.8999 12.0006 15.8999Z"
-                                                      fill="url(#paint1_linear_2232_16347)" />
-                                                <path d="M18.2625 7.16257C19.0288 7.16257 19.65 6.54135 19.65 5.77507C19.65 5.00876 19.0288 4.38757 18.2625 4.38757C17.4962 4.38757 16.875 5.00876 16.875 5.77507C16.875 6.54135 17.4962 7.16257 18.2625 7.16257Z"
-                                                      fill="url(#paint2_linear_2232_16347)" />
-                                            </g>
-                                            <defs>
-                                                <linearGradient id="paint0_linear_2232_16347" x1="4" y1="1" x2="20.5" y2="23"
-                                                                gradientUnits="userSpaceOnUse">
-                                                    <stop stop-color="#5851DB" />
-                                                    <stop offset="0.25" stop-color="#833AB4" />
-                                                    <stop offset="0.479167" stop-color="#C13584" />
-                                                    <stop offset="0.739583" stop-color="#E1306C" />
-                                                    <stop offset="1" stop-color="#FD1D1D" />
-                                                </linearGradient>
-                                                <linearGradient id="paint1_linear_2232_16347" x1="7.90537" y1="6.35792" x2="16.358" y2="17.6767"
-                                                                gradientUnits="userSpaceOnUse">
-                                                    <stop stop-color="#5851DB" />
-                                                    <stop offset="0.25" stop-color="#833AB4" />
-                                                    <stop offset="0.479167" stop-color="#C13584" />
-                                                    <stop offset="0.739583" stop-color="#E1306C" />
-                                                    <stop offset="1" stop-color="#FD1D1D" />
-                                                </linearGradient>
-                                                <linearGradient id="paint2_linear_2232_16347" x1="17.3082" y1="4.46217" x2="19.2769"
-                                                                y2="7.09017" gradientUnits="userSpaceOnUse">
-                                                    <stop stop-color="#5851DB" />
-                                                    <stop offset="0.25" stop-color="#833AB4" />
-                                                    <stop offset="0.479167" stop-color="#C13584" />
-                                                    <stop offset="0.739583" stop-color="#E1306C" />
-                                                    <stop offset="1" stop-color="#FD1D1D" />
-                                                </linearGradient>
-                                                <clipPath id="clip0_2232_16347">
-                                                    <rect width="24" height="24" fill="white" />
-                                                </clipPath>
-                                            </defs>
-                                        </svg>
-                                        <h6 class="fw-500">Instagram Ads</h6>
-                                    </div>
-                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M14.4339 9.44983C14.4339 9.03446 14.7719 8.69723 15.1883 8.69723C15.6046 8.69723 15.9426 9.03446 15.9426 9.44983V13.7714C15.9426 14.3847 15.692 14.942 15.2874 15.3457C14.8829 15.7493 14.3243 15.9993 13.7096 15.9993H2.23295C1.61827 15.9993 1.05971 15.7493 0.655139 15.3457C0.250571 14.942 0 14.3847 0 13.7714V2.23759C0 1.62431 0.250571 1.06702 0.655139 0.663372C1.05971 0.259726 1.61827 0.00972578 2.23295 0.00972578H6.53703C6.95334 0.00972578 7.29135 0.346965 7.29135 0.76233C7.29135 1.17769 6.95334 1.51493 6.53703 1.51493H2.23295C2.03458 1.51493 1.85449 1.59697 1.72268 1.72717C1.59086 1.85868 1.50995 2.03837 1.50995 2.23629V13.7701C1.50995 13.9681 1.59217 14.1477 1.72268 14.2793C1.85449 14.4108 2.03458 14.4915 2.23295 14.4915H13.7109C13.9093 14.4915 14.0894 14.4095 14.2212 14.2793C14.353 14.149 14.4339 13.9681 14.4339 13.7701V9.44983ZM14.6715 2.27275L7.04861 9.97327C6.75759 10.2688 6.27993 10.2727 5.98369 9.98238C5.68744 9.69202 5.68352 9.21546 5.97455 8.91988L13.3038 1.51493H10.2525C9.83622 1.51493 9.49821 1.17769 9.49821 0.76233C9.49821 0.346965 9.83622 0.00972578 10.2525 0.00972578H13.7109C14.3791 0.00972578 15.2405 -0.103555 15.7533 0.413372C16.077 0.740194 16.0052 3.34566 15.9635 4.85478C15.953 5.2454 15.9439 5.54358 15.9439 5.75712C15.9439 6.17249 15.6059 6.50973 15.1896 6.50973C14.7732 6.50973 14.4352 6.17249 14.4352 5.75712C14.4352 5.71676 14.4457 5.32483 14.46 4.81441C14.4809 4.02796 14.6075 2.98629 14.6715 2.27275Z"
-                                              fill="#5A6A85" />
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-                        <!-- end card -->
-                    </div>
-                    <!-- End Col -->
-                </div>
-                <!-- End Row -->
-                <div class="row">
-                    <div class="col-lg-6 col-xl-5">
-                        <div class="card-style mb-30">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="cards-title fw-600">Top Channels</h5>
-                                <div class="more-btn-wrapper">
-                                    <button class="more-btn dropdown-toggle" id="moreAction" data-bs-toggle="dropdown"
-                                            aria-expanded="false">
-                                        <i class="lni lni-more-alt"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="moreAction">
-                                        <li class="dropdown-item">
-                                            <a href="#0" class="text-gray">Add All</a>
-                                        </li>
-                                        <li class="dropdown-item">
-                                            <a href="#0" class="text-gray">Remove All</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <div class="d-flex flex-column card-top-chanels mt-30">
-                                <div class="top-chanels-item">
-                                    <div>
-                                        <h5 class="text-sm fw-medium text-gray">Source</h5>
-                                    </div>
-                                    <div class="text-center">
-                                        <h5 class="text-sm fw-medium text-gray">Visitors</h5>
-                                    </div>
-                                    <div class="text-center">
-                                        <h5 class="text-sm fw-medium text-gray">Revenues</h5>
-                                    </div>
-                                    <div class="text-end d-none d-xl-block">
-                                        <h5 class="text-sm fw-medium text-gray">Conversion</h5>
-                                    </div>
-                                </div>
-
-                                <div class="top-chanels-item">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div>
-                                            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <g clip-path="url(#clip0_2232_16368)">
-                                                    <path d="M18.0001 9.19956C18.011 8.58084 17.9458 7.96308 17.806 7.35962H9.18378V10.6996H14.2449C14.1491 11.2852 13.9333 11.8458 13.6107 12.3476C13.288 12.8493 12.8651 13.282 12.3674 13.6195L12.3498 13.7314L15.0761 15.8011L15.2649 15.8196C16.9995 14.2496 17.9997 11.9395 17.9997 9.19956"
-                                                          fill="#4285F4" />
-                                                    <path d="M9.18376 18C11.6633 18 13.7449 17.2 15.2654 15.82L12.3674 13.6199C11.592 14.15 10.5512 14.52 9.18376 14.52C8.02243 14.5134 6.89273 14.1485 5.95494 13.4772C5.01714 12.8058 4.31888 11.8621 3.95921 10.78L3.85158 10.789L1.01673 12.9389L0.979675 13.0399C1.74317 14.5311 2.91488 15.7848 4.36379 16.6607C5.8127 17.5367 7.48168 18.0004 9.18411 18"
-                                                          fill="#34A853" />
-                                                    <path d="M3.95921 10.7799C3.75834 10.2071 3.65469 9.60576 3.65239 9C3.65608 8.39523 3.75591 7.79471 3.94827 7.22006L3.94316 7.10075L1.07355 4.9162L0.979681 4.95995C0.335608 6.21312 0.00012207 7.59676 0.00012207 8.99991C0.00012207 10.4031 0.335608 11.7867 0.979681 13.0399L3.95921 10.7799Z"
-                                                          fill="#FBBC05" />
-                                                    <path d="M9.18375 3.48001C10.4997 3.45999 11.7724 3.94027 12.7348 4.82007L15.3267 2.34002C13.6643 0.811712 11.4629 -0.0268481 9.18375 1.57224e-05C7.48133 -0.000381223 5.81236 0.463308 4.36346 1.33923C2.91455 2.21516 1.74283 3.4688 0.979309 4.95996L3.94896 7.22007C4.31217 6.13809 5.01275 5.19513 5.95193 4.52412C6.89111 3.85311 8.02151 3.48792 9.18375 3.48001Z"
-                                                          fill="#EB4335" />
-                                                </g>
-                                                <defs>
-                                                    <clipPath id="clip0_2232_16368">
-                                                        <rect width="18" height="18" fill="white" />
-                                                    </clipPath>
-                                                </defs>
-                                            </svg>
-                                        </div>
-                                        <h6 class="text-sm fw-400">Google</h6>
-                                    </div>
-                                    <div class="text-center">
-                                        <h6 class="text-sm fw-400">3.5K</h6>
-                                    </div>
-                                    <div class="text-center">
-                                        <p class="text-sm text-success-2">$5,768</p>
-                                    </div>
-                                    <div class="text-end d-none d-xl-block">
-                                        <p class="text-sm text-primary">4.8%</p>
-                                    </div>
-                                </div>
-
-                                <div class="top-chanels-item">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div>
-                                            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M15.7781 4.30319L16.8469 2.95319C17.1562 2.58756 17.2406 2.30631 17.2688 2.16569C16.425 2.67194 15.6375 2.84069 15.1312 2.84069H14.9344L14.8219 2.72819C14.1469 2.13756 13.3031 1.82819 12.4031 1.82819C10.4344 1.82819 8.8875 3.45944 8.8875 5.34381C8.8875 5.45631 8.8875 5.62506 8.91563 5.73756L9 6.30006L8.40938 6.27194C4.80937 6.15944 1.85625 3.06569 1.37813 2.53131C0.590625 3.93756 1.04063 5.28756 1.51875 6.13131L2.475 7.70631L0.95625 6.86256C0.984375 8.04381 1.43437 8.97194 2.30625 9.64694L3.06562 10.2094L2.30625 10.5188C2.78437 11.9532 3.85313 12.5438 4.64062 12.7688L5.68125 13.0501L4.69688 13.7251C3.12188 14.8501 1.15312 14.7657 0.28125 14.6813C2.05313 15.9188 4.1625 16.2001 5.625 16.2001C6.72188 16.2001 7.5375 16.0876 7.73438 16.0032C15.6094 14.1469 15.975 7.11569 15.975 5.70944V5.51256L16.1438 5.40006C17.1 4.50006 17.4937 4.02194 17.7188 3.74069C17.6344 3.76881 17.5219 3.82506 17.4094 3.85319L15.7781 4.30319Z"
-                                                      fill="#2B96F0" />
-                                            </svg>
-                                        </div>
-                                        <h6 class="text-sm fw-400">Twitter</h6>
-                                    </div>
-                                    <div class="text-center">
-                                        <h6 class="text-sm fw-400">2.2K</h6>
-                                    </div>
-                                    <div class="text-center">
-                                        <p class="text-sm text-success-2">$4,635</p>
-                                    </div>
-                                    <div class="text-end d-none d-xl-block">
-                                        <p class="text-sm text-primary">4.3%</p>
-                                    </div>
-                                </div>
-
-                                <div class="top-chanels-item">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div>
-                                            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M17.3531 4.80947C17.1562 4.0501 16.5656 3.45947 15.8063 3.2626C14.4563 2.89697 9 2.89697 9 2.89697C9 2.89697 3.54375 2.89697 2.19375 3.2626C1.43438 3.45947 0.84375 4.0501 0.646875 4.80947C0.28125 6.1876 0.28125 9.0001 0.28125 9.0001C0.28125 9.0001 0.28125 11.8407 0.646875 13.1907C0.84375 13.9501 1.43438 14.5407 2.19375 14.7376C3.54375 15.1032 9 15.1032 9 15.1032C9 15.1032 14.4563 15.1032 15.8063 14.7376C16.5656 14.5407 17.1562 13.9501 17.3531 13.1907C17.7188 11.8407 17.7188 9.0001 17.7188 9.0001C17.7188 9.0001 17.7188 6.1876 17.3531 4.80947ZM7.25625 11.6157V6.38447L11.7844 9.0001L7.25625 11.6157Z"
-                                                      fill="#FF0000" />
-                                            </svg>
-                                        </div>
-                                        <h6 class="text-sm fw-400">Youtube</h6>
-                                    </div>
-                                    <div class="text-center">
-                                        <h6 class="text-sm fw-400">2.1K</h6>
-                                    </div>
-                                    <div class="text-center">
-                                        <p class="text-sm text-success-2">$4,290</p>
-                                    </div>
-                                    <div class="text-end d-none d-xl-block">
-                                        <p class="text-sm text-primary">3.7%</p>
-                                    </div>
-                                </div>
-
-                                <div class="top-chanels-item">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div>
-                                            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M17.7188 4.95012C17.6344 6.66574 16.4531 9.00012 14.1469 11.9532C11.7844 15.047 9.75937 16.5939 8.12812 16.5939C7.14375 16.5939 6.27188 15.6939 5.54063 13.7814C5.0625 12.0939 4.64062 10.3501 4.13437 8.60637C3.62812 6.75012 3.06563 5.79387 2.41875 5.79387C2.30625 5.79387 1.82812 6.07512 1.04063 6.63762L0.28125 5.51262C1.15312 4.75324 1.99687 3.99387 2.86875 3.20637C4.02187 2.22199 4.8375 1.68762 5.45625 1.65949C6.80625 1.54699 7.62187 2.50324 7.95937 4.44387C8.26875 6.58137 8.52187 7.93137 8.6625 8.43762C9.05625 10.2095 9.50625 11.0814 9.92812 11.0814C10.2937 11.0814 10.8281 10.5189 11.5875 9.36574C12.3469 8.21262 12.6844 7.31262 12.7688 6.72199C12.8813 5.73762 12.4594 5.20324 11.5875 5.20324C11.1938 5.20324 10.7438 5.28762 10.3219 5.51262C11.1656 2.70012 12.7688 1.32199 15.1875 1.37824C16.9594 1.46262 17.8031 2.64387 17.7188 4.95012Z"
-                                                      fill="#4DC1FF" />
-                                            </svg>
-                                        </div>
-                                        <h6 class="text-sm fw-400">Vimeo</h6>
-                                    </div>
-                                    <div class="text-center">
-                                        <h6 class="text-sm fw-400">1.5K</h6>
-                                    </div>
-                                    <div class="text-center">
-                                        <p class="text-sm text-success-2">$3,580</p>
-                                    </div>
-                                    <div class="text-end d-none d-xl-block">
-                                        <p class="text-sm text-primary">2.5%</p>
-                                    </div>
-                                </div>
-
-                                <div class="top-chanels-item">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div>
-                                            <svg width="10" height="18" viewBox="0 0 10 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <g clip-path="url(#clip0_2232_16407)">
-                                                    <path d="M6.34172 17.9988V9.79003H8.9952L9.39246 6.59094H6.34172V4.54841C6.34172 3.62222 6.58943 2.99097 7.8686 2.99097L9.5 2.99019V0.128971C9.21772 0.0901266 8.24937 0.00305176 7.12277 0.00305176C4.77065 0.00305176 3.16034 1.49384 3.16034 4.23175V6.59102H0.5V9.79012H3.16026V17.9989L6.34172 17.9988Z"
-                                                          fill="#3162C9" />
-                                                </g>
-                                                <defs>
-                                                    <clipPath id="clip0_2232_16407">
-                                                        <rect width="9" height="18" fill="white" transform="translate(0.5 0.000244141)" />
-                                                    </clipPath>
-                                                </defs>
-                                            </svg>
-                                        </div>
-                                        <h6 class="text-sm fw-400">Facebook</h6>
-                                    </div>
-                                    <div class="text-center">
-                                        <h6 class="text-sm fw-400">1.2K</h6>
-                                    </div>
-                                    <div class="text-center">
-                                        <p class="text-sm text-success-2">$2,740</p>
-                                    </div>
-                                    <div class="text-end d-none d-xl-block">
-                                        <p class="text-sm text-primary">1.9%</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- End Cart -->
-                    </div>
-                    <!-- End Col -->
-                    <div class="col-lg-6 col-xl-7">
-                        <div class="card-style mb-30">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h5 class="cards-title fw-600">Featured Campaigns</h5>
-                                <div class="more-btn-wrapper">
-                                    <button class="more-btn dropdown-toggle" id="moreAction" data-bs-toggle="dropdown"
-                                            aria-expanded="false">
-                                        <i class="lni lni-more-alt"></i>
-                                    </button>
-                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="moreAction">
-                                        <li class="dropdown-item">
-                                            <a href="#0" class="text-gray">Add All</a>
-                                        </li>
-                                        <li class="dropdown-item">
-                                            <a href="#0" class="text-gray">Remove All</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <p class="text-sm mt-1">75% activity growth</p>
-                            <!-- End Title -->
-
-                            <div class="featured-tab mt-25">
-                                <nav class="nav mb-30" id="nav-tab" role="tablist">
-                                    <button id="tab-3-1" class="rounded-full active" data-bs-toggle="tab" data-bs-target="#tabContent-3-1"
-                                            aria-selected="false" role="tab" tabindex="-1">
-                                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <g clip-path="url(#clip0_2232_16451)">
-                                                <path d="M18 9.19956C18.0109 8.58084 17.9457 7.96308 17.806 7.35962H9.18372V10.6996H14.2449C14.149 11.2852 13.9333 11.8458 13.6106 12.3476C13.288 12.8493 12.8651 13.282 12.3674 13.6195L12.3497 13.7314L15.0761 15.8011L15.2649 15.8196C16.9995 14.2496 17.9997 11.9395 17.9997 9.19956"
-                                                      fill="#4285F4" />
-                                                <path d="M9.18382 18C11.6633 18 13.745 17.2 15.2655 15.82L12.3675 13.6199C11.592 14.15 10.5512 14.52 9.18382 14.52C8.02249 14.5134 6.89279 14.1485 5.955 13.4772C5.0172 12.8058 4.31894 11.8621 3.95927 10.78L3.85164 10.789L1.01679 12.9389L0.979736 13.0399C1.74323 14.5311 2.91494 15.7848 4.36385 16.6607C5.81276 17.5367 7.48174 18.0004 9.18417 18"
-                                                      fill="#34A853" />
-                                                <path d="M3.95921 10.7799C3.75834 10.2071 3.65469 9.60576 3.65239 9C3.65608 8.39523 3.75591 7.79471 3.94827 7.22006L3.94316 7.10075L1.07355 4.9162L0.979681 4.95995C0.335608 6.21312 0.00012207 7.59676 0.00012207 8.99991C0.00012207 10.4031 0.335608 11.7867 0.979681 13.0399L3.95921 10.7799Z"
-                                                      fill="#FBBC05" />
-                                                <path d="M9.18381 3.48001C10.4998 3.45999 11.7725 3.94027 12.7348 4.82007L15.3267 2.34002C13.6644 0.811712 11.463 -0.0268481 9.18381 1.57224e-05C7.48139 -0.000381223 5.81242 0.463308 4.36352 1.33923C2.91461 2.21516 1.74289 3.4688 0.97937 4.95996L3.94902 7.22007C4.31223 6.13809 5.01282 5.19513 5.95199 4.52412C6.89117 3.85311 8.02157 3.48792 9.18381 3.48001Z"
-                                                      fill="#EB4335" />
-                                            </g>
-                                            <defs>
-                                                <clipPath id="clip0_2232_16451">
-                                                    <rect width="18" height="18" fill="white" />
-                                                </clipPath>
-                                            </defs>
-                                        </svg>
-                                        Google
-                                    </button>
-                                    <button id="tab-3-2" class="rounded-full" data-bs-toggle="tab" data-bs-target="#tabContent-3-2"
-                                            aria-selected="false" role="tab" tabindex="-1">
-                                        <svg width="9" height="18" viewBox="0 0 9 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <g clip-path="url(#clip0_2232_16458)">
-                                                <path d="M5.84172 17.9986V9.78978H8.4952L8.89246 6.59069H5.84172V4.54817C5.84172 3.62198 6.08943 2.99073 7.3686 2.99073L9 2.98995V0.128727C8.71772 0.0898825 7.74937 0.00280762 6.62277 0.00280762C4.27065 0.00280762 2.66034 1.4936 2.66034 4.2315V6.59078H0V9.78987H2.66026V17.9986L5.84172 17.9986Z"
-                                                      fill="#3162C9" />
-                                            </g>
-                                            <defs>
-                                                <clipPath id="clip0_2232_16458">
-                                                    <rect width="9" height="18" fill="white" />
-                                                </clipPath>
-                                            </defs>
-                                        </svg>
-                                        Facebook
-                                    </button>
-                                    <button id="tab-3-3" class="rounded-full" data-bs-toggle="tab" data-bs-target="#tabContent-3-3"
-                                            aria-selected="true" role="tab">
-                                        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <g clip-path="url(#clip0_2232_16462)">
-                                                <path d="M17.6906 5.4C17.6625 4.5 17.4938 3.85313 17.2969 3.2625C17.1 2.67188 16.7906 2.19375 16.3125 1.71562C15.8344 1.2375 15.3563 0.95625 14.7938 0.73125C14.2313 0.50625 13.6125 0.365625 12.6563 0.3375C11.6719 0.28125 11.3906 0.28125 9 0.28125C6.60938 0.28125 6.35625 0.28125 5.4 0.309375C4.44375 0.3375 3.85313 0.50625 3.2625 0.703125C2.67188 0.9 2.19375 1.2375 1.71563 1.71562C1.2375 2.19375 0.928125 2.67188 0.73125 3.2625C0.50625 3.825 0.365625 4.44375 0.3375 5.4C0.309375 6.35625 0.28125 6.60938 0.28125 9C0.28125 11.3906 0.28125 11.6438 0.309375 12.6C0.3375 13.5562 0.50625 14.1469 0.703125 14.7375C0.9 15.3281 1.20938 15.8063 1.6875 16.2844C2.16563 16.7625 2.67188 17.0719 3.23438 17.2688C3.79688 17.4656 4.41563 17.6344 5.37188 17.6625C6.32813 17.7188 6.58125 17.7188 8.97188 17.7188C11.3625 17.7188 11.6156 17.7188 12.5719 17.6906C13.5281 17.6625 14.1188 17.4937 14.7094 17.2969C15.3 17.1 15.7781 16.7906 16.2563 16.3125C16.7344 15.8344 17.0438 15.3281 17.2406 14.7656C17.4375 14.2031 17.6063 13.5844 17.6344 12.6281C17.6625 11.7281 17.6625 11.4469 17.6625 9.05625C17.6625 6.66563 17.7188 6.35625 17.6906 5.4ZM16.1156 12.5156C16.0875 13.3594 15.9188 13.8094 15.8063 14.1469C15.6375 14.5406 15.4406 14.85 15.1313 15.1312C14.8219 15.4406 14.5406 15.6094 14.1469 15.8063C13.8375 15.9187 13.3875 16.0875 12.5156 16.1156C11.6156 16.1156 11.3344 16.1156 9.02813 16.1156C6.72188 16.1156 6.4125 16.1156 5.5125 16.0875C4.66875 16.0594 4.21875 15.8906 3.88125 15.7781C3.4875 15.6094 3.17813 15.4125 2.89688 15.1031C2.5875 14.7937 2.41875 14.5125 2.22188 14.1188C2.10938 13.8094 1.94063 13.3594 1.9125 12.4875C1.9125 11.6156 1.9125 11.3344 1.9125 9C1.9125 6.66563 1.9125 6.38438 1.94063 5.48438C1.96875 4.64062 2.1375 4.19062 2.25 3.85312C2.41875 3.45937 2.61563 3.15 2.89688 2.86875C3.20625 2.55938 3.4875 2.39062 3.88125 2.22188C4.19063 2.10938 4.64063 1.94063 5.5125 1.9125C6.4125 1.88438 6.69375 1.88437 9.02813 1.88437C11.3625 1.88437 11.6438 1.88438 12.5438 1.9125C13.3875 1.94063 13.8375 2.10938 14.175 2.22188C14.5688 2.39062 14.8781 2.5875 15.1594 2.86875C15.4688 3.17812 15.6375 3.45937 15.8344 3.85312C15.9469 4.1625 16.1156 4.6125 16.1438 5.48438C16.1719 6.38438 16.1719 6.66563 16.1719 9C16.1719 11.3344 16.1438 11.6156 16.1156 12.5156Z"
-                                                      fill="url(#paint0_linear_2232_16462)" />
-                                                <path d="M9.00044 4.52802C6.49731 4.52802 4.52856 6.55302 4.52856 8.99989C4.52856 11.503 6.55356 13.4718 9.00044 13.4718C11.4473 13.4718 13.5004 11.503 13.5004 8.99989C13.5004 6.49677 11.5036 4.52802 9.00044 4.52802ZM9.00044 11.9249C7.36919 11.9249 6.07544 10.603 6.07544 8.99989C6.07544 7.39677 7.39731 6.07489 9.00044 6.07489C10.6317 6.07489 11.9254 7.36864 11.9254 8.99989C11.9254 10.6311 10.6317 11.9249 9.00044 11.9249Z"
-                                                      fill="url(#paint1_linear_2232_16462)" />
-                                                <path d="M13.6969 5.37196C14.2716 5.37196 14.7375 4.90604 14.7375 4.33134C14.7375 3.7566 14.2716 3.29071 13.6969 3.29071C13.1221 3.29071 12.6562 3.7566 12.6562 4.33134C12.6562 4.90604 13.1221 5.37196 13.6969 5.37196Z"
-                                                      fill="url(#paint2_linear_2232_16462)" />
-                                            </g>
-                                            <defs>
-                                                <linearGradient id="paint0_linear_2232_16462" x1="3" y1="0.75" x2="15.375" y2="17.25"
-                                                                gradientUnits="userSpaceOnUse">
-                                                    <stop stop-color="#5851DB" />
-                                                    <stop offset="0.25" stop-color="#833AB4" />
-                                                    <stop offset="0.479167" stop-color="#C13584" />
-                                                    <stop offset="0.739583" stop-color="#E1306C" />
-                                                    <stop offset="1" stop-color="#FD1D1D" />
-                                                </linearGradient>
-                                                <linearGradient id="paint1_linear_2232_16462" x1="5.92903" y1="4.76844" x2="12.2685"
-                                                                y2="13.2575" gradientUnits="userSpaceOnUse">
-                                                    <stop stop-color="#5851DB" />
-                                                    <stop offset="0.25" stop-color="#833AB4" />
-                                                    <stop offset="0.479167" stop-color="#C13584" />
-                                                    <stop offset="0.739583" stop-color="#E1306C" />
-                                                    <stop offset="1" stop-color="#FD1D1D" />
-                                                </linearGradient>
-                                                <linearGradient id="paint2_linear_2232_16462" x1="12.9811" y1="3.34666" x2="14.4577"
-                                                                y2="5.31766" gradientUnits="userSpaceOnUse">
-                                                    <stop stop-color="#5851DB" />
-                                                    <stop offset="0.25" stop-color="#833AB4" />
-                                                    <stop offset="0.479167" stop-color="#C13584" />
-                                                    <stop offset="0.739583" stop-color="#E1306C" />
-                                                    <stop offset="1" stop-color="#FD1D1D" />
-                                                </linearGradient>
-                                                <clipPath id="clip0_2232_16462">
-                                                    <rect width="18" height="18" fill="white" />
-                                                </clipPath>
-                                            </defs>
-                                        </svg>
-                                        Facebook
-                                    </button>
-                                    <button id="tab-3-4" class="rounded-full" data-bs-toggle="tab" data-bs-target="#tabContent-3-4"
-                                            aria-selected="true" role="tab">
-                                        <svg width="21" height="18" viewBox="0 0 21 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M0 1.55217C0 0.694956 0.695478 0 1.55374 0H18.8723C19.7301 0 20.4261 0.697565 20.4261 1.55217V16.4478C20.4261 17.305 19.7306 18 18.8723 18H1.55374C0.696 18 0 17.3024 0 16.4478V1.55217ZM1.4087 2.18296V15.817C1.4087 16.2355 1.76087 16.5913 2.19548 16.5913H18.2306C18.6678 16.5913 19.0174 16.2449 19.0174 15.817V2.18296C19.0174 1.76452 18.6652 1.4087 18.2306 1.4087H2.19548C1.75826 1.4087 1.4087 1.75513 1.4087 2.18296ZM2.11304 9.23113C2.11304 8.8007 2.43652 8.45217 2.84035 8.45217H6.31565C6.71739 8.45217 7.04296 8.79861 7.04296 9.23113V15.887H2.11252V9.23113H2.11304ZM7.74783 6.41687C7.74783 5.98487 8.0713 5.63478 8.47513 5.63478H11.9504C12.3522 5.63478 12.6777 5.98122 12.6777 6.41687V15.887H7.7473V6.41687H7.74783ZM13.3826 3.5953C13.3826 3.16539 13.7061 2.81687 14.1099 2.81687H17.5852C17.987 2.81687 18.3125 3.16644 18.3125 3.5953V15.8864H13.3821V3.5953H13.3826Z"
-                                                  fill="#0080F7" />
-                                        </svg>
-                                        Seranking
-                                    </button>
-                                </nav>
-
-                                <div class="featured-tab-header mb-30">
-                                    <div class="d-flex flex-wrap">
-                                        <div class="col-6 col-xl-8">
-                                            <h6 class="text-sm fw-500 text-gray">Email Title</h6>
-                                        </div>
-                                        <div class="col-3 col-xl-2">
-                                            <h6 class="text-sm fw-500 text-gray">Status</h6>
-                                        </div>
-                                        <div class="col-3 col-xl-2">
-                                            <h6 class="text-sm fw-500 text-gray text-end">Conversion</h6>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="tab-content" id="nav-tabContent3">
-                                    <div class="tab-pane fade show active" id="tabContent-3-1" role="tabpanel" aria-labelledby="#tab-3-1">
-                                        <div class="d-flex flex-wrap">
-                                            <div class="col-6 col-xl-8">
-                                                <h6 class="text-sm fw-400 tab-item-title">Best Headsets Giveaway</h6>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <span class="status-badge queue">In Queue</span>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <h6 class="text-sm fw-400 text-end">0%(0)</h6>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex flex-wrap mt-25">
-                                            <div class="col-6 col-xl-8">
-                                                <h6 class="text-sm fw-400 tab-item-title">iPhone 14 Plus Giveaway</h6>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <span class="status-badge sent">Sent</span>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <h6 class="text-sm fw-400 text-end">37%(247)</h6>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex flex-wrap mt-25">
-                                            <div class="col-6 col-xl-8">
-                                                <h6 class="text-sm fw-400 tab-item-title">Macbook Pro M1 Giveaway</h6>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <span class="status-badge sent">Sent</span>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <h6 class="text-sm fw-400 text-end">18%(6.4k)</h6>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="tab-pane fade" id="tabContent-3-2" role="tabpanel" aria-labelledby="#tab-3-2">
-                                        <div class="d-flex flex-wrap">
-                                            <div class="col-6 col-xl-8">
-                                                <h6 class="text-sm fw-400 tab-item-title">iPhone 14 Plus Giveaway</h6>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <span class="status-badge sent">Sent</span>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <h6 class="text-sm fw-400 text-end">37%(247)</h6>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex flex-wrap mt-25">
-                                            <div class="col-6 col-xl-8">
-                                                <h6 class="text-sm fw-400 tab-item-title">Best Headsets Giveaway</h6>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <span class="status-badge queue">In Queue</span>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <h6 class="text-sm fw-400 text-end">0%(0)</h6>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex flex-wrap mt-25">
-                                            <div class="col-6 col-xl-8">
-                                                <h6 class="text-sm fw-400 tab-item-title">Macbook Pro M1 Giveaway</h6>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <span class="status-badge sent">Sent</span>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <h6 class="text-sm fw-400 text-end">18%(6.4k)</h6>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="tab-pane fade" id="tabContent-3-3" role="tabpanel" aria-labelledby="#tab-3-3">
-                                        <div class="d-flex flex-wrap">
-                                            <div class="col-6 col-xl-8">
-                                                <h6 class="text-sm fw-400 tab-item-title">Macbook Pro M1 Giveaway</h6>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <span class="status-badge sent">Sent</span>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <h6 class="text-sm fw-400 text-end">18%(6.4k)</h6>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex flex-wrap mt-25">
-                                            <div class="col-6 col-xl-8">
-                                                <h6 class="text-sm fw-400 tab-item-title">Best Headsets Giveaway</h6>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <span class="status-badge queue">In Queue</span>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <h6 class="text-sm fw-400 text-end">0%(0)</h6>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex flex-wrap mt-25">
-                                            <div class="col-6 col-xl-8">
-                                                <h6 class="text-sm fw-400 tab-item-title">iPhone 14 Plus Giveaway</h6>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <span class="status-badge sent">Sent</span>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <h6 class="text-sm fw-400 text-end">37%(247)</h6>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="tab-pane fade" id="tabContent-3-4" role="tabpanel" aria-labelledby="#tab-3-4">
-                                        <div class="d-flex flex-wrap">
-                                            <div class="col-6 col-xl-8">
-                                                <h6 class="text-sm fw-400 tab-item-title">Best Headsets Giveaway</h6>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <span class="status-badge queue">In Queue</span>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <h6 class="text-sm fw-400 text-end">0%(0)</h6>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex flex-wrap mt-25">
-                                            <div class="col-6 col-xl-8">
-                                                <h6 class="text-sm fw-400 tab-item-title">Macbook Pro M1 Giveaway</h6>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <span class="status-badge sent">Sent</span>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <h6 class="text-sm fw-400 text-end">18%(6.4k)</h6>
-                                            </div>
-                                        </div>
-                                        <div class="d-flex flex-wrap mt-25">
-                                            <div class="col-6 col-xl-8">
-                                                <h6 class="text-sm fw-400 tab-item-title">iPhone 14 Plus Giveaway</h6>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <span class="status-badge sent">Sent</span>
-                                            </div>
-                                            <div class="col-3 col-xl-2">
-                                                <h6 class="text-sm fw-400 text-end">37%(247)</h6>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- End Col -->
-                </div>
-                <!-- End Row -->
+               
             </div>
-            <!-- end -->
-        </section>
-        <!-- ========== Marketing Dashboard end ========== -->
-        <!-- ========== chart.js start ========== -->
-        <section class="section">
-            <div class="container-fluid">
-                <!-- ========== title-wrapper start ========== -->
-                <div class="title-wrapper pt-30">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <div class="title">
-                                <h2>Chart js</h2>
-                            </div>
-                        </div>
-                        <!-- end col -->
-                        <div class="col-md-6">
-                            <div class="breadcrumb-wrapper">
-                                <nav aria-label="breadcrumb">
-                                    <ol class="breadcrumb">
-                                        <li class="breadcrumb-item">
-                                            <a href="#0">Dashboard</a>
-                                        </li>
-                                        <li class="breadcrumb-item">
-                                            <a href="#0">Charts</a>
-                                        </li>
-                                        <li class="breadcrumb-item active" aria-current="page">
-                                            Chart.js
-                                        </li>
-                                    </ol>
-                                </nav>
-                            </div>
-                        </div>
-                        <!-- end col -->
-                    </div>
-                    <!-- end row -->
-                </div>
-                <!-- ========== title-wrapper end ========== -->
-                <!-- Chart Card Wrapper Start -->
-                <div class="chart-card-wrapper">
-                    <div class="row">
-                        <div class="col-lg-7">
-                            <div class="card-style mb-30">
-                                <div class="title d-flex justify-content-between">
-                                    <div class="left">
-                                        <h6 class="text-medium mb-20">Line Chart</h6>
-                                    </div>
-                                </div>
-                                <!-- End Title -->
-                                <div class="chart">
-                                    <canvas id="Chart1" style="width: 100%; height: 400px; margin-left: -35px;"></canvas>
-                                </div>
-                                <!-- End Chart -->
-                            </div>
-                        </div>
-                        <!-- End Col -->
-                        <div class="col-lg-5">
-                            <div class="card-style mb-30">
-                                <div class="title d-flex justify-content-between">
-                                    <div class="left">
-                                        <h6 class="text-medium mb-20">Bar Chart</h6>
-                                    </div>
-                                </div>
-                                <!-- End Title -->
-                                <div class="chart">
-                                    <canvas id="Chart4" style="width: 100%; height: 400px; margin-left: -35px;"></canvas>
-                                </div>
-                                <!-- End Chart -->
-                            </div>
-                        </div>
-                        <!-- End Col -->
-                    </div>
-                    <!-- End Row -->
-                    <div class="row">
-                        <div class="col-lg-7">
-                            <div class="card-style">
-                                <div class="title d-flex align-items-center justify-content-between">
-                                    <div class="left">
-                                        <h6 class="text-medium mb-20">Line Chart</h6>
-                                    </div>
-                                </div>
-                                <!-- End Title -->
-                                <div class="chart">
-                                    <canvas id="Chart3" style="width: 100%; height: 400px; margin-left: -35px;"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- End Col -->
-                        <div class="col-lg-5">
-                            <div class="card-style mb-30">
-                                <div class="title d-flex justify-content-between">
-                                    <div class="left">
-                                        <h6 class="text-medium mb-20">Bar Chart</h6>
-                                    </div>
-                                </div>
-                                <!-- End Title -->
-                                <div class="chart">
-                                    <canvas id="Chart2" style="width: 100%; height: 400px; margin-left: -35px;"></canvas>
-                                </div>
-                                <!-- End Chart -->
-                            </div>
-                        </div>
-                        <!-- End Col -->
-                    </div>
-                    <!-- End Row -->
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <div class="card-style mb-30">
-                                <div class="title d-flex justify-content-between">
-                                    <div class="left">
-                                        <h6 class="text-medium mb-20">Doughnut Chart</h6>
-                                    </div>
-                                </div>
-                                <!-- End Title -->
-                                <div class="chart">
-                                    <div id="doughnutChart1" style="width: 100%; height: 350px"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- End Col -->
-                        <div class="col-lg-6">
-                            <div class="card-style mb-30">
-                                <div class="title d-flex justify-content-between">
-                                    <div class="left">
-                                        <h6 class="text-medium mb-20">Pie Chart</h6>
-                                    </div>
-                                </div>
-                                <!-- End Title -->
-                                <div class="chart max-w-350 mx-auto">
-                                    <canvas id="pieChart1" style="width: 100%; height: 350px"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- End Col -->
-                        <div class="col-lg-6">
-                            <div class="card-style mb-30">
-                                <div class="title d-flex justify-content-between">
-                                    <div class="left">
-                                        <h6 class="text-medium mb-20">Radar Chart</h6>
-                                    </div>
-                                </div>
-                                <!-- End Title -->
-                                <div class="chart max-w-350 mx-auto">
-                                    <canvas id="radarChart1" style="width: 100%; height: 350px"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- End Col -->
-                        <div class="col-lg-6">
-                            <div class="card-style mb-30">
-                                <div class="title d-flex justify-content-between">
-                                    <div class="left">
-                                        <h6 class="text-medium mb-20">Polar Area Chart</h6>
-                                    </div>
-                                </div>
-                                <!-- End Title -->
-                                <div class="chart max-w-350 mx-auto">
-                                    <canvas id="polarChart1" style="width: 100%; height: 350px"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- End Col -->
-                    </div>
-                    <!-- End Row -->
-                </div>
-                <!-- Chart Card Wrapper End -->
-            </div>
-            <!-- end container -->
-        </section>
-        <!-- ========== chart.js end ========== -->
-    </main>
-    <!-- ======== main-wrapper end =========== -->
+            <!-- End Row -->
+        </div>
+        <!-- end -->
+    </section>
+    <!-- ========== Marketing Dashboard end ========== -->
+</main>
+<!-- ======== main-wrapper end =========== -->
 </body>
 
 
 
 @section Scripts
 {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        //============ clickRateChart start
-        const clickRateChart = new ApexCharts(
-          document.querySelector("#clickRateChart"),
-          (options = {
-            series: [45, 35, 20],
-            labels: ["Desktop", "Tablet", "Mobile"],
-            colors: ["#365CF5", "#ECF2FF", "#F9F9FD"],
-            chart: {
-              width: 150,
-              height: 150,
-              type: "donut",
-              fontFamily: "Plus Jakarta Sans', sans-serif",
-              foreColor: "#adb0bb",
+        const categoryColors = [
+        '#624BFF', // 經典靛藍
+        '#FB7D5B', // 活力珊瑚橘
+        '#2E91FF', // 天空藍
+        '#F151B1', // 浪漫野莓粉
+        '#1CCAB8', // 清新薄荷綠
+        '#8D6E63', // 溫潤可可棕
+        '#FFBE46', // 蜂蜜金黃
+        '#A155B9', // 優雅薰衣草紫
+        '#757575'  // 中性質感灰
+        ];
+        //趨勢圖
+        new Chart( document.getElementById("trendChart"),{
+            type:'line',
+            data:{
+                labels:@Html.Raw(Json.Serialize(Model.Last7DaysLabels)),
+                datasets:[{
+                    label:'日訂單量',
+                    data: @Json.Serialize(Model.Last7DaysData),
+                    backgroundColor: "transparent",
+                    borderColor: '#FAA916',
+                    borderWidth: 8,
+                    tension:0.3,
+                    pointHoverBorderWidth: 3,
+                    fill: true,
+                    pointRadius: 8,
+                    pointBackgroundColor: "transparent",
+                    pointHoverBackgroundColor: "#FAA916",
+                    pointBorderColor: "transparent",
+                    pointHoverBorderColor: "#fff",
+                    pointHoverRadius: 8,
+                    cubicInterpolationMode: "monotone", // Add this line for curved line
+                }],
             },
-            dataLabels: {
-              enabled: false
+            options: {
+                responsive: true,
+                    plugins: {
+                        legend: {
+                        display: false // 隱藏上方的標籤文字，讓畫面更乾淨
+                        }
+                    },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                        stepSize: 1 // 確保垂直軸顯示的是整數訂單數
+                        }
+                    }
+                }
+            }
+          });
+
+        new Chart(document.getElementById('categoryChart'), {
+            type: 'doughnut',
+            data: {
+                labels: @Html.Raw(Json.Serialize(Model.CategoryLabels)),
+                datasets: [{
+                data: @Json.Serialize(Model.CategoryData),
+                backgroundColor: categoryColors,
+                hoverOffset: 15,                 
+                borderWidth: 2,
+                borderColor: '#ffffff'
+                }]
             },
-            plotOptions: {
-              pie: {
-                startAngle: 0,
-                endAngle: 360,
-                donut: {
-                  size: '75%',
+            options: {
+                plugins: {
+                    legend: {
+                        position: 'bottom', // 標籤放下面
+                        labels: {
+                        padding: 20,
+                        usePointStyle: true
+                        }
+                    }
                 },
-              },
-            },
-            stroke: {
-              show: false,
-            },
-            legend: {
-              show: false,
-            },
-            responsive: [
-              {
-                breakpoint: 991,
-                options: {
-                  chart: {
-                    width: 120,
-                  },
-                },
-              },
-            ],
-            tooltip: {
-              theme: "dark",
-              fillSeriesColor: false,
-            },
-          })
-        );
-        clickRateChart.render();
+                cutout: '70%'
+            }
 
-        // ================== chart four start
-        const ctx4 = document.getElementById("Chart4").getContext("2d");
-        const chart4 = new Chart(ctx4, {
-          type: "bar",
-          data: {
-            labels: ["16/08", "17/08", "18/08", "19/08", "20/08", "21/08", "22/08", "23/08", "24/08", "25/08"],
-            datasets: [
-              {
-                label: "Earnings",
-                data: [600, 700, 960, 700, 650, 800, 650, 980, 670, 900],
-                borderColor: "#365CF5",
-                backgroundColor: "#365CF5",
-                borderWidth: 0,
-                borderRadius: {
-                  topRight: 20,
-                  topLeft: 20,
-                  bottomRight: 0,
-                  bottomLeft: 0,
-                },
-                barThickness: 12,
-                borderSkipped: "bottom",
-              },
-              {
-                label: "Expenses",
-                backgroundColor: "#49BEFF",
-                borderColor: "#49BEFF",
-                borderWidth: 0,
-                borderRadius: {
-                  topRight: 0,
-                  topLeft: 0,
-                  bottomRight: 20,
-                  bottomLeft: 20,
-                },
-                barThickness: 12,
-                data: [-690, -740, -720, -850, -876, -900, -852, -560, -910, -540],
-                borderSkipped: false,
-              },
-            ],
-          },
-          options: {
-            plugins: {
-              legend: {
-                display: false,
-              },
-            },
-            scales: {
-              y: {
-                stacked: true,
-                grid: {
-                  display: true,
-                  color: "rgba(143, 146, 161, .1)",
-                  borderColor: "rgba(143, 146, 161, .1)",
-                },
-                ticks: {
-                  padding: 35,
-                  callback: function (value) {
-                    return Math.abs(value);
-                  },
-                },
-              },
-              x: {
-                stacked: true,
-                grid: {
-                  display: false,
-                  drawBorder: false,
-                },
-                ticks: {
-                  padding: 20,
-                },
-              },
-            },
-          },
-        });
-        // =========== chart four end
-
-        // =========== theme change
-        const darkThemeColors = {
-          darkBorder: "#2b2b42",
-          darkColor: "#838C9A",
-        };
-
-        // Function to apply theme colors to the chart
-        function applyThemeColors(themeColors) {
-          chart4.options.scales.y.grid.color = themeColors.darkBorder;
-          chart4.options.scales.y.grid.borderColor = themeColors.darkBorder;
-          chart4.options.scales.x.ticks.color = themeColors.darkColor;
-          chart4.options.scales.y.ticks.color = themeColors.darkColor;
-
-          chart4.update();
-        }
-
-        const darkThemeButton = document.querySelector('.darkThemeButton')
-        const lightThemeButton = document.querySelector('.lightThemeButton')
-
-        // Check if the user has a saved theme preference
-        const savedTheme = localStorage.getItem('theme')
-
-        // Check the saved theme preference and apply appropriate colors
-        if (savedTheme === 'dark') {
-          applyThemeColors(darkThemeColors);
-        } else {
-          applyThemeColors(lightThemeColors);
-        }
-
-        // Event listeners for theme buttons
-        darkThemeButton.addEventListener('click', () => {
-          applyThemeColors(darkThemeColors);
-        });
-
-        lightThemeButton.addEventListener('click', () => {
-          applyThemeColors(lightThemeColors);
         });
     </script>
 }

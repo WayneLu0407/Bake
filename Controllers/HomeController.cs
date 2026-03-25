@@ -59,14 +59,17 @@ public class HomeController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> LoginAsync(LoginModel model)
     {
-        var user = _context.AccountAuths.Include(u=>u.RoleNavigation).FirstOrDefault(x => x.Email == model.Account && x.PasswordHash == model.Password);  //把資料庫的資料找出來做比對
+        
+        var user = _context.AccountAuths.Include(u=>u.RoleNavigation).FirstOrDefault(x => x.Email == model.Account);  //把資料庫的資料找出來做比對
 
         if (ModelState.IsValid)
         {
-            if (user == null) // 如果沒有資料為Null 則return 回登入畫面
+            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password,user.PasswordHash)) // 如果沒有資料為Null 則return 回登入畫面  使用Bcrypt套件 做雜湊比對
             {
                 return View();
             }
+
+
 
 
 
@@ -118,7 +121,7 @@ public class HomeController : Controller
                 //    byte[] InputPassword = Encoding.UTF8.GetBytes(model.Password);
                 //    byte[] HashPassword = sha256.ComputeHash(InputPassword);
                 //}
-                    _context.AccountAuths.Add(new AccountAuth { UserName = model.Name, Email = model.Email, PasswordHash = model.Password });
+                    _context.AccountAuths.Add(new AccountAuth { UserName = model.Name, Email = model.Email, PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password) });
                     _context.SaveChanges();
                 
                 //encrypt 加密
@@ -230,8 +233,7 @@ public class HomeController : Controller
 
             if (user != null)
             {
-                // 3. 修改驗證狀態 (假設你有一個 IsEmailConfirmed 欄位)
-                //user.IsEmailConfirmed = true;
+                
 
                 _context.SaveChanges();
                 TempData["ResetEmail"] = decryptedEmail;
