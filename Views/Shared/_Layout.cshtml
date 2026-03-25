@@ -123,6 +123,7 @@
                             <small class="text-body-secondary">數量:{{item.quantity}}</small>
                         </div>
                         <span class="text-body-secondary">{{item.price}}</span>
+                        <span class="text-body-secondary">小計:{{item.price * item.quantity}}</span>
                     </li>
                     <li class="list-group-item d-flex justify-content-between">
                         <span>Total</span>
@@ -308,53 +309,15 @@
     <script src="~/js/script.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="~/js/cart-hub.js"></script>
     <script>
-
         // 購物車JavaScript 代碼，只有在需要時才會被渲染
-        const getCartData = async() =>{
-            const response = await fetch('/Cart/GetCartItems'); //向後端API請求購物車資料
-            return await response.json(); //將回傳的JSON資料
-        }
         const cartApp = Vue.createApp({
-            data() {
-                return { cart: []}
-            },
-            computed:{
-                totalPrice(){
-                    return this.cart.reduce((sum,item) => sum + (item.price * (item.quantity ||1)), 0);
-                },
-                totalCount(){
-                    return this.cart.reduce((sum,item) => sum + item.quantity,0);
-                },
-            },
-            methods:{
-                async refresh() {this.cart = await getCartData();}
-            },
-            mounted() {
-                // addEventListener 跟 DOM 有關，留在 mounted
-                this.refresh();
-                window.addEventListener('update-cart', () => {
-                    this.refresh();
-                })
-            }
+            mixins:[CartMixin]
         }).mount("#cart-app");
         
         const cartHeader = Vue.createApp({
-            data(){return {cart:[]}},
-            computed:{
-                totalPrice(){
-                    return this.cart.reduce((sum,item)=>sum+(item.price*(item.quantity || 1)),0);
-                }
-            },
-            methods:{
-                async refresh() {this.cart = await getCartData();}
-            },
-            mounted(){
-            this.refresh();
-            window.addEventListener('update-cart', () =>{
-                this.refresh();
-             })
-            }
+            mixins:[CartMixin]
         }).mount("#headerCart")
     </script>
     <script>
