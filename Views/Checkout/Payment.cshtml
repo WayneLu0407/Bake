@@ -6,6 +6,7 @@
     string ReceiverName = ViewBag.ReceiverName ?? "N/A";
     string ReceiverPhone = ViewBag.ReceiverPhone ?? "N/A";
     string ReceiverAddress = ViewBag.ReceiverAddress ?? "N/A";
+    string ReceiverEmail = ViewBag.ReceiverEmail ?? "N/A";
 }
 
 <section class="h-100 h-custom" style="background-color: #f8f9fa;">
@@ -17,46 +18,45 @@
                     <div class="card-body p-0">
                         <div class="row g-0">
 
-                            @* --- 左邊：確認資訊區 (亮黃色與收件資訊) --- *@
+                            @* --- 左邊：確認資訊區 --- *@
                             <div class="col-lg-5 p-4 p-md-5" style="background-color: #fffbeb;">
                                 <div class="d-flex align-items-center mb-4">
                                     <div class="icon-shape bg-warning text-white rounded-circle p-3 me-3 shadow-sm">
                                         <i class="fas fa-clipboard-check fa-lg"></i>
                                     </div>
-                                    <h4 class="mb-0 fw-bold text-dark">Order Review</h4>
+                                    <h4 class="mb-0 fw-bold text-dark">訂單確認</h4>
                                 </div>
 
                                 <div class="card border-0 shadow-sm rounded-4 mb-4">
                                     <div class="card-body p-4">
                                         <div class="d-flex justify-content-between align-items-center mb-3">
-                                            <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-map-marker-alt text-warning me-2"></i>Shipping Details</h6>
-                                            <a asp-action="Info" class="text-muted small text-decoration-none">Edit</a>
+                                            <h6 class="fw-bold mb-0 text-dark"><i class="fas fa-map-marker-alt text-warning me-2"></i>送貨資訊明細</h6>
+                                            <a asp-action="Info" class="text-muted small text-decoration-none">編輯</a>
                                         </div>
                                         <div class="mb-2">
-                                            <small class="text-muted d-block">Recipient</small>
+                                            <small class="text-muted d-block">收件人</small>
                                             <span class="fw-bold">@ReceiverName</span>
                                         </div>
                                         <div class="mb-2">
-                                            <small class="text-muted d-block">Phone</small>
+                                            <small class="text-muted d-block">聯絡電話</small>
                                             <span class="fw-bold">@ReceiverPhone</span>
                                         </div>
                                         <div class="mb-0">
-                                            <small class="text-muted d-block">Address</small>
+                                            <small class="text-muted d-block">地址</small>
                                             <span class="fw-bold" style="font-size: 0.9rem;">@ReceiverAddress</span>
                                         </div>
                                     </div>
                                 </div>
                                 <div id="paymentPage">
                                     <div class="mb-4">
-                                        <h6 class="fw-bold mb-3 text-dark px-1">Items</h6>
+                                        <h6 class="fw-bold mb-3 text-dark px-1">訂購商品</h6>
                                         <div class="overflow-auto pe-2" style="max-height: 200px;">
                                             @* 綁定 Vue 資料 *@
-
                                             <div v-for="item in cart" :key="item.productId" class="d-flex align-items-center mb-3">
                                                 <img :src="item.imgUrl" class="rounded-3 shadow-sm" style="width: 50px; height: 50px; object-fit: cover; background-color: #fff;">
                                                 <div class="ms-3 flex-grow-1">
                                                     <div class="small fw-bold text-dark text-truncate" style="max-width: 150px;">{{item.productName}}</div>
-                                                    <div class="text-muted" style="font-size: 0.8rem;">Qty: {{item.quantity}}</div>
+                                                    <div class="text-muted" style="font-size: 0.8rem;">數量: {{item.quantity}}</div>
                                                 </div>
                                                 <div class="text-end fw-bold small">${{item.price * item.quantity}}</div>
                                             </div>
@@ -66,7 +66,7 @@
                                     <hr class="my-4 border-dashed">
 
                                     <div class="d-flex justify-content-between align-items-center px-1">
-                                        <span class="text-dark fw-bold fs-5">Total Amount</span>
+                                        <span class="text-dark fw-bold fs-5">訂單總額(含運費)</span>
                                         <h3 class="fw-bolder text-dark mb-0">${{totalPrice + 20}}</h3>
                                     </div>
                                 </div>
@@ -75,13 +75,27 @@
 
                             @* --- 右邊：付款方式選擇 --- *@
                             <div class="col-lg-7 p-4 p-md-5 bg-white">
-                                <h3 class="fw-bold text-dark mb-1">Final Step</h3>
-                                <p class="text-muted mb-5">Select your payment method and complete the purchase.</p>
+                                <h3 class="fw-bold text-dark mb-1">最後一步</h3>
+                                <p class="text-muted mb-5">選擇您的付款方式並完成購買</p>
 
                                 <form asp-controller="Checkout" asp-action="ConfirmPayment" method="post">
                                     <input type="hidden" name="ReceiverName" value="@ReceiverName" />
                                     <input type="hidden" name="ReceiverPhone" value="@ReceiverPhone" />
                                     <input type="hidden" name="ReceiverAddress" value="@ReceiverAddress" />
+                                    <input type="hidden" name="ReceiverEmail" value="@ReceiverAddress" />
+                                    @* --- 放藍星要得 --- *@
+                                    <input type="hidden" name="MerchantID" value="@ViewData["MerchantID"]" />
+                                    <input type="hidden" name="MerchantOrderNo" value="@ViewData["MerchantOrderNo"]"  />
+                                    <input type="hidden" name="ItemDesc" value="@ViewData["ItemDesc"]"   />
+                                    <input type="hidden" name="Amt" value="@ViewData["Amt"]"   />
+                                    <input type="hidden" name="ExpireDate" value="@ViewData["ExpireDate"]"    />
+                                    <input type="hidden" name="ReturnURL" value="@ViewData["ReturnURL"]" />
+                                    <input type="hidden" name="ClientBackURL" value="@ViewData["ClientBackURL"]" />
+                                    <input type="hidden" name="CustomerURL" value="@ViewData["CustomerURL"]" />
+                                    <input type="hidden" name="NotifyURL" value="@ViewData["NotifyURL"]" />
+
+
+
 
                                     @* 信用卡選項 *@
                                     <div class="payment-option mb-3">
@@ -90,7 +104,7 @@
                                             <i class="far fa-credit-card fa-2x me-3 text-muted icon-main"></i>
                                             <div class="flex-grow-1">
                                                 <div class="fw-bold text-dark">信用卡</div>
-                                                <div class="small text-muted">Secure payment with Visa/Master/JCB</div>
+                                                <div class="small text-muted">Visa/Master/JCB 信用卡加密付款</div>
                                             </div>
                                             <i class="fas fa-check-circle fa-lg text-warning check-icon"></i>
                                         </label>
@@ -103,7 +117,7 @@
                                             <i class="fas fa-university fa-2x me-3 text-muted icon-main"></i>
                                             <div class="flex-grow-1">
                                                 <div class="fw-bold text-dark">轉帳</div>
-                                                <div class="small text-muted">Quick mobile payment</div>
+                                                <div class="small text-muted">銀行轉帳</div>
                                             </div>
                                             <i class="fas fa-check-circle fa-lg text-warning check-icon d-none"></i>
                                         </label>
@@ -116,7 +130,7 @@
                                             <i class="fas fa-shipping-fast fa-2x me-3 text-muted icon-main"></i>
                                             <div class="flex-grow-1">
                                                 <div class="fw-bold text-dark">貨到付款</div>
-                                                <div class="small text-muted">Quick mobile payment</div>
+                                                <div class="small text-muted"></div>
                                             </div>
                                             <i class="fas fa-check-circle fa-lg text-warning check-icon d-none"></i>
                                         </label>
