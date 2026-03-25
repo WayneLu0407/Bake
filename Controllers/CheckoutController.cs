@@ -1,11 +1,14 @@
 ﻿using Bake.Data;
 using Bake.Models.Sales;
 using Bake.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
 namespace Bake.Controllers
 {
+    
     public class CheckoutController : Controller
     {
         private readonly BakeContext _bakeContext;
@@ -15,12 +18,27 @@ namespace Bake.Controllers
         }
 
         // 將抓取 ID 的邏輯封裝，全 Controller 通用
-        private int CurrentUserId => int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+        private int CurrentUserId
+        {
+            get
+            { 
+                var claimValue = User.FindFirst("UserId")?.Value
+                              ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+                if (int.TryParse(claimValue, out int id))
+                {
+                    return id;
+                }
+                return 0;
+            }
+        }
 
         public IActionResult Info()
         {
             return View();
         }
+
+        
         [HttpPost]
         public IActionResult Info(CheckoutViewModel model)
         {
@@ -29,6 +47,7 @@ namespace Bake.Controllers
                 TempData["ReceiverName"] = model.ReceiverName;
                 TempData["ReceiverPhone"] = model.ReceiverPhone;
                 TempData["ReceiverAddress"] = model.ReceiverAddress;
+                TempData["ReceiverEmail"] = model.ReceiverEmail;
                 return RedirectToAction("Payment");
             }
             return View(model);
@@ -42,18 +61,29 @@ namespace Bake.Controllers
             ViewBag.ReceiverName = TempData["ReceiverName"] ?? "測試員";
             ViewBag.ReceiverPhone = TempData["ReceiverPhone"];
             ViewBag.ReceiverAddress = TempData["ReceiverAddress"];
+            ViewBag.ReceiverEmail = TempData["ReceiverEmail"];
 
             return View();
         }
 
+        [Authorize]
         //HttpPost接收前端傳來的確定購買清單資料 asp-action="ConfirmPayment"
         //完成後redirection 到Success頁 顯示感謝您的訂購，訂單編號為 #XXX
         public async Task<IActionResult> ConfirmPayment(CheckoutViewModel checkoutViewModel, string PaymentMethod)
         {
+            int userId = CurrentUserId;
+
+            // 驗收防呆：如果真的抓不到登入者 ID，不要讓它進資料庫
+            if (userId == 0)
+            {
+                // 應急方案：驗收時如果真的掛了，可以先 return Content("登入資訊遺失，請重新登入");
+                return RedirectToAction("Login", "Home");
+            }
+
             //1. 建立Order物件實體，並將checkoutdata資料填入Order物件中
             var order = new Order
             {
-                UserId = CurrentUserId,
+                UserId = userId,
                 ShippingAddress = checkoutViewModel.ReceiverAddress,
                 TotalAmount = 0, //這裡先設為0，實際金額應該從購物車計算
                 PaymentMethodId = byte.Parse(PaymentMethod),
@@ -91,10 +121,17 @@ namespace Bake.Controllers
             return RedirectToAction("Success", new { id = order.OrderId});
         }
 
-        public IActionResult Success(int id)
+        [HttpGet]
+        public async Task<IActionResult> Success(int id)
         {
-            ViewBag.OrderId = id; //這裡應該傳入剛剛建立的Order的ID，實際上需要從資料庫取得
-            return View();
+            // 根據 ID 抓出訂單明細
+            var order = await _bakeContext.Orders
+                .Include(o => o.OrderItems)
+                .FirstOrDefaultAsync(o => o.OrderId == id);
+
+            if (order == null) return RedirectToAction("Index", "Home");
+
+            return View(order);
         }
 
         private List<CartViewModel> GetCartItemsFromSession()

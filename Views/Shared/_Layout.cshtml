@@ -7,7 +7,10 @@
     <style>
             [v-cloak] {
                 display: none !important;
-        }
+            }
+            .list-group[v-if] {
+                display: none;
+            }
     </style>
     @* 預連線*@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -135,16 +138,31 @@
         <div class="offcanvas-header justify-content-center">
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
-        <div class="offcanvas-body">
-            <div class="order-md-last">
+        <div class="offcanvas-body" id="mobile-search-app">
+            <div class="order-md-last position-relative">
                 <h4 class="d-flex justify-content-between align-items-center mb-3">
                     <span class="text-primary">搜尋</span>
                 </h4>
-
-                <form asp-controller="Products" asp-action="Index" method="get" class="d-flex mt-3 gap-0">
-                    <input name="keyword" class="form-control rounded-start rounded-0 bg-light" type="search" placeholder="您在尋找什麼嗎?" aria-label="What are you looking for?">
-                    <button class="btn btn-dark rounded-end rounded-0" type="submit">搜尋</button>
-                </form>
+                <div class="d-flex mt-3 gap-0">
+                    <input class="form-control rounded-start rounded-0 bg-light"
+                            placeholder="您在尋找什麼嗎?"
+                            v-model="keyword" @@input="search" @@focus="showDropdown=true" @@blur="hideDropdown">
+                    <a :href="'/Products/Index?keyword=' + keyword" class="btn btn-dark rounded-end rounded-0">搜尋</a>
+                </div>                        
+                <!-- 下拉選單 -->
+                <ul v-if="showDropdown && results.length > 0"
+                    class="list-group position-absolute top-100 start-0 w-100 shadow-lg"
+                    style="z-index: 1050; max-height:300px; overflow-y:auto;">
+                    <li v-for="item in results" :key="item.productId"
+                    class="list-group-item list-group-item-action d-flex align-items-center gap-2"
+                    @@mousedown.prevent="goToProduct(item)">
+                        <img :src="item.productImage" style="width:40px; height:40px; object-fit:cover; border-radius:4px;" />
+                        <div>
+                            <div class="fw-bold small" v-text="item.productName"></div>
+                            <small class="text-muted" v-text="item.productPrice"></small>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
@@ -180,7 +198,8 @@
                                 </svg> 
                             </a>
                             <!-- 下拉選單 -->
-                            <ul v-if="showDropdown && results.length > 0"
+                            <ul v-cloak
+                                v-if="showDropdown && results.length > 0"
                                 class="list-group position-absolute top-100 start-0 w-100 shadow-lg"
                                 style="z-index: 1050; max-height:300px; overflow-y:auto;">
                                 <li v-for="item in results" :key="item.productId"
@@ -199,26 +218,10 @@
 
                 <div class="col-4 col-lg-4 d-flex justify-content-end gap-5 align-items-center mt-4 mt-sm-0 justify-content-center justify-content-sm-end">
                         <div class="support-box text-center d-none d-xxl-block">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="posts"><h5 class="mb-0">交流分享區</h5></a>
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Post" asp-action="Index"><h5 class="mb-0">交流分享區</h5></a>
                     </div>
 
                     <ul class="d-flex justify-content-end list-unstyled m-0">
-                        @* <li>
-                            <a asp-controller="Account" asp-action="Login" class="rounded-circle bg-light p-2 mx-1">
-                                <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#bell"></use></svg>
-                            </a>
-                        </li>
-                        <li>
-                            <a asp-controller="Account" asp-action="Login" class="rounded-circle bg-light p-2 mx-1">
-                                <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#message"></use></svg>
-                            </a>
-                        </li>
-
-                        <li>
-                            <a asp-controller="Account" asp-action="Login" class="rounded-circle bg-light p-2 mx-1">
-                                <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#user"></use></svg>
-                            </a>
-                        </li> *@
 
                         @if (User.Identity.IsAuthenticated)
                         {
@@ -229,7 +232,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="#" class="rounded-circle bg-light p-2 mx-1">
+                                <a asp-controller="Chat" asp-action="Index" class="rounded-circle bg-light p-2 mx-1">
                                     <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#message"></use></svg>
                                 </a>
                             </li>
@@ -262,10 +265,10 @@
                         </li>
                     </ul>
                     @*購物車header部分*@
-                    <div class="cart text-end d-none d-lg-block dropdown">
+                    <div class="cart text-end d-none d-lg-block dropdown" id="headerCart">
                         <button class="border-0 bg-transparent d-flex flex-column gap-2 lh-1" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasCart" aria-controls="offcanvasCart">
                             <span class="fs-6 text-muted dropdown-toggle">購物車</span>
-                            <span class="cart-total fs-5 fw-bold">$1290.00</span>
+                            <span class="cart-total fs-5 fw-bold">{{totalPrice}}</span>
                         </button>
                     </div>
                 </div>
@@ -307,7 +310,11 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script>
 
-        // 這裡是購物車的 JavaScript 代碼，只有在需要時才會被渲染
+        // 購物車JavaScript 代碼，只有在需要時才會被渲染
+        const getCartData = async() =>{
+            const response = await fetch('/Cart/GetCartItems'); //向後端API請求購物車資料
+            return await response.json(); //將回傳的JSON資料
+        }
         const cartApp = Vue.createApp({
             data() {
                 return { cart: []}
@@ -321,21 +328,34 @@
                 },
             },
             methods:{
-                async fetchCart() {
-                    const response = await fetch('/Cart/GetCartItems'); //向後端API請求購物車資料
-                    this.cart = await response.json(); //將回傳的JSON資料賦值給cart
-                }
-            },
-            created() {
-                this.fetchCart();  // 提早發請求，不用 await 擋住
+                async refresh() {this.cart = await getCartData();}
             },
             mounted() {
                 // addEventListener 跟 DOM 有關，留在 mounted
+                this.refresh();
                 window.addEventListener('update-cart', () => {
-                    this.fetchCart();
+                    this.refresh();
                 })
             }
         }).mount("#cart-app");
+        
+        const cartHeader = Vue.createApp({
+            data(){return {cart:[]}},
+            computed:{
+                totalPrice(){
+                    return this.cart.reduce((sum,item)=>sum+(item.price*(item.quantity || 1)),0);
+                }
+            },
+            methods:{
+                async refresh() {this.cart = await getCartData();}
+            },
+            mounted(){
+            this.refresh();
+            window.addEventListener('update-cart', () =>{
+                this.refresh();
+             })
+            }
+        }).mount("#headerCart")
     </script>
     <script>
         // 這裡是搜尋的 JavaScript 代碼，只有在需要時才會被渲染
@@ -378,6 +398,41 @@
                 }
         }).mount('#search-app')
      </script>
+     <script>
+        // 手機版搜尋（跟桌面版邏輯一樣，只是掛在不同的 DOM）
+        const mobileSearchApp = Vue.createApp({
+            data() {
+                return {
+                    keyword: '',
+                    results: [],
+                    showDropdown: false,
+                    timer: null
+                }
+            },
+            methods: {
+                search() {
+                    clearTimeout(this.timer)
+                    const kw = this.keyword.trim()
+                    if (kw.length === 0) {
+                        this.results = [];
+                        return;
+                    }
+                    this.timer = setTimeout(async () => {
+                        const res = await fetch('/api/Product/Search?keyword=' + encodeURIComponent(kw))
+                        this.results = await res.json()
+                    }, 300)
+                },
+                goToProduct(item) {
+                    window.location.href = '/Products/Details/' + item.productId;
+                },
+                hideDropdown() {
+                    setTimeout(() => {
+                        this.showDropdown = false;
+                    }, 200);
+                }
+            }
+        }).mount('#mobile-search-app')
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
     
 </body>

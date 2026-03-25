@@ -1,0 +1,448 @@
+﻿
+@{
+    ViewData["Title"] = "交流分享區";
+}
+
+@section Styles
+{
+<style>
+
+    /* 橘色標題橫幅 */
+    .community-banner {
+        background-color: #F5A623;
+        color: #fff;
+        text-align: center;
+        padding: 14px 0;
+        font-size: 1.4rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+    }
+
+    /* 搜尋列 */
+    .post-search-bar {
+        max-width: 420px;
+    }
+    .post-search-bar .form-control {
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        padding-right: 2.5rem;
+    }
+    .post-search-bar .btn-search-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        color: #666;
+    }
+
+    /* 新增按鈕 */
+    .btn-post-action {
+        background-color: #F5A623;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 22px;
+        font-weight: 600;
+        transition: background .2s;
+    }
+    .btn-post-action:hover {
+        background-color: #e09510;
+        color: #fff;
+    }
+
+    /* 貼文 / 活動卡片 — 複用首頁 product-item 風格 */
+    .post-card {
+        border: 1px solid #eee;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #fff;
+        transition: box-shadow .25s;
+        aspect-ratio: 6 / 5;          /* 卡片整體 5:3 */
+        display: flex;                 /* 讓圖片+文字垂直排列不溢出 */
+        flex-direction: column;
+    }
+    .post-card:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,.1);
+    }
+    .post-card .card-thumb,
+    .post-card .card-thumb-placeholder {
+        width: 100%;
+        aspect-ratio: 4 / 3;          /* 照片維持 4:3 */
+        object-fit: cover;
+        background-color: #e8e8e8;
+        flex-shrink: 1;                /* 空間不夠時可以被壓縮 */
+        min-height: 0;
+    }
+    .post-card .card-body {
+        padding: 10px 12px 14px;
+        flex-shrink: 0;                /* 文字不被壓縮 */
+    }
+    .post-card .card-title {
+        font-size: .85rem;
+        font-weight: 600;
+        margin-bottom: 0;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* 分類卡片（熱門活動分類） */
+    .category-card {
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid #eee;
+        transition: box-shadow .25s;
+        background: #fff;
+    }
+    .category-card:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,.1);
+    }
+    .category-card img {
+        width: 100%;
+        aspect-ratio: 5 / 3;
+        object-fit: cover;
+    }
+    .category-card .cat-label {
+        padding: 10px 14px;
+        font-weight: 600;
+        font-size: .95rem;
+    }
+
+    /* section 標題 */
+    .section-heading {
+        font-size: 1.25rem;
+        font-weight: 700;
+    }
+
+    .category-icon-card {
+    padding: 24px 16px;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    background: #fff;
+    transition: box-shadow .25s, transform .2s;
+    }
+    .category-icon-card:hover {
+        box-shadow: 0 4px 16px rgba(0,0,0,.1);
+        transform: translateY(-2px);
+    }
+    .icon-circle {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        background-color: #FFF3E0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+    }
+    .icon-circle i {
+        font-size: 1.6rem;
+        color: #F5A623;
+    }
+
+    /* Swiper 還沒初始化前的預約束 */
+    .swiper:not(.swiper-initialized) .swiper-wrapper {
+        display: flex;
+        overflow: hidden;
+    }
+    .swiper:not(.swiper-initialized) .swiper-slide {
+        width: 20%;
+        flex-shrink: 0;
+    }
+
+    /* hero banner 一次只顯示一張 */
+    .hero-swiper:not(.swiper-initialized) .swiper-slide {
+        width: 100%;
+    }
+</style>
+}
+
+<div id="posts-app" v-cloak>
+    <!-- ========== 橘色標題橫幅 ========== -->
+    <div class="community-banner">交流分享區</div>
+    <!-- ========== 1. 頂部輪播 ========== -->
+    <section class="py-3">
+        <div class="container-fluid">
+            <div class="banner-blocks">
+                <div class="banner-ad large">
+                    <div class="swiper hero-swiper">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide" style="background: url('postimage/banner/banner1.jpg') no-repeat center / cover;">
+                                <div class="w-100 d-flex flex-column align-items-center justify-content-center text-center" style="min-height: 300px;text-shadow: 2px 2px 6px rgba(0,0,0,0.6);">
+                                    <h5 class="categories mb-2 text-white">烘焙人的秘密基地</h5>
+                                    <h2 class="text-white fw-bold">分享你的甜點故事</h2>
+                                    <h5 class="text-white">食譜交流 · 活動揪團 · 找到和你一樣熱愛烘焙的人</h5>
+                                </div>
+                            </div>
+                            <div class="swiper-slide" style="background: url('postimage/banner/banner3.jpg') no-repeat center / cover;">
+                                <div class="w-100 d-flex flex-column align-items-center justify-content-center text-center" style="min-height: 300px;text-shadow: 2px 2px 6px rgba(0,0,0,0.6);">
+                                    <h5 class="categories mb-2 text-white">不只是買賣，更是一個社群</h5>
+                                    <h2 class="text-white fw-bold">一起烤 一起吃 一起玩</h2>
+                                    <h5 class="text-white">發起手作工作坊 · 揪團嘗鮮 · 和烘焙同好面對面交流</h5>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="swiper-pagination"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <div class="p-5">
+        <!-- ========== 3. 搜尋列 + 按鈕 ========== -->
+        <section class="px-4">
+            <div class="container-fluid">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-5">
+                    <!-- 搜尋 -->
+                    <div class="post-search-bar position-relative flex-grow-1">
+                        <input type="text" class="form-control" placeholder="搜尋" v-model="keyword" />
+                        <button class="btn-search-icon" type="button">
+                            <svg width="20" height="20" viewBox="0 0 24 24"><use xlink:href="#search"></use></svg>
+                        </button>
+                    </div>
+                    <!-- 按鈕 -->
+                    <div class="d-flex gap-2">
+                        <a asp-controller="Home" asp-action="CreatePost" class="btn btn-post-action">全部</a>
+                        <a asp-controller="Home" asp-action="CreatePost" class="btn btn-post-action">新增貼文</a>
+                        <a asp-controller="Home" asp-action="CreateActivity" class="btn btn-post-action">新增活動</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== 4. 最新貼文 ========== -->
+        <section class="py-3 overflow-hidden">
+            <div class="container-fluid">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="section-heading">最新貼文</h3>
+                    <div class="swiper-buttons">
+                        <button class="swiper-prev latest-post-prev btn btn-primary btn-sm">❮</button>
+                        <button class="swiper-next latest-post-next btn btn-primary btn-sm">❯</button>
+                    </div>
+                </div>
+                <div class="swiper latest-post-carousel">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide" v-for="post in latestPosts" :key="post.postId">
+                            <a :href="'/Home/PostDetail/' + post.postId" class="text-decoration-none text-dark">
+                                <div class="post-card">
+                                    <img v-if="post.image" :src="post.image" :alt="post.title" class="card-thumb" />
+                                    <div v-else class="card-thumb-placeholder"></div>
+                                    <div class="card-body">
+                                        <p class="card-title">{{ post.title }}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== 5. 熱門貼文 ========== -->
+        <section class="py-3 overflow-hidden">
+            <div class="container-fluid">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="section-heading">熱門貼文</h3>
+                    <div class="swiper-buttons">
+                        <button class="swiper-prev hot-post-prev btn btn-primary btn-sm">❮</button>
+                        <button class="swiper-next hot-post-next btn btn-primary btn-sm">❯</button>
+                    </div>
+                </div>
+                <div class="swiper hot-post-carousel">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide" v-for="post in hotPosts" :key="post.postId">
+                            <a :href="'/Home/PostDetail/' + post.postId" class="text-decoration-none text-dark">
+                                <div class="post-card">
+                                    <img v-if="post.image" :src="post.image" :alt="post.title" class="card-thumb" />
+                                    <div v-else class="card-thumb-placeholder"></div>
+                                    <div class="card-body">
+                                        <p class="card-title">{{ post.title }}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== 6. 熱門活動分類 ========== -->
+        <section class="py-4">
+            <div class="container-fluid">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="section-heading">熱門活動分類</h3>
+                </div>
+                <div class="row g-4">
+                    <div class="col-3" v-for="cat in categories.filter(c=>c.eventTypeId!==0)" :key="cat.eventTypeId">
+                            <a :href="'/Home/Posts?category=' + cat.eventTypeId" class="text-decoration-none text-dark">
+                            <div class="category-icon-card text-center">
+                                <div class="icon-circle">
+                                    <i class="fa-solid" :class="cat.icon"></i>
+                                </div>
+                                <p class="mt-2 fw-bold mb-0">{{ cat.eventTypeName }}</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== 7. 揪團中的活動（第一組） ========== -->
+        <section class="py-3 overflow-hidden">
+            <div class="container-fluid">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="section-heading">揪團中的活動</h3>
+                    <div class="swiper-buttons">
+                        <button class="swiper-prev group1-prev btn btn-primary btn-sm">❮</button>
+                        <button class="swiper-next group1-next btn btn-primary btn-sm">❯</button>
+                    </div>
+                </div>
+                <div class="swiper group1-carousel">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide" v-for="act in groupActivities1" :key="act.postId">
+                            <a :href="'/Home/PostDetail/' + act.postId" class="text-decoration-none text-dark">
+                                <div class="post-card">
+                                    <img v-if="act.image" :src="act.image" :alt="act.title" class="card-thumb" />
+                                    <div v-else class="card-thumb-placeholder"></div>
+                                    <div class="card-body">
+                                        <p class="card-title">{{ act.title }}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        const postsApp = Vue.createApp({
+            data() {
+                return {
+                    keyword: '',
+                    latestPosts: [],
+                    hotPosts: [],
+                    categories: [],
+                    groupActivities1: [],
+                    groupActivities2: [],
+                }
+            },
+            async mounted() {
+                // ---- 呼叫你的 API 拿資料（路徑請依實際後端調整） ----
+                // 最新貼文
+                try {
+                    const res1 = await fetch('/api/PostApi/Latest')
+                    this.latestPosts = await res1.json()
+                    console.log('Latest:', this.latestPosts)    // 確認有拿到資料
+                } catch (err) { 
+                    console.error('Latest 失敗:', err) 
+                }
+
+                // 熱門貼文
+                try {
+                    const res2 = await fetch('/api/PostApi/Hot')
+                    this.hotPosts = await res2.json()
+                    console.log('Hot:', this.hotPosts)    // 確認有拿到資料
+                } catch (err) { 
+                    console.error('Hot 失敗:', err) 
+                }
+
+                // 熱門活動分類
+                try {
+                    const res3 = await fetch('/api/PostApi/EventTypes')
+                    const raw = await res3.json()
+                    const iconMap = {
+                        1: 'fa-cookie-bite',      // 手作實作
+                        2: 'fa-comments',         // 經驗分享
+                        3: 'fa-mug-hot',          // 品嚐聚會
+                        4: 'fa-basket-shopping',  // 食材揪團
+                    }
+                    this.categories = raw.map(c => ({
+                            ...c,
+                            icon: iconMap[c.eventTypeId] || 'fa-tag'
+                        }))
+                } catch (err) { 
+                    console.error('EventTypes 失敗:', err) 
+                }
+
+                // 揪團活動
+                try {
+                    const res4 = await fetch('/api/PostApi/GroupEvents')
+                    this.groupActivities1  = await res4.json()
+                    console.log('GroupEvents:', this.groupActivities1 )    // 確認有拿到資料
+                } catch (err) { 
+                    console.error('GroupEvents 失敗:', err) 
+                }
+
+                // ---- 等 DOM 更新後初始化所有 Swiper ----
+                this.$nextTick(() => { this.initSwipers() })
+            },
+            methods: {
+                
+
+                /** 統一初始化所有 Swiper（與首頁同樣的銷毀→重建模式） */
+                initSwipers() {
+                    const defaultBreak = {
+                        0:    { slidesPerView: 2, spaceBetween: 12 },
+                        768:  { slidesPerView: 3, spaceBetween: 20 },
+                        992:  { slidesPerView: 4, spaceBetween: 24 },
+                        1200: { slidesPerView: 5, spaceBetween: 28 },
+                    }
+
+                    const configs = [
+                        {
+                            sel: '.hero-swiper',
+                            prev: null, next: null,
+                            loop: true,
+                            autoplay: { delay: 4000 },
+                            pagination: { el: '.swiper-pagination', clickable: true },
+                            breakpoints: { 0: { slidesPerView: 1 } }
+                        },
+                        { sel: '.latest-post-carousel',  prev: '.latest-post-prev',  next: '.latest-post-next' },
+                        { sel: '.hot-post-carousel',     prev: '.hot-post-prev',     next: '.hot-post-next' },
+                        {
+                            sel: '.category-carousel',
+                            prev: '.cat-prev', next: '.cat-next',
+                            breakpoints: {
+                                0:    { slidesPerView: 2, spaceBetween: 12 },
+                                768:  { slidesPerView: 3, spaceBetween: 20 },
+                                1200: { slidesPerView: 4, spaceBetween: 28 }
+                            }
+                        },
+                        { sel: '.group1-carousel', prev: '.group1-prev', next: '.group1-next' },
+                        { sel: '.group2-carousel', prev: '.group2-prev', next: '.group2-next' },
+                    ]
+
+                    configs.forEach(cfg => {
+                        const el = document.querySelector(cfg.sel)
+                        if (!el) return
+                        if (el.swiper) el.swiper.destroy(true, true)
+
+                        const opts = {
+                            loop: cfg.loop || false,
+                            speed: 500,
+                            breakpoints: cfg.breakpoints || defaultBreak,
+                        }
+                        if (cfg.prev && cfg.next) {
+                            opts.navigation = { prevEl: cfg.prev, nextEl: cfg.next }
+                        }
+                        if (cfg.autoplay) opts.autoplay = cfg.autoplay
+                        if (cfg.pagination) opts.pagination = cfg.pagination
+
+                        new Swiper(cfg.sel, opts)
+                    })
+                }
+            }
+        }).mount('#posts-app')
+    </script>
+}

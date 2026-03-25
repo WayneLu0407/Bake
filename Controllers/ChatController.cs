@@ -4,6 +4,7 @@ using Bake.ViewModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 using NuGet.Protocol.Plugins;
 using System.Security.Claims;
 
@@ -161,6 +162,29 @@ namespace Bake.Controllers
 
             // 5. 跳轉到聊天室頁面
             return RedirectToAction("Room", new { id = newRoom.RoomId });
+        }
+        public async Task<IActionResult> Index() 
+        {
+            int userId = await GetCurrentUserIdAsync();
+
+            var lastestRoomId = await _context.ChatRoomMembers
+                .Where(m => m.UserId == userId)
+                .Select(m => new
+                {
+                    m.RoomId,
+                    LastMessageTime = m.Room.ChatMessages
+                    .OrderByDescending(msg => msg.CreateDate)
+                    .Select(msg => msg.CreateDate)
+                    .FirstOrDefault()
+                }).OrderByDescending(x => x.LastMessageTime)
+                .Select(x => x.RoomId)
+                .FirstOrDefaultAsync();
+
+            if (lastestRoomId != 0)
+            {
+                return RedirectToAction("Room", new {id = lastestRoomId});
+            }
+            return View();
         }
     }
 }

@@ -14,7 +14,10 @@ namespace Bake.Areas.Seller.ViewModels
     }
    public class Item
     {
+        public int ProductId { get; set; }
         public string ProductName { get; set; }
         public int Quantity { get; set; }
+        
+        public bool IsReviewed { get; set; }
     }
 }
