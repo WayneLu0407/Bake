@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using Bake.Data;
 using Bake.Models.Sales;
 using Bake.ViewModel;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace Bake.Controllers
 {
@@ -19,6 +21,50 @@ namespace Bake.Controllers
         {
             _context = context;
         }
+
+        private int CurrentUserId =>
+            int.TryParse(User.FindFirstValue("UserId"), out var userId) ? userId : 0;
+
+        private async Task<string?> GetOwnedProductNameAsync(int userId, int orderId, int productId)
+        {
+            return await _context.OrderItems
+                .AsNoTracking()
+                .Where(oi => oi.OrderId == orderId
+                          && oi.ProductId == productId
+                          && oi.Order.UserId == userId)
+                .Select(oi => oi.Product.ProductName)
+                .FirstOrDefaultAsync();
+        }
+
+        private async Task<bool> HasReviewedAsync(int userId, int orderId, int productId)
+        {
+            return await _context.ProductReviews
+                .AsNoTracking()
+                .AnyAsync(r => r.UserId == userId
+                            && r.OrderId == orderId
+                            && r.ProductId == productId);
+        }
+
+        //將平均值回寫入ProductRating 
+        private async Task UpdateProductRatingAsync(int productId)
+        {
+            var product = await _context.Products.FirstOrDefaultAsync(p => p.ProductId == productId);
+            if (product == null)
+            {
+                return;
+            }
+
+            var avgRating = await _context.ProductReviews
+                .Where(r => r.ProductId == productId)
+                .Select(r => (decimal?)r.UserRating)
+                .AverageAsync();
+
+            product.ProductRating = avgRating.HasValue
+                //值,小數點保留到第幾位,直覺的四捨五入
+                ? Math.Round(avgRating.Value, 1, MidpointRounding.AwayFromZero)
+                : null;
+        }
+
 
         // GET: ProductReview
         public async Task<IActionResult> Index()
@@ -46,85 +92,96 @@ namespace Bake.Controllers
             return View(productReview);
         }
 
-        //要記得寫新的Route     [Route("/Customers/{action=Index}/{CustomerID?}")]
         // GET: ProductReview/Create
         [HttpGet]
-        public IActionResult Create(int productId, int orderId)  
+        [Authorize]
+        public async Task<IActionResult> Create(int productId, int orderId)
         {
+            if (CurrentUserId == 0)
+            {
+                return Challenge();
+            }
+
+            var productName = await GetOwnedProductNameAsync(CurrentUserId, orderId, productId);
+            if (productName == null)
+            {
+                return Forbid();
+            }
+
+            var alreadyReviewed = await HasReviewedAsync(CurrentUserId, orderId, productId);
+            if (alreadyReviewed)
+            {
+                TempData["ReviewMessage"] = "你已經評論過這個商品囉！";
+                return RedirectToAction("Orders", "Me", new { area = "Seller" });
+            }
+
             var vm = new ProductReviewCreateViewModel
             {
                 ProductId = productId,
                 OrderId = orderId,
-                UserRating = 5 //預設
+                ProductName = productName,
+                UserRating = 5
             };
 
             return View(vm);
         }
-        //使用者寫入(按儲存)會走這邊
-        // POST: ProductReview/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+
+
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
-        //Bind，我只收這些的意思
-        public async Task<IActionResult> Create(ProductReviewCreateViewModel vm) //本來就不給動別的屬性所以不用Bind
+        public async Task<IActionResult> Create(ProductReviewCreateViewModel vm)
         {
-                const int DEMO_USER_ID = 3; // 還未接登入功能，先固定一個userId demo用
-
-            // 未來要做下單才能評，就把檢查加在這裡
-            // TODO: 檢查 vm.OrderId 這筆訂單是不是 DEMO_USER_ID 的
-            // TODO: 檢查這筆訂單裡是否包含 vm.ProductId
-            // TODO: 檢查訂單狀態是否完成/已收貨
-
-            if (vm.ProductId <= 0 || vm.OrderId <= 0) //避免為0
+            if (CurrentUserId == 0)
             {
-                return BadRequest("productId/orderId 不正確");
+                return Challenge();
             }
 
-            if (vm.UserRating < 1 || vm.UserRating > 5)
+            var productName = await GetOwnedProductNameAsync(CurrentUserId, vm.OrderId, vm.ProductId);
+            if (productName == null)
             {
-                ModelState.AddModelError("UserRating", "評分必須介於 1 到 5");
+                return Forbid();  //禁止存取
             }
+
+            vm.ProductName = productName;
 
             if (string.IsNullOrWhiteSpace(vm.Comment))
-                ModelState.AddModelError("Comment", "請輸入評論內容");
+            {
+                ModelState.AddModelError(nameof(vm.Comment), "請輸入評論內容");
+            }
 
-            if (!ModelState.IsValid) //最後關卡->避免空 comment、rating=0 
+            if (!ModelState.IsValid)
             {
                 return View(vm);
             }
 
-            // 先檢查"同單同商品"有之前有沒有已經評論過
-            var alreadyReviewed = await _context.ProductReviews
-            .AsNoTracking()
-            .AnyAsync(r => r.ProductId == vm.ProductId
-                        && r.UserId == DEMO_USER_ID
-                        && r.OrderId == vm.OrderId);
-
+            var alreadyReviewed = await HasReviewedAsync(CurrentUserId, vm.OrderId, vm.ProductId);
             if (alreadyReviewed)
-                {
-                ModelState.AddModelError("", "你已經評論過這個商品囉！");
+            {
+                ModelState.AddModelError(string.Empty, "你已經評論過這個商品囉！");
                 return View(vm);
             }
-            else
+
+            var entity = new ProductReview
             {
-                var entity = new ProductReview
-                {
-                    ProductId = vm.ProductId,
-                    UserId = DEMO_USER_ID,
-                    OrderId = vm.OrderId,
-                    UserRating = vm.UserRating,
-                    Comment = vm.Comment
-                    // CreatedAt 不填，DB default sysdatetime() 會自動填（符合 NOT NULL）
-                };
-                _context.ProductReviews.Add(entity);
-            }
+                ProductId = vm.ProductId,
+                UserId = CurrentUserId,
+                OrderId = vm.OrderId,
+                UserRating = vm.UserRating,
+                Comment = vm.Comment.Trim()
+            };
+
+            _context.ProductReviews.Add(entity);
             await _context.SaveChangesAsync();
 
-            return RedirectToAction("Details", "Products", new { id = vm.ProductId });
+            await UpdateProductRatingAsync(vm.ProductId);
+            await _context.SaveChangesAsync();
 
+            TempData["ReviewMessage"] = "評論成功！";
+            return RedirectToAction("Orders", "Me", new { area = "Seller" });
         }
 
+        /* 尚未用到
         // GET: ProductReview/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
@@ -177,40 +234,7 @@ namespace Bake.Controllers
             ViewData["UserId"] = new SelectList(_context.UserProfiles, "UserId", "UserId", productReview.UserId);
             return View(productReview);
         }
-
-        // GET: ProductReview/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var productReview = await _context.ProductReviews
-                .Include(p => p.User)
-                .FirstOrDefaultAsync(m => m.ReviewId == id);
-            if (productReview == null)
-            {
-                return NotFound();
-            }
-
-            return View(productReview);
-        }
-
-        // POST: ProductReview/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var productReview = await _context.ProductReviews.FindAsync(id);
-            if (productReview != null)
-            {
-                _context.ProductReviews.Remove(productReview);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+        */
 
         private bool ProductReviewExists(int id)
         {
@@ -228,5 +252,6 @@ namespace Bake.Controllers
 
             return PartialView("_ProductReviewsPartial", reviews);
         }
+
     }
 }
