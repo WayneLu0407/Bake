@@ -173,9 +173,10 @@
                         <h4 class="fw-bold mb-3">「@Model.Title」</h4>
                     }
 
-                    <!-- 圖片（之後改 Swiper 輪播） -->
-                    <div class="detail-card__image rounded-3">旋轉木馬</div>
-
+                    <!-- 圖片 -->
+                    
+                    <img src="@Model.CoverImageUrl" class="img-fluid" />
+                    <br />
                     <!-- ===== 活動內容 ===== -->
                     @if (Model.IsActivity)
                     {
@@ -185,7 +186,7 @@
 
                             <div class="event-meta__label mb-1">活動簡介</div>
                             
-                            <p>
+                            <p style="white-space: pre-line;">
                                @Model.Content
                             </p>
                         </div>
@@ -193,7 +194,8 @@
                     else
                     {
                         <!-- ===== 貼文內容 ===== -->
-                        <p>
+                        <br>
+                        <p style="white-space: pre-line;">
                                @Model.Content
                         </p>
                     }
@@ -271,12 +273,12 @@
                     @(Model.IsActivity ? "活動關鍵字" : "貼文關鍵字")
                 </h6>
                 <div class="d-flex flex-wrap gap-2">
-                    <span class="tag-pill">
+                    
                         @foreach(var tag in Model.Tags)
                         {
                             <span class="tag-pill">@tag.TagName</span>
                         }
-                    </span>
+                    
                 </div>
             </div>
 
