@@ -14,7 +14,11 @@ namespace Bake.Controllers
             return View();
         }
 
-        public IActionResult PostDetail()
+        public IActionResult Trending()
+        {
+            return View();
+        }
+        public IActionResult Events()
         {
             return View();
         }
