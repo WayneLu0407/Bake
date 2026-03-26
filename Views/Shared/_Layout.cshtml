@@ -31,8 +31,8 @@
     @* 3. 套件樣式 *@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css"/>
     <link rel="stylesheet" type="text/css" href="~/css/vendor.css"/>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
-
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    
     @* 4. 主樣式：這才是主角，路徑請務必檢查正確 *@
     <link rel="stylesheet" type="text/css" href="~/css/style.css"/>
 
@@ -227,10 +227,19 @@
                         @if (User.Identity.IsAuthenticated)
                         {
                             <!-- 已登入才顯示 -->
-                            <li>
-                                <a href="#" class="rounded-circle bg-light p-2 mx-1">
+                            <li class="nav-item dropdown">
+                                <a href="#" class="rounded-circle bg-light p-2 mx-1 position-relative" id="bell-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                     <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#bell"></use></svg>
+                                    <span id="notificationCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill " style="display: none;background-color: #8b0000; border: 1.5px solid white; font-weight: bold;">0</span>  <!-- 預設隱藏，有數字才顯示 -->
                                 </a>
+
+                                <ul   class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="bell-dropdown" style="min-width: 250px;">
+                                    <li><h6 class="dropdown-header border-bottom pb-2">系統通知</h6></li>
+                                        <div id="notificationItems" style="max-height: 350px; overflow-y: auto;" >       <!-- 即時收到的訊息會動態塞在這裡 -->
+                                            <li><a class="dropdown-item text-muted text-center py-3"  >暫無新通知</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                        </div>
+                                </ul>
                             </li>
                             <li>
                                 <a asp-controller="Chat" asp-action="Index" class="rounded-circle bg-light p-2 mx-1">
@@ -303,6 +312,10 @@
 
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
+<!-- 補上 Toastr 通知視窗庫 (如果你有用 toastr) -->
+     
+   
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ENjdO4Dr2bkBIFxQpeoTz1HIcje39Wm4jDKdf19U8gI4ddQ3GYNS7NTKfAdVQSZe" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
     <script src="~/js/plugins.js"></script>
@@ -395,6 +408,99 @@
                 }
             }
         }).mount('#mobile-search-app')
+    </script>
+    <script>
+        $(document).ready(function(){
+            fetchSystemInfo();
+            fetchNotifications();
+
+            $(document).on("click",".notification-link", function(e){
+                e.preventDefault(); //停止跳轉
+                const $this = $(this);
+                const id = $this.data("id");
+                const targetUrl = $this.attr("href");
+
+                console.log("發送已讀請求，ID:", id);
+
+                $.post("/Checkout/NotificationRead", {id: id}).done(function(){
+                    $this.closest('li').fadeOut(300, function(){
+                        $(this).remove();
+
+                        let $badge = $("#notificationCount");
+                        let count = Math.max(0,(parseInt($badge.text()) || 0) -1 );
+                        if(count === 0) $badge.hide();
+                        else $badge.text(count);    
+                        if (targetUrl && targetUrl !== "#") {
+                            window.location.href = targetUrl;
+                        }
+                    });
+                });
+            });
+
+        })
+        // 1. 初始化連線 (先定義物件)
+    const connection = new signalR.HubConnectionBuilder()
+        .withUrl("/notificationHub")
+        .withAutomaticReconnect()
+        .build();
+
+    // 2. 註冊監聽事件 (在啟動前設定好規則)
+        connection.on("receiveNotification", (title, message) => {
+        // 彈出通知
+        console.log("收到通知了！", title, message);
+            toastr.success(message, title);
+
+        // 更新小鈴鐺數字
+            let $badge = $("#notificationCount");
+            let count = parseInt($badge.text()) || 0;
+            count += 1;
+
+            $badge.text(count).show().removeClass("d-none");
+            const $container = $("#notificationItems");
+            if ($container.find(".text-muted").length > 0) {
+            $container.empty();
+            }       
+
+    // 建立新的通知項目 (置頂插入)
+        
+    
+        $container.prepend(newItem); // 使用 prepend 讓最新訊息在最上面
+    });
+
+    // 3. 正式啟動連線
+    connection.start()
+        .then(() => console.log("SignalR 已成功啟動"))
+        .catch(err => console.error("SignalR 啟動失敗: ", err.toString()));
+
+    function fetchSystemInfo(){
+        $.get("/Checkout/SystemInfo", function(count){
+            let $badge = $("#notificationCount");
+            if(count > 0){
+                $badge.text(count).show().removeClass("d-none");
+            }else{
+                $badge.hide().addClass("d-none");
+            }
+        });
+    }
+    function fetchNotifications(){
+        const $container = $("#notificationItems");
+        $.get("/Checkout/GetNotifications", function(data){
+            if(data && data.length > 0){
+                $container.empty(); //清除舊的資料    
+
+                data.forEach(item => {
+                   const newItem = `
+                    <li>
+                        <a class="dropdown-item py-2 border-bottom notification-link ${item.isRead ? '' : 'bg-secondary-subtle'}" href="${item.url}" data-id="${item.notificationId}" >
+                            <div class="fw-bold">${item.title}</div>
+                            <div class="small text-truncate">${item.content}</div>
+                        </a>
+                    </li>`; 
+                    $container.append(newItem);
+                })
+            }
+        });
+    }
     </script>
     @await RenderSectionAsync("Scripts", required: false)
     
