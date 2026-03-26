@@ -1,5 +1,6 @@
 using Bake.Data;
 using Bake.Helper;
+using Bake.Hubs;
 using Bake.Models;
 using Bake.Models.User;
 using Humanizer.Bytes;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal;
 using System.Diagnostics;
@@ -22,11 +24,13 @@ public class HomeController : Controller
 {
     private readonly BakeContext _context;  //DI 注入
     private readonly IWebHostEnvironment _webHostEnvironment;
+    
 
     public HomeController(BakeContext context, IWebHostEnvironment webHostEnvironment)
     {
         _context = context;  //HomeController 建構子 DI注入  
         _webHostEnvironment = webHostEnvironment;
+        
     }
     
 
@@ -34,6 +38,7 @@ public class HomeController : Controller
     {
         return View();
     }
+    
 
     public IActionResult Support()
     {
