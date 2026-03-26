@@ -1,8 +1,11 @@
 ﻿using Bake.Data;
+using Bake.Hubs;
+using Bake.Models;
 using Bake.Models.Sales;
 using Bake.ViewModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 
@@ -12,9 +15,11 @@ namespace Bake.Controllers
     public class CheckoutController : Controller
     {
         private readonly BakeContext _bakeContext;
-        public CheckoutController(BakeContext bakeContext)
+        private readonly IHubContext<NotificationHub> _hubContext;
+        public CheckoutController(BakeContext bakeContext, IHubContext<NotificationHub> hubContext)
         {
             _bakeContext = bakeContext;
+            _hubContext = hubContext;
         }
 
         // 將抓取 ID 的邏輯封裝，全 Controller 通用
@@ -39,6 +44,8 @@ namespace Bake.Controllers
         }
 
         
+
+
         [HttpPost]
         public IActionResult Info(CheckoutViewModel model)
         {
@@ -118,8 +125,13 @@ namespace Bake.Controllers
 
             ClearCart(); //清空購物車
 
+            
+
+
             return RedirectToAction("Success", new { id = order.OrderId});
         }
+
+        
 
         [HttpGet]
         public async Task<IActionResult> Success(int id)
@@ -130,6 +142,8 @@ namespace Bake.Controllers
                 .FirstOrDefaultAsync(o => o.OrderId == id);
 
             if (order == null) return RedirectToAction("Index", "Home");
+
+            await SendOrderNotify(order.UserId.ToString(), order.OrderId.ToString());
 
             return View(order);
         }
@@ -149,6 +163,60 @@ namespace Bake.Controllers
         private void ClearCart()
         {
             HttpContext.Session.Remove("UserCart");
+        }
+
+        public async Task SendOrderNotify(string userId, string orderId)
+        {
+            try
+            {
+                var notify = new Notification { UserId = int.Parse(userId), OrderId = int.Parse(orderId), Title = "訂單通知", Content = $"您的訂單 #{orderId} 已成功下單 !", URL = "/Seller/Me/Orders" };
+                _bakeContext.Notifications.Add(notify);
+                await _bakeContext.SaveChangesAsync();
+
+                await _hubContext.Clients.User(userId).SendAsync("receiveNotification", notify.Title, notify.Content);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("未發送訊息");
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> SystemInfo()
+        {
+            int userId = CurrentUserId; // 取得目前登入者 ID
+            var count = await _bakeContext.Notifications
+                .CountAsync(n => n.UserId == userId && !n.IsRead); // 假設你有 IsRead 欄位
+            return Json(count);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetNotifications()
+        {
+            int userid = CurrentUserId;
+
+            var notifucations = await _bakeContext.Notifications.Where(u => u.UserId == userid).OrderByDescending(n => n.CreateAt).Select(n => new
+            {
+                n.NotificationId,
+                n.OrderId,
+                n.Title,
+                n.Content,
+                n.IsRead,
+                n.URL
+            }).ToListAsync();
+            return Json(notifucations);
+        }
+        [HttpPost]
+        [Route("Checkout/NotificationRead")]
+        public async Task<IActionResult> NotificationRead(int Id)
+        {
+            var notification = await _bakeContext.Notifications.FindAsync(Id);
+            if(notification != null)
+            {
+                notification.IsRead = true;
+                await _bakeContext.SaveChangesAsync();
+                return Ok(new { success = true });
+            }
+            return NotFound();
         }
     }
 }
