@@ -25,6 +25,9 @@ public class PostDetailViewModel
     // ---- 圖片 ----
     public List<AttachmentDto> Attachments { get; set; } = new();
 
+    public string? CoverImageUrl => Attachments.FirstOrDefault(x => x.IsCover)?.FileUrl
+                                  ?? Attachments.FirstOrDefault()?.FileUrl;
+
     // ---- 標籤（多對多）----
     public List<TagDto> Tags { get; set; } = new();
 
