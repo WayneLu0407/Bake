@@ -291,10 +291,11 @@
                     <a href="#" class="btn-cta-primary">我要報名</a>
                     <div>
                         <h6 class="fw-bold mb-2">我要詢問</h6>
-                        <a href="#" class="btn-cta-outline">私訊主辦人</a>
+                        <a href="@Url.Action("StartChat", "Chat", new { targetId = Model.Author.UserId })" class="btn-cta-outline">私訊主辦人</a>
                     </div>
                 </div>
             }
+
 
             <!-- 關鍵字 -->
             <div>
