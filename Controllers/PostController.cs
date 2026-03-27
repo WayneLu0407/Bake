@@ -90,6 +90,18 @@ namespace Bake.Controllers
                     })
                     .ToListAsync();
 
+            foreach (var c in comments)
+            {
+                if (string.IsNullOrEmpty(c.AvatarUrl))
+                {
+                    c.AvatarUrl = "/ProductPicture/NoImage.jpg";
+                }
+                else if (!c.AvatarUrl.StartsWith("/"))
+                {
+                    c.AvatarUrl = "/" + c.AvatarUrl;
+                }
+            }
+
             var vm = new PostDetailViewModel
             {
                 PostId = post.PostId,
@@ -150,6 +162,16 @@ namespace Bake.Controllers
                 IsFollowed = false,
                 IsLiked = false,
             };
+
+            if (string.IsNullOrEmpty(vm.Author.Avatar))
+            {
+                vm.Author.Avatar = "/ProductPicture/NoImage.jpg";
+            }
+            else if (!vm.Author.Avatar.StartsWith("/"))
+            {
+                vm.Author.Avatar = "/" + vm.Author.Avatar;
+            }
+
             return View(vm);
         }
 
