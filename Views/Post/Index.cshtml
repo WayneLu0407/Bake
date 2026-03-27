@@ -228,7 +228,7 @@
                 <div class="swiper latest-post-carousel">
                     <div class="swiper-wrapper">
                         <div class="swiper-slide" v-for="post in latestPosts" :key="post.postId">
-                            <a :href="'/Home/PostDetail/' + post.postId" class="text-decoration-none text-dark">
+                            <a :href="'/Post/PostDetail/' + post.postId" class="text-decoration-none text-dark">
                                 <div class="post-card">
                                     <img v-if="post.image" :src="post.image" :alt="post.title" class="card-thumb" />
                                     <div v-else class="card-thumb-placeholder"></div>
@@ -256,7 +256,7 @@
                 <div class="swiper hot-post-carousel">
                     <div class="swiper-wrapper">
                         <div class="swiper-slide" v-for="post in hotPosts" :key="post.postId">
-                            <a :href="'/Home/PostDetail/' + post.postId" class="text-decoration-none text-dark">
+                            <a :href="'/Post/PostDetail/' + post.postId" class="text-decoration-none text-dark">
                                 <div class="post-card">
                                     <img v-if="post.image" :src="post.image" :alt="post.title" class="card-thumb" />
                                     <div v-else class="card-thumb-placeholder"></div>
@@ -305,7 +305,7 @@
                 <div class="swiper group1-carousel">
                     <div class="swiper-wrapper">
                         <div class="swiper-slide" v-for="act in groupActivities1" :key="act.postId">
-                            <a :href="'/Home/PostDetail/' + act.postId" class="text-decoration-none text-dark">
+                            <a :href="'/Post/PostDetail/' + act.postId" class="text-decoration-none text-dark">
                                 <div class="post-card">
                                     <img v-if="act.image" :src="act.image" :alt="act.title" class="card-thumb" />
                                     <div v-else class="card-thumb-placeholder"></div>
