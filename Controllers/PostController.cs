@@ -1,8 +1,16 @@
 ﻿using Bake.Data;
+using Bake.Models.Sales;
+using Bake.ViewModel;
 using Bake.ViewModels.Social;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
+using NuGet.ContentModel;
+using System.ComponentModel.Design;
 using System.Net.Mail;
+using System.Xml.Linq;
 
 namespace Bake.Controllers
 {
@@ -66,8 +74,22 @@ namespace Bake.Controllers
             if(post==null) return NotFound();
 
             var eventDetail = post.EventDetails.FirstOrDefault();
-            
-            
+
+            var comments = await _db.PostComments
+                    .Where(c => c.PostId == id)
+                    .OrderByDescending(c => c.CreatedAt)
+                    .Select(c => new PostDetailViewModel.PostComment
+                    {
+                        CommentId = c.CommentId,
+                        UserId = c.UserId,
+                        UserName = c.User.FullName ?? "匿名",    // 透過導覽屬性拿名字
+                        AvatarUrl = c.User.AvatarUrl,             // 透過導覽屬性拿頭像
+                        Content = c.Content,
+                        CreatedAt = c.CreatedAt,
+                        ParentCommentId = c.ParentCommentId,
+                    })
+                    .ToListAsync();
+
             var vm = new PostDetailViewModel
             {
                 PostId = post.PostId,
@@ -120,11 +142,41 @@ namespace Bake.Controllers
                     LocationCity = eventDetail.LocationCity,
                     LocationAddress = eventDetail.LocationAddress
                 },
+
+                
+
+                Comments = comments,
                 IsFavorited = false,
                 IsFollowed = false,
                 IsLiked = false,
             };
             return View(vm);
+        }
+
+        [HttpPost]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddComment(int PostId, string Content)
+        {
+            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value??"0");
+            
+            if (string.IsNullOrWhiteSpace(Content))
+            {
+                return RedirectToAction("PostDetail", new { id = PostId });
+            }
+            
+            var comment = new Models.Social.PostComment
+            {
+                PostId = PostId,
+                UserId = userId,
+                Content = Content.Trim(),
+            };
+
+            _db.PostComments.Add(comment);
+            await _db.SaveChangesAsync();
+
+            // 留言完導回同一篇文章
+            return RedirectToAction("PostDetail", new { id = PostId });
         }
     }
 }

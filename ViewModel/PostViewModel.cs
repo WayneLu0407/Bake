@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Bake.Models.Social;
+﻿using Bake.Models.Social;
+using Microsoft.AspNetCore.Mvc;
+using NuGet.ContentModel;
 using System.Collections.Generic;
 
 namespace Bake.ViewModels.Social;
@@ -30,6 +31,8 @@ public class PostDetailViewModel
 
     // ---- 標籤（多對多）----
     public List<TagDto> Tags { get; set; } = new();
+
+    public List<PostComment> Comments { get; set; } = new List<PostComment>();
 
     // ---- 活動細節（貼文時為 null）----
     public EventDetailDto? EventDetail { get; set; }
@@ -83,5 +86,15 @@ public class PostDetailViewModel
         public string? Bio { get; set; }
         public int ShareCount { get; set; }     // 該作者的貼文數
         public int FollowerCount { get; set; }  // 粉絲數
+    }
+    public class PostComment
+    {
+        public int CommentId { get; set; }
+        public int UserId { get; set; }
+        public string UserName { get; set; } = "";      // 畫面要顯示名字
+        public string? AvatarUrl { get; set; }           // 畫面要顯示頭像
+        public string Content { get; set; } = "";
+        public DateTime? CreatedAt { get; set; }
+        public int? ParentCommentId { get; set; }        // 之後做回覆功能用
     }
 }
