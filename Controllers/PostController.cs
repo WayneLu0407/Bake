@@ -158,7 +158,8 @@ namespace Bake.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddComment(int PostId, string Content)
         {
-            var userId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value??"0");
+
+            var userId = int.Parse(User.FindFirst("UserId")?.Value??"0");
             
             if (string.IsNullOrWhiteSpace(Content))
             {
