@@ -185,7 +185,7 @@
                                 <p class="card-text">{{item.content}}</p>
                                 <!-- 活動才有的額外資訊 -->
                                 <div v-if="item.typeId ===1"class="event-info d-flex gap-3 mt-1">
-                                    <span><i class="fa-regular fa-calendar"></i> {{item.eventTime}}</span>
+                                    <span><i class="fa-regular fa-calendar"></i> {{formatDate(item.eventTime)}}</span>
                                     <span><i class="fa-solid fa-location-dot"></i> {{item.locationCity }}</span>
                                     <span><i class="fa-solid fa-tag"></i>{{(item.price === 0 || item.price === null)?'免費':'NT$' + item.price}}</span>
                                 </div>
