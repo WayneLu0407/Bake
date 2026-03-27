@@ -113,6 +113,8 @@ public partial class BakeContext : DbContext
 
     public DbSet<PaymentMethod> PaymentMethods { get; set; }
 
+    public DbSet<PostComment> PostComments { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AccountAuth>(entity =>
@@ -506,6 +508,14 @@ public partial class BakeContext : DbContext
                 .HasForeignKey(d => d.OrderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Order_Items_Orders");
+
+            entity.HasOne(d => d.Product).WithMany()
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Order_Items_Products");
+
+            entity.HasIndex(e => e.ProductId)
+                .HasDatabaseName("IX_Order_Items_product_id");
         });
 
         modelBuilder.Entity<OrderStatus>(entity =>
@@ -1212,6 +1222,49 @@ public partial class BakeContext : DbContext
                 new PaymentMethod { PaymentMethodId = 1, Name = "轉帳" },
                 new PaymentMethod { PaymentMethodId = 2, Name = "貨到付款" }
             );
+        });
+
+        modelBuilder.Entity<PostComment>(entity =>
+        {
+            entity.ToTable("Post_Comments", "Social");
+
+            entity.HasKey(e => e.CommentId);
+
+            entity.Property(e => e.CommentId)
+                .HasColumnName("comment_id");
+
+            entity.Property(e => e.PostId)
+                .HasColumnName("post_id");
+
+            entity.Property(e => e.UserId)
+                .HasColumnName("user_id");
+
+            entity.Property(e => e.Content)
+                .HasColumnName("content")
+                .HasMaxLength(500)
+                .IsRequired();
+
+            entity.Property(e => e.ParentCommentId)
+                .HasColumnName("parent_comment_id");
+
+            entity.Property(e => e.CreatedAt)
+                .HasColumnName("created_at")
+                .HasDefaultValueSql("GETDATE()");
+
+            entity.HasOne(e => e.Post)
+                .WithMany(p => p.PostComments)
+                .HasForeignKey(e => e.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.PostComments)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.ParentComment)
+                .WithMany(e => e.Replies)
+                .HasForeignKey(e => e.ParentCommentId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
 
