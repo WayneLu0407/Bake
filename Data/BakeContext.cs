@@ -20,7 +20,7 @@ public partial class BakeContext : DbContext
         : base(options)
     {
     }
-
+    public virtual DbSet<Notification> Notifications { get; set; }
     public virtual DbSet<AccountAuth> AccountAuths { get; set; }
 
     public virtual DbSet<AccountStatusDefinition> AccountStatusDefinitions { get; set; }
@@ -1223,7 +1223,43 @@ public partial class BakeContext : DbContext
                 new PaymentMethod { PaymentMethodId = 2, Name = "貨到付款" }
             );
         });
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(e => e.NotificationId);
 
+            entity.ToTable("Notifications", "Service");  // 放在 Service schema，跟 SystemNotify 同區
+
+            entity.Property(e => e.NotificationId).HasColumnName("notification_id");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.Property(e => e.Title)
+                .HasMaxLength(100)
+                .HasColumnName("title");
+
+            entity.Property(e => e.Content)
+                .HasMaxLength(1000)
+                .HasColumnName("content");
+
+            entity.Property(e => e.URL)
+                .HasMaxLength(2048)
+                .HasColumnName("url");
+
+            entity.Property(e => e.IsRead)
+                .HasDefaultValue(false)
+                .HasColumnName("is_read");
+
+            entity.Property(e => e.CreateAt)
+                .HasDefaultValueSql("(sysdatetime())")
+                .HasColumnName("create_at");
+
+            // ★ 外鍵：關聯到 Orders 表
+            entity.HasOne(e => e.Order)
+                .WithMany()                              // Order 那邊不需要導航回來的話就空著
+                .HasForeignKey(e => e.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)   // 跟你們其他表一致的刪除行為
+                .HasConstraintName("FK_Notification_Orders");
+        });
         modelBuilder.Entity<PostComment>(entity =>
         {
             entity.ToTable("Post_Comments", "Social");
