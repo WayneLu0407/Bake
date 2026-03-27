@@ -199,16 +199,8 @@
                 originalPrice(price, discount) {
                 if (!discount || discount <= 0) return null
                 return Math.round(price / (1 - discount))  // 100 / 0.8 = 125
-                },
-                async addCart(product){
-                    const selectedQty = product.qty || 1;
-                    const addSuccess = await cartService.updateQty(product.productId, selectedQty);
-
-                    if(addSuccess){
-                        product.quantity = 1; //把畫面數字重設回1
-                        alert(`商品${product.productName}選購${selectedQty}件 已加入購物車!`);
-                    }
                 }
+                
             },
             computed: {
                 totalPages() {
