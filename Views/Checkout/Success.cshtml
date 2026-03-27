@@ -1,4 +1,4 @@
-﻿
+﻿@model Bake.Models.Sales.Order
 
 @{
     ViewData["Title"] = "Order Success";
@@ -18,21 +18,21 @@
                 </div>
             </div>
             @*成功訊息*@
-            <h2 class="fw-bold text-dark mb-3">Thank You for Your Order!</h2>
+            <h2 class="fw-bold text-dark mb-3">謝謝您的訂購!</h2>
             <p class="text-muted mb-4 fs-5">
-                We've received your order and our bakers are getting ready to prepare your treats.
+                您的訂單已送達！我們的烘焙師正為您親手打造專屬美味。
             </p>
             
             <div class="card border-0 shadow-sm mb-5" style="border-radius: 15px; background-color: #fdfdfd;">
                 <div class="card-body p-4">
                     <div class="row text-start">
                         <div class="col-6 mb-3">
-                            <label class="text-muted small text-uppercase fw-bold">Order Number</label>
-                            <p class="fw-bold mb-0 text-primary">@ViewBag.OrderId</p>
+                            <label class="text-muted small text-uppercase fw-bold">訂單編號</label>
+                            <p class="fw-bold mb-0 text-primary"># @Model.OrderId</p>
                         </div>
                         <div class="col-6 mb-3 text-end">
-                            <label class="text-muted small text-uppercase fw-bold">Date</label>
-                            <p class="mb-0">@DateTime.Now.ToString("MMM dd, yyyy")</p>
+                            <label class="text-muted small text-uppercase fw-bold">訂購日期</label>
+                            <p class="mb-0">@Model.CreatedAt.ToString("MMM dd, yyyy")</p>
                         </div>
                         <hr class="my-2 opacity-10">
                         <div class="col-12 mt-2">
@@ -47,10 +47,10 @@
 
             <div class="d-grid gap-3 d-sm-flex justify-content-sm-center">
                 <a asp-controller="Home" asp-action="Index" class="btn btn-outline-dark btn-lg px-4 rounded-pill fw-bold">
-                    Back to Shop
+                    回到商店
                 </a>
-                <a asp-controller="Me" asp-action="Orders" class="btn btn-primary btn-lg px-4 rounded-pill fw-bold shadow-sm" style="background-color: #1A237E; border: none;">
-                    View Order Status
+                <a asp-area="Seller"asp-controller="Me" asp-action="Orders" class="btn btn-primary btn-lg px-4 rounded-pill fw-bold shadow-sm" style="background-color: #1A237E; border: none;">
+                    查看訂單
                 </a>
             </div>
         </div>

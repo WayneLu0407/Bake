@@ -289,17 +289,6 @@
                 originalPrice(price, discount) {
                 if (!discount || discount <= 0) return null
                 return Math.round(price / (1 - discount))  // 100 / 0.8 = 125
-                },
-                async addCart(product){
-                    // 如果是主商品的按鈕，傳進來的 product 就是 this.product
-                    // 如果是推薦商品的按鈕，傳進來的就是 v-for 裡的那一個 product
-                    const selectedQty = product.qty || 1;
-                    const addSuccess = await cartService.updateQty(product.productId, selectedQty);
-
-                    if(addSuccess){
-                        product.qty = 1; //把畫面數字重設回1
-                        alert(`商品${product.productName}選購${selectedQty}件 已加入購物車!`);
-                    }
                 }
 
             },
