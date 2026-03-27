@@ -106,7 +106,7 @@
                 <div class="mb-4">
                     <h5 class="mb-3">內容類型</h5>
                     <ul class="list-unstyled">
-                        <li class="mb-1"><a class="nav-link px-0" :class="{'active-filter':contentType === 'all'}" @@click.prevent="contentType='all'">全部</a></li>
+                        <li class="mb-1"><a class="nav-link px-0" :class="{'active-filter':contentType === 'all'}" @@click.prevent="resetAll()">全部</a></li>
                         <li class="mb-1"><a class="nav-link px-0" :class="{'active-filter':contentType === 'post'}" @@click.prevent="contentType='post'">文章</a></li>
                         <li class="mb-1"><a class="nav-link px-0" :class="{'active-filter':contentType === 'event'}" @@click.prevent="contentType='event'">活動</a></li>
                     </ul>
@@ -233,6 +233,7 @@
         const app = Vue.createApp({
             data(){
                 return{
+                    keyword: '',
                     allPosts:[],
                     eventTypes: [],
 
@@ -249,25 +250,12 @@
             async mounted() {
 
                 const params = new URLSearchParams(window.location.search)
-                const cat = params.get('category')
-                if(cat){
-                    this.contentType='event'
-                    this.eventType=parseInt(cat)
-                }
-                const type = params.get('type')
-                if(type === 'post'){
-                    this.contentType = 'post'
-                }
-                if(type === 'event'){
-                    this.contentType = 'event'
+                const kw=params.get('keyword')
+                if(kw){
+                    this.keyword=kw
                 }
 
-                try{
-                    const res= await fetch('/api/PostApi/All')
-                    this.allPosts = await res.json()
-                }catch(err){
-                    console.error(err.message) 
-                }
+                await this.fetchPosts()
 
                 try{
                     const res2= await fetch('/api/PostApi/EventTypes')
@@ -276,7 +264,12 @@
                 }catch(err){
                     console.error(err.message) 
                 }
-            
+
+                const cat = params.get('category')
+                if (cat) { this.contentType = 'event'; this.eventType = parseInt(cat) }
+                const type = params.get('type')
+                if (type === 'post') this.contentType = 'post'
+                if (type === 'event') this.contentType = 'event'
             },
             methods: {
                 formatDate(dateStr) {
@@ -290,7 +283,23 @@
                     else{
                         this.goToPage = this.currentPage;
                     }
-                }
+                },
+                async fetchPosts(){
+                    const url = this.keyword?.trim()? `/api/PostApi/All?keyword=${encodeURIComponent(this.keyword)}`: '/api/PostApi/All'
+                    try {
+                        const res = await fetch(url)
+                        this.allPosts = await res.json()
+                    } catch(err) { console.error(err.message) }
+                },
+                async resetAll() {
+                    this.contentType = 'all'
+                    this.eventType = 'all'
+                    this.priceRange = 'all'
+                    this.sortBy = 'latest'
+                    this.keyword = ''
+                    this.currentPage = 1
+                    await this.fetchPosts()
+                },
             },
             computed:{
                 filteredList(){
@@ -335,14 +344,21 @@
                 }
             },
             watch:{
-                contentType(){
+                async contentType(newVal, oldVal){
+                    if (newVal === oldVal) return
                     this.currentPage=1
                     if(this.contentType !== 'event'){
                         this.eventType = 'all'
                         this.priceRange = 'all'
                     }
+                    this.keyword = ''
+                    await this.fetchPosts() 
                 },
-                sortBy()     { this.currentPage = 1 },
+                async sortBy(){ 
+                    this.currentPage = 1 
+                    this.keyword = '' 
+                    await this.fetchPosts() 
+                },
                 eventType()  { this.currentPage = 1 },
                 priceRange() { this.currentPage = 1 },
             }
