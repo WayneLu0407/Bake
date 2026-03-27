@@ -4,6 +4,7 @@ using Bake.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bake.Migrations
 {
     [DbContext(typeof(BakeContext))]
-    partial class BakeContextModelSnapshot : ModelSnapshot
+    [Migration("20260325053344_AddNotificationTable")]
+    partial class AddNotificationTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -493,8 +496,7 @@ namespace Bake.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.HasIndex("ProductId")
-                        .HasDatabaseName("IX_Order_Items_product_id");
+                    b.HasIndex("ProductId");
 
                     b.ToTable("Order_Items", "Sales");
                 });
@@ -1372,50 +1374,6 @@ namespace Bake.Migrations
                     b.ToTable("Post_Attachments", "Social");
                 });
 
-            modelBuilder.Entity("Bake.Models.Social.PostComment", b =>
-                {
-                    b.Property<int>("CommentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("comment_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)")
-                        .HasColumnName("content");
-
-                    b.Property<DateTime?>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<int?>("ParentCommentId")
-                        .HasColumnType("int")
-                        .HasColumnName("parent_comment_id");
-
-                    b.Property<int>("PostId")
-                        .HasColumnType("int")
-                        .HasColumnName("post_id");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("CommentId");
-
-                    b.HasIndex("ParentCommentId");
-
-                    b.HasIndex("PostId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Post_Comments", "Social");
-                });
-
             modelBuilder.Entity("Bake.Models.Social.PostFavorite", b =>
                 {
                     b.Property<int>("UserId")
@@ -1843,8 +1801,8 @@ namespace Bake.Migrations
                     b.HasOne("Bake.Models.Sales.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
-                        .IsRequired()
-                        .HasConstraintName("FK_Order_Items_Products");
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Order");
 
@@ -2121,32 +2079,6 @@ namespace Bake.Migrations
                     b.Navigation("Post");
                 });
 
-            modelBuilder.Entity("Bake.Models.Social.PostComment", b =>
-                {
-                    b.HasOne("Bake.Models.Social.PostComment", "ParentComment")
-                        .WithMany("Replies")
-                        .HasForeignKey("ParentCommentId")
-                        .OnDelete(DeleteBehavior.NoAction);
-
-                    b.HasOne("Bake.Models.Social.Post", "Post")
-                        .WithMany("PostComments")
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Bake.Models.User.UserProfile", "User")
-                        .WithMany("PostComments")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ParentComment");
-
-                    b.Navigation("Post");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Bake.Models.Social.PostFavorite", b =>
                 {
                     b.HasOne("Bake.Models.Social.Post", "Post")
@@ -2372,16 +2304,9 @@ namespace Bake.Migrations
 
                     b.Navigation("PostAttachments");
 
-                    b.Navigation("PostComments");
-
                     b.Navigation("PostFavorites");
 
                     b.Navigation("PostLikes");
-                });
-
-            modelBuilder.Entity("Bake.Models.Social.PostComment", b =>
-                {
-                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("Bake.Models.Social.PostTypeLookup", b =>
@@ -2427,8 +2352,6 @@ namespace Bake.Migrations
                     b.Navigation("FollowFollowers");
 
                     b.Navigation("Orders");
-
-                    b.Navigation("PostComments");
 
                     b.Navigation("PostFavorites");
 
