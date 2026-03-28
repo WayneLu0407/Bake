@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "報名成功";
+    var returnUrl = ViewBag.ReturnUrl = "/Post/Events";
+}
+
+<div class="container py-5 text-center">
+    <div class="mx-auto" style="max-width: 420px;">
+        <div class="card shadow-sm border-0 p-5">
+            <h2 class="fw-bold mb-4">報名成功！</h2>
+            <p class="text-muted mb-4">即將返回活動頁面。</p>
+            <a href="@returnUrl" class="btn btn-dark">返回活動頁</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        setTimeout(function () {
+            window.location.href = '@returnUrl';
+        }, 5000);
+    </script>
+}
