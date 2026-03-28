@@ -1,5 +1,80 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model Bake.ViewModel.EventApplyViewModel
+
 @{
+    ViewData["Title"] = "確認報名資訊";
 }
+
+@section Styles {
+    <style>
+        .event-confirm-wrap {
+            max-width: 420px;
+            margin: 0 auto;
+        }
+
+        .event-confirm-card {
+            padding: 2rem 1.5rem;
+        }
+
+        .event-confirm-title {
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .event-confirm-list dt {
+            font-weight: 600;
+            margin-bottom: .25rem;
+        }
+
+        .event-confirm-list dd {
+            margin-bottom: 1rem;
+        }
+    </style>
+}
+
+<div class="container py-5">
+    <div class="event-confirm-wrap">
+        <div class="card shadow-sm border-0 event-confirm-card">
+            <h2 class="event-confirm-title">參加人資訊確認</h2>
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+            }
+
+            <dl class="event-confirm-list mb-4">
+                <dt>活動</dt>
+                <dd>@Model.EventTitle</dd>
+
+                <dt>時間</dt>
+                <dd>@Model.EventTime.ToString("yyyy/MM/dd HH:mm")</dd>
+
+                <dt>地點</dt>
+                <dd>@($"{Model.LocationCity} {Model.LocationAddress}")</dd>
+
+                <dt>姓名</dt>
+                <dd>@Model.ApplicantName</dd>
+
+                <dt>手機號碼</dt>
+                <dd>@Model.ApplicantPhone</dd>
+
+                <dt>電子郵件</dt>
+                <dd>@Model.ApplicantEmail</dd>
+
+                <dt>性別</dt>
+                <dd>@(Model.GenderText == "Male" ? "男" : (Model.GenderText == "Female" ? "女" :"未選擇" ))</dd>
+
+                <dt>報名人數</dt>
+                <dd>@Model.NumParticipants</dd>
+            </dl>
+
+            <div class="d-grid gap-2">
+                <a href="/apply/@Model.EventId" class="btn btn-outline-dark">返回修改</a>
+
+                <form asp-action="Confirmed" asp-controller="Post" method="post">
+                    <button type="submit" class="btn btn-dark w-100">確定</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
