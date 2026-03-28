@@ -4,7 +4,7 @@ namespace Bake.Controllers
 {
     public class UserController : Controller
     {
-        public IActionResult Details()
+        public IActionResult UserDetail()
         {
             return View();
         }

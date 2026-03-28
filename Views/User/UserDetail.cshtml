@@ -1,5 +1,820 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@section Styles {
+    
+    <link rel="stylesheet" href="~/seller_assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/lineicons.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/quill/bubble.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/quill/snow.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/fullcalendar.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/morris.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/datatable.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/main.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/sweetstack-admin-override.css" />
+    <link rel="stylesheet" href="~/css/userDashboard.css" />
+    <style>
+    /* ===== 前台覆蓋後台的橘黃背景 ===== */
+    body,
+    .section,
+    .container-fluid {
+    background-color: #fff !important;
+    }
+
+    .card-style {
+    background-color: #f9f9f9 !important;
+    }
+    /* ===== 前台他人主頁背景改白 ===== */
+    .card-style {
+        background-color: #fff !important;
+    }
+
+    /* 個人介紹區塊加邊框 */
+    .profile-wrapper {
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    </style>
+}
 @{
+    ViewBag.Title = "個人介紹";
+}
+<!-- ========== section start ========== -->
+<section class="section">
+    <div class="container-fluid">
+        <!-- ========== title-wrapper start ========== -->
+        <div class="title-wrapper pt-30">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="title">
+                        <h2>個人檔案</h2>
+                    </div>
+                </div>
+            </div>
+            <!-- end row -->
+        </div>
+        <!-- ========== title-wrapper end ========== -->
+
+        <div class="row">
+            <div class="col-xxl-12 col-lg-8">
+                <div class="profile-wrapper mb-30">
+                    <div class="profile-cover">
+                        <img src="~/seller_assets/images/profile/profile-cover.jpg" alt="cover-image" />
+                    </div>
+                    <div class="d-md-flex">
+                        <div class="profile-photo">
+                            <div class="image">
+                                <img src="~/seller_assets/images/profile/profile-image.png" alt="profile" />
+                            </div>
+                            <div class="profile-meta pt-25">
+                                <h5 class="text-bold mb-10">測試用戶</h5>
+                            </div>
+                        </div>
+                        <div class="profiles-activities w-100 pt-30">
+                            <ul class="d-flex align-items-center">
+                                    <li class="mr-30">
+                                    <p><strong>測試數字</strong><br />貼文</p>
+                                    </li>
+                                    <li class="mr-30">
+                                    <p><strong>測試數字</strong><br />粉絲</p>
+                                    </li>
+                                    <li class="mr-30">
+                                    <p><strong>測試數字</strong><br />關注</p>
+                                    </li> 
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="profile-info">
+                        <h5 class="text-bold mb-15">關於我</h5>
+                        <p class="text-sm mb-30">
+                            測試文字
+                        </p>
+                    </div>
+                </div>
+                <!-- ===== 貼文（Swiper） ===== -->
+                <div class="card-style mb-30">
+                    <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                        <h6 class="mb-20">貼文</h6>
+                        <div class="d-flex align-items-center mb-20">
+                            <button class="swiper-prev posts-prev btn btn-sm">❮</button>
+                            <button class="swiper-next posts-next btn btn-sm">❯</button>
+                        </div>
+                    </div>
+                    <div class="swiper posts-carousel overflow-hidden">
+                        <div class="swiper-wrapper">
+                            <!-- swiper-slide 1 (之後用 foreach 動態產生) -->
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- swiper-slide 2 -->
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- swiper-slide 3 -->
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- swiper-slide 4 -->
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- swiper-slide 5 -->
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- swiper-slide 6 -->
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== 發起的活動（Swiper） ===== -->
+                <div class="card-style mb-30">
+                    <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                        <h6 class="mb-20">發起的活動</h6>
+                        <div class="d-flex align-items-center mb-20">
+                            <button class="swiper-prev initiated-prev btn btn-sm">❮</button>
+                            <button class="swiper-next initiated-next btn btn-sm">❯</button>
+                        </div>
+                    </div>
+                    <div class="swiper initiated-carousel overflow-hidden">
+                        <div class="swiper-wrapper">
+                            <!-- swiper-slide 1 (之後用 foreach 動態產生) -->
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- swiper-slide 2 -->
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- swiper-slide 3 -->
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- swiper-slide 4 -->
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== 發起過的活動（Swiper） ===== -->
+                <div class="card-style mb-30">
+                    <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                        <h6 class="mb-20">發起過的活動</h6>
+                        <div class="d-flex align-items-center mb-20">
+                            <button class="swiper-prev past-initiated-prev btn btn-sm">❮</button>
+                            <button class="swiper-next past-initiated-next btn btn-sm">❯</button>
+                        </div>
+                    </div>
+                    <div class="swiper past-initiated-carousel overflow-hidden">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== 參加中的活動（Swiper） ===== -->
+                <div class="card-style mb-30">
+                    <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                        <h6 class="mb-20">參加中的活動</h6>
+                        <div class="d-flex align-items-center mb-20">
+                            <button class="swiper-prev joining-prev btn btn-sm">❮</button>
+                            <button class="swiper-next joining-next btn btn-sm">❯</button>
+                        </div>
+                    </div>
+                    <div class="swiper joining-carousel overflow-hidden">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== 參加過的活動（Swiper） ===== -->
+                <div class="card-style mb-30">
+                    <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                        <h6 class="mb-20">參加過的活動</h6>
+                        <div class="d-flex align-items-center mb-20">
+                            <button class="swiper-prev past-joined-prev btn btn-sm">❮</button>
+                            <button class="swiper-next past-joined-next btn btn-sm">❯</button>
+                        </div>
+                    </div>
+                    <div class="swiper past-joined-carousel overflow-hidden">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="swiper-slide">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">EcommaerceHTML</a>
+                                            </h5>
+                                            <span>11 Jun, 2022</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">43 Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- end card -->
+            </div>
+            <!-- end col -->
+        </div>
+    </div>
+</section>
+
+
+@section Scripts {
+    <script>
+        $(function () {
+
+            // ===== Swiper 初始化（與交流區首頁同樣模式） =====
+            function initProfileSwipers() {
+                const defaultBreak = {
+                    0:    { slidesPerView: 1, spaceBetween: 12 },
+                    768:  { slidesPerView: 2, spaceBetween: 16 },
+                    992:  { slidesPerView: 3, spaceBetween: 20 },
+                    1200: { slidesPerView: 4, spaceBetween: 20 },
+                    1600: { slidesPerView: 5, spaceBetween: 24 },
+                };
+
+                const configs = [
+                    { sel: '.posts-carousel',          prev: '.posts-prev',          next: '.posts-next' },        // 新增
+                    { sel: '.initiated-carousel',      prev: '.initiated-prev',      next: '.initiated-next' },
+                    { sel: '.past-initiated-carousel', prev: '.past-initiated-prev', next: '.past-initiated-next' },
+                    { sel: '.joining-carousel',        prev: '.joining-prev',        next: '.joining-next' },
+                    { sel: '.past-joined-carousel',    prev: '.past-joined-prev',    next: '.past-joined-next' },
+                ];
+
+                configs.forEach(function (cfg) {
+                    const el = document.querySelector(cfg.sel);
+                    if (!el) return;
+                    if (el.swiper) el.swiper.destroy(true, true);
+
+                    new Swiper(cfg.sel, {
+                        speed: 500,
+                        breakpoints: defaultBreak,
+                        navigation: {
+                            prevEl: cfg.prev,
+                            nextEl: cfg.next,
+                        },
+                    });
+                });
+            }
+
+            initProfileSwipers();
+        });
+    </script>
 }
