@@ -1,0 +1,318 @@
+﻿@model Bake.ViewModels.Social.PostDetailViewModel
+
+@{
+    ViewData["Title"] = "貼文詳情";
+}
+
+@section Styles {
+<style>
+    /* ===== 詳細頁專用樣式（僅補 Bootstrap 不足的部分）===== */
+
+    /* 主卡片 */
+    .detail-card {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    /* 圖片輪播區 */
+    .detail-card__image {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: #e8e8e8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted-color);
+    }
+
+    /* 活動 meta 標籤 */
+    .event-meta__label {
+        font-size: 14px;
+        color: var(--muted-color);
+        position: relative;
+        padding-left: 14px;
+    }
+    .event-meta__label::before {
+        content: "•";
+        position: absolute;
+        left: 0;
+    }
+
+    /* 讚 / 收藏 / 分享 列 */
+    .action-bar {
+        display: flex;
+        border-top: 1px solid #eee;
+    }
+    .action-bar__btn {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 14px 0;
+        background: none;
+        border: none;
+        font-size: 14px;
+        color: var(--body-text-color);
+        cursor: pointer;
+        transition: background .2s, color .2s;
+    }
+    .action-bar__btn:hover {
+        background: var(--bs-primary-bg-subtle);
+        color: var(--accent-color);
+    }
+    .action-bar__btn + .action-bar__btn {
+        border-left: 1px solid #eee;
+    }
+
+    /* 作者大頭貼 */
+    .author-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: #ddd;
+        flex-shrink: 0;
+    }
+
+    /* 追蹤按鈕 */
+    .btn-follow {
+        background: var(--dark-color);
+        color: #fff;
+        border: 1px solid var(--dark-color);
+        border-radius: 6px;
+        padding: 4px 16px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: opacity .2s;
+    }
+    .btn-follow:hover { opacity: .85; color: #fff; }
+
+    /* 橘色 tag 膠囊 */
+    .tag-pill {
+        display: inline-block;
+        padding: 6px 18px;
+        background: var(--accent-color);
+        color: #fff;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background .2s;
+    }
+    .tag-pill:hover { background: #f7a422; }
+
+    /* CTA 按鈕（報名 / 私訊） */
+    .btn-cta-primary {
+        display: block;
+        width: 100%;
+        padding: 14px 0;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 700;
+        border-radius: 8px;
+        border: 2px solid var(--accent-color);
+        background: var(--accent-color);
+        color: #fff;
+        transition: all .2s;
+        text-decoration: none;
+    }
+    .btn-cta-primary:hover {
+        background: #f7a422;
+        border-color: #f7a422;
+        color: #fff;
+    }
+    .btn-cta-outline {
+        display: block;
+        width: 100%;
+        padding: 14px 0;
+        text-align: center;
+        font-size: 16px;
+        font-weight: 700;
+        border-radius: 8px;
+        border: 2px solid var(--accent-color);
+        background: transparent;
+        color: var(--dark-color);
+        transition: all .2s;
+        text-decoration: none;
+    }
+    .btn-cta-outline:hover {
+        background: var(--bs-primary-bg-subtle);
+    }
+
+    /* 留言區 */
+    .comment-box textarea:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 .15rem rgba(255,196,63,.25);
+    }
+</style>
+}
+
+
+<!-- ============================================================ -->
+<!--                      頁面主體                                 -->
+<!-- ============================================================ -->
+<div class="container-fluid py-4">
+    <div class="row g-4">
+
+        <!-- ==================== 左欄：主內容 ==================== -->
+        <div class="col-lg-8">
+
+            <div class="detail-card">
+                <div class="p-4">
+
+                    <!-- 標題 -->
+                    @if (Model.IsActivity)
+                    {
+                        <h4 class="fw-bold mb-3">@Model.EventDetail.EventTime.ToString("yyyy/M/d (ddd) tt h:mm")
+        -@Model.EventDetail.EventEndTime.ToString("h:mm") ｜ 「@Model.Title」</h4>
+                    }
+                    else
+                    {
+                        <h4 class="fw-bold mb-3">「@Model.Title」</h4>
+                    }
+
+                    <!-- 圖片 -->
+                    
+                    <img src="@Model.CoverImageUrl" class="img-fluid" />
+                    <br />
+                    <!-- ===== 活動內容 ===== -->
+                    @if (Model.IsActivity)
+                    {
+                        <div class="mt-4">
+                            <div class="event-meta__label mb-1">日期時間</div>
+                            <p class="fw-bold mb-4">@Model.EventDetail.EventTime.ToString("yyyy/M/d (ddd) tt h:mm")-@Model.EventDetail.EventEndTime.ToString("h:mm")</p>
+
+                            <div class="event-meta__label mb-1">活動簡介</div>
+                            
+                            <p style="white-space: pre-line;">
+                               @Model.Content
+                            </p>
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- ===== 貼文內容 ===== -->
+                        <br>
+                        <p style="white-space: pre-line;">
+                               @Model.Content
+                        </p>
+                    }
+
+                </div>
+
+                <!-- 讚 / 收藏 / 分享 -->
+                <div class="action-bar">
+                    <button class="action-bar__btn">
+                        <i class="fa-regular fa-thumbs-up"></i> 讚
+                    </button>
+                    <button class="action-bar__btn">
+                        <i class="fa-regular fa-heart"></i> 收藏
+                    </button>
+                    <button class="action-bar__btn">
+                        <i class="fa-regular fa-share-from-square"></i> 分享
+                    </button>
+                </div>
+            </div>
+
+            <!-- ===== 留言區（僅貼文顯示）===== -->
+            @if (!Model.IsActivity)
+            {       
+                <div class="detail-card mt-4 p-4 comment-box">
+                    <h5 class="fw-bold mb-3">留言</h5> 
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <form asp-controller="Post" asp-action="AddComment" method="post">
+                            <input type="hidden" name="PostId" value="@Model.PostId" />
+                            <textarea class="form-control" name="Content" rows="4" placeholder="分享你的想法..."required></textarea>
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary px-4 fw-bold">發表留言</button>
+                            </div>
+                        </form>
+                    
+                     }
+                    else
+                    {
+                        <p class="text-muted">請先 <a asp-controller="Home" asp-action="Login">登入</a> 才能留言</p>
+                    }
+                    <!-- 顯示已有的留言 -->
+                    @foreach (var c in Model.Comments)
+                    {
+                    <div class="d-flex gap-3 mt-4 pt-3 border-top">
+                        <img src="@(c.AvatarUrl ?? "/images/default-avatar.png")"
+                                class="rounded-circle" style="width:40px; height:40px; object-fit:cover;" />
+                        <div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-bold small">@c.UserName</span>
+                                <span class="text-muted small">@c.CreatedAt?.ToString("yyyy/MM/dd HH:mm")</span>
+                            </div>
+                            <p class="mb-0 mt-1">@c.Content</p>
+                        </div>
+                    </div>
+                    }
+
+                    @if (Model.Comments.Count == 0)
+                    {
+                        <p class="text-muted mt-3">還沒有留言，成為第一個留言的人吧！</p>
+                    }    
+                </div>
+        }
+        </div>
+        <!-- ==================== 右欄：側邊欄 ==================== -->
+        <div class="col-lg-4">
+
+            <!-- 作者 / 主辦人 -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0">
+                        @(Model.IsActivity ? "關於主辦人" : "關於作者")
+                    </h6>
+                    <button class="btn-follow">追蹤</button>
+                </div>
+                <div class="detail-card p-3">
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                         <img src="@Model.Author.Avatar" class="rounded-circle" style="width:40px; height:40px; object-fit:cover;" />
+                        <div>
+                            <div class="fw-bold">@Model.Author.DisplayName</div>
+                            <small class="text-muted">@Model.Author.ShareCount 分享 · @Model.Author.FollowerCount 粉絲</small>
+                        </div>
+                    </div>
+                    <p class="mb-0 small text-muted">
+                        @Model.Author.Bio
+                    </p>
+                </div>
+            </div>
+
+            <!-- 活動 CTA（僅活動顯示） -->
+            @if (Model.IsActivity)
+            {
+                <div class="mb-4 d-flex flex-column gap-3">
+                    <a href="#" class="btn-cta-primary">我要報名</a>
+                    <div>
+                        <h6 class="fw-bold mb-2">我要詢問</h6>
+                        <a href="@Url.Action("StartChat", "Chat", new { targetId = Model.Author.UserId })" class="btn-cta-outline">私訊主辦人</a>
+                    </div>
+                </div>
+            }
+
+
+            <!-- 關鍵字 -->
+            <div>
+                <h6 class="fw-bold mb-3">
+                    @(Model.IsActivity ? "活動關鍵字" : "貼文關鍵字")
+                </h6>
+                <div class="d-flex flex-wrap gap-2">
+                    
+                        @foreach(var tag in Model.Tags)
+                        {
+                            <span class="tag-pill">@tag.TagName</span>
+                        }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

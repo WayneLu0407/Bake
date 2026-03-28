@@ -83,7 +83,7 @@
                         </div>
                     </div>
 
-                    <form asp-action="Apply" asp-controller="Post" asp-route-eventId="@Model.EventId" method="post" novalidate>
+                    <form asp-action="Apply" asp-controller="Post" asp-route-eventId="@Model.EventId" method="post">
                         @Html.AntiForgeryToken()
                         <input asp-for="EventId" type="hidden" />
 

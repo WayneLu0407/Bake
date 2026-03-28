@@ -4,6 +4,7 @@ using Bake.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bake.Migrations
 {
     [DbContext(typeof(BakeContext))]
-    partial class BakeContextModelSnapshot : ModelSnapshot
+    [Migration("20260327020903_AddPostComments")]
+    partial class AddPostComments
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,60 +41,6 @@ namespace Bake.Migrations
                         .HasName("PK__Account___3683B531C403EB5D");
 
                     b.ToTable("Account_Status_Definitions", "User");
-                });
-
-            modelBuilder.Entity("Bake.Models.Notification", b =>
-                {
-                    b.Property<int>("NotificationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("notification_id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)")
-                        .HasColumnName("content");
-
-                    b.Property<DateTime>("CreateAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasColumnName("create_at")
-                        .HasDefaultValueSql("(sysdatetime())");
-
-                    b.Property<bool>("IsRead")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_read");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int")
-                        .HasColumnName("order_id");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("title");
-
-                    b.Property<string>("URL")
-                        .IsRequired()
-                        .HasMaxLength(2048)
-                        .HasColumnType("nvarchar(2048)")
-                        .HasColumnName("url");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("NotificationId");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("Notifications", "Service");
                 });
 
             modelBuilder.Entity("Bake.Models.Platform.PaymentStatusDefinition", b =>
@@ -1694,17 +1643,6 @@ namespace Bake.Migrations
                     b.HasIndex("TagId");
 
                     b.ToTable("Post_Tag_Mapping", "Social");
-                });
-
-            modelBuilder.Entity("Bake.Models.Notification", b =>
-                {
-                    b.HasOne("Bake.Models.Sales.Order", "Order")
-                        .WithMany()
-                        .HasForeignKey("OrderId")
-                        .IsRequired()
-                        .HasConstraintName("FK_Notification_Orders");
-
-                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("Bake.Models.Platform.PaymentTransaction", b =>
