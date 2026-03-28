@@ -199,17 +199,17 @@
             <div class="container-fluid">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-5">
                     <!-- 搜尋 -->
-                    <div class="post-search-bar position-relative flex-grow-1">
-                        <input type="text" class="form-control" placeholder="搜尋" v-model="keyword" />
-                        <button class="btn-search-icon" type="button">
+                    <div class="post-search-bar position-relative flex-grow-1" id="search-app" v-cloak>
+                        <input type="text" class="form-control" placeholder="搜尋文章" v-model="keyword" @@keyup.enter="goSearch" />
+                        <button class="btn-search-icon" type="button" @@click="goSearch">
                             <svg width="20" height="20" viewBox="0 0 24 24"><use xlink:href="#search"></use></svg>
                         </button>
                     </div>
                     <!-- 按鈕 -->
                     <div class="d-flex gap-2">
-                        <a asp-controller="Home" asp-action="CreatePost" class="btn btn-post-action">全部</a>
-                        <a asp-controller="Home" asp-action="CreatePost" class="btn btn-post-action">新增貼文</a>
-                        <a asp-controller="Home" asp-action="CreateActivity" class="btn btn-post-action">新增活動</a>
+                        <a asp-controller="Post" asp-action="PostList" class="btn btn-post-action">全部</a>
+                        <a asp-controller="Post" asp-action="CreatePost" class="btn btn-post-action">新增貼文</a>
+                        <a asp-controller="Post" asp-action="CreateActivity" class="btn btn-post-action">新增活動</a>
                     </div>
                 </div>
             </div>
@@ -228,7 +228,7 @@
                 <div class="swiper latest-post-carousel">
                     <div class="swiper-wrapper">
                         <div class="swiper-slide" v-for="post in latestPosts" :key="post.postId">
-                            <a :href="'/Home/PostDetail/' + post.postId" class="text-decoration-none text-dark">
+                            <a :href="'/Post/PostDetail/' + post.postId" class="text-decoration-none text-dark">
                                 <div class="post-card">
                                     <img v-if="post.image" :src="post.image" :alt="post.title" class="card-thumb" />
                                     <div v-else class="card-thumb-placeholder"></div>
@@ -256,7 +256,7 @@
                 <div class="swiper hot-post-carousel">
                     <div class="swiper-wrapper">
                         <div class="swiper-slide" v-for="post in hotPosts" :key="post.postId">
-                            <a :href="'/Home/PostDetail/' + post.postId" class="text-decoration-none text-dark">
+                            <a :href="'/Post/PostDetail/' + post.postId" class="text-decoration-none text-dark">
                                 <div class="post-card">
                                     <img v-if="post.image" :src="post.image" :alt="post.title" class="card-thumb" />
                                     <div v-else class="card-thumb-placeholder"></div>
@@ -279,7 +279,7 @@
                 </div>
                 <div class="row g-4">
                     <div class="col-3" v-for="cat in categories.filter(c=>c.eventTypeId!==0)" :key="cat.eventTypeId">
-                            <a :href="'/Home/Posts?category=' + cat.eventTypeId" class="text-decoration-none text-dark">
+                            <a :href="'/Post/PostList?category=' + cat.eventTypeId" class="text-decoration-none text-dark">
                             <div class="category-icon-card text-center">
                                 <div class="icon-circle">
                                     <i class="fa-solid" :class="cat.icon"></i>
@@ -290,7 +290,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
         </section>
 
         <!-- ========== 7. 揪團中的活動（第一組） ========== -->
@@ -306,7 +305,7 @@
                 <div class="swiper group1-carousel">
                     <div class="swiper-wrapper">
                         <div class="swiper-slide" v-for="act in groupActivities1" :key="act.postId">
-                            <a :href="'/Home/PostDetail/' + act.postId" class="text-decoration-none text-dark">
+                            <a :href="'/Post/PostDetail/' + act.postId" class="text-decoration-none text-dark">
                                 <div class="post-card">
                                     <img v-if="act.image" :src="act.image" :alt="act.title" class="card-thumb" />
                                     <div v-else class="card-thumb-placeholder"></div>
@@ -389,7 +388,11 @@
             },
             methods: {
                 
-
+                goSearch(){
+                    if(this.keyword.trim()){
+                        window.location.href = '/Post/PostList?keyword=' + encodeURIComponent(this.keyword.trim())
+                    }
+                },
                 /** 統一初始化所有 Swiper（與首頁同樣的銷毀→重建模式） */
                 initSwipers() {
                     const defaultBreak = {
@@ -442,7 +445,8 @@
                         new Swiper(cfg.sel, opts)
                     })
                 }
-            }
+            },
+
         }).mount('#posts-app')
     </script>
 }

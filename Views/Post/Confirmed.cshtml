@@ -72,6 +72,7 @@
                 <a href="/apply/@Model.EventId" class="btn btn-outline-dark">返回修改</a>
 
                 <form asp-action="Confirmed" asp-controller="Post" method="post">
+                    @Html.AntiForgeryToken()
                     <button type="submit" class="btn btn-dark w-100">確定</button>
                 </form>
             </div>

@@ -39,4 +39,6 @@ public partial class Post
     public virtual PostTypeLookup Type { get; set; } = null!;
 
     public virtual ICollection<Tag> Tags { get; set; } = new List<Tag>();
+
+    public virtual ICollection<PostComment> PostComments { get; set; } = new List<PostComment>();
 }

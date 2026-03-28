@@ -113,57 +113,50 @@ namespace Bake.Controllers.api
             return Ok(list);
         }
 
-        // 取單筆商品 → /api/Post/GetById/3
-        [HttpGet("{id}")]
-        public IActionResult GetById(int id)
+        // 全部文章+活動（給 PostList 頁用）
+        [HttpGet("All")]
+        public async Task<IActionResult> All(string? keyword)
         {
-            var prod = _db.Products
-                .Include(p => p.ProductDetail)
-                .Include(p => p.User).ThenInclude(u => u.Shop)
-                .Where(p => p.ProductId == id)
-                .Select(p => new {
-                    productId = p.ProductId,
-                    userId = p.UserId,
-                    productName = p.ProductName,
-                    productImage = p.ProductImage,
-                    productRating = p.ProductRating,
-                    productPrice = p.ProductDetail.ProductPrice,
-                    productDiscount = p.ProductDetail.ProductDiscount,
-                    productQuantity = p.ProductDetail.ProductQuantity,
-                    expireDate = p.ProductDetail.ExpireDate,
-                    shopName = p.User.Shop.ShopName,
-                    shopImg = p.User.Shop.ShopImg!= null? "/" + p.User.Shop.ShopImg.TrimStart('/'): null,
-                    productDescription = p.ProductDescription,
-                    ShelfLifeNote = p.ProductIngredient.ShelfLifeNote,
-                    Ingredient = p.ProductIngredient.Ingredients,
-                    NetWeight = p.ProductIngredient.NetWeight,
-                    categoryId = p.CategoryId,
-                    categoryName = p.Category.CategoryName,
-                })
-                .FirstOrDefault();
+            var query = BaseQuery();
 
-            if (prod == null) return NotFound();
-            return Ok(prod);
-        }
-        //api/Post/Search?keyword = 巧克力
-        [HttpGet]
-        public IActionResult Search(string keyword)
-        {
-            if (string.IsNullOrWhiteSpace(keyword))
-                return Ok(Array.Empty<object>());
-            var results = _db.Products
-                .Include(p => p.ProductDetail)
-                .Where(p => p.ProductName.Contains(keyword))
-                .Take(8)
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                query = query.Where(p =>
+                p.Title.Contains(keyword) ||
+                p.Content.Contains(keyword));
+            }
+            var list = await query
+                .OrderByDescending(p => p.CreatedAt)
                 .Select(p => new
                 {
-                    ProductId=p.ProductId,
-                    ProductName=p.ProductName,
-                    ProductImage = p.ProductImage,
-                    ProductPrice= p.ProductDetail != null ? p.ProductDetail.ProductPrice : (decimal?)null
-                })
-                .ToList();
-            return Ok(results);
+                    p.PostId,
+                    p.Title,
+                    Content = p.Content.Length > 100 ? p.Content.Substring(0, 100) + "..." : p.Content,
+                    p.TypeId,
+                    p.ViewCount,
+                    p.CreatedAt,
+
+                    Image = p.PostAttachments
+                        .Where(a => a.IsCover == true)
+                        .Select(a => a.FileUrl)
+                        .FirstOrDefault(),
+                    EventTypeId = (int?)p.EventDetails
+                        .Select(e => (int?)e.EventTypeId)
+                        .FirstOrDefault(),
+                    EventTypeName = p.EventDetails
+                        .Select(e => e.EventType.EventTypeName)
+                        .FirstOrDefault(),
+                    Price = p.EventDetails
+                        .Select(e => e.Price)
+                        .FirstOrDefault(),
+                    EventTime = p.EventDetails
+                        .Select(e => (DateTime?)e.EventTime)
+                        .FirstOrDefault(),
+                    LocationCity = p.EventDetails
+                        .Select(e => e.LocationCity)
+                        .FirstOrDefault(),
+                }).ToListAsync();
+            return Ok(list);
         }
     }
 }
