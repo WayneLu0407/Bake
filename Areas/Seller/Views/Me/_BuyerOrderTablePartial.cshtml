@@ -1,0 +1,119 @@
+﻿@model IEnumerable<Bake.Areas.Seller.ViewModels.BuyerOrderListViewModel>
+
+<div class="table-responsive">
+	<table id="orderTable" class="table">
+		<thead>
+			<tr>
+				<th>
+					<h6>訂單編號</h6>
+				</th>
+				<th>
+					<h6>訂單品項</h6>
+				</th>
+				<th>
+					<h6>送貨地址</h6>
+				</th>
+				<th>
+					<h6>總金額</h6>
+				</th>
+				<th>
+					<h6>支付方式</h6>
+				</th>
+				<th data-type="date" data-format="YYYY/MM/DD">
+					<h6>購買日期</h6>
+				</th>
+				<th>
+					<h6>訂單狀態</h6>
+				</th>
+				<th>
+					<h6>留下評論</h6>
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			@if (Model != null && Model.Any())
+			{
+				foreach (var item in Model)
+				{
+												
+					<tr>
+						<td>
+							<p>@item.OrderId</p>
+						</td>
+						<td>
+							@foreach (var product in item.ProductsList)
+							{
+								@* <p>@product.ProductName</p><p>x @product.Quantity</p> *@
+								<div class="mb-2">
+									<p class="mb-0">@product.ProductName</p>
+									<small class="text-muted">x @product.Quantity</small>
+								</div>
+							}
+														
+						</td>
+													
+						<td>
+							<p>@item.ShippingAddress</p>
+						</td>
+						<td>
+							<p>@item.TotalAmount</p>
+						</td>
+						<td>
+							<p>@item.PaymentMethod</p>
+						</td>
+						<td>
+							<p>@item.CreatedAt.ToString("yyyy/MM/dd")</p>
+						</td>
+						<td>
+							<p>@item.StatusName</p>
+						</td>
+						<td>
+							@foreach (var product in item.ProductsList)
+							{
+								<div class="mb-2">
+									@if (product.IsReviewed)
+									{
+										<button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+											已評論
+										</button>
+									}
+									else
+									{
+										<a asp-area="" asp-controller="ProductReview" asp-action="Create" asp-route-productId="@product.ProductId" asp-route-orderId="@item.OrderId" class="btn btn-warning btn-sm">評論商品</a>
+									}
+								</div>
+							}
+						</td>
+					</tr>
+				}
+			}
+			else
+			{
+				<p>查無訂單資料</p>
+			}
+		</tbody>
+	</table>
+	@if (ViewBag.TotalPages > 1)
+	{
+		<nav class="mt-4">
+			<ul class="pagination justify-content-center">
+				@* 上一頁 *@
+				<li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
+					<a class="page-link ajax-page-link" href="javascript:void(0);" data-page="@(ViewBag.CurrentPage - 1)">上一頁</a>
+				</li>
+
+				@* 頁碼按鈕 *@
+				@for (int i = 1; i <= ViewBag.TotalPages; i++)
+				{
+					<li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
+						<a class="page-link ajax-page-link" href="javascript:void(0);" data-page="@i">@i</a>
+					</li>
+				}
+
+				@* 下一頁 *@
+				<li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
+					<a class="page-link ajax-page-link" href="javascript:void(0);" data-page="@(ViewBag.CurrentPage + 1)">下一頁</a>
+				</li>
+			</ul>
+		</nav>
+	}
