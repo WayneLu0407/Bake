@@ -57,45 +57,52 @@
   const optionBox = document.querySelector('.option-box')
   const optionOverlay = document.querySelector('.option-overlay')
 
-  optionButton.addEventListener('click', () => {
-    optionBox.classList.add('show')
-    optionOverlay.classList.add('show')
-  })
-  optionButtonClose.addEventListener('click', () => {
-    optionBox.classList.remove('show')
-    optionOverlay.classList.remove('show')
-  })
-  optionOverlay.addEventListener('click', () => {
-    optionOverlay.classList.remove('show')
-    optionBox.classList.remove('show')
-  })
-
+    if (optionButton && optionBox && optionOverlay) {
+        optionButton.addEventListener('click', () => {
+            optionBox.classList.add('show')
+            optionOverlay.classList.add('show')
+        })
+    }
+    if (optionButtonClose && optionBox && optionOverlay) {
+        optionButtonClose.addEventListener('click', () => {
+            optionBox.classList.remove('show')
+            optionOverlay.classList.remove('show')
+        })
+    }
+        if (optionBox && optionOverlay) {
+            optionOverlay.addEventListener('click', () => {
+                optionOverlay.classList.remove('show')
+                optionBox.classList.remove('show')
+            })
+        }
   // ========== layout change
   const leftSidebarButton = document.querySelector('.leftSidebarButton')
   const rightSidebarButton = document.querySelector('.rightSidebarButton')
   const dropdownMenuEnd = document.querySelectorAll(
     '.header-right .dropdown-menu'
   )
+    if (rightSidebarButton && rightSidebarButton && leftSidebarButton) {
+        rightSidebarButton.addEventListener('click', () => {
+            document.body.classList.add('rightSidebar')
+            rightSidebarButton.classList.add('active')
+            leftSidebarButton.classList.remove('active')
 
-  rightSidebarButton.addEventListener('click', () => {
-    document.body.classList.add('rightSidebar')
-    rightSidebarButton.classList.add('active')
-    leftSidebarButton.classList.remove('active')
+            dropdownMenuEnd.forEach((el) => {
+                el.classList.remove('dropdown-menu-end')
+            })
+        })
+    }
+    if (leftSidebarButton) {
+        leftSidebarButton.addEventListener('click', () => {
+            document.body.classList.remove('rightSidebar')
+            leftSidebarButton.classList.add('active')
+            rightSidebarButton.classList.remove('active')
 
-    dropdownMenuEnd.forEach((el) => {
-      el.classList.remove('dropdown-menu-end')
-    })
-  })
-  leftSidebarButton.addEventListener('click', () => {
-    document.body.classList.remove('rightSidebar')
-    leftSidebarButton.classList.add('active')
-    rightSidebarButton.classList.remove('active')
-
-    dropdownMenuEnd.forEach((el) => {
-      el.classList.add('dropdown-menu-end')
-    })
-  })
-
+            dropdownMenuEnd.forEach((el) => {
+                el.classList.add('dropdown-menu-end')
+            })
+        })
+    }
   // =========== theme change
   const lightThemeButton = document.querySelector('.lightThemeButton')
   const darkThemeButton = document.querySelector('.darkThemeButton')
@@ -110,26 +117,28 @@
       logo.src = '/seller_assets/images/logo/logo-white.svg'
   } else {
     document.body.classList.remove('darkTheme')
-    lightThemeButton.classList.add('active')
-    darkThemeButton.classList.remove('active')
+      if (lightThemeButton) lightThemeButton.classList.add('active')
+      if (darkThemeButton)darkThemeButton.classList.remove('active')
       logo.src = '/seller_assets/images/logo/logo.svg'
   }
-
-  darkThemeButton.addEventListener('click', () => {
-    document.body.classList.add('darkTheme')
-    localStorage.setItem('theme', 'dark') // Save theme preference
-    darkThemeButton.classList.add('active')
-    lightThemeButton.classList.remove('active')
-      logo.src = '/seller_assets/images/logo/logo-white.svg'
-  })
-
-  lightThemeButton.addEventListener('click', () => {
-    document.body.classList.remove('darkTheme')
-    localStorage.setItem('theme', 'light') // Save theme preference
-    lightThemeButton.classList.add('active')
-    darkThemeButton.classList.remove('active')
-      logo.src = '/seller_assets/images/logo/logo.svg'
-  })
+    if (darkThemeButton) {
+        darkThemeButton.addEventListener('click', () => {
+            document.body.classList.add('darkTheme')
+            localStorage.setItem('theme', 'dark') // Save theme preference
+            darkThemeButton.classList.add('active')
+            lightThemeButton.classList.remove('active')
+            logo.src = '/seller_assets/images/logo/logo-white.svg'
+        })
+    }
+    if (lightThemeButton) {
+        lightThemeButton.addEventListener('click', () => {
+            document.body.classList.remove('darkTheme')
+            localStorage.setItem('theme', 'light') // Save theme preference
+            lightThemeButton.classList.add('active')
+            darkThemeButton.classList.remove('active')
+            logo.src = '/seller_assets/images/logo/logo.svg'
+        })
+    }
 
   // Enabling bootstrap tooltips
   const tooltipTriggerList = document.querySelectorAll(
