@@ -119,7 +119,7 @@
     document.body.classList.remove('darkTheme')
       if (lightThemeButton) lightThemeButton.classList.add('active')
       if (darkThemeButton)darkThemeButton.classList.remove('active')
-      logo.src = '/seller_assets/images/logo/logo.svg'
+      logo.src = '/ProductPicture/brand/Logo.png'
   }
     if (darkThemeButton) {
         darkThemeButton.addEventListener('click', () => {
@@ -136,7 +136,7 @@
             localStorage.setItem('theme', 'light') // Save theme preference
             lightThemeButton.classList.add('active')
             darkThemeButton.classList.remove('active')
-            logo.src = '/seller_assets/images/logo/logo.svg'
+            logo.src = '/ProductPicture/brand/Logo.png'
         })
     }
 

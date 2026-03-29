@@ -54,7 +54,7 @@
     <aside class="sidebar-nav-wrapper">
         <div class="navbar-logo">
             <a asp-area="" asp-controller="Home" asp-action="index">
-                <img src="~/productpicture/brand/logo.png" alt="SweetStack" style="width: 150px; height: auto;" />
+                <img src="~/ProductPicture/brand/Logo.png" alt="SweetStack" style="width: 150px; height: auto;" asp-append-version="true" />
             </a>
         </div>
         <nav class="sidebar-nav">
@@ -341,6 +341,11 @@
     <script src="~/seller_assets/js/main.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script>
+        // 確保 logo 不被 main.js 的 theme 邏輯覆蓋
+        const logoEl = document.querySelector('.navbar-logo img');
+        if (logoEl) logoEl.src = '/ProductPicture/brand/Logo.png';
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 
