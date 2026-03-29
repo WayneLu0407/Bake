@@ -4,6 +4,9 @@
 	ViewBag.Title = "購買紀錄";
 }
 
+@section Styles {
+	
+}
 
 <body>
 
@@ -44,130 +47,73 @@
 				<div class="row">
 					<div class="col-lg-12">
 						<div class="card-style mb-30">
-                
-							<div class="table-responsive">
-								<table id="table" class="table">
-									<thead>
-										<tr>
-											<th>
-												<h6>訂單編號</h6>
-											</th>
-											<th>
-												<h6>訂單品項</h6>
-											</th>
-											<th>
-												<h6>送貨地址</h6>
-											</th>
-											<th>
-												<h6>總金額</h6>
-											</th>
-											<th>
-												<h6>支付方式</h6>
-											</th>
-											<th data-type="date" data-format="YYYY/MM/DD">
-												<h6>購買日期</h6>
-											</th>
-											<th>
-												<h6>訂單狀態</h6>
-											</th>
-											<th>
-												<h6>留下評論</h6>
-											</th>
-										</tr>
-									</thead>
-									<tbody>
-										@if (Model != null && Model.Any())
-											{
-												foreach(var item in Model){
-												
-												<tr>
-													<td>
-														<p>@item.OrderId</p>
-													</td>
-													<td>
-														@foreach(var product in item.ProductsList){
-															@* <p>@product.ProductName</p><p>x @product.Quantity</p> *@
-															<div class="mb-2">
-																<p class="mb-0">@product.ProductName</p>
-																<small class="text-muted">x @product.Quantity</small>
-															</div>
-														}
-														
-													</td>
-													
-													<td>
-														<p>@item.ShippingAddress</p>
-													</td>
-													<td>
-														<p>@item.TotalAmount</p>
-													</td>
-													<td>
-														<p>@item.PaymentMethod</p>
-													</td>
-													<td>
-														<p>@item.CreatedAt.ToString("yyyy/MM/dd")</p>
-													</td>
-													<td>
-														<p>@item.StatusName</p>
-													</td>
-													<td>
-														@foreach (var product in item.ProductsList)
-														{
-															<div class="mb-2">
-																@if (product.IsReviewed)
-																{
-																	<button type="button" class="btn btn-outline-secondary btn-sm" disabled>
-																		已評論
-																	</button>
-																}
-																else
-																{
-																	<a asp-area="" asp-controller="ProductReview" asp-action="Create" asp-route-productId="@product.ProductId" asp-route-orderId="@item.OrderId" class="btn btn-warning btn-sm">評論商品</a>
-																}
-															</div>
-														}
-													</td>
-												</tr>
-												}
-											}
-											else
-											{
-												<p>查無訂單資料</p>
-											}
-										</tbody>
-								</table>
+							<div id="orderTableContainer">
+								@await Html.PartialAsync("_BuyerOrderTablePartial", Model)
 							</div>
 						</div>
-						<!-- end card -->
 					</div>
-					<!-- end col -->
+					<!-- end card -->
 				</div>
-				<!-- end row -->
+				<!-- end col -->
 			</div>
-			<!-- ========== tables-wrapper end ========== -->
+			<!-- end row -->
 		</div>
-		<!-- end container -->
-	</section>
-	<!-- ========== table components end ========== -->
-
-    
-
- 
-
-  
-	<script>
-			const dataTable = new simpleDatatables.DataTable("#table", {
-			  searchable: true,
-			});
-	</script>
-
+		<!-- ========== tables-wrapper end ========== -->
+	</div>
+	<!-- end container -->
+</section>
+<!-- ========== table components end ========== -->
 @section Scripts {
-	<link rel="stylesheet" href="https://cdn.datatables.net" />
-	<script src="https://cdn.datatables.net"></script>
+	
 	<script>
-		$(document).ready(function () {
-		$('#orderTable').DataTable();
-		});
+			// 1. 使用原生 JavaScript 監聽點擊，防止 jQuery 載入順序問題
+			document.addEventListener('click', function (e) {
+				// 檢查點擊的是否為分頁按鈕 (包含裡面的文字)
+				var btn = e.target.closest('.ajax-page-link');
+            
+				if (btn) {
+					e.preventDefault(); // 【核心】強制禁止網頁刷新跳轉
+					e.stopPropagation();
+
+					var page = btn.getAttribute('data-page');
+					var parentLi = btn.parentElement;
+
+					// 防呆：如果是已停用或沒有頁碼，則不執行
+					if (!page || (parentLi && parentLi.classList.contains('disabled'))) {
+						return false;
+					}
+
+					// 2. 執行 AJAX 請求
+					var container = document.getElementById('orderTableContainer');
+					if (container) container.style.opacity = '0.5';
+
+					// 使用 fetch (原生 AJAX) 更穩定
+					fetch('@Url.Action("Orders", "Me")?pageNumber=' + page + '&isAjax=true', {
+						headers: { 'X-Requested-With': 'XMLHttpRequest' }
+					})
+					.then(response => response.text())
+					.then(html => {
+						if (container) {
+							container.innerHTML = html;
+							container.style.opacity = '1';
+
+							const newUrl = `@Url.Action("Orders", "Me")?pageNumber=${page}`;
+							window.history.pushState({ page: page }, '', newUrl);
+						}
+						// 捲動回頂部
+						window.scrollTo({ top: 0, behavior: 'smooth' });
+					})
+					.catch(err => {
+						console.error('載入失敗:', err);
+						if (container) container.style.opacity = '1';
+						alert("載入失敗，請檢查網路。");
+					});
+
+					return false;
+				}
+			}, true); // 使用 Capture 模式優先捕捉事件
 	</script>
 }
+  
+
 </body>

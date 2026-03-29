@@ -253,8 +253,9 @@ namespace Bake.Areas.Seller.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> Orders()
+        public async Task<IActionResult> Orders(int pageNumber = 1, bool isAjax = false)
         {
+            int pageSize = 10;
             var userId = User.FindFirst("UserId")?.Value;
             //避免他人抓到別人的訂單
             if (!int.TryParse(userId, out var currentUserId)) return RedirectToAction("Login", "Home", new { area = "" });
@@ -265,9 +266,17 @@ namespace Bake.Areas.Seller.Controllers
             .ToListAsync())
             .ToHashSet(); //不重複抓取
 
-            var orderList = await _context.OrderItems
+            var query = _context.OrderItems
                 .Where(x => x.Order.UserId == int.Parse(userId))
-                .GroupBy(o=>o.OrderId)
+                .GroupBy(o => o.OrderId);
+
+            int totalItems = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var orderList = await query
+                .OrderByDescending(g => g.Key)
+                .Skip((pageNumber -1) * pageSize)
+                .Take(pageSize)
                 .Select(g => new BuyerOrderListViewModel
                 {
                     OrderId = g.Key,
@@ -284,7 +293,7 @@ namespace Bake.Areas.Seller.Controllers
                         Quantity = oi.ItemQuantity,
                         IsReviewed = false, 
                     }).ToList()
-                }).OrderBy(c => c.OrderId)
+                })
                 .ToListAsync();
 
             foreach (var order in orderList) // 評論需要 不能寫裡面因為SQL讀不到
@@ -297,6 +306,14 @@ namespace Bake.Areas.Seller.Controllers
                         item.IsReviewed = true; 
                     }
                 }
+            }
+
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = totalPages;
+
+            if (isAjax)
+            {
+                return PartialView("_BuyerOrderTablePartial", orderList);
             }
 
             return View(orderList);
