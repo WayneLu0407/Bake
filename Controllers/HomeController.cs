@@ -1,5 +1,6 @@
 using Bake.Data;
 using Bake.Helper;
+using Bake.Hubs;
 using Bake.Models;
 using Bake.Models.User;
 using Humanizer.Bytes;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal;
 using System.Diagnostics;
@@ -22,11 +24,13 @@ public class HomeController : Controller
 {
     private readonly BakeContext _context;  //DI 注入
     private readonly IWebHostEnvironment _webHostEnvironment;
+    
 
     public HomeController(BakeContext context, IWebHostEnvironment webHostEnvironment)
     {
         _context = context;  //HomeController 建構子 DI注入  
         _webHostEnvironment = webHostEnvironment;
+        
     }
     
 
@@ -34,6 +38,7 @@ public class HomeController : Controller
     {
         return View();
     }
+    
 
     public IActionResult Support()
     {
@@ -59,14 +64,17 @@ public class HomeController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> LoginAsync(LoginModel model)
     {
-        var user = _context.AccountAuths.Include(u=>u.RoleNavigation).FirstOrDefault(x => x.Email == model.Account && x.PasswordHash == model.Password);  //把資料庫的資料找出來做比對
+        
+        var user = _context.AccountAuths.Include(u=>u.RoleNavigation).FirstOrDefault(x => x.Email == model.Account);  //把資料庫的資料找出來做比對
 
         if (ModelState.IsValid)
         {
-            if (user == null) // 如果沒有資料為Null 則return 回登入畫面
+            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password,user.PasswordHash)) // 如果沒有資料為Null 則return 回登入畫面  使用Bcrypt套件 做雜湊比對
             {
                 return View();
             }
+
+
 
 
 
@@ -98,6 +106,7 @@ public class HomeController : Controller
     }
     public IActionResult Register()
     {
+        TempData.Remove("SuccessMessage");
         return View();
     }
     [HttpPost]
@@ -118,7 +127,7 @@ public class HomeController : Controller
                 //    byte[] InputPassword = Encoding.UTF8.GetBytes(model.Password);
                 //    byte[] HashPassword = sha256.ComputeHash(InputPassword);
                 //}
-                    _context.AccountAuths.Add(new AccountAuth { UserName = model.Name, Email = model.Email, PasswordHash = model.Password });
+                    _context.AccountAuths.Add(new AccountAuth { UserName = model.Name, Email = model.Email, PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password) });
                     _context.SaveChanges();
                 
                 //encrypt 加密
@@ -131,14 +140,16 @@ public class HomeController : Controller
                 var body = await System.IO.File.ReadAllTextAsync(filePath);
                 body = body.Replace("{{VerifyUrl}}", url)
                            .Replace("{{UserEmail}}", model.Email);
-                        
+                     
                 await sh.SendEmailAsync(model.Email, "註冊會員", body);
+
+                TempData["SuccessMessage"] = "註冊成功，請去您的電子信箱查收驗證信以開通帳號。";
 
                 return RedirectToAction("Index", "Home");
             }
             
         }
-        return View();
+        return View(model);
     }
     [HttpGet]
     public IActionResult Verifyemail(string token)
@@ -230,8 +241,7 @@ public class HomeController : Controller
 
             if (user != null)
             {
-                // 3. 修改驗證狀態 (假設你有一個 IsEmailConfirmed 欄位)
-                //user.IsEmailConfirmed = true;
+                
 
                 _context.SaveChanges();
                 TempData["ResetEmail"] = decryptedEmail;

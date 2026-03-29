@@ -1,0 +1,264 @@
+﻿@model Bake.ViewModel.ShopFront.ShopProfilePageViewModel
+
+<div class="d-flex justify-content-end align-items-center mb-3">
+    <div class="text-muted small">共 @Model.TotalCount 筆</div>
+</div>
+
+<style>
+    .shop-product-grid .shop-card {
+        transition: transform .18s ease, box-shadow .18s ease;
+        border-radius: 24px;
+        overflow: hidden;
+    }
+
+        .shop-product-grid .shop-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 .5rem 1.1rem rgba(0,0,0,.10) !important;
+        }
+
+    .shop-card-link {
+        display: block;
+        height: 100%;
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .shop-card-body {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 1rem;
+    }
+
+    /* 圖片框縮小，接近商品頁 */
+    .shop-card-image {
+        height: 170px;
+        border-radius: 20px;
+        overflow: hidden;
+        background: #fff;
+        margin-bottom: .85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 12px; /* 調整妳想要的圓角大小 */
+        aspect-ratio: 1 / 1; /* 建議加上這行，確保圖片永遠是正方形 */
+    }
+
+        /* 圖片盡量完整，不要裁太多 */
+        .shop-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+    .shop-card-title {
+        font-size: 1.05rem;
+        font-weight: 800;
+        line-height: 1.4;
+        min-height: 2.8rem;
+        margin-bottom: .2rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .shop-card-shop {
+        font-size: .95rem;
+        color: #777;
+        line-height: 1.4;
+        min-height: 1.35rem;
+        margin-bottom: .25rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .shop-card-rating {
+        font-size: .95rem;
+        color: #666;
+        min-height: 1.35rem;
+        margin-bottom: .7rem;
+        display: flex;
+        align-items: center;
+        gap: .2rem;
+    }
+
+    .shop-star {
+        color: #FFC43F;
+        font-size: 1rem;
+        line-height: 1;
+    }
+
+    .shop-price-block {
+        margin-top: auto;
+    }
+
+    .shop-price-row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: .75rem;
+        min-height: 2rem;
+    }
+
+    .shop-sale-price {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: #1f2937;
+        white-space: nowrap;
+    }
+
+    .shop-original-price {
+        font-size: .95rem;
+        color: #8a8a8a;
+        text-decoration: line-through;
+        white-space: nowrap;
+        margin-left: auto;
+    }
+
+    @@media (max-width: 991.98px) {
+        .shop-card-image {
+            height: 160px;
+        }
+    }
+
+    @@media (max-width: 575.98px) {
+        .shop-card-body {
+            padding: .85rem;
+        }
+
+        .shop-card-image {
+            height: 150px;
+        }
+
+        .shop-sale-price {
+            font-size: 1.05rem;
+        }
+
+        .shop-original-price {
+            font-size: .9rem;
+        }
+    }
+</style>
+
+@if (Model.Products.Count == 0)
+{
+    <div class="alert alert-light border rounded-4">
+        這間店目前沒有符合條件的商品。
+    </div>
+}
+else
+{
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xxl-4 g-4 shop-product-grid">
+        @foreach (var product in Model.Products)
+        {
+            string productImageUrl = Url.Content("~/ProductPicture/NoImage.jpg");
+
+            if (!string.IsNullOrWhiteSpace(product.ProductImage))
+            {
+                if (product.ProductImage.StartsWith("http://") || product.ProductImage.StartsWith("https://"))
+                {
+                    productImageUrl = product.ProductImage;
+                }
+                else
+                {
+                    productImageUrl = Url.Content("~/" + product.ProductImage.TrimStart('/'));
+                }
+            }
+
+            <div class="col">
+                <div class="shop-card card border-0 shadow-sm h-100">
+                    <a href="/Products/Details/@product.ProductId" class="shop-card-link">
+                        <div class="shop-card-body">
+                            <div class="shop-card-image">
+                                <img src="@productImageUrl"
+                                     alt="@product.ProductName"
+                                     onerror="this.src='@Url.Content("~/ProductPicture/NoImage.jpg")'" />
+                            </div>
+
+                            <div class="shop-card-title">@product.ProductName</div>
+
+                            <div class="shop-card-shop">@product.ShopName</div>
+
+                            <div class="shop-card-rating">
+                                <span class="shop-star">★</span>
+                                <span>@(product.Rating?.ToString("0.0") ?? "尚無")</span>
+                            </div>
+
+                            <div class="shop-price-block">
+                                <div class="shop-price-row">
+                                    <span class="shop-sale-price">NT$@product.Price.ToString("N0")</span>
+
+                                    @if (product.OriginalPrice.HasValue && product.OriginalPrice.Value > product.Price)
+                                    {
+                                        <span class="shop-original-price">
+                                            NT$@product.OriginalPrice.Value.ToString("N0")
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@if (Model.TotalPages > 1)
+{
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+
+            <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
+                <a class="page-link"
+                       data-shop-ajax="true"
+                       asp-controller="Shop"
+                       asp-action="Index"
+                       asp-route-id="@Model.ShopInfo.UserId"
+                       asp-route-keyword="@Model.Keyword"
+                       asp-route-categoryId="@Model.CategoryId"
+                       asp-route-sort="@Model.Sort"
+                       asp-route-priceRange="@Model.PriceRange"
+                       asp-route-page="@(Model.Page - 1)">
+                    ‹
+                </a>
+            </li>
+
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.Page ? "active" : "")">
+                    <a class="page-link"
+                           data-shop-ajax="true"
+                           asp-controller="Shop"
+                           asp-action="Index"
+                           asp-route-id="@Model.ShopInfo.UserId"
+                           asp-route-keyword="@Model.Keyword"
+                           asp-route-categoryId="@Model.CategoryId"
+                           asp-route-sort="@Model.Sort"
+                           asp-route-priceRange="@Model.PriceRange"
+                           asp-route-page="@i">
+                        @i
+                    </a>
+                </li>
+            }
+
+            <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : "")">
+                <a class="page-link"
+                       data-shop-ajax="true"
+                       asp-controller="Shop"
+                       asp-action="Index"
+                       asp-route-id="@Model.ShopInfo.UserId"
+                       asp-route-keyword="@Model.Keyword"
+                       asp-route-categoryId="@Model.CategoryId"
+                       asp-route-sort="@Model.Sort"
+                       asp-route-priceRange="@Model.PriceRange"
+                       asp-route-page="@(Model.Page + 1)">
+                    ›
+                </a>
+            </li>
+        </ul>
+    </nav>
+}

@@ -1,7 +1,10 @@
 using Bake.Data;
+using Bake.Hubs;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.CodeAnalysis.Options;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +36,10 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     option.LoginPath = "/Home/Login";
 });
 
+builder.Services.AddSignalR();//聊天室注入
+
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>(); // 小鈴鐺通知注入
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -59,6 +66,8 @@ app.MapAreaControllerRoute(
     areaName: "Seller",
     pattern: "Seller/{controller=Default}/{action=Index}/{id?}");
 
+app.MapHub<Bake.Hubs.ChatHub>("/chathub"); //聊天室Hubs服務
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.MapStaticAssets();
 
@@ -69,3 +78,16 @@ app.MapControllerRoute(
 
 
 app.Run();
+
+
+
+public class CustomUserIdProvider : IUserIdProvider
+{
+    public string GetUserId(HubConnectionContext connection)
+    {
+        var id = connection.User?.FindFirst("UserId")?.Value;
+        
+        // 確保這裡回傳的值，跟妳傳給 SendOrderNotify 的 userId 一致
+        return id;
+    }
+}

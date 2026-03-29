@@ -18,5 +18,7 @@ public partial class ChatMessage
 
     public int SenderId { get; set; }
 
+    public virtual ChatRoom Room { get; set; } = null!;
+
     public virtual UserProfile Sender { get; set; } = null!;
 }
