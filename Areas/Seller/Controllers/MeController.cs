@@ -28,7 +28,7 @@ namespace Bake.Areas.Seller.Controllers
     public class MeController : Controller
     {
         private readonly BakeContext _context;
-        //為了存圖片要建立所以新增
+        
         private readonly IWebHostEnvironment _env;
         public MeController(BakeContext context, IWebHostEnvironment env)
         {
@@ -251,14 +251,32 @@ namespace Bake.Areas.Seller.Controllers
         {
             return View();
         }
-        [Authorize]
-        public async Task<IActionResult> Orders()
-        {
-            var userId = User.FindFirst("UserId")?.Value;
 
-            var orderList = await _context.OrderItems
+        [Authorize]
+        public async Task<IActionResult> Orders(int pageNumber = 1, bool isAjax = false)
+        {
+            int pageSize = 10;
+            var userId = User.FindFirst("UserId")?.Value;
+            //避免他人抓到別人的訂單
+            if (!int.TryParse(userId, out var currentUserId)) return RedirectToAction("Login", "Home", new { area = "" });
+
+            var reviewedSet = (await _context.ProductReviews
+            .Where(r => r.UserId == currentUserId)
+            .Select(r => $"{r.OrderId}_{r.ProductId}")
+            .ToListAsync())
+            .ToHashSet(); //不重複抓取
+
+            var query = _context.OrderItems
                 .Where(x => x.Order.UserId == int.Parse(userId))
-                .GroupBy(o=>o.OrderId)
+                .GroupBy(o => o.OrderId);
+
+            int totalItems = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var orderList = await query
+                .OrderByDescending(g => g.Key)
+                .Skip((pageNumber -1) * pageSize)
+                .Take(pageSize)
                 .Select(g => new BuyerOrderListViewModel
                 {
                     OrderId = g.Key,
@@ -270,11 +288,33 @@ namespace Bake.Areas.Seller.Controllers
                     StatusName = g.First().Order.Status.StatusName,
                     ProductsList = g.First().Order.OrderItems.Select(oi => new Item
                     {
+                        ProductId = oi.ProductId, // 評論需要
                         ProductName = oi.Product.ProductName, // 從訂單項目關聯到產品名稱
                         Quantity = oi.ItemQuantity,
+                        IsReviewed = false, 
                     }).ToList()
-                }).OrderBy(c => c.OrderId)
+                })
                 .ToListAsync();
+
+            foreach (var order in orderList) // 評論需要 不能寫裡面因為SQL讀不到
+            {
+                foreach (var item in order.ProductsList)
+                {
+                    
+                    if (reviewedSet.Contains($"{order.OrderId}_{item.ProductId}"))
+                    {
+                        item.IsReviewed = true; 
+                    }
+                }
+            }
+
+            ViewBag.CurrentPage = pageNumber;
+            ViewBag.TotalPages = totalPages;
+
+            if (isAjax)
+            {
+                return PartialView("_BuyerOrderTablePartial", orderList);
+            }
 
             return View(orderList);
         }
@@ -311,7 +351,7 @@ namespace Bake.Areas.Seller.Controllers
             }
             user.UserName = model.Name;
             user.Email = model.Email;
-            user.PasswordHash = model.Password;
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
             
             _context.SaveChanges();
             return RedirectToAction("Dashboard","Me", new {area = "Seller"});
@@ -344,7 +384,7 @@ namespace Bake.Areas.Seller.Controllers
                     var user = _context.AccountAuths.FirstOrDefault(a=>a.Email == email);
                     if(user != null)
                     {
-                        user.PasswordHash = model.Password;
+                        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
                         _context.AccountAuths.Update(user);
                         _context.SaveChanges();
                         return RedirectToAction("Login", "Home", new { area = "" });
@@ -389,7 +429,7 @@ namespace Bake.Areas.Seller.Controllers
                 users.Role = 1;
                 await _context.SaveChangesAsync();
             }
-            //HttpContext.Session.Clear();
+            
 
             var user = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var claims = new List<Claim>
@@ -414,7 +454,29 @@ namespace Bake.Areas.Seller.Controllers
             HttpContext.Session.Clear();
             return RedirectToAction("Index", "Home");
         }
-        
+
+        public IActionResult BankAccountChange()
+        {
+            return View();
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> BankAccountChangeAsync(BankAccountChangeModel model)
+        {
+            if (!ModelState.IsValid) return View(model);
+            var userId = User.FindFirstValue("UserId");
+            var users = await _context.AccountAuths.Include(a=>a.UserPaymentSecret).FirstOrDefaultAsync(a=>a.UserId == int.Parse(userId));
+            
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] InputAccount = Encoding.UTF8.GetBytes(model.BankAccount);
+                byte[] HashAccount = sha256.ComputeHash(InputAccount);
+                users.UserPaymentSecret.EncryptedBankAcc = HashAccount;
+                _context.UserPaymentSecrets.Update(users.UserPaymentSecret);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("Dashboard", "Me", new { area = "Seller" });
+        }
     }
 }
 

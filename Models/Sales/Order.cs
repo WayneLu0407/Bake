@@ -23,6 +23,7 @@ public partial class Order
 
     public DateTime UpdatedAt { get; set; }
 
+
     public virtual ICollection<OrderItem> OrderItems { get; set; } = new List<OrderItem>();
 
     public virtual ICollection<PaymentTransaction> PaymentTransactions { get; set; } = new List<PaymentTransaction>();

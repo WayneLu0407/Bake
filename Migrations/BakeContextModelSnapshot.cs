@@ -40,6 +40,60 @@ namespace Bake.Migrations
                     b.ToTable("Account_Status_Definitions", "User");
                 });
 
+            modelBuilder.Entity("Bake.Models.Notification", b =>
+                {
+                    b.Property<int>("NotificationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("notification_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)")
+                        .HasColumnName("content");
+
+                    b.Property<DateTime>("CreateAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("create_at")
+                        .HasDefaultValueSql("(sysdatetime())");
+
+                    b.Property<bool>("IsRead")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_read");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("int")
+                        .HasColumnName("order_id");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("title");
+
+                    b.Property<string>("URL")
+                        .IsRequired()
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)")
+                        .HasColumnName("url");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("NotificationId");
+
+                    b.HasIndex("OrderId");
+
+                    b.ToTable("Notifications", "Service");
+                });
+
             modelBuilder.Entity("Bake.Models.Platform.PaymentStatusDefinition", b =>
                 {
                     b.Property<byte>("StatusId")
@@ -438,6 +492,9 @@ namespace Bake.Migrations
                         .HasName("PK__Order_It__52020FDD1BE8135E");
 
                     b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId")
+                        .HasDatabaseName("IX_Order_Items_product_id");
 
                     b.ToTable("Order_Items", "Sales");
                 });
@@ -1315,6 +1372,50 @@ namespace Bake.Migrations
                     b.ToTable("Post_Attachments", "Social");
                 });
 
+            modelBuilder.Entity("Bake.Models.Social.PostComment", b =>
+                {
+                    b.Property<int>("CommentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("comment_id");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CommentId"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)")
+                        .HasColumnName("content");
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<int?>("ParentCommentId")
+                        .HasColumnType("int")
+                        .HasColumnName("parent_comment_id");
+
+                    b.Property<int>("PostId")
+                        .HasColumnType("int")
+                        .HasColumnName("post_id");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int")
+                        .HasColumnName("user_id");
+
+                    b.HasKey("CommentId");
+
+                    b.HasIndex("ParentCommentId");
+
+                    b.HasIndex("PostId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Post_Comments", "Social");
+                });
+
             modelBuilder.Entity("Bake.Models.Social.PostFavorite", b =>
                 {
                     b.Property<int>("UserId")
@@ -1595,6 +1696,17 @@ namespace Bake.Migrations
                     b.ToTable("Post_Tag_Mapping", "Social");
                 });
 
+            modelBuilder.Entity("Bake.Models.Notification", b =>
+                {
+                    b.HasOne("Bake.Models.Sales.Order", "Order")
+                        .WithMany()
+                        .HasForeignKey("OrderId")
+                        .IsRequired()
+                        .HasConstraintName("FK_Notification_Orders");
+
+                    b.Navigation("Order");
+                });
+
             modelBuilder.Entity("Bake.Models.Platform.PaymentTransaction", b =>
                 {
                     b.HasOne("Bake.Models.Sales.Order", "Orders")
@@ -1728,7 +1840,15 @@ namespace Bake.Migrations
                         .IsRequired()
                         .HasConstraintName("FK_Order_Items_Orders");
 
+                    b.HasOne("Bake.Models.Sales.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .IsRequired()
+                        .HasConstraintName("FK_Order_Items_Products");
+
                     b.Navigation("Order");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Bake.Models.Sales.Product", b =>
@@ -2001,6 +2121,32 @@ namespace Bake.Migrations
                     b.Navigation("Post");
                 });
 
+            modelBuilder.Entity("Bake.Models.Social.PostComment", b =>
+                {
+                    b.HasOne("Bake.Models.Social.PostComment", "ParentComment")
+                        .WithMany("Replies")
+                        .HasForeignKey("ParentCommentId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Bake.Models.Social.Post", "Post")
+                        .WithMany("PostComments")
+                        .HasForeignKey("PostId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Bake.Models.User.UserProfile", "User")
+                        .WithMany("PostComments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ParentComment");
+
+                    b.Navigation("Post");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Bake.Models.Social.PostFavorite", b =>
                 {
                     b.HasOne("Bake.Models.Social.Post", "Post")
@@ -2226,9 +2372,16 @@ namespace Bake.Migrations
 
                     b.Navigation("PostAttachments");
 
+                    b.Navigation("PostComments");
+
                     b.Navigation("PostFavorites");
 
                     b.Navigation("PostLikes");
+                });
+
+            modelBuilder.Entity("Bake.Models.Social.PostComment", b =>
+                {
+                    b.Navigation("Replies");
                 });
 
             modelBuilder.Entity("Bake.Models.Social.PostTypeLookup", b =>
@@ -2274,6 +2427,8 @@ namespace Bake.Migrations
                     b.Navigation("FollowFollowers");
 
                     b.Navigation("Orders");
+
+                    b.Navigation("PostComments");
 
                     b.Navigation("PostFavorites");
 

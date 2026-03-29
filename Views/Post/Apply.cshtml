@@ -1,5 +1,141 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model Bake.ViewModel.EventApplyViewModel
+
 @{
+    ViewData["Title"] = "我要報名";
+}
+
+@section Styles {
+    <style>
+        .event-apply-wrap {
+            max-width: 420px;
+            margin: 0 auto;
+        }
+        .event-apply-page {
+            background-color: #fff;
+        }
+
+
+        .event-apply-title {
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            letter-spacing: 1px;
+        }
+
+        .event-meta {
+            background: #f8f9fa;
+            border-radius: 14px;
+            padding: 1rem;
+        }
+
+        .event-meta-item + .event-meta-item {
+            margin-top: .5rem;
+        }
+
+        .form-label {
+            font-weight: 600;
+        }
+
+        .readonly-input {
+            background-color: #f8f9fa;
+        }
+
+        .text-danger{
+            color: indianred !important;
+        }
+
+        @@media (max-width: 576px) {
+            .event-apply-title {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+}
+
+<div class="event-apply-page">
+    <div class="container py-4 py-md-5">
+        <div class="event-apply-wrap">
+            <div class="card event-apply-card">
+                <div class="card-body p-3 p-md-4 p-lg-5">
+                    <h2 class="event-apply-title">填寫參加人資訊</h2>
+
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+                    }
+
+                    @if (TempData["SuccessMessage"] != null)
+                    {
+                        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                    }
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <div class="event-meta mb-4">
+                        <div class="event-meta-item">
+                            <strong>活動：</strong> @Model.EventTitle
+                        </div>
+                        <div class="event-meta-item">
+                            <strong>時間：</strong> @Model.EventTime.ToString("yyyy/MM/dd HH:mm")
+                        </div>
+                        <div class="event-meta-item">
+                            <strong>地點：</strong> @($"{Model.LocationCity} {Model.LocationAddress}")
+                        </div>
+                    </div>
+
+                    <form asp-action="Apply" asp-controller="Post" asp-route-eventId="@Model.EventId" method="post">
+                        @Html.AntiForgeryToken()
+                        <input asp-for="EventId" type="hidden" />
+
+                        <div class="mb-3">
+                            <label asp-for="ApplicantName" class="form-label"></label>
+                            <input asp-for="ApplicantName" class="form-control" placeholder="請輸入姓名" />
+                            <span asp-validation-for="ApplicantName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ApplicantPhone" class="form-label"></label>
+                            <input asp-for="ApplicantPhone" class="form-control" placeholder="請輸入手機號碼" />
+                            <span asp-validation-for="ApplicantPhone" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="ApplicantEmail" class="form-label"></label>
+                            <input asp-for="ApplicantEmail" class="form-control" placeholder="請輸入電子郵件" />
+                            <span asp-validation-for="ApplicantEmail" class="text-danger"></span>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label asp-for="GenderText" class="form-label">性別</label>
+                                <select asp-for="GenderText" class="form-select">
+                                    <option value="">未選擇</option>
+                                    <option value="Male">男</option>
+                                    <option value="Female">女</option>
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <div class="mt-3 mb-4">
+                            <label asp-for="NumParticipants" class="form-label"></label>
+                            <select asp-for="NumParticipants" class="form-select">
+                                @for (int i = 1; i <= 10; i++)
+                                {
+                                    <option value="@i">@i</option>
+                                }
+                            </select>
+                            <span asp-validation-for="NumParticipants" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-dark w-100 py-2">下一步</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }
