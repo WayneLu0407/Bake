@@ -64,43 +64,7 @@
 </section>
 <!-- ========== table components end ========== -->
 @section Scripts {
-	@* <script>
-			$(document).ready(function(){
-					// 使用委派 (Delegation) 監聽點擊，因為按鈕是動態生成的
-					$(document).on("click", ".ajax-page-link", function(e){
-						e.preventDefault();
-						e.stopPropagation();
-						var page = $(this).data("page");
-						if(!page || $(this).parent().hasClass("disabled")) return false;
-
-						console.log("正在請求第 " + page + " 頁");
-
-						$("#orderTableContainer").css("opacity", "0.5");
-
-						$.ajax({
-							url: '@Url.Action("Orders", "Me")',
-							type: "GET",
-							data:{pageNumber:page,
-								  isAjax : true
-							},
-							
-							success: function(result) {
-								//局部檢視替換內容
-								$("#orderTableContainer").html(result);
-								$("#orderTableContainer").css("opacity", "1");
-
-								$("html, body").animate({
-									scrollTop: $(".table-components").offset().top -100
-								}, 200);
-							},
-							error: function(){
-								alert("載入失敗, 請重試!");
-								$("orderTableContainer").css("opcity", "1")
-							}
-						});
-					});
-			});
-	</script> *@
+	
 	<script>
 			// 1. 使用原生 JavaScript 監聽點擊，防止 jQuery 載入順序問題
 			document.addEventListener('click', function (e) {
@@ -118,8 +82,6 @@
 					if (!page || (parentLi && parentLi.classList.contains('disabled'))) {
 						return false;
 					}
-
-					console.log("原生監聽觸發！正在請求第 " + page + " 頁");
 
 					// 2. 執行 AJAX 請求
 					var container = document.getElementById('orderTableContainer');
