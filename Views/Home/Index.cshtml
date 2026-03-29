@@ -528,6 +528,7 @@
 
 @section Scripts
 {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
     <script>
         const app=Vue.createApp({
@@ -638,4 +639,21 @@
         app.mount('#product');
     </script>
 
+
+    
+
+    <script>
+                        // 檢查是否有來自後端的 SuccessMessage
+                        var successMsg = '@Html.Raw(TempData["SuccessMessage"])';
+        
+                        if (successMsg && successMsg.trim() !== "") {
+                        Swal.fire({
+                        title: '註冊成功！',
+                        text: successMsg,
+                        icon: 'success',
+                        confirmButtonText: '確定',
+                        confirmButtonColor: '#3085d6' // 可根據您的主題調整顏色
+                        });
+                        }
+    </script>
 }
