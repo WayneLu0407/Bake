@@ -176,7 +176,7 @@
                                                         </button>
                                                     </span>
                                                 </div>
-                                                <a href="#" class="btn btn-danger btn-sm w-20 mt-1">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                                   <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                             </div>
                                         </div>
                                     </div>
@@ -228,7 +228,7 @@
                                                             </button>
                                                         </span>
                                                     </div>
-                                                    <a href="#" class="btn btn-danger btn-sm w-20 mt-1">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                                        <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                                 </div>
                                           </div>
                                     </div>
@@ -279,7 +279,7 @@
                                                             </button>
                                                         </span>
                                                     </div>
-                                                    <a href="#" class="btn btn-danger btn-sm w-20 mt-1">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                                        <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                                 </div>
                                         </div>
                                     </div>
@@ -389,7 +389,7 @@
                                                     </button>
                                                 </span>
                                             </div>
-                                            <a href="#" class="btn btn-danger btn-sm w-20 mt-1">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                                <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                         </div>
                                     </div>
                                 </div>
@@ -465,7 +465,7 @@
                                                     </button>
                                                 </span>
                                             </div>
-                                            <a href="#" class="btn btn-danger btn-sm w-20 mt-1">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                                        <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                         </div>
                                     </div>
                                 </div>
@@ -504,7 +504,7 @@
                         <div class="swiper-wrapper" >
                             <!-- 單一店家 — 複製此區塊重複使用 -->
                               <div class="swiper-slide" v-for="shop in shops" :key="shop.userId">
-                                <div class="card mb-3 p-3 rounded-4 shadow border-0">
+                                    <a :href="'/Shop/' + shop.userId" class="card mb-3 p-3 rounded-4 shadow border-0" style="text-decoration:none;">             
                                     <div class="row g-0">
                                         <div class="col-md-4">
                                            <img :src="shop.shopImg" class="img-fluid rounded" :alt="shop.shopName">
@@ -513,11 +513,10 @@
                                             <div class="card-body py-0">
                                                 <h5 class="card-title">{{ shop.shopName }}</h5>
                                                 <p class="text-muted mb-0 shop-desc">{{ shop.shopDescription }}</p>
-                                                </p>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
+                                </a>
                             </div> 
                         </div>
                     </div>
@@ -529,9 +528,11 @@
 
 @section Scripts
 {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
     <script>
         const app=Vue.createApp({
+            mixins: [CartMixin],
             data(){
                 return{
                     products: [],
@@ -549,7 +550,6 @@
                 if (!discount || discount <= 0) return null
                 return Math.round(price / (1 - discount))  // 100 / 0.8 = 125
                 }
-
             },
             computed:{
 
@@ -639,4 +639,21 @@
         app.mount('#product');
     </script>
 
+
+    
+
+    <script>
+                        // 檢查是否有來自後端的 SuccessMessage
+                        var successMsg = '@Html.Raw(TempData["SuccessMessage"])';
+        
+                        if (successMsg && successMsg.trim() !== "") {
+                        Swal.fire({
+                        title: '註冊成功！',
+                        text: successMsg,
+                        icon: 'success',
+                        confirmButtonText: '確定',
+                        confirmButtonColor: '#3085d6' // 可根據您的主題調整顏色
+                        });
+                        }
+    </script>
 }

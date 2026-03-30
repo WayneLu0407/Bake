@@ -20,7 +20,7 @@ public partial class BakeContext : DbContext
         : base(options)
     {
     }
-
+    public virtual DbSet<Notification> Notifications { get; set; }
     public virtual DbSet<AccountAuth> AccountAuths { get; set; }
 
     public virtual DbSet<AccountStatusDefinition> AccountStatusDefinitions { get; set; }
@@ -112,6 +112,8 @@ public partial class BakeContext : DbContext
     public virtual DbSet<UserProfile> UserProfiles { get; set; }
 
     public DbSet<PaymentMethod> PaymentMethods { get; set; }
+
+    public DbSet<PostComment> PostComments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -506,6 +508,14 @@ public partial class BakeContext : DbContext
                 .HasForeignKey(d => d.OrderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Order_Items_Orders");
+
+            entity.HasOne(d => d.Product).WithMany()
+                .HasForeignKey(d => d.ProductId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Order_Items_Products");
+
+            entity.HasIndex(e => e.ProductId)
+                .HasDatabaseName("IX_Order_Items_product_id");
         });
 
         modelBuilder.Entity<OrderStatus>(entity =>
@@ -1212,6 +1222,85 @@ public partial class BakeContext : DbContext
                 new PaymentMethod { PaymentMethodId = 1, Name = "轉帳" },
                 new PaymentMethod { PaymentMethodId = 2, Name = "貨到付款" }
             );
+        });
+        modelBuilder.Entity<Notification>(entity =>
+        {
+            entity.HasKey(e => e.NotificationId);
+
+            entity.ToTable("Notifications", "Service");  // 放在 Service schema，跟 SystemNotify 同區
+
+            entity.Property(e => e.NotificationId).HasColumnName("notification_id");
+            entity.Property(e => e.OrderId).HasColumnName("order_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+
+            entity.Property(e => e.Title)
+                .HasMaxLength(100)
+                .HasColumnName("title");
+
+            entity.Property(e => e.Content)
+                .HasMaxLength(1000)
+                .HasColumnName("content");
+
+            entity.Property(e => e.URL)
+                .HasMaxLength(2048)
+                .HasColumnName("url");
+
+            entity.Property(e => e.IsRead)
+                .HasDefaultValue(false)
+                .HasColumnName("is_read");
+
+            entity.Property(e => e.CreateAt)
+                .HasDefaultValueSql("(sysdatetime())")
+                .HasColumnName("create_at");
+
+            // ★ 外鍵：關聯到 Orders 表
+            entity.HasOne(e => e.Order)
+                .WithMany()                              // Order 那邊不需要導航回來的話就空著
+                .HasForeignKey(e => e.OrderId)
+                .OnDelete(DeleteBehavior.ClientSetNull)   // 跟你們其他表一致的刪除行為
+                .HasConstraintName("FK_Notification_Orders");
+        });
+        modelBuilder.Entity<PostComment>(entity =>
+        {
+            entity.ToTable("Post_Comments", "Social");
+
+            entity.HasKey(e => e.CommentId);
+
+            entity.Property(e => e.CommentId)
+                .HasColumnName("comment_id");
+
+            entity.Property(e => e.PostId)
+                .HasColumnName("post_id");
+
+            entity.Property(e => e.UserId)
+                .HasColumnName("user_id");
+
+            entity.Property(e => e.Content)
+                .HasColumnName("content")
+                .HasMaxLength(500)
+                .IsRequired();
+
+            entity.Property(e => e.ParentCommentId)
+                .HasColumnName("parent_comment_id");
+
+            entity.Property(e => e.CreatedAt)
+                .HasColumnName("created_at")
+                .HasDefaultValueSql("GETDATE()");
+
+            entity.HasOne(e => e.Post)
+                .WithMany(p => p.PostComments)
+                .HasForeignKey(e => e.PostId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.User)
+                .WithMany(u => u.PostComments)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.ParentComment)
+                .WithMany(e => e.Replies)
+                .HasForeignKey(e => e.ParentCommentId)
+                .OnDelete(DeleteBehavior.NoAction);
         });
 
 

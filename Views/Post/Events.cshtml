@@ -1,5 +1,35 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿@{
+    ViewData["Title"] = "揪團中的活動";
 }
+
+<div class="container py-5 text-center">
+    <div class="mx-auto" style="max-width: 420px;">
+        <div class="card shadow-sm border-0 p-5">
+
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger mt-3">
+                    @TempData["ErrorMessage"]
+                </div>
+            }
+
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success mt-3">
+                    @TempData["SuccessMessage"]
+                </div>
+            }
+            <h6 class="text-center">準備跳轉回活動首頁</h6>
+        </div>  
+    </div>  
+</div>    
+
+
+@section Scripts{
+    <script>
+    setTimeout(function () {
+        window.location.href = '/Post'; 
+    }, 5000); 
+</script>
+}
+

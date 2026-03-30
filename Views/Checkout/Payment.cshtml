@@ -41,6 +41,10 @@
                                             <small class="text-muted d-block">聯絡電話</small>
                                             <span class="fw-bold">@ReceiverPhone</span>
                                         </div>
+                                        <div class="mb-2">
+                                            <small class="text-muted d-block">電子信箱</small>
+                                            <span class="fw-bold">@ReceiverEmail</span>
+                                        </div>
                                         <div class="mb-0">
                                             <small class="text-muted d-block">地址</small>
                                             <span class="fw-bold" style="font-size: 0.9rem;">@ReceiverAddress</span>
@@ -58,7 +62,7 @@
                                                     <div class="small fw-bold text-dark text-truncate" style="max-width: 150px;">{{item.productName}}</div>
                                                     <div class="text-muted" style="font-size: 0.8rem;">數量: {{item.quantity}}</div>
                                                 </div>
-                                                <div class="text-end fw-bold small">${{item.price * item.quantity}}</div>
+                                                <div class="text-end fw-bold small">${{formatNumber(item.price * item.quantity)}}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -66,8 +70,16 @@
                                     <hr class="my-4 border-dashed">
 
                                     <div class="d-flex justify-content-between align-items-center px-1">
-                                        <span class="text-dark fw-bold fs-5">訂單總額(含運費)</span>
-                                        <h3 class="fw-bolder text-dark mb-0">${{totalPrice + 20}}</h3>
+                                        <span class="text-dark fw-bold fs-5">訂單小計</span>
+                                        <h5 class="fw-bolder text-dark mb-0">${{formatNumber(totalPrice)}}</h5>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center px-1">
+                                        <span class="text-dark fw-bold fs-5">運費</span>
+                                        <h5 class="mb-0">@ViewBag.ShippingFee</h5>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center px-1">
+                                        <span class="text-dark fw-bold fs-3">訂單總額</span>
+                                        <h3 class="fw-bolder text-dark mb-0">${{formatNumber(grandTotal)}}</h3>
                                     </div>
                                 </div>
                                 
@@ -82,8 +94,8 @@
                                     <input type="hidden" name="ReceiverName" value="@ReceiverName" />
                                     <input type="hidden" name="ReceiverPhone" value="@ReceiverPhone" />
                                     <input type="hidden" name="ReceiverAddress" value="@ReceiverAddress" />
-                                    <input type="hidden" name="ReceiverEmail" value="@ReceiverAddress" />
-                                    @* --- 放藍星要得 --- *@
+                                    <input type="hidden" name="ReceiverEmail" value="@ReceiverEmail" />
+                                    @* --- 放藍星要的 --- *@
                                     <input type="hidden" name="MerchantID" value="@ViewData["MerchantID"]" />
                                     <input type="hidden" name="MerchantOrderNo" value="@ViewData["MerchantOrderNo"]"  />
                                     <input type="hidden" name="ItemDesc" value="@ViewData["ItemDesc"]"   />
@@ -211,17 +223,24 @@
 
         //購物清單
         const app = Vue.createApp({
-            data(){return{cart:[]}},
-            computed:{
-                totalPrice(){return this.cart.reduce((sum, item)=>sum+(item.price*item.quantity),0);}
-            },
-            methods:{
-                async fetchCart(){
-                const response = await fetch('/Cart/GetCartItems');
-                if(response.ok) this.cart = await response.json();
+            mixins:[CartMixin],
+            data(){
+                return {
+                    shippingFee: @(ViewBag.ShippingFee ?? 60)
                 }
             },
-            mounted(){this.fetchCart();}
+            computed: {
+                grandTotal() {
+                    return this.totalPrice + this.shippingFee;
+                }
+            },
+            methods:{
+                formatNumber(num) {
+                    if (!num) return '0';
+                    return num.toLocaleString('zh-TW'); //強制台灣格式
+                }
+            },
+            mounted(){this.refreshCart();}
         }).mount('#paymentPage')
     </script>
 }

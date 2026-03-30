@@ -50,6 +50,7 @@ public partial class UserProfile
 
     public virtual ICollection<SystemNotify> SystemNotifySenders { get; set; } = new List<SystemNotify>();
 
+    public virtual ICollection<PostComment> PostComments { get; set; } = new List<PostComment>();
     public virtual AccountAuth User { get; set; } = null!;
 
     public virtual UserGenderStatusDefinition UserGenderNavigation { get; set; } = null!;
