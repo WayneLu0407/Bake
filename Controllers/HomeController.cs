@@ -16,6 +16,7 @@ using System.Diagnostics;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using static System.Collections.Specialized.BitVector32;
 
 namespace Bake.Controllers;
@@ -38,7 +39,16 @@ public class HomeController : Controller
     {
         return View();
     }
-    
+    //GET : /Home/ExchangeRate
+    [HttpGet]
+    public async Task<string> ExchangeRate()
+    {
+        HttpClient client = new HttpClient();
+        HttpResponseMessage response = await client.GetAsync("https://openapi.taifex.com.tw/v1/DailyForeignExchangeRates");
+        string Rates = await response.Content.ReadAsStringAsync();
+        exchangeRate[] arr = JsonSerializer.Deserialize<exchangeRate[]>(Rates);
+        return arr[arr.Length - 1].USDNTD;
+    }
 
     public IActionResult Support()
     {

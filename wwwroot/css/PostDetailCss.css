@@ -1,0 +1,154 @@
+﻿/* ===== 詳細頁專用樣式（僅補 Bootstrap 不足的部分）===== */
+
+/* 主卡片 */
+.detail-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* 圖片輪播區 */
+.detail-card__image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #e8e8e8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted-color);
+}
+
+/* 活動 meta 標籤 */
+.event-meta__label {
+    font-size: 14px;
+    color: var(--muted-color);
+    position: relative;
+    padding-left: 14px;
+}
+
+    .event-meta__label::before {
+        content: "•";
+        position: absolute;
+        left: 0;
+    }
+
+/* 讚 / 收藏 / 分享 列 */
+.action-bar {
+    display: flex;
+    border-top: 1px solid #eee;
+}
+
+.action-bar__btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 14px 0;
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: var(--body-text-color);
+    cursor: pointer;
+    transition: background .2s, color .2s;
+}
+
+    .action-bar__btn:hover {
+        background: var(--bs-primary-bg-subtle);
+        color: var(--accent-color);
+    }
+
+    .action-bar__btn + .action-bar__btn {
+        border-left: 1px solid #eee;
+    }
+
+/* 作者大頭貼 */
+.author-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #ddd;
+    flex-shrink: 0;
+}
+
+/* 追蹤按鈕 */
+.btn-follow {
+    background: var(--dark-color);
+    color: #fff;
+    border: 1px solid var(--dark-color);
+    border-radius: 6px;
+    padding: 4px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    transition: opacity .2s;
+}
+
+    .btn-follow:hover {
+        opacity: .85;
+        color: #fff;
+    }
+
+/* 橘色 tag 膠囊 */
+.tag-pill {
+    display: inline-block;
+    padding: 6px 18px;
+    background: var(--accent-color);
+    color: #fff;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background .2s;
+}
+
+    .tag-pill:hover {
+        background: #f7a422;
+    }
+
+/* CTA 按鈕（報名 / 私訊） */
+.btn-cta-primary {
+    display: block;
+    width: 100%;
+    padding: 14px 0;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 8px;
+    border: 2px solid var(--accent-color);
+    background: var(--accent-color);
+    color: #fff;
+    transition: all .2s;
+    text-decoration: none;
+}
+
+    .btn-cta-primary:hover {
+        background: #f7a422;
+        border-color: #f7a422;
+        color: #fff;
+    }
+
+.btn-cta-outline {
+    display: block;
+    width: 100%;
+    padding: 14px 0;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    border-radius: 8px;
+    border: 2px solid var(--accent-color);
+    background: transparent;
+    color: var(--dark-color);
+    transition: all .2s;
+    text-decoration: none;
+}
+
+    .btn-cta-outline:hover {
+        background: var(--bs-primary-bg-subtle);
+    }
+
+/* 留言區 */
+.comment-box textarea:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 .15rem rgba(255,196,63,.25);
+}
