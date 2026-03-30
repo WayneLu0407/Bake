@@ -19,6 +19,7 @@ namespace Bake.Controllers.api
         public IActionResult Get()
         {
             var prod = _db.Products
+                .Where(p => p.User.Shop != null && p.User.Shop.StatusId == 0)
                 .Include(p => p.Category)
                 .Include(p => p.ProductDetail)
                 .Include(p => p.User).ThenInclude(u => u.Shop)
@@ -45,7 +46,7 @@ namespace Bake.Controllers.api
             var prod = _db.Products
                 .Include(p => p.ProductDetail)
                 .Include(p => p.User).ThenInclude(u => u.Shop)
-                .Where(p => p.ProductId == id)
+                .Where(p => p.ProductId == id && p.User.Shop != null && p.User.Shop.StatusId == 0)
                 .Select(p => new {
                     productId = p.ProductId,
                     userId = p.UserId,
@@ -78,7 +79,7 @@ namespace Bake.Controllers.api
                 return Ok(Array.Empty<object>());
             var results = _db.Products
                 .Include(p => p.ProductDetail)
-                .Where(p => p.ProductName.Contains(keyword))
+                .Where(p => p.ProductName.Contains(keyword) && p.User.Shop != null && p.User.Shop.StatusId == 0)
                 .Take(8)
                 .Select(p => new
                 {
