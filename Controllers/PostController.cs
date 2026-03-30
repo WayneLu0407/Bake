@@ -1,20 +1,21 @@
 ﻿using Bake.Data;
 using Bake.Models.Sales;
+using Bake.Models.Social;
 using Bake.ViewModel;
 using Bake.ViewModels.Social;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using NuGet.ContentModel;
 using System.ComponentModel.Design;
-using System.Net.Mail;
-using System.Xml.Linq;
-using Bake.Models.Social;
-using System.Text.Json;
-using Microsoft.AspNetCore.Hosting;
 using System.IO;
+using System.Net.Mail;
+using System.Text.Json;
+using System.Xml.Linq;
 
 namespace Bake.Controllers
 {
@@ -22,17 +23,25 @@ namespace Bake.Controllers
     {
 
         private readonly BakeContext _db;
+        private readonly IWebHostEnvironment _env;
 
         private const string EventApplySessionKey = "EventApplyDraft";
+
+        private static readonly HashSet<string> AllowedImageExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".jpg", ".jpeg", ".png"
+        };
+
+
+        public PostController(BakeContext context, IWebHostEnvironment env)
+        {
+            _db = context;
+            _env = env;
+        }
 
         private int CurrentUserId =>
             int.TryParse(User.FindFirst("UserId")?.Value, out var userId) ? userId : 0;
 
-
-        public PostController(BakeContext db)
-        {
-            this._db = db;
-        }
         public IActionResult Index()
         {
             return View();
@@ -60,6 +69,101 @@ namespace Bake.Controllers
             return View();
         }
 
+
+        //建立新活動 - 頭
+        [Authorize]
+        [HttpGet("/posts/events/new")]
+        public async Task<IActionResult> NewEvent()
+        {
+            // 抓出發起者的資料
+            var vm = new EventCreateViewModel();
+            await FillOrganizerInfoAsync(vm, CurrentUserId);
+            await LoadEventTypeOptionsAsync(vm);
+            return View(vm);
+        }
+
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        [HttpPost("/posts/events/new")]
+        public async Task<IActionResult> NewEvent(EventCreateViewModel input)
+        {
+
+            // 抓出發起者的資料
+            await FillOrganizerInfoAsync(input, CurrentUserId);
+            await LoadEventTypeOptionsAsync(input);
+            ValidateEventCreateInput(input);
+
+            if (!ModelState.IsValid)
+            {
+                return View(input);
+            }
+
+            const byte postTypeId = 1;
+            byte eventTypeId = input.EventTypeId;
+            byte eventStatusId = 1;
+
+            var eventStart = input.EventDate.Date.Add(input.StartTime);
+            var eventEnd = input.EventDate.Date.Add(input.EndTime);
+            var signupStart = input.SignupStartDate.Date;
+            var signupDeadline = input.SignupEndDate.Date.AddDays(1).AddTicks(-1);
+
+            await using var transaction = await _db.Database.BeginTransactionAsync();
+
+            try
+            {
+                var post = new Post
+                {
+                    AuthorId = CurrentUserId,
+                    TypeId = postTypeId,
+                    Title = input.Title.Trim(),
+                    Content = input.Content.Trim(),
+                    CreatedAt = DateTime.Now,
+                    IsPublished = true
+                };
+
+                _db.Posts.Add(post);
+                await _db.SaveChangesAsync();
+
+                var eventDetail = new EventDetail
+                {
+                    PostId = post.PostId,
+                    EventTypeId = eventTypeId,
+                    ManualStatusId = eventStatusId,
+                    Price = input.Price,
+                    MaxParticipants = input.MaxParticipants,
+                    SignupStart = signupStart,
+                    SignupDeadline = signupDeadline,
+                    EventTime = eventStart,
+                    EventEndTime = eventEnd,
+                    LocationCity = input.LocationCity.Trim(),
+                    LocationAddress = input.LocationAddress.Trim()
+                };
+
+                _db.EventDetails.Add(eventDetail);
+
+                var attachment = await SaveEventPhotoAsync(input.Photo, post.PostId, input.Title.Trim());
+                if (attachment != null)
+                {
+                    _db.PostAttachments.Add(attachment);
+                }
+
+                await AttachTagsToPostAsync(post, input.KeywordsText);
+
+                // Remark目前先不寫資料庫避免硬塞到不對的欄位
+                await _db.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                TempData["SuccessMessage"] = "活動建立成功";
+                return RedirectToAction("PostDetail", new { id = post.PostId });
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+        // ------建立活動(尾)
+        // ------ 申請參加活動(頭)
         [Authorize]
         [HttpGet("/apply/{eventId}")]
         public async Task<IActionResult> Apply(int eventId)
@@ -202,7 +306,7 @@ namespace Bake.Controllers
 
             return View();
         }
-
+        // ------ 申請參加活動(尾)
         public IActionResult UserProfile()
         {
             return View();
@@ -355,6 +459,7 @@ namespace Bake.Controllers
             return RedirectToAction("PostDetail", new { id = PostId });
         }
 
+        // ------ 申請參加活動方法(頭)
         private async Task<EventApplyViewModel?> BuildApplyViewModelAsync(int eventId)
         {
             var eventDetail = await _db.EventDetails
@@ -481,5 +586,182 @@ namespace Bake.Controllers
         {
             HttpContext.Session.Remove(EventApplySessionKey);
         }
+        // ------ 申請參加活動方法(尾)
+
+        // ------ 建立活動用方法(頭)
+        private async Task FillOrganizerInfoAsync(EventCreateViewModel vm, int userId)
+        {
+            var account = await _db.AccountAuths
+                .Include(a => a.UserProfile)
+                .FirstOrDefaultAsync(a => a.UserId == userId);
+
+            vm.OrganizerName = account?.UserProfile?.FullName ?? "未命名主辦人";
+
+            //幫頭像URL注意"/"，沒有就加入
+            var avatarUrl = account?.UserProfile?.AvatarUrl;
+
+            if (string.IsNullOrWhiteSpace(avatarUrl))
+            {
+                vm.OrganizerAvatarUrl = null;
+            }
+            else
+            {
+                vm.OrganizerAvatarUrl = avatarUrl.StartsWith("/")
+                    ? avatarUrl
+                    : "/" + avatarUrl;
+            }
+
+        }
+
+        private void ValidateEventCreateInput(EventCreateViewModel input)
+        {
+            if (input.SignupStartDate > input.SignupEndDate)
+            {
+                ModelState.AddModelError(nameof(input.SignupEndDate), "報名截止日不可早於報名開始日");
+            }
+
+            if (input.StartTime >= input.EndTime)
+            {
+                ModelState.AddModelError(nameof(input.EndTime), "結束時間必須晚於開始時間");
+            }
+
+            if (input.SignupEndDate.Date > input.EventDate.Date)
+            {
+                ModelState.AddModelError(nameof(input.SignupEndDate), "報名截止日不可晚於活動日期");
+            }
+
+            if (input.Photo == null || input.Photo.Length == 0)
+            {
+                return;
+            }
+
+            var extension = Path.GetExtension(input.Photo.FileName).ToLower();
+
+            if (!AllowedImageExtensions.Contains(extension))
+            {
+                ModelState.AddModelError(nameof(input.Photo), "照片只接受 jpg、jpeg、png");
+            }
+
+            if (input.Photo.Length > 5 * 1024 * 1024)
+            {
+                ModelState.AddModelError(nameof(input.Photo), "照片不可超過 5MB");
+            }
+        }
+
+
+        private async Task<PostAttachment?> SaveEventPhotoAsync(IFormFile? file, int postId, string title)
+        {
+            if (file == null || file.Length == 0)
+            {
+                return null;
+            }
+
+            //轉小寫+檢查副檔名
+            var extension = Path.GetExtension(file.FileName).ToLower();
+            if (!AllowedImageExtensions.Contains(extension))
+            {
+                return null;
+            }
+
+            // 實體資料夾：wwwroot/PostImage/activity
+            var relativeFolder = Path.Combine("PostImage", "activity");
+            var absoluteFolder = Path.Combine(_env.WebRootPath, relativeFolder);
+
+            Directory.CreateDirectory(absoluteFolder);
+
+            // 產生安全檔名：時間 + postId
+            var timestamp = DateTime.Now.Ticks.ToString();
+            var fileName = $"{timestamp}-{postId}{extension.ToLower()}";
+            var savePath = Path.Combine(absoluteFolder, fileName);
+            // 存入
+            await using (var stream = new FileStream(savePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            // 寫入DB路徑: /PostImage/activity/xxx.jpg
+            var fileUrl = "/" + Path.Combine(relativeFolder, fileName).Replace("\\", "/");
+
+            return new PostAttachment
+            {
+                PostId = postId,
+                FileUrl = fileUrl,
+                AltText = "EventPhoto",
+                IsCover = true,
+                SortOrder = 1
+            };
+        }
+
+        private async Task AttachTagsToPostAsync(Post post, string? keywordsText)
+        {
+            var tagNames = SplitKeywords(keywordsText);
+            if (tagNames.Count == 0)
+            {
+                return;
+            }
+
+            var existingTags = await _db.Tags
+                .Where(t => tagNames.Contains(t.TagName))
+                .ToListAsync();
+
+            var existingNames = existingTags
+                .Select(t => t.TagName)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var tag in existingTags)
+            {
+                post.Tags.Add(tag);
+            }
+
+            foreach (var name in tagNames.Where(n => !existingNames.Contains(n)))
+            {
+                post.Tags.Add(new Tag
+                {
+                    TagName = name
+                });
+            }
+        }
+
+        private static List<string> SplitKeywords(string? keywordsText)
+        {
+            if (string.IsNullOrWhiteSpace(keywordsText))
+            {
+                return new List<string>();
+            }
+
+            return keywordsText
+                .Split(',', '，')
+                .Select(x => x.Trim())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(NormalizeTagName)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+        }
+
+        private static string NormalizeTagName(string input)
+        {
+            var value = input.Trim();
+
+            if (!value.StartsWith("#"))
+            {
+                value = "#" + value;
+            }
+
+            return value;
+        }
+
+        //處理EventType
+        private async Task LoadEventTypeOptionsAsync(EventCreateViewModel vm)
+        {
+            vm.EventTypeOptions = await _db.EventTypeLookups
+                .OrderBy(x => x.EventTypeId)
+                .Select(x => new SelectListItem
+                {
+                    Value = x.EventTypeId.ToString(),
+                    Text = x.EventTypeName
+                })
+                .ToListAsync();
+        }
+        // ------ 建立活動用方法(尾)
     }
 }
