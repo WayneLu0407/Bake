@@ -34,6 +34,15 @@
         border-radius: 12px;
         overflow: hidden;
     }
+
+    /* ===== 修正前台 navbar icon 被後台 CSS 壓扁 ===== */
+    header .rounded-circle,
+    .header-right a.rounded-circle {
+        width: 46px !important;
+        height: 46px !important;
+        border-radius: 50% !important;
+        aspect-ratio: 1 / 1;
+    }
     </style>
 }
 @{
