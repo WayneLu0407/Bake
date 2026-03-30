@@ -189,9 +189,13 @@
                     </div>
 
                     <div class="mt-3">
-                        <label asp-for="Remark" class="form-label"></label>
-                        <input asp-for="Remark" class="form-control" />
-                        <span asp-validation-for="Remark" class="text-danger"></span>
+                        <label asp-for="KeywordsText" class="form-label fw-bold">
+                            <i class="bi bi-tags-fill me-1"></i>活動關鍵字
+                        </label>
+                        <input asp-for="KeywordsText"
+                               class="form-control"
+                               placeholder="例如：新手友善, 食材團購, 基礎烘焙(請使用空格或逗號分開)" />
+                        <span asp-validation-for="KeywordsText" class="text-danger"></span>
                     </div>
 
                     <div class="mt-3">
