@@ -16,6 +16,7 @@ using System.Diagnostics;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using static System.Collections.Specialized.BitVector32;
 
 namespace Bake.Controllers;
@@ -38,7 +39,16 @@ public class HomeController : Controller
     {
         return View();
     }
-    
+    //GET : /Home/ExchangeRate
+    [HttpGet]
+    public async Task<string> ExchangeRate()
+    {
+        HttpClient client = new HttpClient();
+        HttpResponseMessage response = await client.GetAsync("https://openapi.taifex.com.tw/v1/DailyForeignExchangeRates");
+        string Rates = await response.Content.ReadAsStringAsync();
+        exchangeRate[] arr = JsonSerializer.Deserialize<exchangeRate[]>(Rates);
+        return arr[arr.Length - 1].USDNTD;
+    }
 
     public IActionResult Support()
     {
@@ -106,6 +116,7 @@ public class HomeController : Controller
     }
     public IActionResult Register()
     {
+        TempData.Remove("SuccessMessage");
         return View();
     }
     [HttpPost]
@@ -139,14 +150,16 @@ public class HomeController : Controller
                 var body = await System.IO.File.ReadAllTextAsync(filePath);
                 body = body.Replace("{{VerifyUrl}}", url)
                            .Replace("{{UserEmail}}", model.Email);
-                        
+                     
                 await sh.SendEmailAsync(model.Email, "註冊會員", body);
+
+                TempData["SuccessMessage"] = "註冊成功，請去您的電子信箱查收驗證信以開通帳號。";
 
                 return RedirectToAction("Index", "Home");
             }
             
         }
-        return View();
+        return View(model);
     }
     [HttpGet]
     public IActionResult Verifyemail(string token)
