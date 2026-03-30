@@ -408,7 +408,7 @@ namespace Bake.Controllers
                     EventTime = eventDetail.EventTime,
                     EventEndTime = eventDetail.EventEndTime,
                     LocationCity = eventDetail.LocationCity,
-                    LocationAddress = eventDetail.LocationAddress
+                    LocationAddress = eventDetail.LocationAddress,
                 },
 
                 
