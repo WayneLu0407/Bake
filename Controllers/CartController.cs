@@ -39,6 +39,10 @@ namespace Bake.Controllers
             if (existingItem != null)
             {
                 existingItem.Quantity += request.Quantity; //如果已經有了，就增加數量
+                if (existingItem.Quantity <= 0) //原本有，想要刪除
+                {
+                    cart.Remove(existingItem);
+                }
             }
             else
             {
@@ -87,8 +91,6 @@ namespace Bake.Controllers
             return Json(cart); //C# 的 CartViewModel 是 Price (大寫 P)。使用 return Json(cart) 時，ASP.NET Core 預設會把它轉成小寫開頭的 JSON。
         }
 
-
-
         //建立兩個私有方法：一個從 Session 取出購物車資料，另一個把購物車資料存回 Session
         private List<CartViewModel> GetCartFromSession()
         {
@@ -106,5 +108,24 @@ namespace Bake.Controllers
             public int ProductId { get; set; }
             public int Quantity { get; set; }
         }
+
+        [HttpPost]
+        //儲存運費資訊到Session
+        public IActionResult SaveShippingToSession([FromBody] shippingRequest request) 
+        {
+            if (request == null || request.Fee < 0) 
+            {
+                return BadRequest("無效的運費資料");
+            }
+
+            HttpContext.Session.SetInt32("ShippingFee", request.Fee);
+            return Ok(new { sucess=true, message="運費已暫存"});
+        }
+
+        public class shippingRequest
+        {
+            public int Fee { get; set; }
+        }
+
     }
 }

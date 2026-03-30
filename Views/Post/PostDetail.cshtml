@@ -1,0 +1,183 @@
+﻿@model Bake.ViewModels.Social.PostDetailViewModel
+
+@{
+    ViewData["Title"] = "貼文詳情";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/PostDetailCss.css" / >
+}
+
+
+<!-- ============================================================ -->
+<!--                      頁面主體                                 -->
+<!-- ============================================================ -->
+<div class="container-fluid py-4">
+    <div class="row g-4">
+
+        <!-- ==================== 左欄：主內容 ==================== -->
+        <div class="col-lg-8">
+
+            <div class="detail-card">
+                <div class="p-4">
+
+                    <!-- 標題 -->
+                    @if (Model.IsActivity)
+                    {
+                        <h4 class="fw-bold mb-3">@Model.EventDetail.EventTime.ToString("yyyy/M/d (ddd) tt h:mm")
+        -@Model.EventDetail.EventEndTime.ToString("h:mm") ｜ 「@Model.Title」</h4>
+                    }
+                    else
+                    {
+                        <h4 class="fw-bold mb-3">「@Model.Title」</h4>
+                    }
+
+                    <!-- 圖片 -->
+                    
+                    <img src="@Model.CoverImageUrl" class="img-fluid" />
+                    <br />
+                    <!-- ===== 活動內容 ===== -->
+                    @if (Model.IsActivity)
+                    {
+                        <div class="mt-4">
+                            <div class="event-meta__label mb-1">日期時間</div>
+                            <p class="fw-bold mb-4">@Model.EventDetail.EventTime.ToString("yyyy/M/d (ddd) tt h:mm")-@Model.EventDetail.EventEndTime.ToString("h:mm")</p>
+
+                            <div class="event-meta__label mb-1">活動費用</div>
+                            <p class="fw-bold mb-4">
+                               @(Model.EventDetail.Price == 0 || Model.EventDetail.Price == null ? "免費" : "NT$" + Model.EventDetail.Price)
+                            </p>
+
+                            <div class="event-meta__label mb-1">活動簡介</div>
+
+                            <p style="white-space: pre-line;">
+                               @Model.Content
+                            </p>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <!-- ===== 貼文內容 ===== -->
+                        <br>
+                        <p style="white-space: pre-line;">
+                               @Model.Content
+                        </p>
+                    }
+
+                </div>
+
+                <!-- 讚 / 收藏 / 分享 -->
+                <div class="action-bar">
+                    <button class="action-bar__btn">
+                        <i class="fa-regular fa-thumbs-up"></i> 讚
+                    </button>
+                    <button class="action-bar__btn">
+                        <i class="fa-regular fa-heart"></i> 收藏
+                    </button>
+                    <button class="action-bar__btn">
+                        <i class="fa-regular fa-share-from-square"></i> 分享
+                    </button>
+                </div>
+            </div>
+
+            <!-- ===== 留言區（僅貼文顯示）===== -->
+            @if (!Model.IsActivity)
+            {       
+                <div class="detail-card mt-4 p-4 comment-box">
+                    <h5 class="fw-bold mb-3">留言</h5> 
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <form asp-controller="Post" asp-action="AddComment" method="post">
+                            <input type="hidden" name="PostId" value="@Model.PostId" />
+                            <textarea class="form-control" name="Content" rows="4" placeholder="分享你的想法..."required></textarea>
+                            <div class="d-flex justify-content-end mt-3">
+                                <button type="submit" class="btn btn-primary px-4 fw-bold">發表留言</button>
+                            </div>
+                        </form>
+                    
+                     }
+                    else
+                    {
+                        <p class="text-muted">請先 <a asp-controller="Home" asp-action="Login">登入</a> 才能留言</p>
+                    }
+                    <!-- 顯示已有的留言 -->
+                    @foreach (var c in Model.Comments)
+                    {
+                    <div class="d-flex gap-3 mt-4 pt-3 border-top">
+                        <img src="@(c.AvatarUrl ?? "/images/default-avatar.png")"
+                                class="rounded-circle" style="width:40px; height:40px; object-fit:cover;" />
+                        <div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-bold small">@c.UserName</span>
+                                <span class="text-muted small">@c.CreatedAt?.ToString("yyyy/MM/dd HH:mm")</span>
+                            </div>
+                            <p class="mb-0 mt-1">@c.Content</p>
+                        </div>
+                    </div>
+                    }
+
+                    @if (Model.Comments.Count == 0)
+                    {
+                        <p class="text-muted mt-3">還沒有留言，成為第一個留言的人吧！</p>
+                    }    
+                </div>
+        }
+        </div>
+        <!-- ==================== 右欄：側邊欄 ==================== -->
+        <div class="col-lg-4">
+
+            <!-- 作者 / 主辦人 -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0">
+                        @(Model.IsActivity ? "關於主辦人" : "關於作者")
+                    </h6>
+                    <button class="btn-follow">追蹤</button>
+                </div>
+                <div class="detail-card p-3">
+                    <div class="d-flex align-items-center gap-3 mb-2">
+                         <img src="@Model.Author.Avatar" class="rounded-circle" style="width:40px; height:40px; object-fit:cover;" />
+                        <div>
+                            <a asp-controller="User" asp-action="UserDetail" asp-route-id="@Model.Author.UserId" class="fw-bold text-decoration-none">@Model.Author.DisplayName</a>
+                            <small class="text-muted">@Model.Author.ShareCount 分享 · @Model.Author.FollowerCount 粉絲</small>
+                        </div>
+                    </div>
+                    <p class="mb-0 small text-muted">
+                        @Model.Author.Bio
+                    </p>
+                </div>
+            </div>
+
+            <!-- 活動 CTA（僅活動顯示） -->
+            @if (Model.IsActivity)
+            {
+                <div class="mb-4 d-flex flex-column gap-3">
+                    <a href="#" class="btn-cta-primary">我要報名</a>
+                    <div>
+                        <h6 class="fw-bold mb-2">我要詢問</h6>
+                        <a href="@Url.Action("StartChat", "Chat", new { targetId = Model.Author.UserId })" class="btn-cta-outline">私訊主辦人</a>
+                    </div>
+                </div>
+            }
+
+
+            <!-- 關鍵字 -->
+            <div>
+                <h6 class="fw-bold mb-3">
+                    @(Model.IsActivity ? "活動關鍵字" : "貼文關鍵字")
+                </h6>
+                <div class="d-flex flex-wrap gap-2">
+                    
+                        @foreach(var tag in Model.Tags)
+                        {
+                            <span class="tag-pill">@tag.TagName</span>
+                        }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

@@ -1,5 +1,119 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model IEnumerable<Bake.Areas.Seller.ViewModels.BuyerOrderListViewModel>
+@inject Bake.Data.BakeContext context
 @{
+	ViewBag.Title = "購買紀錄";
 }
+
+@section Styles {
+	
+}
+
+<body>
+
+
+	<!-- ========== table components start ========== -->
+	<section class="table-components">
+		<div class="container-fluid">
+			<!-- ========== title-wrapper start ========== -->
+			<div class="title-wrapper pt-30">
+				<div class="row align-items-center">
+					<div class="col-md-6">
+						<div class="title">
+							<h2>購買紀錄</h2>
+						</div>
+					</div>
+					<!-- end col -->
+					<div class="col-md-6">
+						<div class="breadcrumb-wrapper">
+							<nav aria-label="breadcrumb">
+								<ol class="breadcrumb">
+									<li class="breadcrumb-item">
+										<a asp-area="Seller" asp-controller="Me" asp-action="Dashboard">會員中心</a>
+									</li>
+									<li class="breadcrumb-item active" aria-current="page">
+										購買紀錄
+									</li>
+								</ol>
+							</nav>
+						</div>
+					</div>
+					<!-- end col -->
+				</div>
+				<!-- end row -->
+			</div>
+			<!-- ========== title-wrapper end ========== -->
+			<!-- ========== tables-wrapper start ========== -->
+			<div class="tables-wrapper">
+				<div class="row">
+					<div class="col-lg-12">
+						<div class="card-style mb-30">
+							<div id="orderTableContainer">
+								@await Html.PartialAsync("_BuyerOrderTablePartial", Model)
+							</div>
+						</div>
+					</div>
+					<!-- end card -->
+				</div>
+				<!-- end col -->
+			</div>
+			<!-- end row -->
+		</div>
+		<!-- ========== tables-wrapper end ========== -->
+	</div>
+	<!-- end container -->
+</section>
+<!-- ========== table components end ========== -->
+@section Scripts {
+	
+	<script>
+			// 1. 使用原生 JavaScript 監聽點擊，防止 jQuery 載入順序問題
+			document.addEventListener('click', function (e) {
+				// 檢查點擊的是否為分頁按鈕 (包含裡面的文字)
+				var btn = e.target.closest('.ajax-page-link');
+            
+				if (btn) {
+					e.preventDefault(); // 【核心】強制禁止網頁刷新跳轉
+					e.stopPropagation();
+
+					var page = btn.getAttribute('data-page');
+					var parentLi = btn.parentElement;
+
+					// 防呆：如果是已停用或沒有頁碼，則不執行
+					if (!page || (parentLi && parentLi.classList.contains('disabled'))) {
+						return false;
+					}
+
+					// 2. 執行 AJAX 請求
+					var container = document.getElementById('orderTableContainer');
+					if (container) container.style.opacity = '0.5';
+
+					// 使用 fetch (原生 AJAX) 更穩定
+					fetch('@Url.Action("Orders", "Me")?pageNumber=' + page + '&isAjax=true', {
+						headers: { 'X-Requested-With': 'XMLHttpRequest' }
+					})
+					.then(response => response.text())
+					.then(html => {
+						if (container) {
+							container.innerHTML = html;
+							container.style.opacity = '1';
+
+							const newUrl = `@Url.Action("Orders", "Me")?pageNumber=${page}`;
+							window.history.pushState({ page: page }, '', newUrl);
+						}
+						// 捲動回頂部
+						window.scrollTo({ top: 0, behavior: 'smooth' });
+					})
+					.catch(err => {
+						console.error('載入失敗:', err);
+						if (container) container.style.opacity = '1';
+						alert("載入失敗，請檢查網路。");
+					});
+
+					return false;
+				}
+			}, true); // 使用 Capture 模式優先捕捉事件
+	</script>
+}
+  
+
+</body>
