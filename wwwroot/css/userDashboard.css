@@ -47,19 +47,26 @@
     outline: none;
 }
 
-    .swiper-prev:hover,
-    .swiper-next:hover {
-        background-color: #e09510;
-        color: #fff;
-    }
+.swiper-prev:hover,
+.swiper-next:hover {
+    background-color: #e09510;
+    color: #fff;
+}
 
-    .swiper-prev:disabled,
-    .swiper-next:disabled,
-    .swiper-prev.swiper-button-disabled,
-    .swiper-next.swiper-button-disabled {
-        border: none;
-        outline: none;
-        box-shadow: none;
-        opacity: 0.3;
-        background: #f1f1f1;
-    }
+.swiper-prev:disabled,
+.swiper-next:disabled,
+.swiper-prev.swiper-button-disabled,
+.swiper-next.swiper-button-disabled {
+    border: none;
+    outline: none;
+    box-shadow: none;
+    opacity: 0.3;
+    background: #f1f1f1;
+}
+/* 大頭照強制圓形 + 裁切 */
+.profile-photo .image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
