@@ -34,6 +34,15 @@
         border-radius: 12px;
         overflow: hidden;
     }
+
+    /* ===== 修正前台 navbar icon 被後台 CSS 壓扁 ===== */
+    header .rounded-circle,
+    .header-right a.rounded-circle {
+        width: 46px !important;
+        height: 46px !important;
+        border-radius: 50% !important;
+        aspect-ratio: 1 / 1;
+    }
     </style>
 }
 @{
@@ -56,7 +65,7 @@
         <!-- ========== title-wrapper end ========== -->
 
         <div class="row">
-            <div class="col-xxl-12 col-lg-8">
+            <div class="col-xxl-12 col-12">
                 <div class="profile-wrapper mb-30">
                     <div class="profile-cover">
                         <img src="~/seller_assets/images/profile/profile-cover.jpg" alt="cover-image" />
