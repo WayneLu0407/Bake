@@ -21,7 +21,10 @@ namespace Bake.Controllers.api
             public string Title { get; set; } = "";
             public string? Image { get; set; }
             public int? ViewCount { get; set; }
-            public int? LikesCount { get; set; }
+            public int LikesCount { get; set; }
+            public int FavoritesCount { get; set; }
+            public int CommentsCount { get; set; }
+            public DateTime? CreatedAt { get; set; }
         }
 
         // ---------- 共用的「組卡片」查詢 ----------
@@ -40,12 +43,14 @@ namespace Bake.Controllers.api
             {
                 PostId = p.PostId,
                 Title = p.Title,
+                CreatedAt = p.CreatedAt,
                 Image = p.PostAttachments
-                    .Where(a => a.IsCover == true)
-                    .Select(a => a.FileUrl)
-                    .FirstOrDefault(),
-                ViewCount = p.ViewCount,
-                LikesCount = p.LikesCount
+                .Where(a => a.IsCover == true)
+                .Select(a => a.FileUrl)
+                .FirstOrDefault(),
+                FavoritesCount = p.PostFavorites.Count(),
+                LikesCount = p.PostLikes.Count(),
+                CommentsCount = p.PostComments.Count()
             });
         }
 
@@ -54,7 +59,9 @@ namespace Bake.Controllers.api
         public async Task<IActionResult> Article(int userId)
         {
             var list = await ToCard(
-                BaseQuery(userId).OrderByDescending(p => p.CreatedAt)
+                BaseQuery(userId)
+                .Where(p => p.TypeId == 0)
+                .OrderByDescending(p => p.CreatedAt)
                 )
                 .Take(10)
                 .ToListAsync();
@@ -68,7 +75,7 @@ namespace Bake.Controllers.api
         {
             var now = DateTime.Now;
             var list = await _db.Posts
-                .Where(p => p.IsPublished == true
+                .Where(p => p.IsPublished == true && p.TypeId == 1
                 && p.EventDetails.Any(e => e.SignupDeadline > now) && p.AuthorId == userId)
                 .Select(p => new
                 {
@@ -97,7 +104,7 @@ namespace Bake.Controllers.api
         {
             var now = DateTime.Now;
             var list = await _db.Posts
-                .Where(p => p.IsPublished == true
+                .Where(p => p.IsPublished == true && p.TypeId == 1
                 && p.EventDetails.Any(e => e.EventTime < now)
                 && p.AuthorId== userId)
                 .Select(p => new
@@ -124,7 +131,7 @@ namespace Bake.Controllers.api
         {
             var now = DateTime.Now;
             var list = await _db.Posts
-                .Where(p => p.IsPublished == true
+                .Where(p => p.IsPublished == true && p.TypeId == 1
                 && p.AuthorId != userId
                 && p.EventDetails.Any(e => e.EventTime > now
                     && e.EventRegistrations.Any(r => r.UserId == userId && r.RegistStatusId == 1)))
@@ -152,7 +159,7 @@ namespace Bake.Controllers.api
         {
             var now = DateTime.Now;
             var list = await _db.Posts
-                .Where(p => p.IsPublished == true
+                .Where(p => p.IsPublished == true && p.TypeId == 1
                 && p.AuthorId != userId
                 && p.EventDetails.Any(e => e.EventTime < now
                     && e.EventRegistrations.Any(r => r.UserId == userId && r.RegistStatusId == 1)))
@@ -187,6 +194,8 @@ namespace Bake.Controllers.api
                         ? (u.AvatarUrl.StartsWith("/") ? u.AvatarUrl : "/" + u.AvatarUrl)
                         : "/seller_assets/images/profile/NoImage.png",
                     u.Bio,
+                    FollowerCount = _db.Follows.Count(f => f.BefollowedId == userId),   // 被多少人追蹤
+                    FollowingCount = _db.Follows.Count(f => f.FollowerId == userId),    // 追蹤多少人
                 })
                 .FirstOrDefaultAsync();
             if (user == null) return NotFound();
