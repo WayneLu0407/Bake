@@ -149,7 +149,6 @@ namespace Bake.Controllers
 
                 await AttachTagsToPostAsync(post, input.KeywordsText);
 
-                // Remark目前先不寫資料庫避免硬塞到不對的欄位
                 await _db.SaveChangesAsync();
                 await transaction.CommitAsync();
 
@@ -729,8 +728,10 @@ namespace Bake.Controllers
                 return new List<string>();
             }
 
+            var delimiters = new[] { ',', '，', ' ', '　' }; // 包含全型空格
+
             return keywordsText
-                .Split(',', '，')
+                .Split(delimiters, StringSplitOptions.RemoveEmptyEntries)
                 .Select(x => x.Trim())
                 .Where(x => !string.IsNullOrWhiteSpace(x))
                 .Select(NormalizeTagName)
