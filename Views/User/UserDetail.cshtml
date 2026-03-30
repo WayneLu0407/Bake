@@ -76,7 +76,7 @@
                                     <p><strong>{{ articles.length }}</strong><br />貼文</p>
                                     </li>
                                     <li class="mr-30">
-                                    <p><strong>測試數字</strong><br />粉絲</p>
+                                    <p><strong>{{userProfile.followerCount}}</strong><br />粉絲</p>
                                     </li>
                             </ul>
                         </div>
@@ -107,7 +107,7 @@
                                             <h5 class="text-bold mr-20">
                                                 <a :href="'/Post/PostDetail/' + item.postId" class="title">{{ item.title }}</a>
                                             </h5>
-                                            <span>{{item.eventTime}}</span>
+                                            <span>{{formatDate(item.createdAt)}}</span>
                                         </div>
                                     </div>
                                     <div class="card-image">
@@ -122,7 +122,7 @@
                                         </div>
                                         <div class="action">
                                             <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
+                                            <a href="#0">{{item.commentsCount}} Comments</a>
                                         </div>
                                     </div>
                                 </div>
@@ -150,7 +150,7 @@
                                             <h5 class="text-bold mr-20">
                                                 <a href="'/Post/PostDetail/'+item.postId" class="title">{{item.title}}</a>
                                             </h5>
-                                            <span>{{item.singupDeadline}}</span>
+                                            <span>{{formatDate(item.singupDeadline)}}</span>
                                         </div>
                                     </div>
                                     <div class="card-image">
@@ -175,14 +175,14 @@
                     </div>
                     <div class="swiper past-initiated-carousel overflow-hidden">
                         <div class="swiper-wrapper">
-                            <div class="swiper-slide" v-for="item in EndEvents" :key="item.postId">
+                            <div class="swiper-slide" v-for="item in endEvents" :key="item.postId">
                                 <div class="card-style-6 mb-30">
                                     <div class="card-meta mb-25">
                                         <div class="d-flex align-items-center flex-wrap mb-10">
                                             <h5 class="text-bold mr-20">
                                                 <a href="#0" class="title">{{item.title}}</a>
                                             </h5>
-                                            <span>{{item.eventTime}}</span>
+                                            <span>{{formatDate(item.eventTime)}}</span>
                                         </div>
                                     </div>
                                     <div class="card-image">
@@ -213,14 +213,14 @@
                     </div>
                     <div class="swiper joining-carousel overflow-hidden">
                         <div class="swiper-wrapper">
-                            <div class="swiper-slide" v-for="item in WillAttendEvents" :key="item.postId">
+                            <div class="swiper-slide" v-for="item in willAttendEvents" :key="item.postId">
                                 <div class="card-style-6 mb-30">
                                     <div class="card-meta mb-25">
                                         <div class="d-flex align-items-center flex-wrap mb-10">
                                             <h5 class="text-bold mr-20">
                                                 <a href="#0" class="title">{{item.title}}</a>
                                             </h5>
-                                            <span>{{item.eventTime}}</span>
+                                            <span>{{formatDate(item.eventTime)}}</span>
                                         </div>
                                     </div>
                                     <div class="card-image">
@@ -245,14 +245,14 @@
                     </div>
                     <div class="swiper past-joined-carousel overflow-hidden">
                         <div class="swiper-wrapper">
-                            <div class="swiper-slide" v-for="item in AttendedEvents" :key="item.postId">
+                            <div class="swiper-slide" v-for="item in attendedEvents" :key="item.postId">
                                 <div class="card-style-6 mb-30">
                                     <div class="card-meta mb-25">
                                         <div class="d-flex align-items-center flex-wrap mb-10">
                                             <h5 class="text-bold mr-20">
                                                 <a href="#0" class="title">{{item.title}}</a>
                                             </h5>
-                                            <span>{{item.eventTime}}</span>
+                                            <span>{{formatDate(item.eventTime)}}</span>
                                         </div>
                                     </div>
                                     <div class="card-image">
@@ -342,6 +342,10 @@
                 });
             },
             methods:{
+                formatDate(dateStr) {
+                    if (!dateStr) return '';
+                    return dateStr.split('T')[0];
+                },
                 async fetchProfile(){
                     try{
                         const res = await fetch(`/api/UserDetailApi/Profile/${this.userId}`);
