@@ -1,5 +1,76 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model Bake.Models.RegisterModel
 @{
+	Layout = "_Layout2";
+	ViewBag.Title = "會員註冊";
 }
+<div class="row g-0 auth-row">
+	<div class="col-lg-6">
+		<div class="auth-cover-wrapper bg-primary-100">
+			<div class="auth-cover">
+				<div class="title text-center">
+					<h1 class="text-primary mb-10"></h1>
+					<p class="text-medium">
+						註冊會員
+						<br class="d-sm-block" />
+
+					</p>
+				</div>
+				<div class="cover-image">
+					<img src="~/seller_assets/images/auth/signup-image.svg" alt="" />
+				</div>
+				<div class="shape-image">
+					<img src="~/seller_assets/images/auth/shape.svg" alt="" />
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-lg-6">
+		<div class="signup-wrapper">
+			<div class="form-wrapper">
+				<h6 class="mb-15">填寫會員資料</h6>
+				<form asp-controller="Home" asp-action="Register" method="post">
+					<div class="row">
+						<div class="col-12">
+							<div class="input-style-1">
+								<label>姓名</label>
+								<input name="Name" type="text" placeholder="Name" />
+								<span asp-validation-for="Name" class="text-danger"></span>
+							</div>
+						</div>
+						<!-- end col -->
+						<div class="col-12">
+							<div class="input-style-1">
+								<label>電子郵件</label>
+								<input name="Email" type="email" placeholder="name@example.com" />
+								<span asp-validation-for="Email" class="text-danger"></span>
+							</div>
+						</div>
+						<!-- end col -->
+						<div class="col-12">
+							<div class="input-style-1">
+								<label>密碼</label>
+								<input name="Password" type="password" placeholder="Password" />
+								<span asp-validation-for="Password" class="text-danger"></span>
+							</div>
+						</div>
+						<!-- end col -->
+						<div class="col-12">
+							<div class="input-style-1">
+								<label>確認密碼</label>
+								<input name="PasswordConfirm" type="password" placeholder="PasswordConfirm" />
+								<span asp-validation-for="PasswordConfirm" class="text-danger"></span>
+							</div>
+						</div>
+						<!-- end col -->
+						<div class="col-12">
+							<div class="button-group d-flex justify-content-center flex-wrap">
+								<input type="submit" class="main-btn primary-btn btn-hover w-100 text-center" value="註冊" />
+							</div>
+						</div>
+					</div>
+					<!-- end row -->
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

@@ -34,3 +34,96 @@
     outline: 2px solid #0d6efd; /* Bootstrap 藍色 */
     border-radius: 1rem; /* 對應 rounded-4 */
 }
+.product-item figure {
+    height: 200px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #FFFFFF;
+    border-radius: 12px;
+    margin: 0;
+}
+
+    .product-item figure img.tab-image {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-item figure a {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+
+/*    products details*/
+
+/* 商品資訊 table */
+.info-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f5f5f5;
+    font-size: 14px;
+}
+
+    .info-table td:first-child {
+        color: var(--muted-color);
+        width: 110px;
+        white-space: nowrap;
+    }
+/* 品牌 stats */
+.brand-stats p {
+    font-size: 13px;
+    margin-bottom: 6px;
+    color: var(--body-text-color);
+}
+
+.brand-stats strong {
+    color: var(--dark-color);
+}
+/*屬性選擇器*/
+[v-cloak] {
+    display: none;
+}
+
+/* 店名：最多 1 行，超出省略 */
+.brand-carousel .card-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 描述：最多 2 行，超出省略 */
+.brand-carousel .shop-desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* 解決陰影被切掉的問題 */
+.brand-carousel .swiper-wrapper {
+    padding: 10px 0;
+}
+
+/* 分頁 — active 頁碼 */
+.pagination .page-item.active .page-link {
+    background-color: #FFC43F;
+    border-color: #FFC43F;
+    color: #222;
+}
+
+/* 分頁 — hover */
+.pagination .page-item .page-link:hover {
+    background-color: #F7A422;
+    border-color: #F7A422;
+    color: #222;
+}
+
+/* 分頁 — 一般狀態的文字色 */
+.pagination .page-item .page-link {
+    color: #222;
+}

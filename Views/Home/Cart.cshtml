@@ -1,5 +1,165 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
-@{
+﻿<head>
+    <style>
+            /* 響應式規則：螢幕大於 1025px 時 */
+            @@media (min-width: 1025px) {
+                .h-custom {
+                    height: 100vh !important;
+                }
+            }
+    </style>
+</head>
+
+<body>
+    <section class="h-100 h-custom" style="background-color: floralwhite;">
+        <div class="container py-5 h-100" id="checkoutApp">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col-12">
+                    <div class="card card-registration card-registration-2" style="border-radius: 15px;">
+                        <div class="card-body p-0">
+                            <div class="row g-0">
+                                <div class="col-lg-8">
+                                    <div class="p-5">
+                                        <div class="d-flex justify-content-between align-items-center mb-5">
+                                            <h1 class="fw-bold mb-0">我的購物車</h1>
+                                            <h3 class="mb-0 text-muted">共 {{totalCount}} 件商品</h3>
+                                        </div>
+                                        <hr class="my-4">
+
+                                        <div v-for="item in cart" :key="item.productId" class="row mb-4 d-flex justify-content-between align-items-center">
+                                            <div class="col-md-2 col-lg-2 col-xl-2">
+                                                <img :src="item.imgUrl"
+                                                     class="img-fluid rounded-3" alt="Cotton T-shirt">
+                                            </div>
+                                            <div class="col-md-3 col-lg-3 col-xl-3">
+                                                <h5 class="text-muted">{{item.productName}}</h5>
+                                            </div>
+                                            @* 數量增減 *@
+                                            <div class="col-md-3 col-lg-3 col-xl-2 d-flex align-items-center">
+                                                <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
+                                                        v-on:click="updateQuantity(item.productId, -1)">
+                                                    <i class="fas fa-minus"></i>
+                                                </button>
+
+                                                <input id="form1" min="0" name="quantity" :value="item.quantity" type="number" readonly
+                                                       class="form-control form-control-sm text-center" style="width: 50px" />
+
+                                                <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
+                                                        v-on:click="updateQuantity(item.productId, 1)">
+                                                    <i class="fas fa-plus"></i>
+                                                </button>
+
+                                            </div>
+                                            <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
+                                                <h6 class="mb-0">{{item.price}}</h6>
+                                            </div>
+                                            <div class="col-md-1 col-lg-1 col-xl-1 text-end">
+                                                <a href="#!" class="text-muted" v-on:click.prevent="deleteItem(item.productId)"><i class="fas fa-trash-alt"></i></a>
+                                            </div>
+                                            <hr class="my-4">
+                                        </div>
+
+                                        <div class="pt-5">
+                                            <h6 class="mb-0">
+                                                <a asp-controller="Products" asp-action="Index" class="text-body">
+                                                    <i class="fas fa-long-arrow-alt-left me-2"></i>回到商店
+                                                </a>
+                                            </h6>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 bg-body-tertiary">
+                                    <div class="p-5">
+                                        <h3 class="fw-bold mb-5 mt-2 pt-1">訂單總結</h3>
+                                        <hr class="my-4">
+
+                                        <div class="d-flex justify-content-between mb-4">
+                                            <h5 class="text-uppercase">商品共 {{totalCount}} 件</h5>
+                                            <h5>$ {{formatNumber(totalPrice)}}</h5>
+                                        </div>
+
+                                        <h5 class="text-uppercase mb-3">運費</h5>
+
+                                        <div class="mb-4 pb-2">
+                                            <select data-mdb-select-init v-model="selectedShipping">
+                                                <option v-for="opt in shippingOptions" :key="opt.name" :value="opt">
+                                                    {{opt.name}} ${{opt.fee}}
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <h5 class="text-uppercase mb-3">優惠券</h5>
+
+                                        <div class="mb-5">
+                                            <div data-mdb-input-init class="form-outline">
+                                                <input type="text" id="form3Examplea2" class="form-control form-control-lg" />
+                                                <label class="form-label" for="form3Examplea2">輸入您的優惠折扣碼</label>
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-4">
+
+                                        <div class="d-flex justify-content-between mb-5">
+                                            <h5 class="text-uppercase">訂單總額</h5>
+                                            <h5>$ {{formatNumber(grandTotal)}} </h5>
+                                        </div>
+
+                                        <a href="#" v-on:click.prevent="saveShipping" style="background-color: #ffc107;" data-mdb-button-init data-mdb-ripple-init class="btn btn-danger btn-block w-100 btn-lg"
+                                               data-mdb-ripple-color="dark">
+                                            結帳
+                                        </a>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</body>
+
+@section Scripts
+{
+    <script>
+        const app = Vue.createApp({
+            mixins: [CartMixin],
+            data(){
+                return{
+                    selectedShipping:{name:'宅配', fee:120},
+                    shippingOptions:[
+                        {name:'宅配', fee:120},
+                        {name:'貨到付款', fee:60}
+                    ]
+                }
+            },
+            computed:{
+                grandTotal(){
+                    return this.totalPrice + this.selectedShipping.fee;
+                }
+            },
+            methods:{
+                async saveShipping(fee) {
+                    const feeData = {fee:this.selectedShipping.fee};
+                    const res = await fetch('/Cart/SaveShippingToSession',{
+                        method:'POST',
+                        headers:{'Content-Type':'application/json'},
+                        body: JSON.stringify(feeData)
+                    });
+
+                    if(res.ok){
+                        window.location.href = '/Checkout/Info';
+                    }
+                    else{
+                        alert("系統繁忙，請稍後再試");
+                    }
+                },
+                formatNumber(num) {
+                    if (!num) return '0';
+                    return num.toLocaleString('zh-TW'); // 強制台灣格式
+                }
+            }
+        }).mount('#checkoutApp');
+    </script>
 }

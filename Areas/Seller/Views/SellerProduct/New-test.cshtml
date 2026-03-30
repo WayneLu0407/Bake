@@ -1,0 +1,101 @@
+﻿@model Bake.Areas.Seller.ViewModels.ProductViewModel
+
+@if (TempData["Success"] != null)
+{
+    <script>
+        alert("@Html.Raw(TempData["Success"])");
+    </script>
+}
+<!-- ========== section start ========== -->
+<section>
+    <div class="container-fluid">
+        <!-- ========== title-wrapper start ========== -->
+        <div class="title-wrapper pt-30">
+            <div class="row justify-content-center">
+                <div class="col-md-4">
+                    <div class="title d-flex align-items-center flex-wrap justify-content-center">
+                        <h2 class="mr-40">新增商品</h2>
+                    </div>
+                </div>
+            </div>
+            <!-- end row -->
+        </div>
+    </div>
+    <!-- ========== title-wrapper end ========== -->
+    <!-- ======== card style start ========== -->
+    <div class="card-style px-0 mb-30">
+
+        <div class="row justify-content-center">
+            <div class="col-md-4">
+                <form asp-area="Seller" asp-controller="SellerProduct" asp-action="New" method="post" enctype="multipart/form-data" novalidate>
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <label asp-for="ProductName" class="control-label"></label>
+                        <input asp-for="ProductName" class="form-control" />
+                        <span asp-validation-for="ProductName" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="CategoryId" class="control-label"></label>
+                        <select asp-for="CategoryId" class="form-control"
+                                asp-items="@(new SelectList(ViewBag.Categories, "CategoryId", "CategoryName"))">
+                            <option value="">-- 請選擇分類 --</option>
+                        </select>
+                        <span asp-validation-for="CategoryId" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ProductDiscount" class="control-label"></label>
+                        <input asp-for="ProductDiscount" class="form-control" min="0" max="0.99" data-val-number="請輸入有效的數字" />
+                        <span asp-validation-for="ProductDiscount" class="text-danger"></span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+        <!-- ========== section end ========== -->
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+            <script>
+                if ($.validator) {
+                        $.extend($.validator.messages, {
+                            number: "請輸入有效的數字。",
+                            range: $.validator.format("請輸入介於 {0} 到 {1} 之間的數值。"),
+                            required: "這是必填欄位。"
+                        });
+                    }
+
+                function previewUploadImage(inputFile) {
+                    var file = inputFile.files[0];
+                    var allowTypes = "image.*";
+                    if (inputFile.files[0].type.match(allowTypes)) {
+                        $('.btn').prop('disabled', false);
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            $("#ProductImage").prev().attr('src', e.target.result);
+                            $("#ProductImage").prev().attr('title', file.name);
+                        }
+                        reader.readAsDataURL(file);
+                    }
+                    else {
+                        alert("不支援上傳的檔案格式!");
+                        inputFile.value = "";
+                        $('.btn').prop('disabled', true);
+
+                        $("#ProductImage").prev().attr('src', "/images/NoImage.jpg");
+                        $("#ProductImage").prev().attr('title', "尚無圖片");
+
+                    }
+                }
+
+                $("#ProductImage").change(function () {
+                    // alert("change");
+                        previewUploadImage(this);
+                });
+
+            </script>
+}
