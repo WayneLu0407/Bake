@@ -144,7 +144,7 @@ namespace Bake.Controllers
 
 
             int shippingFee = HttpContext.Session.GetInt32("ShippingFee") ?? 60;
-            order.TotalAmount = totalAmount + shippingFee; //假設運費固定60元
+            order.TotalAmount = totalAmount + shippingFee;
 
             //3. 寫入資料庫
             _bakeContext.Orders.Add(order);

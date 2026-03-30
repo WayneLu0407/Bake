@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-
 namespace Bake.Controllers
 {
     public class SupportController : Controller
     {
+  
         public IActionResult Faq()
         {
             return View();
@@ -12,5 +12,10 @@ namespace Bake.Controllers
         {
             return View();
         }
+        public IActionResult AiRobot()
+        {
+            return View();
+        }
+
     }
 }
