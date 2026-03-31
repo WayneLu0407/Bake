@@ -41,7 +41,7 @@ namespace Bake.Controllers
         [HttpGet]
         public IActionResult Info()
         {
-            // 試著從 Session 抓回舊資料
+            // 從 Session 抓回舊資料
             int? sessionShipping = HttpContext.Session.GetInt32("ShippingFee");
             ViewBag.ShippingFee = sessionShipping ?? 60; // 如果沒抓到，預設 60
 
@@ -150,8 +150,16 @@ namespace Bake.Controllers
             _bakeContext.Orders.Add(order);
             await _bakeContext.SaveChangesAsync();
 
-            ClearCart(); //清空購物車
-            return RedirectToAction("Success", new { id = order.OrderId});
+            //ClearCart(); //清空購物車
+
+            //4.重新導向: 如果是貨到付款，直接到Success
+            if (order.PaymentMethodId == 2) 
+            {
+                return RedirectToAction("Success", new { id = order.OrderId });
+            }
+
+            // 如果是信用卡或轉帳，導回到payment串接藍星
+            return RedirectToAction("Payment", new { id = order.OrderId});
         }
 
         
