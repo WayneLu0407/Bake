@@ -162,6 +162,22 @@ namespace Bake.Controllers
             }
         }
         // ------建立活動(尾)
+
+        [Authorize]
+        [HttpGet("posts/events/{postId}/edit")]
+        public async Task<IActionResult> EditEvent(int postId)
+        {
+            var post = await GetOwnedEventPostAsync(postId, CurrentUserId);
+
+            if (post == null)
+            {
+                return NotFound();
+            }
+            var vm = await BuildEventEditViewModelAsync(post);
+            return View(vm);
+        }
+
+
         // ------ 申請參加活動(頭)
         [Authorize]
         [HttpGet("/apply/{eventId}")]
@@ -587,7 +603,65 @@ namespace Bake.Controllers
         }
         // ------ 申請參加活動方法(尾)
 
+        private async Task<Post?> GetOwnedEventPostAsync(int postId, int userId)
+        {
+            return await _db.Posts
+                .Include(p => p.EventDetails)
+                    .ThenInclude(e => e.EventRegistrations)
+                .Include(p => p.PostAttachments)
+                .Include(p => p.Tags)
+                .FirstOrDefaultAsync(p =>
+                p.PostId == postId &&
+                p.TypeId == 1 && //限定活動
+                p.AuthorId == userId); //限定主辦人
+        }
+
+        private async Task<EventEditViewModel> BuildEventEditViewModelAsync(Post post)
+        {
+            var eventDetail = post.EventDetails.First();
+
+            var vm = new EventEditViewModel
+            {
+                PostId = post.PostId,
+                EventId = eventDetail.EventId,
+
+                Title = post.Title,
+                Content = post.Content,
+
+                EventDate = eventDetail.EventTime.Date,
+                StartTime = eventDetail.EventTime.TimeOfDay,
+                EndTime = eventDetail.EventTime.TimeOfDay,
+
+                LocationCity = eventDetail.LocationCity ?? string.Empty,
+                LocationAddress = eventDetail.LocationAddress ?? string.Empty,
+
+                MaxParticipants = eventDetail.MaxParticipants,
+                Price = eventDetail.Price ?? 0,
+
+                SignupStartDate = eventDetail.SignupStart.Date,
+                SignupEndDate = eventDetail.SignupDeadline.Date,
+
+                EventTypeId = eventDetail.EventTypeId,
+
+                KeywordsText = string.Join(",", post.Tags.Select(t => t.TagName)),
+                ExistingPhotoUrl = post.PostAttachments   //這邊是多圖片的寫法，可能要改掉
+                    .Where(a => a.IsCover == true)
+                    .Select(a => a.FileUrl)
+                    .FirstOrDefault(),
+
+                HasRegistrations = eventDetail.EventRegistrations.Any() //回傳布林
+            };
+
+            await FillOrganizerInfoAsync(vm, CurrentUserId);
+            await LoadEventTypeOptionsAsync(vm);
+
+            return vm;
+        }
+
+
         // ------ 建立活動用方法(頭)
+        
+        //編輯也有用到
         private async Task FillOrganizerInfoAsync(EventCreateViewModel vm, int userId)
         {
             var account = await _db.AccountAuths
@@ -751,7 +825,7 @@ namespace Bake.Controllers
             return value;
         }
 
-        //處理EventType
+        //處理EventType    //編輯也有用到
         private async Task LoadEventTypeOptionsAsync(EventCreateViewModel vm)
         {
             vm.EventTypeOptions = await _db.EventTypeLookups
