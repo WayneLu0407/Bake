@@ -1,0 +1,65 @@
+﻿/* ===== 讓 Swiper 卡片風格對齊交流區 ===== */
+
+/* 卡片整體：加圓角、限制寬度 */
+.swiper-slide .card-style-6 {
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* 圖片：固定高度、裁切填滿、圓角 */
+.swiper-slide .card-image img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+/* 縮小文字區塊的間距 */
+.swiper-slide .card-meta {
+    margin-bottom: 10px;
+}
+
+    .swiper-slide .card-meta h5 {
+        font-size: 0.95rem;
+    }
+
+    .swiper-slide .card-meta p {
+        font-size: 0.85rem;
+        color: #666;
+    }
+
+/* 左右箭頭按鈕 */
+.swiper-prev,
+.swiper-next {
+    width: 36px;
+    height: 36px;
+    border-radius: 20%;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    background: #f1f1f1;
+    color: #666;
+    border: none;
+    outline: none;
+}
+
+    .swiper-prev:hover,
+    .swiper-next:hover {
+        background-color: #e09510;
+        color: #fff;
+    }
+
+    .swiper-prev:disabled,
+    .swiper-next:disabled,
+    .swiper-prev.swiper-button-disabled,
+    .swiper-next.swiper-button-disabled {
+        border: none;
+        outline: none;
+        box-shadow: none;
+        opacity: 0.3;
+        background: #f1f1f1;
+    }

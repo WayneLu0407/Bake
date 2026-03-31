@@ -1,0 +1,415 @@
+﻿@section Styles {
+
+    
+    <link rel="stylesheet" href="~/seller_assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/lineicons.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/quill/bubble.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/quill/snow.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/fullcalendar.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/morris.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/datatable.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/main.css" />
+    <link rel="stylesheet" href="~/seller_assets/css/sweetstack-admin-override.css" />
+    <link rel="stylesheet" href="~/css/userDashboard.css" />
+    
+    <style>
+    /* ===== 前台覆蓋後台的橘黃背景 ===== */
+    body,
+    .section,
+    .container-fluid {
+    background-color: #fff !important;
+    }
+
+    .card-style {
+    background-color: #f9f9f9 !important;
+    }
+    /* ===== 前台他人主頁背景改白 ===== */
+    .card-style {
+        background-color: #fff !important;
+    }
+
+    /* 個人介紹區塊加邊框 */
+    .profile-wrapper {
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    /* ===== 修正前台 navbar icon 被後台 CSS 壓扁 ===== */
+    header .rounded-circle,
+    .header-right a.rounded-circle {
+        width: 46px !important;
+        height: 46px !important;
+        border-radius: 50% !important;
+        aspect-ratio: 1 / 1;
+    }
+    </style>
+}
+@{
+    ViewBag.Title = "個人介紹";
+}
+<!-- ========== section start ========== -->
+<section class="section" id="app">
+    <div class="container-fluid">
+        <!-- ========== title-wrapper start ========== -->
+        <div class="title-wrapper pt-30">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="title">
+                        <h2>個人檔案</h2>
+                    </div>
+                </div>
+            </div>
+            <!-- end row -->
+        </div>
+        <!-- ========== title-wrapper end ========== -->
+
+        <div class="row">
+            <div class="col-xxl-12 col-12">
+                <div class="profile-wrapper mb-30">
+                    <div class="profile-cover">
+                        <img src="~/seller_assets/images/profile/profile-cover.jpg" alt="cover-image" />
+                    </div>
+                    <div class="d-md-flex">
+                        <div class="profile-photo">
+                            <div class="image">
+                                <img :src="userProfile.avatarUrl" alt="profile" />
+                            </div>
+                            <div class="profile-meta pt-25">
+                                <h5 class="text-bold mb-10">{{userProfile.fullName}}</h5>
+                            </div>
+                        </div>
+                        <div class="profiles-activities w-100 pt-30">
+                            <ul class="d-flex align-items-center">
+                                    <li class="mr-30">
+                                    <p><strong>{{ articles.length }}</strong><br />貼文</p>
+                                    </li>
+                                    <li class="mr-30">
+                                    <p><strong>{{userProfile.followerCount}}</strong><br />粉絲</p>
+                                    </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="profile-info">
+                        <h5 class="text-bold mb-15">關於我</h5>
+                        <p class="text-sm mb-30">
+                            {{ userProfile.bio || '目前尚未填寫個人介紹' }}
+                        </p>
+                    </div>
+                </div>
+                <!-- ===== 貼文（Swiper） ===== -->
+                <div class="card-style mb-30">
+                    <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                        <h6 class="mb-20">貼文</h6>
+                        <div class="d-flex align-items-center mb-20">
+                            <button class="swiper-prev posts-prev btn btn-sm">❮</button>
+                            <button class="swiper-next posts-next btn btn-sm">❯</button>
+                        </div>
+                    </div>
+                    <div class="swiper posts-carousel overflow-hidden">
+                        <div class="swiper-wrapper">
+                            <!-- swiper-slide 1 (之後用 foreach 動態產生) -->
+                            <div class="swiper-slide" v-for="item in articles" :key="item.postId">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a :href="'/Post/PostDetail/' + item.postId" class="title">{{ item.title }}</a>
+                                            </h5>
+                                            <span>{{formatDate(item.createdAt)}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a :href="'/Post/PostDetail/' + item.postId">
+                                            <img :src="item.image" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">{{item.likesCount}} Like</a>
+                                        </div>
+                                        <div class="action">
+                                            <button><i class="lni lni-comments"></i></button>
+                                            <a href="#0">{{item.commentsCount}} Comments</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== 發起的活動（Swiper） ===== -->
+                <div class="card-style mb-30">
+                    <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                        <h6 class="mb-20">發起的活動</h6>
+                        <div class="d-flex align-items-center mb-20">
+                            <button class="swiper-prev initiated-prev btn btn-sm">❮</button>
+                            <button class="swiper-next initiated-next btn btn-sm">❯</button>
+                        </div>
+                    </div>
+                    <div class="swiper initiated-carousel overflow-hidden">
+                        <div class="swiper-wrapper">
+                            <!-- swiper-slide 1 (之後用 foreach 動態產生) -->
+                            <div class="swiper-slide" v-for="item in onGoingEvents" :key="item.postId">
+                                <div class="card-style-6 mb-30" >
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="'/Post/PostDetail/'+item.postId" class="title">{{item.title}}</a>
+                                            </h5>
+                                            <span>{{formatDate(item.singupDeadline)}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a :href="'/Post/PostDetail/' + item.postId">
+                                            <img :src="item.image" alt="" />
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== 發起過的活動（Swiper） ===== -->
+                <div class="card-style mb-30">
+                    <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                        <h6 class="mb-20">發起過的活動</h6>
+                        <div class="d-flex align-items-center mb-20">
+                            <button class="swiper-prev past-initiated-prev btn btn-sm">❮</button>
+                            <button class="swiper-next past-initiated-next btn btn-sm">❯</button>
+                        </div>
+                    </div>
+                    <div class="swiper past-initiated-carousel overflow-hidden">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide" v-for="item in endEvents" :key="item.postId">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">{{item.title}}</a>
+                                            </h5>
+                                            <span>{{formatDate(item.eventTime)}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img :src="item.image" alt="" />
+                                        </a>
+                                    </div>
+                                    <div class="card-action">
+                                        <div class="action mr-20">
+                                            <button><i class="lni lni-thumbs-up"></i></button>
+                                            <a href="#0">434 Like</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== 將參加的活動（Swiper） ===== -->
+                <div class="card-style mb-30">
+                    <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                        <h6 class="mb-20">將參加的活動</h6>
+                        <div class="d-flex align-items-center mb-20">
+                            <button class="swiper-prev joining-prev btn btn-sm">❮</button>
+                            <button class="swiper-next joining-next btn btn-sm">❯</button>
+                        </div>
+                    </div>
+                    <div class="swiper joining-carousel overflow-hidden">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide" v-for="item in willAttendEvents" :key="item.postId">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">{{item.title}}</a>
+                                            </h5>
+                                            <span>{{formatDate(item.eventTime)}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img :src="item.image" alt="" />
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== 參加過的活動（Swiper） ===== -->
+                <div class="card-style mb-30">
+                    <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                        <h6 class="mb-20">參加過的活動</h6>
+                        <div class="d-flex align-items-center mb-20">
+                            <button class="swiper-prev past-joined-prev btn btn-sm">❮</button>
+                            <button class="swiper-next past-joined-next btn btn-sm">❯</button>
+                        </div>
+                    </div>
+                    <div class="swiper past-joined-carousel overflow-hidden">
+                        <div class="swiper-wrapper">
+                            <div class="swiper-slide" v-for="item in attendedEvents" :key="item.postId">
+                                <div class="card-style-6 mb-30">
+                                    <div class="card-meta mb-25">
+                                        <div class="d-flex align-items-center flex-wrap mb-10">
+                                            <h5 class="text-bold mr-20">
+                                                <a href="#0" class="title">{{item.title}}</a>
+                                            </h5>
+                                            <span>{{formatDate(item.eventTime)}}</span>
+                                        </div>
+                                    </div>
+                                    <div class="card-image">
+                                        <a href="#0">
+                                            <img :src="item.image" alt="" />
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- end card -->
+            </div>
+            <!-- end col -->
+        </div>
+    </div>
+</section>
+
+
+@section Scripts {
+    <script>
+            // ===== Swiper 初始化（與交流區首頁同樣模式） =====
+            function initProfileSwipers() {
+                const defaultBreak = {
+                    0:    { slidesPerView: 1, spaceBetween: 12 },
+                    768:  { slidesPerView: 2, spaceBetween: 16 },
+                    992:  { slidesPerView: 3, spaceBetween: 20 },
+                    1200: { slidesPerView: 4, spaceBetween: 20 },
+                    1600: { slidesPerView: 5, spaceBetween: 24 },
+                };
+
+                const configs = [
+                    { sel: '.posts-carousel',          prev: '.posts-prev',          next: '.posts-next' },        // 新增
+                    { sel: '.initiated-carousel',      prev: '.initiated-prev',      next: '.initiated-next' },
+                    { sel: '.past-initiated-carousel', prev: '.past-initiated-prev', next: '.past-initiated-next' },
+                    { sel: '.joining-carousel',        prev: '.joining-prev',        next: '.joining-next' },
+                    { sel: '.past-joined-carousel',    prev: '.past-joined-prev',    next: '.past-joined-next' },
+                ];
+
+                configs.forEach(function (cfg) {
+                    const el = document.querySelector(cfg.sel);
+                    if (!el) return;
+                    if (el.swiper) el.swiper.destroy(true, true);
+
+                    new Swiper(cfg.sel, {
+                        speed: 500,
+                        breakpoints: defaultBreak,
+                        navigation: {
+                            prevEl: cfg.prev,
+                            nextEl: cfg.next,
+                        },
+                    });
+                });
+            };
+    </script>
+    <script>
+        const app=Vue.createApp({
+            data(){
+                return{
+                    onGoingEvents:[],
+                    endEvents:[],
+                    willAttendEvents:[],
+                    attendedEvents:[],
+                    articles: [],
+                    userId:0,
+                    userProfile:{},
+                    
+                }
+            },
+            async mounted(){
+
+                const path=window.location.pathname.split('/');
+                this.userId = path[path.length -1];
+
+                await Promise.all([
+                this.fetchProfile(),
+                this.fetchArticles(),
+                this.fetchOnGoingEvents(),
+                this.fetchEndEvents(),
+                this.fetchWillAttendEvents(),
+                this.fetchAttendedEvents(),
+                ]);
+
+                this.$nextTick(() => {
+                    initProfileSwipers();
+                });
+            },
+            methods:{
+                formatDate(dateStr) {
+                    if (!dateStr) return '';
+                    return dateStr.split('T')[0];
+                },
+                async fetchProfile(){
+                    try{
+                        const res = await fetch(`/api/UserDetailApi/Profile/${this.userId}`);
+                        this.userProfile = await res.json();
+                    }catch(err){
+                        console.error('Profile 失敗:', err);
+                    }
+                },
+                async fetchArticles(){
+                    try{
+                        const res = await fetch (`/api/UserDetailApi/Article/${this.userId}`);
+                        this.articles = await res.json();
+                    }catch(err){
+                        console.error('Article 失敗:', err);
+                    }
+                },
+                async fetchOnGoingEvents(){
+                    try{
+                        const res = await fetch (`/api/UserDetailApi/OnGoingEvents/${this.userId}`);
+                        this.onGoingEvents = await res.json();
+                    }catch(err){
+                        console.error('OnGoingEvents 失敗:', err);
+                    }
+                },
+                async fetchEndEvents(){
+                    try{
+                        const res = await fetch (`/api/UserDetailApi/EndEvents/${this.userId}`);
+                        this.endEvents = await res.json();
+                    }catch(err){
+                        console.error('EndEvents 失敗:', err);
+                    }
+                },
+                async fetchWillAttendEvents(){
+                    try{
+                        const res = await fetch (`/api/UserDetailApi/WillAttendEvents/${this.userId}`);
+                        this.willAttendEvents = await res.json();
+                    }catch(err){
+                        console.error('WillAttendEvents 失敗:', err);
+                    }
+                },
+                async fetchAttendedEvents(){
+                    try{
+                        const res = await fetch (`/api/UserDetailApi/AttendedEvents/${this.userId}`);
+                        this.attendedEvents = await res.json();
+                    }catch(err){
+                        console.error('AttendedEvents 失敗:', err);
+                    }
+                },
+            },
+            computed:{
+            },
+
+        
+        
+        }).mount('#app')
+
+    </script>
+}
