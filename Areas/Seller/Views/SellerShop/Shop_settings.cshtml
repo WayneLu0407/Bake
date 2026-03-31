@@ -17,12 +17,11 @@
     <div class="row g-4">
 
         <!-- 右側內容 -->
-        <div class="col-12 col-lg-9">
+        <div class="col-12">
             <div class="seller-panel p-4 rounded-4">
 
                 <div class="mb-3">
                     <div class="fs-4 fw-bold">店舖設定</div>
-                    <div class="text-muted">店舖簡介</div>
                 </div>
 
                 <div class="seller-card bg-white rounded-4 p-4 shadow-sm">
@@ -64,7 +63,7 @@
         
                                         @* 使用 Model 中的 StatusOptions，即使報錯也不會消失 *@
                                         <select asp-for="StatusId"
-                                                class="form-select border-primary"
+                                                class="form-select border-warning"
                                                 asp-items="Model.StatusName">
                                             <option value="">-- 請選擇 --</option>
                                         </select>
