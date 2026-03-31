@@ -1,12 +1,15 @@
-﻿using Bake.Data;
+﻿using AspNetCoreGeneratedDocument;
+using Bake.Data;
 using Bake.Models;
 using Bake.Models.Sales;
 using Bake.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Web;
@@ -17,7 +20,7 @@ namespace Bake.Controllers.api
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PayController : ControllerBase
+    public class PayController : Controller
     {
         private readonly BakeContext _bakeContext;
         private readonly IConfiguration _config;
@@ -27,16 +30,93 @@ namespace Bake.Controllers.api
             _config = config;
         }
 
-        [HttpGet("GetTradeData/{id}")]
-        public IActionResult GetTradeData(int id)
+        private int CurrentUserId
         {
-            // 從資料庫拿訂單資料
-            var order = _bakeContext.Orders.FirstOrDefault(o => o.OrderId == id);
-            if(order == null) return NotFound("找不到訂單");
+            get
+            {
+                var claimValue = User.FindFirst("UserId")?.Value
+                              ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
-            // 從session拿Info資料、購物車資料
+                if (int.TryParse(claimValue, out int id))
+                {
+                    return id;
+                }
+                return 0;
+            }
+        }
+
+        [Authorize]
+        [HttpPost]
+        //HttpPost接收前端傳來的確定購買清單資料 asp-action="ConfirmPayment"
+        //完成後redirection 去藍星串接
+
+
+        [HttpPost("GetTradeData")]
+        public async Task<IActionResult> GetTradeData([FromForm]CheckoutViewModel checkoutViewModel, [FromForm]string PaymentMethod)
+        {
+            int userId = CurrentUserId;
+
+            // 驗收防呆：如果真的抓不到登入者 ID，不要讓它進資料庫
+            if (userId == 0)
+            {
+                return RedirectToAction("Login", "Home");
+            }
+
+            //從session拿Info資料
+            var infoJson = HttpContext.Session.GetString("ReceiverInfo");
+            if (string.IsNullOrEmpty(infoJson)) return RedirectToAction("Info");
+            var receiverInfo = JsonSerializer.Deserialize<CheckoutViewModel>(infoJson);
+
+            //1. 建立Order物件實體，並將checkoutdata資料填入Order物件中
+            var order = new Order
+            {
+                UserId = userId,
+                ShippingAddress = receiverInfo.ReceiverAddress,
+                TotalAmount = 0, //這裡先設為0，實際金額應該從購物車計算
+                PaymentMethodId = byte.Parse(PaymentMethod),
+                StatusId = 0, //0:待付款、1:待出貨
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now,
+            };
+
+            //2. 建立OrderItem物件實體，並將購物車中的每個商品資料填入OrderItem物件中，並加入Order的OrderItems集合中
+            var cartItems = GetCartItemsFromSession();
+            if (!cartItems.Any()) return RedirectToAction("Index", "Cart"); // 沒東西買就回購物車
+
+            decimal totalAmount = 0;
+            foreach (var item in cartItems)
+            {
+                var orderItem = new OrderItem
+                {
+                    ProductId = item.ProductId,
+                    ItemQuantity = item.Quantity,
+                    UnitPrice = item.Price,
+                    Subtotal = item.Quantity * item.Price
+                };
+
+                order.OrderItems.Add(orderItem);
+                totalAmount += item.Quantity * item.Price;
+            }
+
+
+            int shippingFee = HttpContext.Session.GetInt32("ShippingFee") ?? 60;
+            order.TotalAmount = totalAmount + shippingFee;
+
+            //3. 寫入資料庫
+            _bakeContext.Orders.Add(order);
+            await _bakeContext.SaveChangesAsync();
+
+            //ClearCart(); //清空購物車
+
+            //4.重新導向: 如果是貨到付款，直接到Success
+            if (order.PaymentMethodId == 2)
+            {
+                return Ok(new { success=true, isCod=true, id = order.OrderId });
+            }
+
+
+            // [ 待修改 ] 用ViewBag拿資料
             string customerEmail = GetEmailFromSession();
-            var cartItem = GetCartItemsFromSession();
 
             // 金流配置
             string merchantID = _config["NewebPayConfig:MerchantID"];
@@ -44,18 +124,20 @@ namespace Bake.Controllers.api
             string hashIV = _config["NewebPayConfig:HashIV"];
             string baseAddress = $"{Request.Scheme}://{Request.Host}";
 
-            string itemDesc = string.Join(", ", cartItem.Select(c => c.ProductName));
+            string itemDesc = string.Join(",", cartItems.Select(item => item.ProductName.Trim() ?? "烘焙商品"))
+                .Replace("&", "").Replace("=", "");
             if (itemDesc.Length > 50) itemDesc = itemDesc.Substring(0, 47) + "...";
+            long nowTimeStamp = DateTimeOffset.Now.ToUnixTimeSeconds();
             // 金流資訊→組成藍新金流需要的TradeInfo
             var payData = new List<string>
             {
                 $"MerchantID={merchantID}",
-                $"RespondType=String",
-                $"TimeStamp={DateTimeOffset.Now.ToUnixTimeSeconds()}",
-                $"Version=2.0",
-                $"MerchantOrderNo={order.OrderId}_{DateTimeOffset.Now.ToUnixTimeSeconds()}",  // 要加上時間戳?
+                $"RespondType=JSON",
+                $"TimeStamp={nowTimeStamp}",
+                $"Version=2.3",
+                $"MerchantOrderNo={order.OrderId}_{nowTimeStamp}",
                 $"Amt={(int)order.TotalAmount}",
-                $"ItemDesc={itemDesc}",
+                $"ItemDesc=testorder",
                 $"ExpireDate={DateTime.Now.AddDays(3).ToString("yyyyMMdd")}",
                 $"Email={customerEmail}",
                 $"ReturnURL={baseAddress}/Pay/CallbackReturn",
@@ -64,12 +146,13 @@ namespace Bake.Controllers.api
                 (order.PaymentMethodId == 0 ? "CREDIT=1" : "CREDIT=0"),
                 (order.PaymentMethodId == 1 ? "VACC=1" : "VACC=0"),
             };
-            string rawTradeInfo = string.Join("&", payData);
+            string rawTradeInfo = string.Join("&", payData).Trim();
+            Console.WriteLine($"加密前字串:{rawTradeInfo}");
 
-            // 執行AES加密
+            // 交易資料做 AES加密、SHA256 加密
             string TradeInfoEncrypt = EncryptAESHex(rawTradeInfo, hashKey, hashIV);
-            //交易資料 SHA256 加密
-            string TradeSha = EncryptSHA256($"HashKey={hashKey}&{TradeInfoEncrypt}&HashIV={hashIV}");
+            string shaSource = $"HashKey={hashKey}&{TradeInfoEncrypt}&HashIV={hashIV}";
+            string TradeSha = EncryptSHA256(shaSource);
 
             //使用viewmodel包裝要傳給前端的資料
             var response = new PayViewModel
@@ -77,97 +160,126 @@ namespace Bake.Controllers.api
                 MerchantID = merchantID,
                 TradeInfo = TradeInfoEncrypt,
                 TradeSha = TradeSha,
+                Version = "2.3",
                 PayGateWay = _config["NewebPayConfig:PayGateWay"]
             };
-            return Ok(response);
+
+            //檢查用
+            //string testDecrypt = DecryptAESHex(TradeInfoEncrypt, hashKey, hashIV);
+            //Console.WriteLine($"反向解密結果: {testDecrypt}");
+            //Console.WriteLine($"[Debug] Raw: {rawTradeInfo}");
+            //string shaSource_ = $"HashKey={hashKey}&{TradeInfoEncrypt.ToUpper()}&HashIV={hashIV}";
+            //Console.WriteLine($"[Debug] SHA Source: {shaSource_}");
+            return Ok(new { isCod=false, payData = response});
+
+            //ClearCart(); //清空購物車
         }
 
-        
-        /// 支付完成返回網址
-        //public IActionResult CallbackReturn()
-        //{
-        //    // 接收參數
-        //    StringBuilder receive = new StringBuilder();
-        //    foreach (var item in Request.Form)
-        //    {
-        //        receive.AppendLine(item.Key + "=" + item.Value + "<br>");
-        //    }
-        //    //ViewData["ReceiveObj"] = receive.ToString();
+        [HttpPost]
+        [IgnoreAntiforgeryToken]
+        //callbackreturn
+        public IActionResult CallbackReturn(NewebPayResponse model)
+        {
+            // 接收參數
+            //StringBuilder receive = new StringBuilder();
+            //foreach (var item in Request.Form)
+            //{
+            //    receive.AppendLine(item.Key + "=" + item.Value + "<br>");
+            //}
+            //ViewData["ReceiveObj"] = receive.ToString();
 
-        //    // 解密訊息
-        //    IConfiguration Config = new ConfigurationBuilder().AddJsonFile("appSettings.json").Build();
-        //    string HashKey = Config.GetSection("HashKey").Value;//API 串接金鑰
-        //    string HashIV = Config.GetSection("HashIV").Value;//API 串接密碼
+            //// 解密訊息
+            //IConfiguration Config = new ConfigurationBuilder().AddJsonFile("appSettings.json").Build();
+            //string HashKey = Config.GetSection("HashKey").Value;//API 串接金鑰
+            //string HashIV = Config.GetSection("HashIV").Value;//API 串接密碼
 
-        //    string TradeInfoDecrypt = DecryptAESHex(Request.Form["TradeInfo"], HashKey, HashIV);
-        //    NameValueCollection decryptTradeCollection = HttpUtility.ParseQueryString(TradeInfoDecrypt);
-        //    receive.Length = 0;
-        //    foreach (String key in decryptTradeCollection.AllKeys)
-        //    {
-        //        receive.AppendLine(key + "=" + decryptTradeCollection[key] + "<br>");
-        //    }
-        //    //ViewData["TradeInfo"] = receive.ToString();
+            //string TradeInfoDecrypt = DecryptAESHex(Request.Form["TradeInfo"], HashKey, HashIV);
+            //NameValueCollection decryptTradeCollection = HttpUtility.ParseQueryString(TradeInfoDecrypt);
+            //receive.Length = 0;
+            //foreach (String key in decryptTradeCollection.AllKeys)
+            //{
+            //    receive.AppendLine(key + "=" + decryptTradeCollection[key] + "<br>");
+            //}
+            //ViewData["TradeInfo"] = receive.ToString();
+            //Console.WriteLine($"藍星回傳:{receive.ToString()}");
 
-        //    return View();
-        //}
+            //string merchantOrderNo = decryptTradeCollection["MerchantOrderNo"];
+            //string status = decryptTradeCollection["Status"]; // 藍新回傳的狀態碼
 
-        ///// 商店取號網址？?
-        ///// </summary>
-        ///// <returns></returns>
-        //public IActionResult CallbackCustomer()
-        //{
-        //    // 接收參數
-        //    StringBuilder receive = new StringBuilder();
-        //    foreach (var item in Request.Form)
-        //    {
-        //        receive.AppendLine(item.Key + "=" + item.Value + "<br>");
-        //    }
-        //    ViewData["ReceiveObj"] = receive.ToString();
+            //if (!string.IsNullOrEmpty(merchantOrderNo) && status == "SUCCESS")
+            //{
+            //    // 2. 拆解字串取得 OrderId
+            //    var parts = merchantOrderNo.Split('_');
+            //    if (parts.Length > 0 && int.TryParse(parts[0], out int orderId))
+            //    {
+            //        // 3. 導向到 CheckoutController 的 Success Action
+            //        // 參數順序：(Action名稱, Controller名稱, 路由參數)
+            //        return RedirectToAction("Success", "Checkout", new { id = orderId });
+            //    }
+            //}
+            //return RedirectToAction("Index", "Home");
 
-        //    // 解密訊息
-        //    IConfiguration Config = new ConfigurationBuilder().AddJsonFile("appSettings.json").Build();
-        //    string HashKey = Config.GetSection("HashKey").Value;//API 串接金鑰
-        //    string HashIV = Config.GetSection("HashIV").Value;//API 串接密碼
-        //    string TradeInfoDecrypt = DecryptAESHex(Request.Form["TradeInfo"], HashKey, HashIV);
-        //    NameValueCollection decryptTradeCollection = HttpUtility.ParseQueryString(TradeInfoDecrypt);
-        //    receive.Length = 0;
-        //    foreach (String key in decryptTradeCollection.AllKeys)
-        //    {
-        //        receive.AppendLine(key + "=" + decryptTradeCollection[key] + "<br>");
-        //    }
-        //    ViewData["TradeInfo"] = receive.ToString();
-        //    return View();
-        //}
+            return Json(model);
+        }
 
-        
-        ///// 支付通知網址 ??????
-        ///// </summary>
-        ///// <returns></returns>
-        //public IActionResult CallbackNotify()
-        //{
-        //    // 接收參數
-        //    StringBuilder receive = new StringBuilder();
-        //    foreach (var item in Request.Form)
-        //    {
-        //        receive.AppendLine(item.Key + "=" + item.Value + "<br>");
-        //    }
-        //    ViewData["ReceiveObj"] = receive.ToString();
+        /// <summary>
+        /// 商店取號網址
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult CallbackCustomer()
+        {
+            // 接收參數
+            StringBuilder receive = new StringBuilder();
+            foreach (var item in Request.Form)
+            {
+                receive.AppendLine(item.Key + "=" + item.Value + "<br>");
+            }
+            ViewData["ReceiveObj"] = receive.ToString();
 
-        //    // 解密訊息
-        //    IConfiguration Config = new ConfigurationBuilder().AddJsonFile("appSettings.json").Build();
-        //    string HashKey = Config.GetSection("HashKey").Value;//API 串接金鑰
-        //    string HashIV = Config.GetSection("HashIV").Value;//API 串接密碼
-        //    string TradeInfoDecrypt = DecryptAESHex(Request.Form["TradeInfo"], HashKey, HashIV);
-        //    NameValueCollection decryptTradeCollection = HttpUtility.ParseQueryString(TradeInfoDecrypt);
-        //    receive.Length = 0;
-        //    foreach (String key in decryptTradeCollection.AllKeys)
-        //    {
-        //        receive.AppendLine(key + "=" + decryptTradeCollection[key] + "<br>");
-        //    }
-        //    ViewData["TradeInfo"] = receive.ToString();
+            // 解密訊息
+            IConfiguration Config = new ConfigurationBuilder().AddJsonFile("appSettings.json").Build();
+            string HashKey = Config.GetSection("HashKey").Value;//API 串接金鑰
+            string HashIV = Config.GetSection("HashIV").Value;//API 串接密碼
+            string TradeInfoDecrypt = DecryptAESHex(Request.Form["TradeInfo"], HashKey, HashIV);
+            NameValueCollection decryptTradeCollection = HttpUtility.ParseQueryString(TradeInfoDecrypt);
+            receive.Length = 0;
+            foreach (String key in decryptTradeCollection.AllKeys)
+            {
+                receive.AppendLine(key + "=" + decryptTradeCollection[key] + "<br>");
+            }
+            ViewData["TradeInfo"] = receive.ToString();
+            return View();
+        }
 
-        //    return View();
-        //}
+        /// <summary>
+        /// 支付通知網址
+        /// </summary>
+        /// <returns></returns>
+        public IActionResult CallbackNotify()
+        {
+            // 接收參數
+            StringBuilder receive = new StringBuilder();
+            foreach (var item in Request.Form)
+            {
+                receive.AppendLine(item.Key + "=" + item.Value + "<br>");
+            }
+            ViewData["ReceiveObj"] = receive.ToString();
+
+            // 解密訊息
+            IConfiguration Config = new ConfigurationBuilder().AddJsonFile("appSettings.json").Build();
+            string HashKey = Config.GetSection("HashKey").Value;//API 串接金鑰
+            string HashIV = Config.GetSection("HashIV").Value;//API 串接密碼
+            string TradeInfoDecrypt = DecryptAESHex(Request.Form["TradeInfo"], HashKey, HashIV);
+            NameValueCollection decryptTradeCollection = HttpUtility.ParseQueryString(TradeInfoDecrypt);
+            receive.Length = 0;
+            foreach (String key in decryptTradeCollection.AllKeys)
+            {
+                receive.AppendLine(key + "=" + decryptTradeCollection[key] + "<br>");
+            }
+            ViewData["TradeInfo"] = receive.ToString();
+
+            return View();
+        }
 
         private List<CartViewModel> GetCartItemsFromSession()
         {
@@ -180,7 +292,6 @@ namespace Bake.Controllers.api
 
             return JsonSerializer.Deserialize<List<CartViewModel>>(cartJson);
         }
-
         private string GetEmailFromSession()
         {
             var infoJson = HttpContext.Session.GetString("ReceiverInfo");
@@ -348,5 +459,14 @@ namespace Bake.Controllers.api
                 }
             }
         }
+    }
+
+    public class NewebPayResponse
+    {
+        public string Status { get; set; }      // SUCCESS or errors
+        public string MerchantID { get; set; }
+        public string Version { get; set; }     // e.g., 2.3
+        public string TradeInfo { get; set; }   // AES Encrypted string
+        public string TradeSha { get; set; }    // SHA256 Hash for verification
     }
 }
