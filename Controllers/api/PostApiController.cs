@@ -106,6 +106,9 @@ namespace Bake.Controllers.api
                     SingupDeadline = p.EventDetails
                         .Select(e => e.SignupDeadline)
                         .FirstOrDefault(),
+                    Price = p.EventDetails
+                        .Select(e => e.Price)
+                        .FirstOrDefault()
                 })
                 .OrderByDescending(p => p.EventTime)
                 .Take(20)

@@ -184,11 +184,17 @@
                             <div class="event-meta__label mb-1">日期時間</div>
                             <p class="fw-bold mb-4">@Model.EventDetail.EventTime.ToString("yyyy/M/d (ddd) tt h:mm")-@Model.EventDetail.EventEndTime.ToString("h:mm")</p>
 
+                            <div class="event-meta__label mb-1">活動費用</div>
+                            <p class="fw-bold mb-4">
+                               @(Model.EventDetail.Price == 0 || Model.EventDetail.Price == null ? "免費" : "NT$" + Model.EventDetail.Price)
+                            </p>
+
                             <div class="event-meta__label mb-1">活動簡介</div>
-                            
+
                             <p style="white-space: pre-line;">
                                @Model.Content
                             </p>
+
                         </div>
                     }
                     else
