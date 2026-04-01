@@ -1,0 +1,16 @@
+﻿@model Bake.Models.Sales.Shop
+
+@{
+    ViewData["Title"] = "店鋪已結束營業";
+}
+
+<div class="container text-center py-5">
+    <div class="mb-4" style="font-size: 4rem;">🚪</div>
+    <h2 class="fw-bold mb-3">此店鋪已結束營業</h2>
+    <p class="text-muted mb-4">
+        「@Model.ShopName」已永久停止營業，感謝您的支持。
+    </p>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-warning px-4 py-2 rounded-pill">
+        回到首頁
+    </a>
+</div>
