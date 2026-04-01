@@ -1,0 +1,89 @@
+﻿
+@{
+    ViewData["Title"] = "付款失敗";
+}
+
+<section class="py-5" style="background-color: #f8f9fa; min-height: 80vh;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <div class="card border-0 shadow-lg" style="border-radius: 1.5rem;">
+                    <div class="card-body p-5 text-center">
+                        
+                        <div class="mb-4">
+                            <div class="display-1 text-danger">
+                                <i class="fas fa-exclamation-circle"></i>
+                            </div>
+                        </div>
+
+                        <h2 class="fw-bold text-dark mb-3">付款未成功</h2>
+                        <p class="text-muted mb-4">
+                            很抱歉，您的訂單付款過程發生了點問題。<br>
+                            請檢查您的信用卡資訊或嘗試其他支付方式。
+                        </p>
+
+                        <div class="bg-light rounded-4 p-4 mb-4 text-start">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">訂單編號：</span>
+                                <span class="fw-bold">@ViewBag.OrderId</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">訂單金額：</span>
+                                <span class="fw-bold text-danger">$@ViewBag.Amount</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">失敗原因：</span>
+                                <span class="text-secondary small">@(ViewBag.ErrorMessage ?? "刷卡授權失敗，請洽詢發卡銀行")</span>
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-3">
+                            <a href="@Url.Action("GetTradeData", "PayApi", new { id = ViewBag.OrderId })" 
+                               class="btn btn-warning py-3 rounded-pill fw-bold shadow-sm">
+                                <i class="fas fa-redo-alt me-2"></i> 重新嘗試付款
+                            </a>
+                            
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary py-2 w-100 rounded-pill">
+                                        回首頁
+                                    </a>
+                                </div>
+                                <div class="col-6">
+                                    <a href="#" class="btn btn-outline-secondary py-2 w-100 rounded-pill">
+                                        聯絡客服
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <p class="text-muted small">
+                        <i class="fas fa-shield-alt me-1"></i> 我們不會保留您的信用卡完整資訊，請放心交易。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section Styles {
+    <style>
+        .card {
+            transition: transform 0.3s ease;
+        }
+        /* 增加一點點烘焙風格的暖色調微調 */
+        .btn-warning {
+            background-color: #ffc107;
+            border-color: #ffc107;
+            color: #442c2e; /* 深巧克力色文字 */
+        }
+        .btn-warning:hover {
+            background-color: #eab000;
+            color: #442c2e;
+        }
+    </style>
+}
