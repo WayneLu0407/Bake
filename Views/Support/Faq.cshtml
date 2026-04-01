@@ -1,0 +1,156 @@
+﻿
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans)}
+.hero{background:#F5A623;padding:2rem 1.5rem 1.8rem;border-radius:var(--border-radius-lg) var(--border-radius-lg) 0 0}
+.hero-title{color:#fff;font-size:15px;font-weight:500;text-align:center;margin-bottom:1rem;opacity:.92}
+.search-wrap{position:relative;max-width:600px;margin:0 auto}
+.search-wrap svg{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:#999;fill:none;stroke-width:2}
+#searchInput{width:100%;padding:11px 14px 11px 40px;border:none;border-radius:40px;font-size:14px;outline:none;color:var(--color-text-primary);background:#fff}
+.body{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-top:none;border-radius:0 0 var(--border-radius-lg) var(--border-radius-lg);padding:1.5rem}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem}
+.tab{padding:6px 14px;border-radius:40px;font-size:13px;cursor:pointer;border:0.5px solid var(--color-border-secondary);background:var(--color-background-secondary);color:var(--color-text-secondary);transition:all .15s}
+.tab.active{background:#F5811E;color:#fff;border-color:#F5811E}
+.section-label{font-size:12px;color:var(--color-text-secondary);font-weight:500;margin-bottom:8px;text-transform:none;letter-spacing:.02em}
+.accordion-group{margin-bottom:1.25rem}
+.acc-item{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);margin-bottom:6px;overflow:hidden}
+.acc-q{width:100%;text-align:left;padding:13px 16px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;background:var(--color-background-primary);font-size:14px;font-weight:500;color:var(--color-text-primary);border:none;gap:12px}
+.acc-q:hover{background:var(--color-background-secondary)}
+.acc-q.open{background:#FFF6EE;color:#B85C10}
+.chevron{width:16px;height:16px;flex-shrink:0;stroke:currentColor;fill:none;stroke-width:2;transition:transform .2s}
+.chevron.open{transform:rotate(180deg)}
+.acc-a{display:none;padding:0 16px 14px;font-size:13px;color:var(--color-text-secondary);line-height:1.7;border-top:0.5px solid var(--color-border-tertiary)}
+.acc-a.open{display:block}
+.acc-a p{margin-top:10px}
+.empty{text-align:center;padding:2rem;color:var(--color-text-secondary);font-size:14px}
+.ai-banner{margin-top:1.25rem;padding:14px 18px;border-radius:var(--border-radius-lg);border:0.5px solid #FAC775;background:#FAEEDA;display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer}
+.ai-banner:hover{background:#FAC775}
+.ai-left{display:flex;align-items:center;gap:10px}
+.ai-icon{width:32px;height:32px;border-radius:50%;background:#F5811E;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ai-icon svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:2}
+.ai-text h5{color:#633806; margin:0;}
+.ai-text p{color:#854F0B; margin: 0;}
+.ai-text{display: flex; flex-direction: column; justify-content: center;}
+.ai-arrow{font-size:16px;color:#854F0B}
+.highlight{background:#FFE0B2;border-radius:3px;padding:0 2px}
+</style>
+
+<div class="hero">
+  <p class="hero-title">需要協助嗎？</p>
+  <div class="search-wrap">
+    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input id="searchInput" placeholder="請輸入問題關鍵字" oninput="filterFAQ()">
+  </div>
+</div>
+<h3 class="d-flex justify-content-center mt-5">熱門常見問題問題</h3>
+<div class="body">
+  
+  <div id="faqList" class="m-4"></div>
+
+  <div class="ai-banner" onclick="sendPrompt('我想試試AI智能客服，請問有哪些問題可以幫我解答？')">
+    <div class="ai-left">
+      <div class="ai-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2a4 4 0 0 1 4 4v1h1a3 3 0 0 1 3 3v5a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3v-5a3 3 0 0 1 3-3h1V6a4 4 0 0 1 4-4z"/><circle cx="9" cy="13" r="1" fill="#fff" stroke="none"/><circle cx="15" cy="13" r="1" fill="#fff" stroke="none"/></svg>
+      </div>
+      <div class="ai-text">
+        <h5>試試 AI 智能客服</h5>
+        <p>找不到答案？讓 AI 幫您解決問題 ↗</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const faqData = [
+  {cat:'甜點棧', q:'什麼是甜點棧？', a:'甜點棧是由我們精選合作的優質烘焙商家所組成的平台，提供多元化的商品與交流社群空間，讓您可以直接向商家查詢、預訂並獲得完整服務。'},
+  {cat:'甜點棧', q:'我該如何聯繫商家？', a:'請透過商品頁內的「聯繫賣家」功能，直接詢問商家。平台上的商品是由商家提供與服務，如有任何商品相關問題，建議直接與商家聯繫，以獲得最快速的協助！'},
+  {cat:'帳號', q:'無法登入，該怎麼辦？', a:'請確認您使用的是註冊時的 Email 登入。若忘記密碼，請點選登入頁面的【忘記密碼】，系統會寄送重設連結至您的信箱。'},
+  {cat:'帳號', q:'如何更改個人資料？', a:'請至 會員中心 > 帳號設定 > 填寫完後儲存。'},
+  {cat:'優惠', q:'優惠代碼使用規範為何？', a:'同一帳號 / 同一裝置 / 同一人每筆優惠券只能使用一次。所有優惠代碼與優惠券皆只適用於甜點棧支援的付款方式。活動頁面上公布優惠代碼除非另有說明，否則只限於該活動專區使用。'},
+  {cat:'付款', q:'如何索取發票或收據？', a:'若發票由甜點棧代為開立，發票將會於賣家出貨後的 1 天內開立，並寄送電子發票通知信給您。若賣家未申請代收轉付服務，請直接聊聊與賣家確認。'},
+  {cat:'付款', q:'我可以在已成立的訂單中修改或添加商品嗎？', a:'若訂單已成立將無法再修改或添加更多商品。如有需求，請先取消該筆訂單，並於取消後重新下單。'},
+  {cat:'付款', q:'沒有帳號可以購買商品嗎？', a:'為保障您的權益，在甜點棧購買商品前皆須先註冊帳號。'},
+  {cat:'付款', q:'我可以使用哪些信用卡付款？', a:'甜點棧目前支援 VISA、Master 與 JCB 三家國際發卡組織之信用卡 / 簽帳金融卡。跨境訂單使用信用卡支付時，發卡銀行可能收取額外手續費，請洽您的發卡銀行。'},
+  {cat:'付款', q:'如何撰寫商品評論？', a:'只有完成的訂單才可以撰寫商品評論。請登入後前往「會員中心」>「訂單記錄」，找到欲撰寫評論的訂單並點擊評論商品，依照指示填寫送出。'},
+  {cat:'付款', q:'在甜點棧付款是否安全？', a:'您可以放心付款。甜點棧透過第三方安全支付平台處理交易，採用加密機制確保資訊安全，甜點棧不會保存您的信用卡資料。'},
+  {cat:'付款', q:'重複刷卡或刷卡成功但訂單未成立，該怎麼處理？', a:'活動期間交易量大或銀行連線失敗時，可能會有此情形。若溢付金額已收到消費通知，甜點棧將自動取消溢付金額，作業時間於交易日隔天起約 7–14 個工作天。'},
+  {cat:'付款', q:'我可以申請退款嗎？', a:'退款流程為平台未來的發展願景，我們期待盡快為您提供此服務。'}
+];
+
+let activeTab = 'all';
+let searchVal = '';
+
+function setTab(tab, el){
+  activeTab = tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function filterFAQ(){
+  searchVal = document.getElementById('searchInput').value.trim();
+  render();
+}
+
+function highlight(text, kw){
+  if(!kw) return text;
+  const re = new RegExp('('+kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi');
+  return text.replace(re,'<span class="highlight">$1</span>');
+}
+
+function render(){
+  const list = document.getElementById('faqList');
+  const kw = searchVal.toLowerCase();
+  
+  let filtered = faqData.filter(item=>{
+    const matchCat = activeTab==='all' || item.cat===activeTab || item.q.includes(activeTab) || item.a.includes(activeTab);
+    const matchSearch = !kw || item.q.toLowerCase().includes(kw) || item.a.toLowerCase().includes(kw);
+    return matchCat && matchSearch;
+  });
+
+  if(filtered.length===0){
+    list.innerHTML='<div class="empty">找不到相關問題，歡迎試試 AI 智能客服 👇</div>';
+    return;
+  }
+
+  const groups = {};
+  const catOrder = ['甜點棧','帳號','優惠','付款'];
+  filtered.forEach(item=>{
+    if(!groups[item.cat]) groups[item.cat]={'帳號':'帳號管理','甜點棧':'甜點棧介紹','優惠':'優惠券與優惠代碼','付款':'付款與訂單'}[item.cat]||item.cat, groups[item.cat]=[];
+    groups[item.cat].push(item);
+  });
+
+  const catLabel = {'帳號':'帳號管理','甜點棧':'甜點棧介紹','優惠':'優惠券與優惠代碼','付款':'付款與訂單'};
+
+  let html = '';
+  catOrder.forEach(cat=>{
+    const items = filtered.filter(i=>i.cat===cat);
+    if(!items.length) return;
+    html += `<div class="accordion-group"><p class="section-label">${catLabel[cat]||cat}</p>`;
+    items.forEach((item,idx)=>{
+      const id = cat+idx;
+      html += `<div class="acc-item">
+        <button class="acc-q" onclick="toggle('${id}',this)" id="q-${id}">
+          <span>${highlight(item.q,searchVal)}</span>
+          <svg class="chevron" viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="acc-a" id="a-${id}">${highlight(item.a,searchVal)}</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+  list.innerHTML = html;
+}
+
+function toggle(id, btn){
+  const ans = document.getElementById('a-'+id);
+  const chev = btn.querySelector('.chevron');
+  const isOpen = ans.classList.contains('open');
+  ans.classList.toggle('open',!isOpen);
+  chev.classList.toggle('open',!isOpen);
+  btn.classList.toggle('open',!isOpen);
+}
+
+render();
+</script>
