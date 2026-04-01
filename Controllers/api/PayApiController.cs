@@ -20,11 +20,11 @@ namespace Bake.Controllers.api
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PayController : Controller
+    public class PayApiController : ControllerBase
     {
         private readonly BakeContext _bakeContext;
         private readonly IConfiguration _config;
-        public PayController( BakeContext bakeContext, IConfiguration config)
+        public PayApiController( BakeContext bakeContext, IConfiguration config)
         {
             _bakeContext = bakeContext;
             _config = config;
@@ -45,10 +45,7 @@ namespace Bake.Controllers.api
             }
         }
 
-        [Authorize]
-        [HttpPost]
-        //HttpPost接收前端傳來的確定購買清單資料 asp-action="ConfirmPayment"
-        //完成後redirection 去藍星串接
+        
 
 
         [HttpPost("GetTradeData")]
@@ -137,7 +134,7 @@ namespace Bake.Controllers.api
                 $"Version=2.3",
                 $"MerchantOrderNo={order.OrderId}_{nowTimeStamp}",
                 $"Amt={(int)order.TotalAmount}",
-                $"ItemDesc=testorder",
+                $"ItemDesc={itemDesc}",
                 $"ExpireDate={DateTime.Now.AddDays(3).ToString("yyyyMMdd")}",
                 $"Email={customerEmail}",
                 $"ReturnURL={baseAddress}/Pay/CallbackReturn",
@@ -175,111 +172,9 @@ namespace Bake.Controllers.api
             //ClearCart(); //清空購物車
         }
 
-        [HttpPost]
-        [IgnoreAntiforgeryToken]
-        //callbackreturn
-        public IActionResult CallbackReturn(NewebPayResponse model)
-        {
-            // 接收參數
-            //StringBuilder receive = new StringBuilder();
-            //foreach (var item in Request.Form)
-            //{
-            //    receive.AppendLine(item.Key + "=" + item.Value + "<br>");
-            //}
-            //ViewData["ReceiveObj"] = receive.ToString();
+        
 
-            //// 解密訊息
-            //IConfiguration Config = new ConfigurationBuilder().AddJsonFile("appSettings.json").Build();
-            //string HashKey = Config.GetSection("HashKey").Value;//API 串接金鑰
-            //string HashIV = Config.GetSection("HashIV").Value;//API 串接密碼
-
-            //string TradeInfoDecrypt = DecryptAESHex(Request.Form["TradeInfo"], HashKey, HashIV);
-            //NameValueCollection decryptTradeCollection = HttpUtility.ParseQueryString(TradeInfoDecrypt);
-            //receive.Length = 0;
-            //foreach (String key in decryptTradeCollection.AllKeys)
-            //{
-            //    receive.AppendLine(key + "=" + decryptTradeCollection[key] + "<br>");
-            //}
-            //ViewData["TradeInfo"] = receive.ToString();
-            //Console.WriteLine($"藍星回傳:{receive.ToString()}");
-
-            //string merchantOrderNo = decryptTradeCollection["MerchantOrderNo"];
-            //string status = decryptTradeCollection["Status"]; // 藍新回傳的狀態碼
-
-            //if (!string.IsNullOrEmpty(merchantOrderNo) && status == "SUCCESS")
-            //{
-            //    // 2. 拆解字串取得 OrderId
-            //    var parts = merchantOrderNo.Split('_');
-            //    if (parts.Length > 0 && int.TryParse(parts[0], out int orderId))
-            //    {
-            //        // 3. 導向到 CheckoutController 的 Success Action
-            //        // 參數順序：(Action名稱, Controller名稱, 路由參數)
-            //        return RedirectToAction("Success", "Checkout", new { id = orderId });
-            //    }
-            //}
-            //return RedirectToAction("Index", "Home");
-
-            return Json(model);
-        }
-
-        /// <summary>
-        /// 商店取號網址
-        /// </summary>
-        /// <returns></returns>
-        public IActionResult CallbackCustomer()
-        {
-            // 接收參數
-            StringBuilder receive = new StringBuilder();
-            foreach (var item in Request.Form)
-            {
-                receive.AppendLine(item.Key + "=" + item.Value + "<br>");
-            }
-            ViewData["ReceiveObj"] = receive.ToString();
-
-            // 解密訊息
-            IConfiguration Config = new ConfigurationBuilder().AddJsonFile("appSettings.json").Build();
-            string HashKey = Config.GetSection("HashKey").Value;//API 串接金鑰
-            string HashIV = Config.GetSection("HashIV").Value;//API 串接密碼
-            string TradeInfoDecrypt = DecryptAESHex(Request.Form["TradeInfo"], HashKey, HashIV);
-            NameValueCollection decryptTradeCollection = HttpUtility.ParseQueryString(TradeInfoDecrypt);
-            receive.Length = 0;
-            foreach (String key in decryptTradeCollection.AllKeys)
-            {
-                receive.AppendLine(key + "=" + decryptTradeCollection[key] + "<br>");
-            }
-            ViewData["TradeInfo"] = receive.ToString();
-            return View();
-        }
-
-        /// <summary>
-        /// 支付通知網址
-        /// </summary>
-        /// <returns></returns>
-        public IActionResult CallbackNotify()
-        {
-            // 接收參數
-            StringBuilder receive = new StringBuilder();
-            foreach (var item in Request.Form)
-            {
-                receive.AppendLine(item.Key + "=" + item.Value + "<br>");
-            }
-            ViewData["ReceiveObj"] = receive.ToString();
-
-            // 解密訊息
-            IConfiguration Config = new ConfigurationBuilder().AddJsonFile("appSettings.json").Build();
-            string HashKey = Config.GetSection("HashKey").Value;//API 串接金鑰
-            string HashIV = Config.GetSection("HashIV").Value;//API 串接密碼
-            string TradeInfoDecrypt = DecryptAESHex(Request.Form["TradeInfo"], HashKey, HashIV);
-            NameValueCollection decryptTradeCollection = HttpUtility.ParseQueryString(TradeInfoDecrypt);
-            receive.Length = 0;
-            foreach (String key in decryptTradeCollection.AllKeys)
-            {
-                receive.AppendLine(key + "=" + decryptTradeCollection[key] + "<br>");
-            }
-            ViewData["TradeInfo"] = receive.ToString();
-
-            return View();
-        }
+        
 
         private List<CartViewModel> GetCartItemsFromSession()
         {
@@ -461,12 +356,5 @@ namespace Bake.Controllers.api
         }
     }
 
-    public class NewebPayResponse
-    {
-        public string Status { get; set; }      // SUCCESS or errors
-        public string MerchantID { get; set; }
-        public string Version { get; set; }     // e.g., 2.3
-        public string TradeInfo { get; set; }   // AES Encrypted string
-        public string TradeSha { get; set; }    // SHA256 Hash for verification
-    }
+    
 }
