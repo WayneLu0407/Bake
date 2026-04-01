@@ -233,6 +233,15 @@ namespace Bake.Areas.Seller.Controllers
             ViewBag.Categories = await _context.ProductCategories
                 .Select(c => new { c.CategoryId, c.CategoryName })
                 .ToListAsync();
+
+            var userId = GetCurrentUserId();
+            var shop = await _context.Shops
+                .Where(u => u.UserId == userId)
+                .Select(u => new { u.ShopName, u.ShopImg })
+                .FirstOrDefaultAsync();
+
+            ViewBag.ShopName = shop ?.ShopName ?? "我的店鋪";
+            ViewBag.ShopImg = ViewBag.ShopImg = "/" + (shop?.ShopImg ?? "ProductPicture/NoImage.jpg").TrimStart('/');
             return View();
         }
 
