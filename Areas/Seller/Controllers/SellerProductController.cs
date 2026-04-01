@@ -305,7 +305,6 @@ namespace Bake.Areas.Seller.Controllers
                 ViewBag.Categories = await _context.ProductCategories
                 .Select(c => new { c.CategoryId, c.CategoryName })
                 .ToListAsync();
-                TempData["Success"] = "商品新增成功！";
                 return RedirectToAction("All");
 
             }
