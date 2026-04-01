@@ -279,7 +279,7 @@
             const formData = new FormData(checkoutForm);
 
             try{
-                const res = await fetch(`/api/Pay/GetTradeData`,{
+                const res = await fetch(`/api/PayApi/GetTradeData`,{
                     method: 'POST',
                     body: formData
                 });
