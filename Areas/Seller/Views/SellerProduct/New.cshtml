@@ -1,11 +1,5 @@
 ﻿@model Bake.Areas.Seller.ViewModels.ProductViewModel
 
-@if (TempData["Success"] != null)
-{
-    <script>
-        alert("@Html.Raw(TempData["Success"])");
-    </script>
-}
         <!-- ========== section start ========== -->
         <section>
             <div class="container-fluid">
@@ -91,7 +85,9 @@
                                     <input type="file" asp-for="ProductImage" class="form-control" accept="image/*" title="尚無內容" />
                                     <span asp-validation-for="ProductImage" class="text-danger"></span>
                                 </div>
-                                <div class="form-group">
+                                <!-- ===== 按鈕區：儲存草稿 / 預覽 / 新增 ===== -->
+                                <div class="form-group d-flex justify-content-end gap-2 mt-4">
+                                    <button type="button" id="btnPreview" class="btn btn-outline-secondary">預覽</button>
                                     <input type="submit" value="新增" class="btn btn-primary" />
                                 </div>
                             </form>
@@ -103,6 +99,135 @@
             <!-- end container -->
         </section>
         <!-- ========== section end ========== -->
+<!-- ===================================================================
+     預覽 Modal — 模擬 Details 頁面的商品展示樣式
+     =================================================================== -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="previewModalLabel">商品預覽</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Modal Body — 模擬 Details 頁面 -->
+            <div class="modal-body px-4">
+
+                <!-- 麵包屑 -->
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><span>首頁</span></li>
+                        <li class="breadcrumb-item"><span id="pvCategoryBreadcrumb">分類</span></li>
+                        <li class="breadcrumb-item active" id="pvNameBreadcrumb">商品名稱</li>
+                    </ol>
+                </nav>
+
+                <!-- 商品主區 -->
+                <div class="row g-4 mb-4">
+                    <!-- 左：圖片 -->
+                    <div class="col-12 col-lg-6">
+                        <div class="overflow-hidden" style="min-height:350px; display:flex; align-items:center; justify-content:center;">
+                            <img id="pvImage" src="~/ProductPicture/NoImage.jpg" alt="商品圖片"
+                                 style="max-width:100%; max-height:450px; object-fit:contain;" />
+                        </div>
+                    </div>
+                    <!-- 右：商品資訊 -->
+                    <div class="col-12 col-lg-6 d-flex flex-column gap-3">
+                        <div>
+                            <p class="text-muted mb-1" id="pvShopName">您的店鋪</p>
+                            <h1 class="fs-2 mb-0" id="pvProductName">商品名稱</h1>
+                        </div>
+
+                        <!-- 售價 -->
+                        <div class="d-flex flex-column gap-1">
+                            <span class="fs-1 fw-bold" style="color:#e02020;" id="pvPrice">NT$0</span>
+                            <span class="text-muted text-decoration-line-through" id="pvOriginalPrice" style="display:none;"></span>
+                        </div>
+
+                        <!-- 數量 -->
+                        <div>
+                            <p class="text-muted mb-1">數量</p>
+                            <select class="form-select" style="width:80px;" disabled>
+                                <option>1</option>
+                            </select>
+                        </div>
+
+                        <!-- 按鈕 -->
+                        <div class="d-flex flex-column gap-2 mt-2">
+                            <button class="btn py-3 w-100" style="background:#ffc43f; color:red; cursor:default;" disabled>放入購物車</button>
+                            <button class="btn btn-light py-3 w-100" disabled>加入最愛</button>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- 商品介紹 + 關於品牌 -->
+                <!-- 標題列：兩邊對齊，共用一條底線 -->
+                <div class="row mb-0" style="--bs-gutter-x:1.5rem;">
+                    <div class="col-12 col-lg-6 d-flex align-items-end">
+                        <h5 class="fw-bold mb-0 pb-2 style=" line-height:1.4;"">商品介紹</h5>
+                    </div>
+                    <div class="col-12 col-lg-6 d-flex align-items-end justify-content-between">
+                        <h5 class="fw-bold mb-0 pb-2" style="line-height:1.4;">關於品牌</h5>
+                        <span class="btn btn-outline-warning btn-sm" style="cursor:default;">來去逛逛</span>
+                    </div>
+                </div>
+                <hr class="mt-0 mb-3" />
+                <!-- 內容列 -->
+                <div class="row g-4 mb-4">
+                    <div class="col-12 col-lg-6">
+                        <p class="lh-lg" id="pvDescription" style="white-space:pre-line;">（尚無描述）</p>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <img id="pvShopImage" src="~/ProductPicture/NoImage.jpg" alt="品牌Logo" style="width:80px; height:80px; object-fit:cover; border-radius:50%;" />
+                            <div>
+                                <p class="fw-bold mb-0" id="pvShopName2">您的店鋪</p>
+                                <p class="text-muted mb-0">台灣</p>
+                            </div>
+                        </div>
+                        <div class="text-muted" style="font-size:0.9rem;">
+                            <p class="mb-1">上次上線：<strong>剛剛</strong></p>
+                            <p class="mb-1">回應率：<strong>100%</strong></p>
+                            <p class="mb-1">回應速度：<strong>1 日內</strong></p>
+                            <p class="mb-1">平均出貨速度：<strong>一週內</strong></p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- 商品資訊 table -->
+                <div class="mb-4">
+                    <h5 class="fw-bold pb-2 mb-3">商品資訊</h5>
+                    <table class="table" style="table-layout:fixed;">
+                        <colgroup>
+                            <col style="width:30%;" />
+                            <col style="width:70%;" />
+                        </colgroup>
+                        <tbody>
+                            <tr><td>賞味期限</td><td id="pvShelfLife">—</td></tr>
+                            <tr><td>內容物</td><td id="pvIngredients">—</td></tr>
+                            <tr><td>內容量</td><td id="pvNetWeight">—</td></tr>
+                            <tr><td>庫存數量</td><td id="pvQuantity">—</td></tr>
+                            <tr><td>有效期限</td><td id="pvExpireDate">—</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            <!-- end modal-body -->
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                <button type="button" class="btn btn-primary" id="btnSubmitFromPreview">確認新增</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
@@ -146,40 +271,119 @@
             $.validator.methods.step = function (value, element, param) {
                 return this.optional(element) || (value % param === 0);
             };
-        });
-        function previewUploadImage(inputFile) {
-            var file = inputFile.files[0];
+            function previewUploadImage(inputFile) {
+                var file = inputFile.files[0];
 
-            if(file.size>5*1024*1024){
-                alert("圖片不能超過5MB");
-                inputFile.value="";
-                return;
-            }
-            var allowTypes = "image.*";
-            if (inputFile.files[0].type.match(allowTypes)) {
-                $('.btn').prop('disabled', false);
-                var reader = new FileReader();
-                reader.onload = function (e) {
-                    $("#ProductImage").prev().attr('src', e.target.result);
-                    $("#ProductImage").prev().attr('title', file.name);
+                if(file.size>5*1024*1024){
+                    alert("圖片不能超過5MB");
+                    inputFile.value="";
+                    return;
                 }
-                reader.readAsDataURL(file);
+                var allowTypes = "image.*";
+                if (inputFile.files[0].type.match(allowTypes)) {
+                    $('.btn').prop('disabled', false);
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        $("#ProductImage").prev().attr('src', e.target.result);
+                        $("#ProductImage").prev().attr('title', file.name);
+                    }
+                    reader.readAsDataURL(file);
+                }
+                else {
+                    alert("不支援上傳的檔案格式!");
+                    inputFile.value = "";
+                    $('.btn').prop('disabled', true);
+
+                    $("#ProductImage").prev().attr('src', "/images/NoImage.jpg");
+                    $("#ProductImage").prev().attr('title', "尚無圖片");
+
+                }
             }
-            else {
-                alert("不支援上傳的檔案格式!");
-                inputFile.value = "";
-                $('.btn').prop('disabled', true);
 
-                $("#ProductImage").prev().attr('src', "/images/NoImage.jpg");
-                $("#ProductImage").prev().attr('title', "尚無圖片");
+            $("#ProductImage").change(function () {
+                // alert("change");
+                    previewUploadImage(this);
+            });
 
-            }
-        }
 
-        $("#ProductImage").change(function () {
-            // alert("change");
-                previewUploadImage(this);
+            // ========== 預覽功能 ==========
+            var categoryMap = {};
+            // 從 select 的 option 建立 categoryId → categoryName 對照
+            $("#CategoryId option").each(function () {
+                var val = $(this).val();
+                var text = $(this).text();
+                if (val) {
+                    categoryMap[val] = text;
+                }
+            });
+
+            $("#btnPreview").click(function () {
+                // 1) 讀取表單欄位
+                var name        = $("#ProductName").val() || "（未填寫商品名稱）";
+                var categoryId  = $("#CategoryId").val();
+                var categoryName = categoryMap[categoryId] || "未選擇分類";
+                var description = $("#ProductDescription").val() || "（尚無描述）";
+                var price       = parseFloat($("#ProductPrice").val()) || 0;
+                var discount    = parseFloat($("#ProductDiscount").val()) || 0;
+                var quantity    = parseInt($("#ProductQuantity").val()) || 0;
+                var expireDate  = $("#ExpireDate").val() || "—";
+                var ingredients = $("#Ingredients").val() || "—";
+                var netWeight   = $("#NetWeight").val() || "—";
+                var shelfLife   = $("#ShelfLifeNote").val() || "—";
+
+                // 2) 圖片：從表單上方的 img 取得 (已由 previewUploadImage 設定)
+                var imgSrc = $("#ProductImage").prev("img").attr("src") || "/ProductPicture/NoImage.jpg";
+
+                // 3) 計算原價 (如果有折扣)
+                var originalPrice = null;
+                if (discount > 0 && discount < 1) {
+                    originalPrice = Math.round(price / (1 - discount));
+                }
+
+                // 4) 填入 Modal
+                $("#pvProductName").text(name);
+                $("#pvNameBreadcrumb").text(name);
+                $("#pvCategoryBreadcrumb").text(categoryName);
+                $("#pvDescription").text(description);
+                $("#pvPrice").text("NT$" + price);
+                $("#pvImage").attr("src", imgSrc);
+
+                if (originalPrice) {
+                    $("#pvOriginalPrice").text("NT$" + originalPrice).show();
+                } else {
+                    $("#pvOriginalPrice").hide();
+                }
+
+                $("#pvShelfLife").text(shelfLife);
+                $("#pvIngredients").text(ingredients);
+                $("#pvNetWeight").text(netWeight);
+                $("#pvQuantity").text(quantity > 0 ? quantity : "—");
+                $("#pvExpireDate").text(expireDate || "—");
+
+                // 取得店鋪名稱 (從 API 或預設)
+                var shopName = @Html.Raw(Json.Serialize(ViewBag.ShopName ?? "我的店鋪"));
+                $("#pvShopName").text(shopName);
+                $("#pvShopName2").text(shopName);
+
+                var shopImg  =  @Html.Raw(Json.Serialize(ViewBag.ShopImg ?? "/ProductPicture/NoImage.jpg"));
+                $("#pvShopImage").attr("src", shopImg);
+
+                // 5) 開啟 Modal
+                var modal = new bootstrap.Modal(document.getElementById('previewModal'));
+                modal.show();
+            });
+            // ★ 修正 aria-hidden 焦點警告：Modal 關閉時把焦點移回預覽按鈕
+            document.getElementById('previewModal').addEventListener('hidden.bs.modal', function () {
+                document.getElementById('btnPreview').focus();
+            });
+            // 從預覽 Modal 直接送出表單
+            $("#btnSubmitFromPreview").click(function () {
+                // 關閉 Modal
+                bootstrap.Modal.getInstance(document.getElementById('previewModal')).hide();
+                // 送出表單
+                $("#newProductForm").submit();
+            });
         });
-
+        
     </script>
 }

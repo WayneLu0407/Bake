@@ -1,4 +1,5 @@
 ﻿using Bake.Data;
+using Bake.Models.Sales;
 using Bake.ViewModel.ShopFront;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,20 @@ namespace Bake.Controllers
             string? priceRange = "all",
             int page = 1)
         {
-            var vm = await BuildShopProfilePageViewModel(id, keyword, categoryId, sort, priceRange, page);
+            var shop = await _context.Shops
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.UserId == id);
+
+            if (shop == null) 
+            {
+                return NotFound();
+            }
+            if (shop.StatusId == 2)
+            {
+                return View("ShopClosed", shop);
+            }
+
+            var vm = await BuildShopProfilePageViewModel(id,shop, keyword, categoryId, sort, priceRange, page);
 
             if (vm == null)
             {
@@ -40,6 +54,7 @@ namespace Bake.Controllers
 
         private async Task<ShopProfilePageViewModel?> BuildShopProfilePageViewModel(
             int id,
+            Shop shop,
             string? keyword,
             int? categoryId,
             string? sort,
@@ -56,108 +71,114 @@ namespace Bake.Controllers
             sort = string.IsNullOrWhiteSpace(sort) ? "latest" : sort.Trim().ToLower();
             priceRange = string.IsNullOrWhiteSpace(priceRange) ? "all" : priceRange.Trim().ToLower();
 
-            var shop = await _context.Shops
-                .AsNoTracking()
-                .FirstOrDefaultAsync(x => x.UserId == id);
+            List<ShopProductCardViewModel> products;
+            List<ShopCategoryFilterItemViewModel> categories;
+            int totalCount;
 
-            if (shop == null)
+            if (shop.StatusId == 1)
             {
-                return null;
+                // 暫停營業 → 不撈商品
+                products = new List<ShopProductCardViewModel>();
+                categories = new List<ShopCategoryFilterItemViewModel>();
+                totalCount = 0;
             }
-
-            var productQuery = _context.Products
-                .AsNoTracking()
-                .Where(p => p.UserId == id)
-                .Include(p => p.Category)
-                .Include(p => p.ProductDetail)
-                .AsQueryable();
-
-            if (!string.IsNullOrWhiteSpace(keyword))
+            else
             {
-                keyword = keyword.Trim();
-                productQuery = productQuery.Where(p =>
-                    EF.Functions.Like(p.ProductName, $"%{keyword}%"));
-            }
 
-            if (categoryId.HasValue)
-            {
-                productQuery = productQuery.Where(p => p.CategoryId == categoryId.Value);
-            }
+                var productQuery = _context.Products
+                    .AsNoTracking()
+                    .Where(p => p.UserId == id)
+                    .Include(p => p.Category)
+                    .Include(p => p.ProductDetail)
+                    .AsQueryable();
 
-            productQuery = priceRange switch
-            {
-                "0-100" => productQuery.Where(p => 
-                    p.ProductDetail != null && 
-                    p.ProductDetail.ProductPrice < 100),
-                "100-300" => productQuery.Where(p => 
-                    p.ProductDetail != null && 
-                    p.ProductDetail.ProductPrice >= 100 &&
-                    p.ProductDetail.ProductPrice < 300),
-                "300-500" => productQuery.Where(p => 
-                    p.ProductDetail != null && 
-                    p.ProductDetail.ProductPrice >= 300 && 
-                    p.ProductDetail.ProductPrice < 500),
-                "500-up" => productQuery.Where(p => 
-                    p.ProductDetail != null && 
-                    p.ProductDetail.ProductPrice >= 500),
-                _ => productQuery
-            };
-
-            productQuery = sort switch
-            {
-                "price_asc" => productQuery.OrderBy(p => 
-                    p.ProductDetail != null ? 
-                    p.ProductDetail.ProductPrice : 0),
-                "price_desc" => productQuery.OrderByDescending(p => 
-                    p.ProductDetail != null ? p.ProductDetail.ProductPrice : 0),
-                "rating" => productQuery.OrderByDescending(p => 
-                    p.ProductRating ?? 0),
-                _ => productQuery.OrderByDescending(p => 
-                    p.ProductDate)
-            };
-
-            var categories = await _context.Products
-                .AsNoTracking()
-                .Where(p => p.UserId == id)
-                .GroupBy(p => new
+                if (!string.IsNullOrWhiteSpace(keyword))
                 {
-                    p.CategoryId,
-                    CategoryName = p.Category.CategoryName
-                })
-                .Select(g => new ShopCategoryFilterItemViewModel
-                {
-                    CategoryId = g.Key.CategoryId,
-                    CategoryName = g.Key.CategoryName,
-                    Count = g.Count()
-                })
-                .OrderBy(x => x.CategoryId)
-                .ToListAsync();
+                    keyword = keyword.Trim();
+                    productQuery = productQuery.Where(p =>
+                        EF.Functions.Like(p.ProductName, $"%{keyword}%"));
+                }
 
-            var totalCount = await productQuery.CountAsync();
-
-            var products = await productQuery
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(p => new ShopProductCardViewModel
+                if (categoryId.HasValue)
                 {
-                    ProductId = p.ProductId,
-                    ProductName = p.ProductName,
-                    ProductImage = p.ProductImage,
-                    ShopName = shop.ShopName,
-                    CategoryName = p.Category.CategoryName,
-                    Price = p.ProductDetail != null ? p.ProductDetail.ProductPrice : 0,
-                    OriginalPrice =
+                    productQuery = productQuery.Where(p => p.CategoryId == categoryId.Value);
+                }
+
+                productQuery = priceRange switch
+                {
+                    "0-100" => productQuery.Where(p =>
                         p.ProductDetail != null &&
-                        p.ProductDetail.ProductDiscount.HasValue &&
-                        p.ProductDetail.ProductDiscount.Value > 0 &&
-                        p.ProductDetail.ProductDiscount.Value < 1
-                            ? Math.Round(
-                                p.ProductDetail.ProductPrice /
-                                (1 - p.ProductDetail.ProductDiscount.Value), 0)
-                            : null,
-                    Rating = p.ProductRating
-                })
-                .ToListAsync();
+                        p.ProductDetail.ProductPrice < 100),
+                    "100-300" => productQuery.Where(p =>
+                        p.ProductDetail != null &&
+                        p.ProductDetail.ProductPrice >= 100 &&
+                        p.ProductDetail.ProductPrice < 300),
+                    "300-500" => productQuery.Where(p =>
+                        p.ProductDetail != null &&
+                        p.ProductDetail.ProductPrice >= 300 &&
+                        p.ProductDetail.ProductPrice < 500),
+                    "500-up" => productQuery.Where(p =>
+                        p.ProductDetail != null &&
+                        p.ProductDetail.ProductPrice >= 500),
+                    _ => productQuery
+                };
+
+                productQuery = sort switch
+                {
+                    "price_asc" => productQuery.OrderBy(p =>
+                        p.ProductDetail != null ?
+                        p.ProductDetail.ProductPrice : 0),
+                    "price_desc" => productQuery.OrderByDescending(p =>
+                        p.ProductDetail != null ? p.ProductDetail.ProductPrice : 0),
+                    "rating" => productQuery.OrderByDescending(p =>
+                        p.ProductRating ?? 0),
+                    _ => productQuery.OrderByDescending(p =>
+                        p.ProductDate)
+                };
+
+                 categories = await _context.Products
+                    .AsNoTracking()
+                    .Where(p => p.UserId == id)
+                    .GroupBy(p => new
+                    {
+                        p.CategoryId,
+                        CategoryName = p.Category.CategoryName
+                    })
+                    .Select(g => new ShopCategoryFilterItemViewModel
+                    {
+                        CategoryId = g.Key.CategoryId,
+                        CategoryName = g.Key.CategoryName,
+                        Count = g.Count()
+                    })
+                    .OrderBy(x => x.CategoryId)
+                    .ToListAsync();
+
+                 totalCount = await productQuery.CountAsync();
+
+                 products = await productQuery
+                    .Skip((page - 1) * pageSize)
+                    .Take(pageSize)
+                    .Select(p => new ShopProductCardViewModel
+                    {
+                        ProductId = p.ProductId,
+                        ProductName = p.ProductName,
+                        ProductImage = p.ProductImage,
+                        ShopName = shop.ShopName,
+                        CategoryName = p.Category.CategoryName,
+                        Price = p.ProductDetail != null ? p.ProductDetail.ProductPrice : 0,
+                        OriginalPrice =
+                            p.ProductDetail != null &&
+                            p.ProductDetail.ProductDiscount.HasValue &&
+                            p.ProductDetail.ProductDiscount.Value > 0 &&
+                            p.ProductDetail.ProductDiscount.Value < 1
+                                ? Math.Round(
+                                    p.ProductDetail.ProductPrice /
+                                    (1 - p.ProductDetail.ProductDiscount.Value), 0)
+                                : null,
+                        Rating = p.ProductRating
+                    })
+                    .ToListAsync();
+            }
 
             return new ShopProfilePageViewModel
             {
