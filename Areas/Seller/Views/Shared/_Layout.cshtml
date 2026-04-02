@@ -119,13 +119,6 @@
                                 </span>
                             </a>
                         </li>
-                        <li>
-                            <a asp-area="Seller" asp-controller="SellerShop" asp-action="Billing_account">
-                                <span class="text">
-                                    收款帳號設定
-                                </span>
-                            </a>
-                        </li>
                     </ul>
 					</li>
 				}
@@ -213,12 +206,6 @@
                                     <i class="lni lni-chevron-left me-2"></i> 主選單
                                 </button>
                             </div>
-                            <div class="header-search d-none d-md-flex">
-                                <form action="#">
-                                    <input type="text" placeholder="搜尋..." />
-                                    <button><i class="lni lni-search-alt"></i></button>
-                                </form>
-                            </div>
                         </div>
                     </div>
                     <div class="col-lg-7 col-md-7 col-6">
@@ -247,11 +234,14 @@
                                     <div class="profile-info">
                                         <div class="info">
                                             <div class="image">
-                                                <img src="~/seller_assets/images/profile/profile-image.png" alt="" />
+                                               @{
+                                                    var av = User.FindFirst("AvatarUrl")?.Value;
+                                                    var imgSrc = string.IsNullOrEmpty(av) ? "/seller_assets/images/profile/profile-image.png" : (av.StartsWith("/")?av:"/"+av);
+                                                }
+                                                <img src="@imgSrc" alt="" />
                                             </div>
                                             <div>
-                                                <h6 class="fw-500">Adam Joe</h6>
-                                                <p>Admin</p>
+                                                <h6 class="fw-500">@User.FindFirst("FullName")?.Value</h6>
                                             </div>
                                         </div>
                                     </div>
