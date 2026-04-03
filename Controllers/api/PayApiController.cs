@@ -45,9 +45,9 @@ namespace Bake.Controllers.api
             }
         }
 
-        
 
 
+        [Authorize]
         [HttpPost("GetTradeData")]
         public async Task<IActionResult> GetTradeData([FromForm]CheckoutViewModel checkoutViewModel, [FromForm]string PaymentMethod)
         {
@@ -103,7 +103,7 @@ namespace Bake.Controllers.api
             _bakeContext.Orders.Add(order);
             await _bakeContext.SaveChangesAsync();
 
-            //ClearCart(); //清空購物車
+            ClearCart(); //清空購物車
 
             //4.重新導向: 如果是貨到付款，直接到Success
             if (order.PaymentMethodId == 2)
@@ -169,7 +169,7 @@ namespace Bake.Controllers.api
             //Console.WriteLine($"[Debug] SHA Source: {shaSource_}");
             return Ok(new { isCod=false, payData = response});
 
-            //ClearCart(); //清空購物車
+            
         }
 
         
@@ -199,6 +199,10 @@ namespace Bake.Controllers.api
             return model.ReceiverEmail;
         }
 
+        private void ClearCart()
+        {
+            HttpContext.Session.Remove("UserCart");
+        }
 
         // ↓↓↓加密解密方法↓↓↓
         /// <summary>
