@@ -115,6 +115,8 @@ public partial class BakeContext : DbContext
 
     public DbSet<PostComment> PostComments { get; set; }
 
+    public DbSet<Coupon> Coupons { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AccountAuth>(entity =>
