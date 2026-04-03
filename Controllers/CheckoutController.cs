@@ -90,78 +90,6 @@ namespace Bake.Controllers
             ViewBag.ShippingFee = shippingFee;
             return View();
         }
-
-        [Authorize]
-        [HttpPost]
-        //HttpPost接收前端傳來的確定購買清單資料 asp-action="ConfirmPayment"
-        //完成後redirection 到Success頁 顯示感謝您的訂購，訂單編號為 #XXX
-        public async Task<IActionResult> ConfirmPayment(CheckoutViewModel checkoutViewModel, string PaymentMethod)
-        {
-            int userId = CurrentUserId;
-
-            // 驗收防呆：如果真的抓不到登入者 ID，不要讓它進資料庫
-            if (userId == 0)
-            {
-                // 應急方案：驗收時如果真的掛了，可以先 return Content("登入資訊遺失，請重新登入");
-                return RedirectToAction("Login", "Home");
-            }
-
-            //從session拿Info資料
-            var infoJson = HttpContext.Session.GetString("ReceiverInfo");
-            if (string.IsNullOrEmpty(infoJson)) return RedirectToAction("Info");
-            var receiverInfo = JsonSerializer.Deserialize<CheckoutViewModel>(infoJson);
-
-            //1. 建立Order物件實體，並將checkoutdata資料填入Order物件中
-            var order = new Order
-            {
-                UserId = userId,
-                ShippingAddress = receiverInfo.ReceiverAddress,
-                TotalAmount = 0, //這裡先設為0，實際金額應該從購物車計算
-                PaymentMethodId = byte.Parse(PaymentMethod),
-                StatusId = 0, //0:待付款、1:待出貨
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now,
-            };
-
-            //2. 建立OrderItem物件實體，並將購物車中的每個商品資料填入OrderItem物件中，並加入Order的OrderItems集合中
-            var cartItems = GetCartItemsFromSession();
-            if (!cartItems.Any()) return RedirectToAction("Index", "Cart"); // 沒東西買就回購物車
-
-            decimal totalAmount = 0;
-            foreach (var item in cartItems)
-            {
-                var orderItem = new OrderItem
-                {
-                    ProductId = item.ProductId,
-                    ItemQuantity = item.Quantity,
-                    UnitPrice = item.Price,
-                    Subtotal = item.Quantity * item.Price
-                };
-
-                order.OrderItems.Add(orderItem);
-                totalAmount += item.Quantity * item.Price;
-            }
-
-
-            int shippingFee = HttpContext.Session.GetInt32("ShippingFee") ?? 60;
-            order.TotalAmount = totalAmount + shippingFee;
-
-            //3. 寫入資料庫
-            _bakeContext.Orders.Add(order);
-            await _bakeContext.SaveChangesAsync();
-
-            //ClearCart(); //清空購物車
-
-            //4.重新導向: 如果是貨到付款，直接到Success
-            if (order.PaymentMethodId == 2) 
-            {
-                return RedirectToAction("Success", new { id = order.OrderId });
-            }
-
-            // 如果是信用卡或轉帳，導回到payment串接藍星
-            return RedirectToAction("Payment", new { id = order.OrderId});
-        }
-
         
 
         [HttpGet]
@@ -177,6 +105,17 @@ namespace Bake.Controllers
             await SendOrderNotify(order.UserId.ToString(), order.OrderId.ToString());
 
             return View(order);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Fail(int id, string msg, string amount)
+        {
+            ViewBag.OrderId = id;
+            ViewBag.ErrorMessage = msg;
+            ViewBag.Amount = amount;
+            //await SendOrderNotify(order.UserId.ToString(), order.OrderId.ToString());
+
+            return View();
         }
 
         private List<CartViewModel> GetCartItemsFromSession()
