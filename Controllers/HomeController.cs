@@ -84,17 +84,17 @@ public class HomeController : Controller
                 return View();
             }
 
-
-
-
+            var userProfile = _context.UserProfiles.FirstOrDefault(x => x.UserId == user.UserId);
 
             var claims = new List<Claim>    //網站會員的身分證
-        {
-            new Claim("UserId",user.UserId.ToString()),
-            new Claim(ClaimTypes.Name,model.Account),
-            new Claim(ClaimTypes.Role,user.RoleNavigation.StatusName)
+            {
+                new Claim("UserId",user.UserId.ToString()),
+                new Claim(ClaimTypes.Name,model.Account),
+                new Claim(ClaimTypes.Role,user.RoleNavigation.StatusName),
+                new Claim("FullName",userProfile?.FullName??""),
+                new Claim("AvatarUrl",userProfile?.AvatarUrl??"")
 
-        };
+            };
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var claimPrincipal = new ClaimsPrincipal(identity);
 
