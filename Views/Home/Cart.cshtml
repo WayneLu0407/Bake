@@ -91,13 +91,30 @@
 
                                         <div class="mb-5">
                                             <div data-mdb-input-init class="form-outline">
-                                                <input type="text" id="form3Examplea2" class="form-control form-control-lg" />
+                                                <input type="text" v-model="couponCode" id="form3Examplea2" class="form-control form-control-lg" />
                                                 <label class="form-label" for="form3Examplea2">輸入您的優惠折扣碼</label>
+                                                <button class="btn btn-dark" type="button" v-on:click="checkCoupon">套用</button>
+                                            </div>
+                                            @* 顯示目前套用的折扣金額 (可選) *@
+                                            <div v-if="appliedDiscount > 0" class="text-success mt-2 small">
+                                                <i class="fas fa-check-circle"></i> 已折抵: $ {{formatNumber(appliedDiscount)}}
                                             </div>
                                         </div>
 
                                         <hr class="my-4">
-
+                                        @* 這裡增加一個小計與折抵的明細顯示，讓使用者更清楚 *@
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <h6 class="text-uppercase">商品小計</h6>
+                                            <h6>$ {{formatNumber(totalPrice)}}</h6>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2 text-success" v-if="appliedDiscount > 0">
+                                            <h6 class="text-uppercase">優惠折抵</h6>
+                                            <h6>- $ {{formatNumber(appliedDiscount)}}</h6>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-4">
+                                            <h6 class="text-uppercase">運費</h6>
+                                            <h6>$ {{formatNumber(selectedShipping.fee)}}</h6>
+                                        </div>
                                         <div class="d-flex justify-content-between mb-5">
                                             <h5 class="text-uppercase">訂單總額</h5>
                                             <h5>$ {{formatNumber(grandTotal)}} </h5>
@@ -131,12 +148,15 @@
                     shippingOptions:[
                         {name:'宅配', fee:120},
                         {name:'貨到付款', fee:60}
-                    ]
+                    ],
+                    couponCode:'',
+                    appliedDiscount: 0
                 }
             },
             computed:{
                 grandTotal(){
-                    return this.totalPrice + this.selectedShipping.fee;
+                    const total = this.totalPrice - this.appliedDiscount + this.selectedShipping.fee;
+                    return total > 0 ? total : 0; // 確保不會出現負數
                 }
             },
             methods:{
@@ -154,6 +174,30 @@
                     else{
                         alert("系統繁忙，請稍後再試");
                     }
+                },
+                async checkCoupon(){
+                    if(!this.couponCode || this.couponCode.trim()===""){
+                        alert("請輸入優惠碼");
+                        return;
+                    }
+                    try{
+                        const res = await fetch('/api/CouponApi/CheckCoupon',{
+                            method:'POST',
+                            headers:{'Content-Type':'application/json'},
+                            body: JSON.stringify({couponCode:this.couponCode})
+                        });
+                        const result = await res.json();
+                        if(result.success){
+                            this.appliedDiscount = result.discount;
+                            console.log("優惠券套用成功");
+                        }else{
+                            this.appliedDiscount = 0;
+                            alert(result.message || "優惠碼無效");
+                        }
+                    }catch(e){
+                        alert("驗證優惠碼時發生錯誤，請稍後再試");
+                        return;
+                    }  
                 },
                 formatNumber(num) {
                     if (!num) return '0';
