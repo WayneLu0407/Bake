@@ -1,28 +1,49 @@
-﻿<div class="container">
-    <h3 class="mb-3 text-center"></h3>
-    <div class="form-floating mb-3">
-        <input class="form-control" id="inputText" placeholder="" value="" />
-        <label for="inputText">請輸入問題</label>
+﻿<div id="app" class="container">
+    <h3 class="m-3 text-center">AI客服問答專區</h3>
+    <div class="input-group mb-3">
+        <div class="form-floating">
+            <input class="form-control" placeholder="" id="inputText" v-model="question">
+            <label for="inputText">請輸入問題</label>
+        </div>
+            <button class="btn btn-primary" v-on:click="btnAsk">發送</button>
     </div>
-    <div class="mb-3">
-        <button id="btnAsk" class="btn btn-primary">發送</button>
-    </div>
-    <div class="mb-3">
-        <textarea class="form-control" id="outputText" rows="15"></textarea>
+
+
+    <div class="border rounded p-3" style="height:400px; overflow-y:auto;">
+        <div v-for="(msg,index) in messages" :key="index" class="mb-2 p-2" :class="msg.sender==='user'?'text-end':'text-start'">
+            <span class="d-inline-block p-2 rounded" :class="msg.sender==='user'?'bg-primary':'bg-light text-dark'">
+                {{msg.text}}
+            </span>
+            
+        </div>
     </div>
 </div>
 
 @section Scripts{
     <script>
-        document.getElementById("btnAsk").addEventListener("click", async function() { 
-            const question = document.getElementById("inputText").value;
-            const response = await fetch("/api/SupportApi", {
+    var app = Vue.createApp({
+        data(){return{
+            question:"",
+            answer: "",
+            messages:[],
+        }},
+        methods:{
+            async btnAsk(){
+                if(!this.question.trim()) return;
+                this.messages.push({ sender: "user", text: this.question });
+                
+                const response = await fetch("/api/SupportApi", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ question: question)}
-            });
-            const data = await response.json();
-            document.getElementById("outputText").innerText = data.answer;
-        });
+                body: JSON.stringify({ question: this.question })
+                });
+                const data = await response.json();
+                this.question = "";
+                this.messages.push({sender:"bot", text: data.answer });
+            }
+        }
+    });
+    app.mount('#app');
+
     </script>
 }
