@@ -1,0 +1,363 @@
+﻿@model IEnumerable<Bake.Models.Sales.Coupon>
+@{
+    ViewData["Titel"] = "優惠券管理";
+}
+
+@section Styles
+{
+   <style>
+       @@keyframes flash-green {
+        from { background-color: #e2f6ed !important;}
+        to { background-color: transparent !important;}
+    }
+    /* 容器：白底、圓角、陰影、Notion 字體 */
+    .dashboard-notion-card {
+        background-color: #ffffff;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* 輕微陰影 */
+        border: 1px solid #edeef0; /* 極細外框 */
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        color: #37352f;
+        overflow: hidden; /* 確保圓角效果 */
+    }
+
+    /* 卡片標題區塊：與 HTML 的 mb-3 區分，這裡處理內部留白 */
+    .notion-card-header {
+        padding: 20px 24px 16px;
+        border-bottom: 1px solid #edeef0;
+    }
+
+    .notion-card-title {
+        font-size: 20px; /* 字體放大 */
+        font-weight: 700; /* 粗體 */
+        display: flex;
+        align-items: center;
+        gap: 8px; /* 圖示與文字間距 */
+        color: #000; /* 標題純黑，更清晰 */
+    }
+
+    /* 表格本體 */
+    .table-notion {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 18px; /* 整體字體放大 */
+    }
+
+    /* 表頭：淺灰色背景、字體灰一點、粗體 */
+    .table-notion thead th {
+        color: rgba(55, 53, 47, 0.85); /* 比之前黑一點點，提高對比 */
+        font-weight: 700; /* 粗體 */
+        text-align: left;
+        padding: 16px 24px; /* 寬鬆的留白 (Margin/Padding 視覺) */
+        border-bottom: 1px solid #edeef0;
+        background-color: #f7f6f3; /* 極淺灰色背景，Notion 常規表頭 */
+        font-size: 16px; /* 表頭字體稍微小一點點點 */
+    }
+
+    /* 單元格 */
+    .table-notion tbody td {
+        padding: 18px 24px; /* 上下留白加大 */
+        border-bottom: 1px solid #edeef0;
+        vertical-align: middle;
+        color: #37352f;
+    }
+
+    /* Hover 效果：輕微的灰色 */
+    .table-notion tbody tr:hover {
+        background-color: #f7f6f3 !important; /* 圖2的灰色 hover */
+        transition: background 0.2s ease;
+    }
+
+    /* 代碼樣式 */
+    .coupon-code {
+        background: #f1f1ef;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-family: monospace;
+        color: #eb5757;
+        font-weight: bold;
+    }
+
+    /* Badge 樣式 */
+    .notion-badge-value {
+        padding: 4px 12px;
+        border-radius: 6px; /* 更方正一點 */
+        font-size: 16px;
+        font-weight: 700; /* 粗體 */
+        background-color: #fed823; 
+        color: #000;
+    }
+    
+    /* 折扣金額 Badge (可以留著當加分樣式) */
+    .notion-badge-discount {
+        background-color: #e2f6ed; /* 淺綠 */
+        color: #1c734f;
+    }
+
+    /* 狀態 Badge (符合圖2) */
+    .notion-badge {
+        padding: 2px 8px;
+        border-radius: 3px;
+        font-size: 16px;
+        font-weight: 500;
+    }
+    .notion-badge-success { background-color: #e2f6ed; color: #1c734f; }
+    .notion-badge-secondary { background-color: #f1f1ef; color: #787774; }
+    .btn-notion-action {
+        background: none;
+        border: 1px solid #edeef0;
+        color: #37352f;
+        padding: 4px 10px;
+        border-radius: 5px;
+        font-size: 13px;
+        transition: all 0.2s;
+        cursor: pointer;
+        margin-right: 5px;
+    }
+    .btn-notion-action:hover {
+        background-color: #f7f6f3;
+        border-color: #d3d4d6;
+    }
+    .btn-notion-danger:hover {
+        background-color: #ffeded;
+        color: #eb5757;
+        border-color: #eb5757;
+    }
+    .animate-save {
+        animation: flash-green 1s ease-out forwards !important;
+    }
+</style>
+}
+
+
+<div id="app" class="container mt-4">
+    <div class="mb-3">
+        </div>
+    
+    @*新增優惠券*@
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">新增優惠券</h5>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">折扣金額</label>
+                    <input type="number" v-model.number="newCoupon.discountAmount" class="form-control" placeholder="例如: 50">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">最低消費</label>
+                    <input type="number" v-model.number="newCoupon.minimumPurchase" class="form-control" placeholder="例如: 500">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">結束日期</label>
+                    <input type="date" v-model="newCoupon.expirationDate" class="form-control">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button @@click="addCoupon" class="btn btn-success w-100" v-bind:disabled="isSubmitting">
+                        <span v-if="isSubmitting" class="spinner-border spinner-border-sm"></span>
+                        {{ isSubmitting ? '處理中...' : '產生優惠券' }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*優惠券管理*@
+    <div class="dashboard-notion-card">
+        <div class="notion-card-header">
+            <h2 class="notion-card-title">
+                <span>🎫</span> 賣家優惠券管理
+            </h2>
+        </div>
+
+        <table class="table-notion">
+            <thead>
+                <tr>
+                    <th style="width:30%">優惠碼</th>
+                    <th>折扣金額</th>
+                    <th>低消門檻</th>
+                    <th>有效期至</th>
+                    <th style="text-align: center;">狀態</th>
+                    <th style="text-align: center;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="c in coupons" :key="c.couponId">
+                    <td>
+                        <span class="coupon-code">{{ c.code }}</span>
+                    </td>
+                    
+                    <td>
+                        <span style="font-weight: 700; color: #37352f;">${{ c.discountValue }}</span>
+                    </td>
+                    
+                    <td>
+                        <span class="notion-badge-value">
+                            ${{ c.minimumPurchase }}
+                        </span>
+                    </td>
+                    
+                    <td>
+                        <div class="d-flex align-items-center">
+                            <input type="date" 
+                                   v-model="c.expirationDateOnly" 
+                                   class="form-control form-control-sm border-0 bg-transparent notion-date-input"
+                                   style="width: 140px; cursor: pointer; color: #37352f; padding: 0;"
+                                   @@change="updateDate(c, $event)">
+                        </div>
+                    </td>
+                    
+                    <td style="text-align: center;">
+                        <span :class="['notion-badge', c.isActive ? 'notion-badge-success' : 'notion-badge-secondary']">
+                            {{ c.isActive ? '● 啟用中' : '● 已停用' }}
+                        </span>
+                    </td>
+                    <td style="text-align: center;">
+                        <button class="btn-notion-action" @@click="toggleStatus(c)">
+                            {{ c.isActive ? '停用' : '啟用' }}
+                        </button>
+                        <button class="btn-notion-action btn-notion-danger" @@click="deleteCoupon(c)">
+                            刪除
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+        const app = Vue.createApp({
+            data(){
+                return{
+                    coupons:[],
+                    newCoupon:{
+                    discountAmount:100,
+                    minimumPurchase:500,
+                    expirationDate:''
+                    },
+                    isSubmitting: false
+                }
+            },
+            mounted(){
+                this.fetchCoupons();
+                const d = new Date();
+                this.newCoupon.expirationDate = d.toISOString().split('T')[0];
+            },
+            methods:{
+                //取得優惠券列表
+                async fetchCoupons(){
+                    try{
+                        const res =  await fetch("/Seller/Coupon/GetCoupon");
+                        const data =  await res.json();
+                        this.coupons = data.map(c=>({
+                            ...c,
+                            expirationDateOnly: c.expirationDate.split('T')[0]
+                        }));
+                    }
+                    catch(error){
+                        console.log("取得優惠券失敗",error);
+                    }
+                },
+                //新增優惠券
+                async addCoupon(){
+                    this.isSubmitting = true;
+                    try{
+                        const res = await fetch("/Seller/Coupon/CreateCoupon",{
+                            method:"POST",
+                            headers:{'Content-type':'application/json'},
+                            body:JSON.stringify(this.newCoupon)
+                        });
+                        const result = await res.json();
+
+                        if(result.success){
+                            const newObj = {
+                                ...result.data,
+                                expirationDateOnly: result.data.expirationDate.split('T')[0]
+                            };
+                            this.coupons.unshift(result.data);
+                            alert("優惠券產生成功！ 代碼:"+result.data.code);
+                        }
+                        else{
+                            alert("優惠券產生失敗: "+result.message);
+                        }
+                    }
+                    catch(error){
+                        alert("發生錯誤: "+error);
+                    }
+                    finally{
+                        this.isSubmitting = false;
+                    }
+                },
+                //停用或啟用優惠券
+                async toggleStatus(coupon){
+                    try{
+                        const res = await fetch(`/Seller/Coupon/ToggleCouponStatus/${coupon.couponId}`
+                        ,{method:'POST'})
+                        const result = await res.json();
+                        if(result.success){
+                            coupon.isActive = result.isActive;
+                        }
+                    }
+                    catch(error){
+                        alert("操作失敗: "+error);
+                    }
+                },
+
+                //刪除優惠券
+                async deleteCoupon(coupon){
+                    if(!confirm("確定要刪除這張優惠券嗎?")){
+                        return;
+                    }
+                    try{
+                        const res = await fetch(`/Seller/Coupon/DeleteCoupon/${coupon.couponId}`,{method:'POST'});
+                        if(res.ok){
+                            this.coupons = this.coupons.filter(item=> item.couponId !== coupon.couponId);
+                        }
+                    }
+                    catch(error){
+                        alert("刪除失敗: "+error);
+                    }
+                },
+                //修改到期日
+                async updateDate(coupon, event){
+                    const originalDate = this.coupons.find(x => x.couponId === coupon.couponId).expirationDate.split('T')[0];
+                    try{
+                        const res = await fetch(`/Seller/Coupon/UpdateExpireDate/${coupon.couponId}`,{
+                            method:'POST',
+                            headers:{'Content-Type':'application/json'},
+                            body: JSON.stringify({newDate: coupon.expirationDateOnly})
+                        })
+                        const result = await res.json();
+                        
+                        if(result.success){
+                            const el = event.target;
+                            console.log("動畫套用對象:", el); // 檢查控制台有沒有印出 <input...>
+                            el.classList.remove('animate-save');
+                            void el.offsetWidth;
+                            el.classList.add('animate-save');
+                            coupon.expirationDate = coupon.expirationDateOnly;
+                            console.log("日期已更新為:", result.newDate);
+                            alert("日期已更新為:"+result.newDate)
+                        }else{
+                            alert(result.message);
+                            coupon.expirationDateOnly = originalDate;
+                        }
+                    }
+                    catch(error){
+                        console.log("更新日期失敗",error);
+                        alert("網路連線失敗");
+                        coupon.expirationDateOnly = originalDate;
+                    }
+                },
+
+                formatDate(dateStr){
+                    if(!dateStr) return '';
+                    return new Date(dateStr).toLocaleDateString();
+                }
+            }
+
+        }).mount("#app");
+    </script>
+}
