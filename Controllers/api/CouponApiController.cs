@@ -75,8 +75,16 @@ namespace Bake.Controllers.api
             if (applyAmout < coupon.MinimumPurchase) 
             {
                 string scope = coupon.SellerId.HasValue? "指定賣家商品" : "全站商品";
-                return Ok(new { Success = false, Message = $"此優惠券為{scope}，需購買金額達{coupon.MinimumPurchase}元才可使用" });
+                return Ok(new { Success = false, Message = $"此優惠券為{scope}，需購買金額達{coupon.MinimumPurchase:0}元才可使用" });
             }
+
+            //存入Cookie
+            Response.Cookies.Append("AppliedCoupon", request.CouponCode, new CookieOptions
+            {
+                Expires = DateTimeOffset.Now.AddMinutes(30),
+                HttpOnly = true,
+                Secure = true
+            });
 
             return Ok(new {
                 Success = true,

@@ -41,20 +41,28 @@ const CartMixin = {
     data() {
         return {
             cart: [],
-            shippingFee:120
+            shippingFee: 0,
+            couponCode: '',
+            appliedDiscount: 0
         };
     },
-    // 1. computed > totalPrice、totalCount
+    // 1. computed > totalPrice、totalCount、grandTotal
     computed: {
-        //totalPrice
+        //品項金額小計
         totalPrice() {
             return this.cart.reduce((sum, item) =>
             sum + (item.price * item.quantity), 0);
         },
-        //totalCount
+        //買幾項
         totalCount() {
             return this.cart.reduce((sum, item) =>
                 sum + item.quantity, 0);
+        },
+        //品項金額-折扣+運費
+        grandTotal() {
+            const fee = this.selectedShipping ? this.selectedShipping.fee : this.shippingFee;
+            const total = this.totalPrice - this.appliedDiscount + fee;
+            return total > 0 ? total : 0; // 確保不會出現負數
         }
     },
     // 2. method > 
@@ -90,6 +98,33 @@ const CartMixin = {
         async deleteItem(productId) {
             if (confirm('確定移除商品?')) {
                 await cartService.removeItem(productId);
+            }
+        },
+
+        //套用優惠券
+        async checkCoupon(isAutoRun = false) {
+            if (!this.couponCode || this.couponCode.trim() === "") {
+                return;
+            }
+            try {
+                const res = await fetch('/api/CouponApi/CheckCoupon', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ couponCode: this.couponCode })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    this.appliedDiscount = result.discount;
+                    console.log("優惠券套用成功");
+                } else {
+                    this.appliedDiscount = 0;
+                    alert(result.message || "優惠碼無效");
+                }
+            } catch (e) {
+                if (!isAutoRun) {
+                    alert("驗證優惠碼時發生錯誤");
+                }
+                return;
             }
         },
 

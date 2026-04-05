@@ -1,11 +1,13 @@
 ﻿using Bake.Data;
 using Bake.Models.Sales;
 using Bake.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
 namespace Bake.Controllers
 {
+    [Authorize]
     public class CartController : Controller
     {
         private const string CartSessionKey = "UserCart";
@@ -113,18 +115,27 @@ namespace Bake.Controllers
         //儲存運費資訊到Session
         public IActionResult SaveShippingToSession([FromBody] shippingRequest request) 
         {
-            if (request == null || request.Fee < 0) 
+            if (request == null || string.IsNullOrEmpty(request.ShippingMethod))
             {
-                return BadRequest("無效的運費資料");
+                return BadRequest("請選擇配送方式");
             }
 
-            HttpContext.Session.SetInt32("ShippingFee", request.Fee);
+            // 統一管理運費邏輯
+            int fee = request.ShippingMethod switch
+            {
+                "Home" => 120, // 宅配
+                "COD" => 60,  // 貨到付款
+                _ => 60   // 預設值
+            };
+
+            HttpContext.Session.SetInt32("ShippingFee", fee);
+            HttpContext.Session.SetString("ShippingMethod", request.ShippingMethod);
             return Ok(new { sucess=true, message="運費已暫存"});
         }
 
         public class shippingRequest
         {
-            public int Fee { get; set; }
+            public string ShippingMethod { get; set; }
         }
 
     }
