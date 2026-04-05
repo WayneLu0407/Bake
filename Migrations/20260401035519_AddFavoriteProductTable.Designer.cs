@@ -4,6 +4,7 @@ using Bake.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bake.Migrations
 {
     [DbContext(typeof(BakeContext))]
-    partial class BakeContextModelSnapshot : ModelSnapshot
+    [Migration("20260401035519_AddFavoriteProductTable")]
+    partial class AddFavoriteProductTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -408,43 +411,32 @@ namespace Bake.Migrations
                     b.ToTable("Cart_Status", "Sales");
                 });
 
-            modelBuilder.Entity("Bake.Models.Sales.Coupon", b =>
+            modelBuilder.Entity("Bake.Models.Sales.FavoriteProduct", b =>
                 {
-                    b.Property<int>("CouponId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CouponId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETUTCDATE()");
 
-                    b.Property<decimal>("DiscountValue")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<DateTime>("ExpirationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal?>("MinimumPurchase")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("SellerId")
+                    b.Property<int>("ProductId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UsedCount")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
-                    b.HasKey("CouponId");
+                    b.HasKey("Id");
 
-                    b.ToTable("Coupons");
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("FavoriteProducts");
                 });
 
             modelBuilder.Entity("Bake.Models.Sales.Order", b =>

@@ -86,6 +86,7 @@ public class PostDetailViewModel
         public string? Bio { get; set; }
         public int ShareCount { get; set; }     // 該作者的貼文數
         public int FollowerCount { get; set; }  // 粉絲數
+        
     }
     public class PostComment
     {
