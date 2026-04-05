@@ -462,7 +462,7 @@ namespace Bake.Controllers
             var eventDetail = post.EventDetails.FirstOrDefault();
 
             var user = User.FindFirst("UserId")?.Value;
-            if (string.IsNullOrEmpty(user)) return Json(new { isFollowed = false });
+            
             var isFollowed = false;
             var isLike = false;
             var isFavorited = false;
