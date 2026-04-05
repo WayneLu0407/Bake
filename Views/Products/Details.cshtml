@@ -1,5 +1,6 @@
 ﻿@model Bake.ViewModel.Products.ProductDetailsViewModel
 <div id="product" v-cloak>
+    @Html.AntiForgeryToken()
     <div class="container-fluid  border-bottom">
             <div class="row py-3 justify-content-center">
                 <div class="d-flex  justify-content-center align-items-center　">
@@ -110,7 +111,9 @@
                     <!-- FoodMart .btn-primary -->
                     <button class="btn btn-primary py-3 w-100" style="color: #e02020;" @@click.prevent="addCart(product)">放入購物車</button>
                     <!-- FoodMart .btn-outline-light -->
-                    <button class="btn btn-light py-3 w-100">加入最愛</button>
+                        <button class="btn btn-light py-3 w-100" :class="{'is-active' : product.isFavorited}" @@click.prevent="toggleFavorite(product)" >
+                            {{ product.isFavorited ? '已加入最愛' : '加入最愛' }}
+                        </button>
                 </div>
             </div>
         </section>
@@ -218,8 +221,12 @@
                                 <div class="swiper-slide" v-for="product in productsByDiscount.slice(0, 10)" :key="product.productId">
                                     <div class="product-item">
                                         <span v-if="discountLabel(product.productDiscount)" class="badge bg-success position-absolute m-3">{{ discountLabel(product.productDiscount) }}</span>
-                                        <a href="#" class="btn-wishlist">
-                                            <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
+                                        <a href="#" class="btn-wishlist" :class="{'is-active' : product.isFavorited}" @@click.prevent="toggleFavorite(product)">
+                                            <iconify-icon :key="product.isFavorited"
+                                                          :icon="product.isFavorited ? 'ph:heart-fill' : 'ph:heart'"
+                                                          :style="{ color: product.isFavorited ? '#ff4d4d' : 'inherit' }"
+                                                          width="24">
+                                            </iconify-icon>
                                         </a>
                                         <figure class="mb-3">
                                             <a :href="'/Products/Details/' + product.productId" title="Product Title">
@@ -270,6 +277,7 @@
 
 @section Scripts
 {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
     <script>
         const app=Vue.createApp({
@@ -291,8 +299,45 @@
                 originalPrice(price, discount) {
                 if (!discount || discount <= 0) return null
                 return Math.round(price / (1 - discount))  // 100 / 0.8 = 125
-                }
+                },
+                async toggleFavorite(product){
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                    try {
+                        const response = await fetch('/Products/ToggleFavorite', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: new URLSearchParams({ 
+                                productId: product.productId,
+                                __RequestVerificationToken: token
+                            })
+                        });
+                        const res = await response.json();
 
+                        if (res.success) {
+                            // 直接更新物件屬性，Vue 3 會自動感應
+                            product.isFavorited = res.isFavorited;
+            
+                            Swal.fire({
+                            icon: "success",
+                            title: res.message,
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                        } else {
+                            Swal.fire({
+                            icon: "warning",
+                            title: "提示",
+                            text: res.message
+                        }).then(() => {
+                            if (res.message.includes("登入")) {
+                                window.location.href = '/Home/Login';
+                            }
+                            });
+                        }
+                    } catch (err) {
+                            console.error("收藏失敗", err);
+                    }
+                }
             },
             computed:{
 
@@ -341,7 +386,8 @@
                 this.product.qty = 1; //下拉式選單初始值為1
                 this.products = data.map(p => ({
                     ...p,
-                    qty: 1  //為每個推薦商品加上初始數量為1
+                    qty: 1,  //為每個推薦商品加上初始數量為1
+                    isFavorited: p.isFavorited || false
                 }))
 
                 this.loading = false
