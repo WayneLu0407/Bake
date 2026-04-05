@@ -49,6 +49,8 @@ public partial class BakeContext : DbContext
 
     public virtual DbSet<Follow> Follows { get; set; }
 
+    public virtual DbSet<FavoriteProduct> FavoriteProducts { get; set; }
+
     public virtual DbSet<NotifyType> NotifyTypes { get; set; }
 
     public virtual DbSet<Order> Orders { get; set; }
@@ -441,6 +443,22 @@ public partial class BakeContext : DbContext
                 .HasForeignKey(d => d.FollowerId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Follower_Profile");
+        });
+
+        modelBuilder.Entity<FavoriteProduct>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.CreatedAt)
+            .HasDefaultValueSql("GETUTCDATE()");
+
+            entity.HasOne(e => e.User).WithMany()
+            .HasForeignKey(e => e.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Product)
+            .WithMany()
+            .HasForeignKey(e => e.ProductId)
+            .OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<NotifyType>(entity =>
