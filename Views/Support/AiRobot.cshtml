@@ -1,0 +1,48 @@
+﻿<div id="app" class="container">
+    <h3 class="m-3 text-center">AI客服問答專區</h3>
+    <div class="input-group mb-3">
+        <div class="form-floating">
+            <input class="form-control" placeholder="" id="inputText" v-model="question">
+            <label for="inputText">請輸入問題</label>
+        </div>
+            <button class="btn btn-primary" v-on:click="btnAsk">發送</button>
+    </div>
+
+
+    <div class="border rounded p-3" style="height:400px; overflow-y:auto;">
+        <div v-for="(msg,index) in messages" :key="index" class="mb-2 p-2" :class="msg.sender==='user'?'text-end':'text-start'">
+            <span class="d-inline-block p-2 rounded" :class="msg.sender==='user'?'bg-primary':'bg-light text-dark'">
+                {{msg.text}}
+            </span>
+            
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+    var app = Vue.createApp({
+        data(){return{
+            question:"",
+            messages:[],
+        }},
+        methods:{
+            async btnAsk(){
+                if(!this.question.trim()) return;
+                this.messages.push({ sender: "user", text: this.question });
+                
+                const response = await fetch("/api/SupportApi", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question: this.question })
+                });
+                const data = await response.json();
+                this.question = "";
+                this.messages.push({sender:"bot", text: data.answer });
+            }
+        }
+    });
+    app.mount('#app');
+
+    </script>
+}
