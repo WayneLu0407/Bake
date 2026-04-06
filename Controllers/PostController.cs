@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using NuGet.ContentModel;
 using System.ComponentModel.Design;
+using System.Globalization;
 using System.IO;
 using System.Net.Mail;
 using System.Text.Json;
@@ -164,9 +165,10 @@ namespace Bake.Controllers
         // ------建立活動(尾)
 
         [Authorize]
-        [HttpGet("posts/events/{postId}/edit")]
+        [HttpGet("Post/events/{postId}/edit")]
         public async Task<IActionResult> EditEvent(int postId)
         {
+            //var hostedEventsVm = await BuildHostedEventsSectionAsync(CurrentUserId); 偵錯用
             var post = await GetOwnedEventPostAsync(postId, CurrentUserId);
 
             if (post == null)
@@ -177,6 +179,94 @@ namespace Bake.Controllers
             return View(vm);
         }
 
+        [Authorize]
+        [HttpPost("Post/events/{postId}/edit")]
+        public async Task<IActionResult> EditEvent(int postId , EventEditViewModel input)
+        {
+            var post = await GetOwnedEventPostAsync(postId, CurrentUserId);
+
+            if(post == null)
+            {
+                return NotFound();
+            }
+
+            var eventDetail = post.EventDetails.First();
+
+            input.PostId = post.PostId;
+            input.EventId = eventDetail.EventId;
+            input.HasRegistrations = eventDetail.EventRegistrations.Any();
+            input.ExistingPhotoUrl = post.PostAttachments
+                .Where(a=>a.IsCover == true)
+                .Select(a=>a.FileUrl)
+                .FirstOrDefault();
+            
+            await FillOrganizerInfoAsync(input, CurrentUserId);
+            await LoadEventTypeOptionsAsync(input);
+
+            PreserveLockFieldsForRegisteredEvent(input, post);
+
+            ValidateEventCreateInput(input);
+
+            if (!ModelState.IsValid)
+            {
+                return View(input);
+            }
+
+            post.Title = input.Title.Trim();
+            post.Content = input.Content.Trim();
+            eventDetail.EventTypeId = input.EventTypeId;
+
+            //價格應該也要鎖起來才對?
+            eventDetail.Price = input.Price;
+
+            //報名人數=false時,才可編輯
+            if (!input.HasRegistrations)
+            {
+                eventDetail.EventTime = input.EventDate.Date.Add(input.StartTime);
+                eventDetail.EventEndTime = input.EventDate.Date.Add(input.EndTime);
+
+                eventDetail.LocationCity = input.LocationCity.Trim();
+                eventDetail.LocationAddress = input.LocationAddress.Trim();
+
+                eventDetail.MaxParticipants = input.MaxParticipants;
+                eventDetail.SignupStart = input.SignupStartDate.Date;
+                eventDetail.SignupDeadline = input.SignupEndDate.Date.AddDays(1).AddTicks(-1);
+            }
+
+            await ReplaceTagsForPostAsync(post, input.KeywordsText);
+            await ReplaceEventCoverPhotoAsync(post, input.Photo, post.Title);
+
+            await _db.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "活動更新成功";
+            return RedirectToAction("PostDetail", new { id = post.PostId });
+        }
+
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        [HttpPost("/Post/events/{postId}/unpublish")]
+        public async Task<IActionResult> UnpublishEvent(int postId)
+        {
+            var post = await GetOwnedEventPostAsync(postId, CurrentUserId);
+
+            if(post== null)
+            {
+                return NotFound();
+            }
+
+            //已下架的不重複處理
+            if (post.IsPublished != true)
+            {
+                TempData["SuccessMessage"] = "活動已經是下架狀態";
+                return RedirectToAction(nameof(PostDetail), new { id = post.PostId });
+            }
+
+            post.IsPublished = false;
+            await _db.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "活動已下架";
+            return RedirectToAction(nameof(PostDetail), new { id = post.PostId });
+        }
 
         // ------ 申請參加活動(頭)
         [Authorize]
@@ -322,6 +412,7 @@ namespace Bake.Controllers
             return View();
         }
         // ------ 申請參加活動(尾)
+
         public IActionResult UserProfile()
         {
             return View();
@@ -343,7 +434,16 @@ namespace Bake.Controllers
                     .ThenInclude(e => e.EventRegistrations)
                 .FirstOrDefaultAsync(p => p.PostId == id);
 
-            if(post==null) return NotFound();
+            // 判斷文章擁有者(編輯活動貼文用)
+            var isOwner = post.AuthorId == CurrentUserId && CurrentUserId > 0;
+            var isPublished = post.IsPublished == true;
+            if(!isPublished && !isOwner)
+            {
+                return NotFound();
+            }
+
+
+            if (post==null) return NotFound();
 
             var eventDetail = post.EventDetails.FirstOrDefault();
 
@@ -383,6 +483,9 @@ namespace Bake.Controllers
                 ViewCount = post.ViewCount ?? 0,
                 LikesCount = post.LikesCount ?? 0,
                 FavoriteCount = post.FavoriteCount ?? 0,
+                // 判斷文章擁有者(編輯活動貼文用)
+                IsOwner = isOwner,
+                IsPublished = isPublished,
 
                 Attachments = post.PostAttachments
                     .OrderBy(pa => pa.SortOrder)
@@ -524,6 +627,11 @@ namespace Bake.Controllers
                 return "找不到活動資料";
             }
 
+            if(eventDetail.Post.IsPublished != true)
+            {
+                return "活動已下架";
+            }
+
             if (eventDetail.Post.AuthorId == userId)
             {
                 return "發起人不能報名自己的活動";
@@ -603,6 +711,9 @@ namespace Bake.Controllers
         }
         // ------ 申請參加活動方法(尾)
 
+
+        // ------ 編輯發起的活動方法(頭)
+
         private async Task<Post?> GetOwnedEventPostAsync(int postId, int userId)
         {
             return await _db.Posts
@@ -658,9 +769,189 @@ namespace Bake.Controllers
             return vm;
         }
 
+        //後端鎖定編輯欄位
+        private static void PreserveLockFieldsForRegisteredEvent (EventEditViewModel input,Post post)
+        {
+            var eventDetail = post.EventDetails.First();
+
+            if (!eventDetail.EventRegistrations.Any())
+            {
+                return;
+            }
+
+            input.EventDate = eventDetail.EventTime.Date;
+            input.StartTime = eventDetail.EventTime.TimeOfDay;
+            input.EndTime = eventDetail.EventEndTime.TimeOfDay;
+
+            input.LocationCity = eventDetail.LocationCity ?? string.Empty;
+            input.LocationAddress = eventDetail.LocationAddress ?? string.Empty;
+
+            input.MaxParticipants = eventDetail.MaxParticipants;
+
+            input.SignupStartDate = eventDetail.SignupStart.Date;
+            input.SignupEndDate = eventDetail.SignupDeadline.Date;
+        }
+
+        //先把舊的tag殺掉再重新存入
+        private async Task ReplaceTagsForPostAsync(Post post, string? keywordsText)
+        {
+            post.Tags.Clear();
+            await AttachTagsToPostAsync(post, keywordsText);
+        }
+
+        //刪舊圖片用
+        private void DeleteLocalFileIfExists(string? fileUrl)
+        {
+            if (string.IsNullOrWhiteSpace(fileUrl))
+            {
+                return;
+            }
+            //避免其他環境讀取時路徑規則不一樣
+            var relativePath = fileUrl.TrimStart('/').Replace("/", Path.DirectorySeparatorChar.ToString());
+            var absolutePath = Path.Combine(_env.WebRootPath, relativePath);
+
+            //Exists是否存在
+            if (System.IO.File.Exists(absolutePath))
+            {
+                System.IO.File.Delete(absolutePath);
+            }
+        }
+        //更換封面圖
+        private async Task ReplaceEventCoverPhotoAsync(Post post, IFormFile? newPhoto, string title)
+        {
+            if (newPhoto == null || newPhoto.Length == 0)
+            {
+                return;
+            }
+
+            var newAttachment = await SaveEventPhotoAsync(newPhoto, post.PostId, title);
+            if (newAttachment == null)
+            {
+                return;
+            }
+
+            var oldCover = post.PostAttachments
+                .OrderByDescending(a => a.IsCover == true)
+                .ThenBy(a => a.SortOrder ?? int.MaxValue)
+                .FirstOrDefault();
+
+            if (oldCover != null)
+            {
+                DeleteLocalFileIfExists(oldCover.FileUrl);
+                _db.PostAttachments.Remove(oldCover);
+            }
+
+            _db.PostAttachments.Add(newAttachment);
+        }
+
+
+        // ------ 編輯發起的活動方法(尾)
+
+        // ------ 管理活動狀態用(頭)
+        private static (string StatusText, string BadgeClass) GetHostedEventDisplayStatus(bool isPublished, EventDetail eventDetail, DateTime now)
+        {
+            if (!isPublished)
+            {
+                return ("已下架", "secondary");
+            }
+
+            if (now > eventDetail.EventEndTime)
+            {
+                return ("已結束", "dark");
+            }
+
+            if (now >= eventDetail.EventTime && now <= eventDetail.EventEndTime)
+            {
+                return ("活動進行中", "primary");
+            }
+
+            if (now > eventDetail.SignupDeadline)
+            {
+                return ("報名已截止", "warning");
+            }
+
+            if (now < eventDetail.SignupStart)
+            {
+                return ("報名尚未開始", "info");
+            }
+
+            return ("報名中", "success");
+        }
+
+        private async Task<MyHostedEventsViewModel> BuildHostedEventsSectionAsync(int userId)
+        {
+            var posts = await _db.Posts
+                .AsNoTracking()
+                .Where(p => p.AuthorId == userId
+                            && p.TypeId == 1
+                            && p.EventDetails.Any())
+                .Include(p => p.EventDetails)
+                    .ThenInclude(e => e.EventType)
+                .Include(p => p.EventDetails)
+                    .ThenInclude(e => e.EventRegistrations)
+                .Include(p => p.PostAttachments)
+                .OrderByDescending(p => p.CreatedAt)
+                .ToListAsync();
+
+            var now = DateTime.Now;
+
+            var items = posts.Select(post =>
+            {
+                var eventDetail = post.EventDetails.First();
+
+                var (statusText, badgeClass) = GetHostedEventDisplayStatus(
+                    post.IsPublished == true,
+                    eventDetail,
+                    now);
+
+                return new MyHostedEventItemViewModel
+                {
+                    PostId = post.PostId,
+                    EventId = eventDetail.EventId,
+                    Title = post.Title,
+                    CoverImageUrl = post.PostAttachments
+                        .OrderByDescending(a => a.IsCover == true)
+                        .ThenBy(a => a.SortOrder ?? int.MaxValue)
+                        .Select(a => a.FileUrl)
+                        .FirstOrDefault(),
+
+                    EventTypeName = eventDetail.EventType?.EventTypeName ?? "未分類",
+
+                    EventTime = eventDetail.EventTime,
+                    EventEndTime = eventDetail.EventEndTime,
+                    SignupStart = eventDetail.SignupStart,
+                    SignupDeadline = eventDetail.SignupDeadline,
+
+                    LocationText = string.Join(" ", new[]
+                    {
+                eventDetail.LocationCity,
+                eventDetail.LocationAddress
+            }.Where(x => !string.IsNullOrWhiteSpace(x))),
+
+                    ParticipantCount = eventDetail.EventRegistrations.Sum(x => x.NumParticipants),
+                    MaxParticipants = eventDetail.MaxParticipants,
+
+                    IsPublished = post.IsPublished == true,
+
+                    StatusText = statusText,
+                    BadgeClass = badgeClass
+                };
+            }).ToList();
+
+            return new MyHostedEventsViewModel
+            {
+                TotalCount = items.Count,
+                PublishedCount = items.Count(x => x.IsPublished),
+                UnpublishedCount = items.Count(x => !x.IsPublished),
+                Items = items
+            };
+        }
+
+
+        // ------ 管理活動狀態用(尾)
 
         // ------ 建立活動用方法(頭)
-        
+
         //編輯也有用到
         private async Task FillOrganizerInfoAsync(EventCreateViewModel vm, int userId)
         {

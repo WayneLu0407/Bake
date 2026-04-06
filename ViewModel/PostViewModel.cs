@@ -45,6 +45,12 @@ public class PostDetailViewModel
     public bool IsFavorited { get; set; }
     public bool IsFollowed { get; set; }
 
+
+    // 判斷文章擁有者(編輯活動貼文用)
+    public bool IsOwner { get; set; }
+    public bool IsPublished { get; set; }
+
+
     // =========== 內部 DTO ===========
 
     public class AttachmentDto

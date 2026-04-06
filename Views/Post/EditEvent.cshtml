@@ -219,6 +219,8 @@
                     <input asp-for="Photo" id="PhotoInput" class="form-control" type="file" accept="image/*" />
                     <span asp-validation-for="Photo" class="text-danger"></span>
 
+                    <small class="text-muted d-block mt-2">未重新上傳照片時，會保留原封面。</small>
+
                     <div id="photoPreview" class="preview-grid">
                         @if (!string.IsNullOrWhiteSpace(Model.ExistingPhotoUrl))
                         {
