@@ -186,53 +186,53 @@
             },
             async mounted() {
                 // ---- 呼叫你的 API 拿資料（路徑請依實際後端調整） ----
+
+                const results = await Promise.allSettled([
+                    fetch('/api/PostApi/Latest').then(r=>r.json()),
+                    fetch('/api/PostApi/Hot').then(r => r.json()),
+                    fetch('/api/PostApi/EventTypes').then(r => r.json()),
+                    fetch('/api/PostApi/GroupEvents').then(r => r.json()),
+                ]);
                 // 最新貼文
-                try {
-                    const res1 = await fetch('/api/PostApi/Latest')
-                    this.latestPosts = await res1.json()
-                    console.log('Latest:', this.latestPosts)    // 確認有拿到資料
-                } catch (err) { 
-                    console.error('Latest 失敗:', err) 
+                if (results[0].status === 'fulfilled') {
+                    this.latestPosts = results[0].value;
+                } else { 
+                 console.error('Latest失敗:',results[0].reason);
                 }
 
                 // 熱門貼文
-                try {
-                    const res2 = await fetch('/api/PostApi/Hot')
-                    this.hotPosts = await res2.json()
-                    console.log('Hot:', this.hotPosts)    // 確認有拿到資料
-                } catch (err) { 
-                    console.error('Hot 失敗:', err) 
+                if (results[1].status === 'fulfilled') {
+                    this.hotPosts = results[1].value;
+                } else {
+                    console.error('Hot 失敗:', results[1].reason);
                 }
 
+
                 // 熱門活動分類
-                try {
-                    const res3 = await fetch('/api/PostApi/EventTypes')
-                    const raw = await res3.json()
+                if (results[2].status === 'fulfilled') {
                     const iconMap = {
                         1: 'fa-cookie-bite',      // 手作實作
                         2: 'fa-comments',         // 經驗分享
                         3: 'fa-mug-hot',          // 品嚐聚會
                         4: 'fa-basket-shopping',  // 食材揪團
-                    }
-                    this.categories = raw.map(c => ({
-                            ...c,
-                            icon: iconMap[c.eventTypeId] || 'fa-tag'
-                        }))
-                } catch (err) { 
-                    console.error('EventTypes 失敗:', err) 
+                    };
+                    this.categories = results[2].value.map(c => ({
+                        ...c,
+                        icon: iconMap[c.eventTypeId] || 'fa-tag'
+                    }));
+                } else{ 
+                    console.error('EventTypes 失敗:', results[2].reason);
                 }
 
                 // 揪團活動
-                try {
-                    const res4 = await fetch('/api/PostApi/GroupEvents')
-                    this.groupActivities1  = await res4.json()
-                    console.log('GroupEvents:', this.groupActivities1 )    // 確認有拿到資料
-                } catch (err) { 
-                    console.error('GroupEvents 失敗:', err) 
+                if (results[3].status === 'fulfilled') {
+                    this.groupActivities1 = results[3].value;
+                }else { 
+                    console.error('EventTypes 失敗:', results[3].reason);
                 }
 
                 // ---- 等 DOM 更新後初始化所有 Swiper ----
-                this.$nextTick(() => { this.initSwipers() })
+                this.$nextTick(() => { this.initSwipers(); });
             },
             methods: {
                 
