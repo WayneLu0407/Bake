@@ -1,4 +1,5 @@
 ﻿using Bake.Data;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +15,7 @@ namespace Bake.Controllers.api
             this._db = db;
         }
 
+        
         private int? CurrentUserId()
         {
             var userId = User.FindFirst("UserId")?.Value;
@@ -61,6 +63,7 @@ namespace Bake.Controllers.api
             var prod = _db.Products
                 .Include(p => p.ProductDetail)
                 .Include(p => p.User).ThenInclude(u => u.Shop)
+                .Include(p => p.ProductIngredient)
                 .Where(p => p.ProductId == id && p.User.Shop != null && p.User.Shop.StatusId == 0)
                 .Select(p => new {
                     productId = p.ProductId,
@@ -75,9 +78,9 @@ namespace Bake.Controllers.api
                     shopName = p.User.Shop.ShopName,
                     shopImg = p.User.Shop.ShopImg!= null? "/" + p.User.Shop.ShopImg.TrimStart('/'): null,
                     productDescription = p.ProductDescription,
-                    ShelfLifeNote = p.ProductIngredient.ShelfLifeNote,
-                    Ingredient = p.ProductIngredient.Ingredients,
-                    NetWeight = p.ProductIngredient.NetWeight,
+                    ShelfLifeNote = p.ProductIngredient!= null? p.ProductIngredient.ShelfLifeNote: null,
+                    Ingredient = p.ProductIngredient != null ? p.ProductIngredient.Ingredients : null,
+                    NetWeight = p.ProductIngredient != null ? p.ProductIngredient.NetWeight : null,
                     categoryId = p.CategoryId,
                     categoryName = p.Category.CategoryName,
                     isFavorited = userId != null && _db.FavoriteProducts.Any(f => f.ProductId == p.ProductId && f.UserId == userId.Value)
@@ -94,6 +97,8 @@ namespace Bake.Controllers.api
         {
             if (string.IsNullOrWhiteSpace(keyword))
                 return Ok(Array.Empty<object>());
+            if (keyword.Length > 50)
+                return BadRequest();
             var results = _db.Products
                 .Include(p => p.ProductDetail)
                 .Where(p => p.ProductName.Contains(keyword) && p.User.Shop != null && p.User.Shop.StatusId == 0)

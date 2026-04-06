@@ -2,6 +2,7 @@
 using Bake.Models;
 using Bake.Models.Sales;
 using Bake.ViewModel.Products;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
@@ -81,6 +82,7 @@ namespace Bake.Controllers
             return View(vm);
         }
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> Favorite()   // (查詢)
         {
             var user = CurrentUserId();
@@ -92,6 +94,7 @@ namespace Bake.Controllers
             var myFavorite = await _db.FavoriteProducts
                 .Where(u =>u.UserId == user.Value)
                 .Include(i=> i.Product)
+                    .ThenInclude(p => p.ProductDetail)
                 .Select(w => new WishListViewModel
                 {
                     ProductId = w.ProductId,
