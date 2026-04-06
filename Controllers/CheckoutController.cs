@@ -11,7 +11,8 @@ using System.Text.Json;
 
 namespace Bake.Controllers
 {
-    
+
+    [Authorize]
     public class CheckoutController : Controller
     {
         private readonly BakeContext _bakeContext;
@@ -41,53 +42,42 @@ namespace Bake.Controllers
         [HttpGet]
         public IActionResult Info()
         {
-            // 從 Session 抓回舊資料
-            int? sessionShipping = HttpContext.Session.GetInt32("ShippingFee");
-            ViewBag.ShippingFee = sessionShipping ?? 60; // 如果沒抓到，預設 60
+            // 運費資料
+            ViewBag.ShippingFee = HttpContext.Session.GetInt32("ShippingFee") ?? 60;
 
-            var infoJson = HttpContext.Session.GetString("ReceiverInfo");
-            if (!string.IsNullOrEmpty(infoJson))
-            {
-                var model = JsonSerializer.Deserialize<CheckoutViewModel>(infoJson);
-                return View(model); // 把舊資料丟回給 View 顯示
-            }
+            // 收件人資料
+            var infoJson = TempData.Peek("ReceiverInfo")?.ToString();
 
-            return View(new CheckoutViewModel()); // 第一次進來，給空的
+            //如果有填過收件人資料，回傳填好的資料；如果沒有填過，回傳空的資料表格
+            CheckoutViewModel model = !string.IsNullOrEmpty(infoJson)? 
+                JsonSerializer.Deserialize<CheckoutViewModel>(infoJson)
+                : new CheckoutViewModel();
+
+            // 優惠券
+            var couponCode = Request.Cookies["AppliedCoupon"];
+            ViewBag.CouponCode = couponCode ?? string.Empty; // 如果沒抓到，預設空字串
+
+            return View(model);
         }
-
-        
 
 
         [HttpPost]
         public IActionResult Info(CheckoutViewModel model, int ShippingFee)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                //資料存session
-                var infoJson = JsonSerializer.Serialize(model);
-                HttpContext.Session.SetString("ReceiverInfo", infoJson);
-                HttpContext.Session.SetInt32("ShippingFee", ShippingFee);
-
-                return RedirectToAction("Payment");
+                return View(model);
             }
-            return View(model);
+
+            ViewBag.ShippingFee = HttpContext.Session.GetInt32("ShippingFee") ?? 60;
+            ViewBag.CouponCode = Request.Cookies["AppliedCoupon"] ?? string.Empty;
+
+            return View("Payment", model);
         }
 
         [HttpGet]
         public IActionResult Payment()
-        {
-            // 從Session拿資料
-            var infoJson = HttpContext.Session.GetString("ReceiverInfo");
-            if (string.IsNullOrEmpty(infoJson)) return RedirectToAction("Info");
-
-            var model = JsonSerializer.Deserialize<CheckoutViewModel>(infoJson);
-            int shippingFee = HttpContext.Session.GetInt32("ShippingFee") ?? 60;
-
-            ViewBag.ReceiverName = model.ReceiverName;
-            ViewBag.ReceiverPhone = model.ReceiverPhone;
-            ViewBag.ReceiverAddress = model.ReceiverAddress;
-            ViewBag.ReceiverEmail = model.ReceiverEmail;
-            ViewBag.ShippingFee = shippingFee;
+        { 
             return View();
         }
         

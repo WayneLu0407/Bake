@@ -1,5 +1,5 @@
 ﻿@model Bake.ViewModels.Social.PostDetailViewModel
-
+@Html.AntiForgeryToken()
 @{
     ViewData["Title"] = "貼文詳情";
 }
@@ -13,6 +13,7 @@
 <!--                      頁面主體                                 -->
 <!-- ============================================================ -->
 <div class="container-fluid py-4">
+    @Html.AntiForgeryToken()
     <div class="row g-4">
 
         <!-- ==================== 左欄：主內容 ==================== -->
@@ -69,11 +70,13 @@
 
                 <!-- 讚 / 收藏 / 分享 -->
                 <div class="action-bar">
-                    <button class="action-bar__btn">
-                        <i class="fa-regular fa-thumbs-up"></i> 讚
+                    <button class="action-bar__btn" id="btn-like" data-id="@Model.PostId">
+                        <i class="@(Model.IsLiked ? "fa-solid" : "fa-regular") fa-thumbs-up"></i> 
+                        <span class="text">@(Model.IsLiked ? "已按讚" : "讚")</span>
                     </button>
-                    <button class="action-bar__btn">
-                        <i class="fa-regular fa-heart"></i> 收藏
+                    <button class="action-bar__btn" id="btn-favorite" data-id="@Model.PostId">
+                        <i class="@(Model.IsFavorited ? "fa-solid" : "fa-heart")"></i> 
+                        <span class="text">@(Model.IsFavorited ? "已收藏" : "收藏")</span>
                     </button>
                     <button class="action-bar__btn">
                         <i class="fa-regular fa-share-from-square"></i> 分享
@@ -133,7 +136,9 @@
                     <h6 class="fw-bold mb-0">
                         @(Model.IsActivity ? "關於主辦人" : "關於作者")
                     </h6>
-                    <button class="btn-follow">追蹤</button>
+                    <button class="btn-follow" id="btn-follow" data-id="@Model.Author.UserId">
+                        <span class="text">@(Model.IsFollowed ? "追蹤中" : "追蹤")</span>
+                    </button>
                 </div>
                 <div class="detail-card p-3">
                     <div class="d-flex align-items-center gap-3 mb-2">
@@ -179,5 +184,108 @@
     </div>
 </div>
 
+@section Scripts{
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){  //讚&收藏
+            const btnlike = document.getElementById('btn-like');
+            btnlike.addEventListener('click', function(){
+                const postId = this.getAttribute('data-id');
+                handleToggle(this, '/Post/PostToggleLike', postId);
+            });
+            const btnfavorite = document.getElementById('btn-favorite');
+            btnfavorite.addEventListener('click', function(){
+                const postId = this.getAttribute('data-id');
+                handleToggle(this, '/Post/PostToggleFavorite',postId)
+            });
 
+            async function handleToggle(btn, url, postId){
+                try{
+                    btn.style.pointerEvents = 'none';
+                    const response = await fetch(`${url}?postId=${postId}`, {    // Query String
+                        method: 'POST',
+                        headers: {
+                            'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if(result.success){
+                        const icon = btn.querySelector('i');
+                        const text = btn.querySelector('.text');
+
+                        if(result.isLiked || result.isFavorited ){ // 後端回傳狀態
+                            icon.classList.remove('fa-regular');
+                            icon.classList.add('fa-solid');
+                            // 根據按鈕類型更新文字
+                            text.innerText = btn.id === 'btn-like' ? '已讚' : '已收藏';
+                        }else {
+                            icon.classList.remove('fa-solid');
+                            icon.classList.add('fa-regular');
+                            text.innerText = btn.id === 'btn-like' ? '讚' : '收藏';
+                        }
+                    }else {
+                        alert(result.message);
+                        if (result.message.includes("登入")) {
+                            window.location.href = '/Home/Login';
+                        }
+                    }
+                }
+                catch(error){
+                    console.error('Error:', error);
+                }
+                finally{
+                    btn.style.pointerEvents = 'auto';
+                }
+            }
+
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const btnFollow = document.getElementById('btn-follow');
+
+            if (btnFollow) {
+                btnFollow.addEventListener('click', async function () {
+                    const beFollowId = this.getAttribute('data-id');
+                    const textSpan = this.querySelector('.text'); // 取得內層 span
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+                    try {
+                        // 1. 鎖定按鈕防止連點
+                        this.style.pointerEvents = 'none';
+
+                        // 2. 發送請求 (對應你的後端參數 beFollowId)
+                        const response = await fetch(`/Post/UserToggleFollow?beFollowId=${beFollowId}`, {
+                            method: 'POST',
+                            headers: { 'RequestVerificationToken': token }
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            // 3. 根據後端回傳 result.isFollowed 更新 UI
+                            if (result.isFollowed) {
+                                this.classList.add('followed');
+                                if (textSpan) textSpan.innerText = '已追蹤';
+                            } else {
+                                this.classList.remove('followed');
+                                if (textSpan) textSpan.innerText = '追蹤';
+                            }
+                        } else {
+                            alert(result.message);
+                            if (result.message.includes("請先登入")) {
+                                window.location.href = '/Home/Login';
+                            }
+                        }
+                    } catch (error) {
+                        console.error('追蹤功能出錯:', error);
+                    } finally {
+                        // 4. 解除鎖定
+                        this.style.pointerEvents = 'auto';
+                    }
+                });
+            }
+        });
+    </script>
+}
 

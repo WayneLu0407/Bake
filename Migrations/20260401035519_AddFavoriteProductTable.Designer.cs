@@ -4,6 +4,7 @@ using Bake.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bake.Migrations
 {
     [DbContext(typeof(BakeContext))]
-    partial class BakeContextModelSnapshot : ModelSnapshot
+    [Migration("20260401035519_AddFavoriteProductTable")]
+    partial class AddFavoriteProductTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -406,45 +409,6 @@ namespace Bake.Migrations
                         .HasName("PK__Cart_Sta__3683B531F40F6FF0");
 
                     b.ToTable("Cart_Status", "Sales");
-                });
-
-            modelBuilder.Entity("Bake.Models.Sales.Coupon", b =>
-                {
-                    b.Property<int>("CouponId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CouponId"));
-
-                    b.Property<string>("Code")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<decimal>("DiscountValue")
-                        .HasColumnType("decimal(18, 2)");
-
-                    b.Property<DateTime>("ExpirationDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<decimal?>("MinimumPurchase")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int?>("SellerId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("UsedCount")
-                        .HasColumnType("int");
-
-                    b.HasKey("CouponId");
-
-                    b.ToTable("Coupons");
                 });
 
             modelBuilder.Entity("Bake.Models.Sales.FavoriteProduct", b =>

@@ -52,10 +52,10 @@
 
 @{
     ViewData["Title"] = "Order Payment";
-    string ReceiverName = ViewBag.ReceiverName ?? "N/A";
-    string ReceiverPhone = ViewBag.ReceiverPhone ?? "N/A";
-    string ReceiverAddress = ViewBag.ReceiverAddress ?? "N/A";
-    string ReceiverEmail = ViewBag.ReceiverEmail ?? "N/A";
+    string ReceiverName = Model.ReceiverName ?? "N/A";
+    string ReceiverPhone = Model.ReceiverPhone ?? "N/A";
+    string ReceiverAddress = Model.ReceiverAddress ?? "N/A";
+    string ReceiverEmail = Model.ReceiverEmail ?? "N/A";
 
     var orderId = ViewContext.RouteData.Values["id"];
 }
@@ -129,9 +129,13 @@
                                         <span class="text-dark fw-bold fs-5">訂單小計</span>
                                         <h5 class="fw-bolder text-dark mb-0">${{formatNumber(totalPrice)}}</h5>
                                     </div>
+                                    <div v-if="appliedDiscount > 0" class="d-flex justify-content-between align-items-center px-1 text-danger">
+                                        <span class="text-dark fw-bold fs-5">優惠券折抵 ({{couponCode}})</span>
+                                        <h5 class="fw-bolder mb-0">-${{formatNumber(appliedDiscount)}}</h5>
+                                    </div>
                                     <div class="d-flex justify-content-between align-items-center px-1">
                                         <span class="text-dark fw-bold fs-5">運費</span>
-                                        <h5 class="mb-0">@ViewBag.ShippingFee</h5>
+                                        <h5 class="mb-0">${{formatNumber(shippingFee)}}</h5>
                                     </div>
                                     <div class="d-flex justify-content-between align-items-center px-1">
                                         <span class="text-dark fw-bold fs-3">訂單總額</span>
@@ -147,10 +151,10 @@
                                 <p class="text-muted mb-5">選擇您的付款方式並完成購買</p>
 
                                 <form asp-controller="Pay" asp-action="ConfirmPayment" method="post" id="checkoutForm">
-                                    <input type="hidden" name="ReceiverName" value="@ReceiverName" />
-                                    <input type="hidden" name="ReceiverPhone" value="@ReceiverPhone" />
-                                    <input type="hidden" name="ReceiverAddress" value="@ReceiverAddress" />
-                                    <input type="hidden" name="ReceiverEmail" value="@ReceiverEmail" />
+                                    <input type="hidden" name="ReceiverName" value="@Model.ReceiverName" />
+                                    <input type="hidden" name="ReceiverPhone" value="@Model.ReceiverPhone" />
+                                    <input type="hidden" name="ReceiverAddress" value="@Model.ReceiverAddress" />
+                                    <input type="hidden" name="ReceiverEmail" value="@Model.ReceiverEmail" />
                       
 
                                     @* 信用卡選項 *@
@@ -192,29 +196,12 @@
                                         </label>
                                     </div>
 
-
-                                    @* <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill shadow-lg fw-bold btn-lg"
-                                            style="background-color: #1A237E; border: none; font-size: 1.2rem;">
-                                        PLACE ORDER NOW <i class="fas fa-arrow-right ms-2"></i>
-                                    </button> *@
-
-                                    @* @if (orderId != null)
-                                    { *@
-                                        @* 狀態 A：訂單已在資料庫，準備付錢 *@
                                         <button type="button" onclick="goNewebPay()" id="btn-pay"
                                                 class="btn btn-warning w-100 py-3 rounded-pill shadow-lg fw-bold btn-lg"
                                                 style="border: none; font-size: 1.2rem;">
                                             前往付款 (藍新金流) <i class="fas fa-credit-card ms-2"></i>
                                         </button>
-                                    @* } *@
-                                    @* else
-                                    {
-                                        狀態 B：初次進入頁面，先執行存檔 
-                                        <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill shadow-lg fw-bold btn-lg"
-                                                style="background-color: #1A237E; border: none; font-size: 1.2rem;">
-                                            PLACE ORDER NOW <i class="fas fa-arrow-right ms-2"></i>
-                                        </button>
-                                    }*@
+
                                 </form>
                             </div>
 
@@ -251,21 +238,23 @@
             mixins:[CartMixin],
             data(){
                 return {
-                    shippingFee: @(ViewBag.ShippingFee ?? 60)
+                    couponCode: '@ViewBag.CouponCode',
+                    shippingFee: @(ViewBag.ShippingFee ?? 60),
                 }
             },
-            computed: {
-                grandTotal() {
-                    return this.totalPrice + this.shippingFee;
+            computed:{
+                grandTotal(){
+                    const total = this.totalPrice - this.appliedDiscount + this.shippingFee;
+                    return total > 0 ? total : 0;
                 }
             },
-            methods:{
-                formatNumber(num) {
-                    if (!num) return '0';
-                    return num.toLocaleString('zh-TW'); //強制台灣格式
+            mounted(){
+                this.refreshCart();
+
+                if (this.couponCode && this.couponCode !== '') {
+                    this.checkCoupon(true);
                 }
-            },
-            mounted(){this.refreshCart();}
+            }
         }).mount('#paymentPage')
 
         async function goNewebPay(){
@@ -307,8 +296,6 @@
                 btn.disabled = false;
                 btn.innerText = "重新嘗試支付";
             }
-            
-            
         }
     </script>
 }
