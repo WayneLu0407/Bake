@@ -128,13 +128,6 @@
                     <div class="bootstrap-tabs product-tabs">
                         <div class="tabs-header d-flex justify-content-between border-bottom my-5">
                             <h3>熱門商品</h3>
-                            @* <nav>
-                                <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                                    <a href="#" class="nav-link text-uppercase fs-6 active" id="nav-all-tab" data-bs-toggle="tab" data-bs-target="#nav-all" value="default">全部</a>
-                                    <a href="#" class="nav-link text-uppercase fs-6" id="nav-fruits-tab" data-bs-toggle="tab" data-bs-target="#nav-fruits" ">法式</a>
-                                    <a href="#" class="nav-link text-uppercase fs-6" id="nav-juices-tab" data-bs-toggle="tab" data-bs-target="#nav-juices" >日式</a>
-                                </div>
-                            </nav> *@
                         </div>
                         <div class="tab-content" id="nav-tabContent">
                             <div class="tab-pane fade show active" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab">
@@ -174,9 +167,9 @@
                                                             <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
                                                         </button>
                                                     </span>
-                                                        <input type="text" class="form-control input-number" v-model.number="product.qty">
+                                                        <input type="text" class="form-control input-number" v-model.number="product.qty" min="1" max="9" @@change="product.qty = Math.min(9,Math.max(1,product.qty||1))">
                                                     <span class="input-group-btn">
-                                                        <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent ="product.qty += 1">
+                                                                    <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(9, product.qty + 1)">
                                                             <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
                                                         </button>
                                                     </span>
@@ -223,23 +216,23 @@
                                                     NT${{ originalPrice(product.productPrice, product.productDiscount) }}
                                                 </del>
                                             </div>
-                                                <div class="d-flex align-items-center justify-content-between">
-                                                    <div class="input-group product-qty">
-                                                        <span class="input-group-btn">
-                                                            <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
-                                                                <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
-                                                            </button>
-                                                        </span>
-                                                        <input type="text" class="form-control input-number" v-model.number="product.qty">
-                                                        <span class="input-group-btn">
-                                                            <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty += 1">
-                                                                <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
-                                                            </button>
-                                                        </span>
-                                                    </div>
-                                                        <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div class="input-group product-qty">
+                                                    <span class="input-group-btn">
+                                                        <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
+                                                            <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
+                                                        </button>
+                                                    </span>
+                                                    <input type="text" class="form-control input-number" v-model.number="product.qty" min="1" max="9" @@change="product.qty = Math.min(9,Math.max(1,product.qty||1))">
+                                                    <span class="input-group-btn">
+                                                        <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(9, product.qty + 1)">
+                                                            <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
+                                                        </button>
+                                                    </span>
                                                 </div>
-                                          </div>
+                                                <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                            </div>
+                                        </div>
                                     </div>
                                     <!-- / 單一商品 -->
                                 </div>
@@ -278,22 +271,22 @@
                                                     NT${{ originalPrice(product.productPrice, product.productDiscount) }}
                                                 </del>
                                             </div>
-                                                <div class="d-flex align-items-center justify-content-between">
-                                                    <div class="input-group product-qty">
-                                                        <span class="input-group-btn">
-                                                            <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
-                                                                <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
-                                                            </button>
-                                                        </span>
-                                                        <input type="text" class="form-control input-number" v-model.number="product.qty">
-                                                        <span class="input-group-btn">
-                                                            <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty += 1">
-                                                                <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
-                                                            </button>
-                                                        </span>
-                                                    </div>
-                                                        <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                            <div class="d-flex align-items-center justify-content-between">
+                                                <div class="input-group product-qty">
+                                                    <span class="input-group-btn">
+                                                        <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
+                                                            <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
+                                                        </button>
+                                                    </span>
+                                                    <input type="text" class="form-control input-number" v-model.number="product.qty" min="1" max="9" @@change="product.qty = Math.min(9,Math.max(1,product.qty||1))">
+                                                    <span class="input-group-btn">
+                                                        <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(9, product.qty + 1)">
+                                                            <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
+                                                        </button>
+                                                    </span>
                                                 </div>
+                                                <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                            </div>
                                         </div>
                                     </div>
                                     <!-- / 單一商品 -->
@@ -393,22 +386,21 @@
                                             NT${{ originalPrice(product.productPrice, product.productDiscount) }}
                                         </del>
                                     </div>
-                                        <div class="d-flex align-items-center justify-content-between">
-                                            <div class="input-group product-qty">
-                                                <span class="input-group-btn">
-                                                    <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
-                                                        <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
-                                                    </button>
-                                                </span>
-                                                <input type="text" class="form-control input-number" v-model.number="product.qty">
-                                                <span class="input-group-btn">
-                                                    <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty += 1">
-                                                        <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
-                                                    </button>
-                                                </span>
-                                            </div>
-                                                <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="input-group product-qty">
+                                            <span class="input-group-btn">
+                                                <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
+                                                    <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
+                                                </button>
+                                            </span>
+                                            <input type="text" class="form-control input-number" v-model.number="product.qty" min="1" max="9" @@change="product.qty = Math.min(9,Math.max(1,product.qty||1))">
+                                            <span class="input-group-btn">
+                                                <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(9, product.qty + 1)">
+                                                    <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
+                                                </button>
+                                            </span>
                                         </div>
+                                        <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                     </div>
                                 </div>
                             <!-- / 單一商品 -->
@@ -480,14 +472,14 @@
                                                         <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
                                                     </button>
                                                 </span>
-                                                <input type="text" class="form-control input-number" v-model.number="product.qty">
+                                                <input type="text" class="form-control input-number" v-model.number="product.qty" min="1" max="9" @@change="product.qty = Math.min(9,Math.max(1,product.qty||1))">
                                                 <span class="input-group-btn">
-                                                    <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty += 1">
+                                                    <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(9, product.qty + 1)">
                                                         <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
                                                     </button>
                                                 </span>
                                             </div>
-                                                        <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
+                                            <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                         </div>
                                     </div>
                                 </div>
