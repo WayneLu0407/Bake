@@ -90,12 +90,12 @@
             </symbol>
             <symbol xmlns="http://www.w3.org/2000/svg" id="close" viewBox="0 0 15 15">
                 <path fill="currentColor" d="M7.953 3.788a.5.5 0 0 0-.906 0L6.08 5.85l-2.154.33a.5.5 0 0 0-.283.843l1.574 1.613l-.373 2.284a.5.5 0 0 0 .736.518l1.92-1.063l1.921 1.063a.5.5 0 0 0 .736-.519l-.373-2.283l1.574-1.613a.5.5 0 0 0-.283-.844L8.921 5.85l-.968-2.062Z" />
-            <symbol xmlns="http://www.w3.org/2000/svg" id="bell" viewBox="0 0 24 24">
+            </symbol>
+                <symbol xmlns="http://www.w3.org/2000/svg" id="bell" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M19.29 17.29L18 16v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-1.29 1.29c-.63.63-.19 1.71.7 1.71h13.17c.9 0 1.34-1.08.71-1.71M16 17H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5zm-4 5c1.1 0 2-.9 2-2h-4a2 2 0 0 0 2 2" />
             </symbol>
             <symbol xmlns="http://www.w3.org/2000/svg" id="message" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M20 4v12H5.17L4 17.17V4zm0-2H4c-1.1 0-2 .9-2 2v15.59c0 .89 1.08 1.34 1.71.71L6 18h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2" />
-            </symbol>
             </symbol>
         </defs>
     </svg>
@@ -221,8 +221,8 @@
 
 
                 <div class="col-4 col-lg-4 d-flex justify-content-end gap-5 align-items-center mt-4 mt-sm-0 justify-content-center justify-content-sm-end">
-                        <div class="support-box text-center d-none d-xxl-block">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Post" asp-action="Index"><h5 class="mb-0">交流分享區</h5></a>
+                    <div class="support-box text-center d-none d-xxl-block">
+                    <a class="nav-link text-dark" asp-area="" asp-controller="Post" asp-action="Index"><h5 class="mb-0">交流分享區</h5></a>
                     </div>
 
                     <ul class="d-flex justify-content-end list-unstyled m-0">
@@ -238,10 +238,12 @@
 
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="bell-dropdown" style="min-width: 250px;">
                                     <li><h6 class="dropdown-header border-bottom pb-2">系統通知</h6></li>
+                                    <li style="padding:0; list-style:none;"> 
                                         <div id="notificationItems" style="max-height: 350px; overflow-y: auto;" >       <!-- 即時收到的訊息會動態塞在這裡 -->
-                                            <li><a class="dropdown-item text-muted text-center py-3"  >暫無新通知</a></li>
-                                            <li><hr class="dropdown-divider"></li>
+                                            <a class="dropdown-item text-muted text-center py-3">暫無新通知</a>
+                                            <hr class="dropdown-divider">
                                         </div>
+                                    </li>
                                 </ul>
                             </li>
                             <li>
@@ -254,7 +256,6 @@
                                     <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
                                 </a>
                             </li>
-
                         }
                         <!-- User 圖示永遠顯示，但連結不同 -->
                         <li>
@@ -291,7 +292,6 @@
                         </button>
                     </div>
                 </div>
-
             </div>
         </div>
     </header>
@@ -536,10 +536,7 @@
                      currencyUnit.innerText = "USD"
                      this.disabled = true;
                  }
-                 
-                 
             }
-            
         }
         catch(err){
             alert(err.message)
