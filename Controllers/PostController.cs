@@ -52,6 +52,136 @@ namespace Bake.Controllers
         {
             return View();
         }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PostToggleLike(int postId)   // 貼文按讚
+        {
+            var user = User.FindFirst("UserId")?.Value;
+            if (user == null) // 判斷有沒有登入
+            {
+                return Json(new { success = false, message = "請先登入!" });
+            }
+            var postExists = await _db.Posts.AnyAsync(p => p.PostId == postId);
+            if (!postExists) // 判斷貼文存在
+            {
+                return Json(new { success = false, message = "找不到該貼文!" });
+            }
+            try
+            {
+                var like = await _db.PostLikes.FirstOrDefaultAsync(l =>    // 判斷有沒有按讚
+                l.UserId == int.Parse(user) && l.PostId == postId);
+                if (like == null)       // 如果還沒按讚   新增至按讚表
+                {
+                    var newLike = new PostLike
+                    {
+                        UserId = int.Parse(user),
+                        PostId = postId,
+                        CreatedAt = DateTime.Now,
+                    };
+                    _db.PostLikes.Add(newLike);
+                    await _db.SaveChangesAsync();
+                    return Json(new { success = true, isLiked = true, message = "已按讚!" });
+                }
+                else                    //如果已經按讚  移除按讚清單
+                {
+                    _db.PostLikes.Remove(like);
+                    await _db.SaveChangesAsync();
+                    return Json(new { success = true, isLiked = false, message = "已取消按讚!" });
+                }
+            }
+            catch(Exception ex)
+            {
+                return Json(new {success = false, message = "伺服器發生錯誤"});
+            }
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> PostToggleFavorite(int postId)   // 貼文收藏
+        {
+            var user = User.FindFirst("UserId")?.Value;
+            if (user == null)// 判斷有沒有登入
+            {
+                return Json(new { success = false, message = "請先登入!" });
+            }
+            var postExists = await _db.Posts.AnyAsync(p => p.PostId == postId);
+            if (!postExists) // 判斷貼文存在
+            {
+                return Json(new { success = false, message = "找不到該貼文!" });
+            }
+            try
+            {
+                var favorite = await _db.PostFavorites.FirstOrDefaultAsync(f =>    // 判斷有沒有收藏
+                f.UserId == int.Parse(user) && f.PostId == postId);
+                if (favorite == null)       // 如果還沒收藏   新增至收藏表
+                {
+                    var newFavorite = new PostFavorite
+                    {
+                        UserId = int.Parse(user),
+                        PostId = postId,
+                        CreatedAt = DateTime.Now,
+                    };
+                    _db.PostFavorites.Add(newFavorite);
+                    await _db.SaveChangesAsync();
+                    return Json(new { success = true, isFavorited = true, message = "已收藏貼文!" });
+                }
+                else                    //如果已經收藏  移除收藏清單
+                {
+                    _db.PostFavorites.Remove(favorite);
+                    await _db.SaveChangesAsync();
+                    return Json(new { success = true, isFavorited = false, message = "已移除收藏!" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "伺服器發生錯誤" });
+            }
+        }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UserToggleFollow(int beFollowId)   // 用戶追蹤
+        {
+            var user = User.FindFirst("UserId")?.Value;
+            if (user == null)  // 判斷有沒有登入
+            {
+                return Json(new { success = false, message = "請先登入!" });
+            }
+            if (int.Parse(user) == beFollowId)
+            {
+                return Json(new { success = false, message = "你不能追蹤你自己!" });
+            }
+            var userExists = await _db.UserProfiles.AnyAsync(p => p.UserId == beFollowId);
+            if (!userExists)  // 判斷用戶存在
+            {
+                return Json(new { success = false, message = "找不到該用戶!" });
+            }
+            try
+            {
+                var follow = await _db.Follows.FirstOrDefaultAsync(f =>    // 判斷有沒有追蹤
+                f.FollowerId == int.Parse(user) && f.BefollowedId == beFollowId);
+                if (follow == null)       // 如果還沒追蹤   新增至追蹤表
+                {
+                    var newFollow = new Follow
+                    {
+                        FollowerId = int.Parse(user),
+                        BefollowedId = beFollowId,
+                        CreatedAt = DateTime.Now,
+                    };
+                    _db.Follows.Add(newFollow);
+                    await _db.SaveChangesAsync();
+                    return Json(new { success = true, isFollowed = true, message = "已追蹤用戶!" });
+                }
+                else                    //如果已經追蹤  移除追蹤清單
+                {
+                    _db.Follows.Remove(follow);
+                    await _db.SaveChangesAsync();
+                    return Json(new { success = true, isFollowed = false, message = "已取消追蹤!" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "伺服器發生錯誤" });
+            }
+        }
 
 
         //public IActionResult Latest()
@@ -331,6 +461,24 @@ namespace Bake.Controllers
 
             var eventDetail = post.EventDetails.FirstOrDefault();
 
+            var user = User.FindFirst("UserId")?.Value;
+            
+            var isFollowed = false;
+            var isLike = false;
+            var isFavorited = false;
+
+            if(int.TryParse(user,out int CurrentUserId))
+            {
+                isFollowed = await _db.Follows.AnyAsync(f =>
+                    f.FollowerId == CurrentUserId && f.BefollowedId == post.AuthorId );
+                isLike = await _db.PostLikes.AnyAsync(f =>
+                    f.UserId == CurrentUserId && f.PostId == id);
+                isFavorited = await _db.PostFavorites.AnyAsync(f =>
+                    f.UserId == CurrentUserId && f.PostId == id);
+            }
+
+            
+
             var comments = await _db.PostComments
                     .Where(c => c.PostId == id)
                     .OrderByDescending(c => c.CreatedAt)
@@ -367,7 +515,7 @@ namespace Bake.Controllers
                 ViewCount = post.ViewCount ?? 0,
                 LikesCount = post.LikesCount ?? 0,
                 FavoriteCount = post.FavoriteCount ?? 0,
-
+                
                 Attachments = post.PostAttachments
                     .OrderBy(pa => pa.SortOrder)
                     .Select(pa => new PostDetailViewModel.AttachmentDto
@@ -384,7 +532,7 @@ namespace Bake.Controllers
                     TagId = t.TagId,
                     TagName = t.TagName
                 }).ToList(),
-
+                
                 Author = new PostDetailViewModel.AuthorDto
                 {
                     UserId = post.Author.UserId,
@@ -393,7 +541,7 @@ namespace Bake.Controllers
                     Bio = post.Author.Bio,
                     ShareCount = await _db.Posts.CountAsync(p => p.AuthorId == post.AuthorId),
                     FollowerCount = post.Author.FollowBefolloweds.Count,
-
+                    
                 },
                 EventDetail = eventDetail == null ? null : new PostDetailViewModel.EventDetailDto
                 {
@@ -414,9 +562,9 @@ namespace Bake.Controllers
                 
 
                 Comments = comments,
-                IsFavorited = false,
-                IsFollowed = false,
-                IsLiked = false,
+                IsFavorited = isFavorited,
+                IsFollowed = isFollowed,
+                IsLiked = isLike,
             };
 
             if (string.IsNullOrEmpty(vm.Author.Avatar))
@@ -764,5 +912,7 @@ namespace Bake.Controllers
                 .ToListAsync();
         }
         // ------ 建立活動用方法(尾)
+
+        
     }
 }

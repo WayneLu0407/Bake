@@ -386,3 +386,6 @@ a.primary,
         border-color: var(--ss-primary-hover) !important;
         color: #222 !important;
     }
+.header-message-box a.rounded-circle:hover {
+    color: #000;
+}

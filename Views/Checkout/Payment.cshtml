@@ -1,13 +1,69 @@
 ﻿@using Bake.ViewModel
 @model CheckoutViewModel
 
+@section Styles
+{
+    <style>
+        .cursor-pointer {
+            cursor: pointer;
+        }
+
+        .border-dashed {
+            border-top: 2px dashed #ddd;
+            opacity: 1;
+        }
+
+        /* 付款選項美化 */
+        .payment-option label {
+            transition: all 0.2s ease;
+            border: 2px solid #eee !important;
+        }
+
+            .payment-option label:hover {
+                background-color: #fffbeb;
+                border-color: #ffc107 !important;
+            }
+        /* 選中狀態 */
+        .payment-option input:checked + label {
+            border-color: #ffc107 !important;
+            background-color: #fff;
+        }
+
+            .payment-option input:checked + label .icon-main {
+                color: #ffc107 !important;
+            }
+
+            .payment-option input:checked + label .check-icon {
+                display: block !important;
+            }
+
+        /* 捲軸美化 */
+        .overflow-auto::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .overflow-auto::-webkit-scrollbar-thumb {
+            background: #E0E0E0;
+            border-radius: 10px;
+        }
+    </style>
+
+}
+
 @{
     ViewData["Title"] = "Order Payment";
-    string ReceiverName = ViewBag.ReceiverName ?? "N/A";
-    string ReceiverPhone = ViewBag.ReceiverPhone ?? "N/A";
-    string ReceiverAddress = ViewBag.ReceiverAddress ?? "N/A";
-    string ReceiverEmail = ViewBag.ReceiverEmail ?? "N/A";
+    string ReceiverName = Model.ReceiverName ?? "N/A";
+    string ReceiverPhone = Model.ReceiverPhone ?? "N/A";
+    string ReceiverAddress = Model.ReceiverAddress ?? "N/A";
+    string ReceiverEmail = Model.ReceiverEmail ?? "N/A";
+
+    var orderId = ViewContext.RouteData.Values["id"];
 }
+
+
+
+
+
 
 <section class="h-100 h-custom" style="background-color: #f8f9fa;">
     <div class="container py-5 h-100">
@@ -73,9 +129,13 @@
                                         <span class="text-dark fw-bold fs-5">訂單小計</span>
                                         <h5 class="fw-bolder text-dark mb-0">${{formatNumber(totalPrice)}}</h5>
                                     </div>
+                                    <div v-if="appliedDiscount > 0" class="d-flex justify-content-between align-items-center px-1 text-danger">
+                                        <span class="text-dark fw-bold fs-5">優惠券折抵 ({{couponCode}})</span>
+                                        <h5 class="fw-bolder mb-0">-${{formatNumber(appliedDiscount)}}</h5>
+                                    </div>
                                     <div class="d-flex justify-content-between align-items-center px-1">
                                         <span class="text-dark fw-bold fs-5">運費</span>
-                                        <h5 class="mb-0">@ViewBag.ShippingFee</h5>
+                                        <h5 class="mb-0">${{formatNumber(shippingFee)}}</h5>
                                     </div>
                                     <div class="d-flex justify-content-between align-items-center px-1">
                                         <span class="text-dark fw-bold fs-3">訂單總額</span>
@@ -90,24 +150,12 @@
                                 <h3 class="fw-bold text-dark mb-1">最後一步</h3>
                                 <p class="text-muted mb-5">選擇您的付款方式並完成購買</p>
 
-                                <form asp-controller="Checkout" asp-action="ConfirmPayment" method="post">
-                                    <input type="hidden" name="ReceiverName" value="@ReceiverName" />
-                                    <input type="hidden" name="ReceiverPhone" value="@ReceiverPhone" />
-                                    <input type="hidden" name="ReceiverAddress" value="@ReceiverAddress" />
-                                    <input type="hidden" name="ReceiverEmail" value="@ReceiverEmail" />
-                                    @* --- 放藍星要的 --- *@
-                                    <input type="hidden" name="MerchantID" value="@ViewData["MerchantID"]" />
-                                    <input type="hidden" name="MerchantOrderNo" value="@ViewData["MerchantOrderNo"]"  />
-                                    <input type="hidden" name="ItemDesc" value="@ViewData["ItemDesc"]"   />
-                                    <input type="hidden" name="Amt" value="@ViewData["Amt"]"   />
-                                    <input type="hidden" name="ExpireDate" value="@ViewData["ExpireDate"]"    />
-                                    <input type="hidden" name="ReturnURL" value="@ViewData["ReturnURL"]" />
-                                    <input type="hidden" name="ClientBackURL" value="@ViewData["ClientBackURL"]" />
-                                    <input type="hidden" name="CustomerURL" value="@ViewData["CustomerURL"]" />
-                                    <input type="hidden" name="NotifyURL" value="@ViewData["NotifyURL"]" />
-
-
-
+                                <form asp-controller="Pay" asp-action="ConfirmPayment" method="post" id="checkoutForm">
+                                    <input type="hidden" name="ReceiverName" value="@Model.ReceiverName" />
+                                    <input type="hidden" name="ReceiverPhone" value="@Model.ReceiverPhone" />
+                                    <input type="hidden" name="ReceiverAddress" value="@Model.ReceiverAddress" />
+                                    <input type="hidden" name="ReceiverEmail" value="@Model.ReceiverEmail" />
+                      
 
                                     @* 信用卡選項 *@
                                     <div class="payment-option mb-3">
@@ -148,11 +196,12 @@
                                         </label>
                                     </div>
 
+                                        <button type="button" onclick="goNewebPay()" id="btn-pay"
+                                                class="btn btn-warning w-100 py-3 rounded-pill shadow-lg fw-bold btn-lg"
+                                                style="border: none; font-size: 1.2rem;">
+                                            前往付款 (藍新金流) <i class="fas fa-credit-card ms-2"></i>
+                                        </button>
 
-                                    <button type="submit" class="btn btn-primary w-100 py-3 rounded-pill shadow-lg fw-bold btn-lg"
-                                            style="background-color: #1A237E; border: none; font-size: 1.2rem;">
-                                        PLACE ORDER NOW <i class="fas fa-arrow-right ms-2"></i>
-                                    </button>
                                 </form>
                             </div>
 
@@ -164,50 +213,13 @@
     </div>
 </section>
 
-<style>
-    .cursor-pointer {
-        cursor: pointer;
-    }
+<form id="newebpay-form" method="post" action="">
+    <input type="hidden" name="MerchantID" value="" />
+    <input type="hidden" name="TradeInfo" value="" />
+    <input type="hidden" name="TradeSha" value="" />
+    <input type="hidden" name="Version" value="" />
 
-    .border-dashed {
-        border-top: 2px dashed #ddd;
-        opacity: 1;
-    }
-
-    /* 付款選項美化 */
-    .payment-option label {
-        transition: all 0.2s ease;
-        border: 2px solid #eee !important;
-    }
-
-        .payment-option label:hover {
-            background-color: #fffbeb;
-            border-color: #ffc107 !important;
-        }
-    /* 選中狀態 */
-    .payment-option input:checked + label {
-        border-color: #ffc107 !important;
-        background-color: #fff;
-    }
-
-        .payment-option input:checked + label .icon-main {
-            color: #ffc107 !important;
-        }
-
-        .payment-option input:checked + label .check-icon {
-            display: block !important;
-        }
-
-    /* 捲軸美化 */
-    .overflow-auto::-webkit-scrollbar {
-        width: 5px;
-    }
-
-    .overflow-auto::-webkit-scrollbar-thumb {
-        background: #E0E0E0;
-        border-radius: 10px;
-    }
-</style>
+</form>
 
 @section Scripts {
     <script>
@@ -226,21 +238,64 @@
             mixins:[CartMixin],
             data(){
                 return {
-                    shippingFee: @(ViewBag.ShippingFee ?? 60)
+                    couponCode: '@ViewBag.CouponCode',
+                    shippingFee: @(ViewBag.ShippingFee ?? 60),
                 }
             },
-            computed: {
-                grandTotal() {
-                    return this.totalPrice + this.shippingFee;
+            computed:{
+                grandTotal(){
+                    const total = this.totalPrice - this.appliedDiscount + this.shippingFee;
+                    return total > 0 ? total : 0;
                 }
             },
-            methods:{
-                formatNumber(num) {
-                    if (!num) return '0';
-                    return num.toLocaleString('zh-TW'); //強制台灣格式
+            mounted(){
+                this.refreshCart();
+
+                if (this.couponCode && this.couponCode !== '') {
+                    this.checkCoupon(true);
                 }
-            },
-            mounted(){this.refreshCart();}
+            }
         }).mount('#paymentPage')
+
+        async function goNewebPay(){
+            const btn = document.getElementById('btn-pay');
+            //抓取form資料，送出前先禁用按鈕並顯示處理中狀態
+            const checkoutForm = document.querySelector('#checkoutForm');
+            btn.disabled = true; // 防止重複點擊
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 處理中...';
+
+            //打包Info form資料
+            const formData = new FormData(checkoutForm);
+
+            try{
+                const res = await fetch(`/api/PayApi/GetTradeData`,{
+                    method: 'POST',
+                    body: formData
+                });
+                if(!res.ok) throw new Error('無法取得付款資料');
+
+                const result = await res.json();
+                console.log(result);
+
+                if(result.isCod){
+                    window.location.href = `/Checkout/Success/${result.id}`;
+                }
+                else{
+                    const data = result.payData;
+                    const form = document.getElementById('newebpay-form');
+                    form.action = data.payGateWay;
+                    form.querySelector('input[name="MerchantID"]').value = data.merchantID;
+                    form.querySelector('input[name="TradeInfo"]').value = data.tradeInfo;
+                    form.querySelector('input[name="TradeSha"]').value = data.tradeSha;
+                    form.querySelector('input[name="Version"]').value = data.version;
+                    form.submit();
+                }
+            }
+            catch(err){
+                alert(err.message);
+                btn.disabled = false;
+                btn.innerText = "重新嘗試支付";
+            }
+        }
     </script>
 }
