@@ -4,6 +4,7 @@ using Bake.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bake.Migrations
 {
     [DbContext(typeof(BakeContext))]
-    partial class BakeContextModelSnapshot : ModelSnapshot
+    [Migration("20260331135725_AddCouponTable")]
+    partial class AddCouponTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -445,34 +448,6 @@ namespace Bake.Migrations
                     b.HasKey("CouponId");
 
                     b.ToTable("Coupons");
-                });
-
-            modelBuilder.Entity("Bake.Models.Sales.FavoriteProduct", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETUTCDATE()");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("FavoriteProducts");
                 });
 
             modelBuilder.Entity("Bake.Models.Sales.Order", b =>
@@ -1870,25 +1845,6 @@ namespace Bake.Migrations
                         .HasConstraintName("FK_cartItem_cart");
 
                     b.Navigation("Cart");
-                });
-
-            modelBuilder.Entity("Bake.Models.Sales.FavoriteProduct", b =>
-                {
-                    b.HasOne("Bake.Models.Sales.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Bake.Models.User.AccountAuth", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Bake.Models.Sales.Order", b =>

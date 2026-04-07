@@ -22,7 +22,6 @@
         .shop-filter-card {
             background: #fff;
             border-radius: 24px;
-            box-shadow: 0 .125rem .5rem rgba(0,0,0,.06);
             padding: 1.5rem;
             position: sticky;
             top: 100px;
@@ -62,9 +61,9 @@
             cursor: pointer;
         }
 
-            .shop-price-option input {
-                margin: 0;
-            }
+        .shop-price-option input {
+            margin: 0;
+        }
 
         #shop-product-section.shop-loading {
             opacity: .45;
@@ -89,14 +88,16 @@
 <div class="container-fluid shop-page-wrap shop-page-shell">
 
     @await Html.PartialAsync("_ShopProfilePartial", Model.ShopInfo)
-
-    <div class="d-flex justify-content-end mt-3 mb-4">
-        <button type="button" class="btn btn-warning rounded-pill px-4 py-2 fw-bold">
-            加入關注
-        </button>
-    </div>
-
     <div class="row g-4">
+    @if (Model.ShopInfo.StatusId == 1)
+    {
+        <div class="col-12 text-center py-5">
+            <h4 class="fw-bold">此店鋪暫停營業中</h4>
+            <p class="text-muted">店家目前暫時休息，請稍後再來逛逛</p>
+        </div>
+    }
+    else
+    {
         <aside class="col-lg-3">
             <div class="shop-filter-card">
 
@@ -240,18 +241,23 @@
                             <span>NT$500 以上</span>
                         </label>
                     </div>
-
-                    <input type="hidden" name="categoryId" value="@Model.CategoryId" />
-                    <button type="submit" class="btn btn-dark w-100">套用篩選</button>
                 </form>
             </div>
         </aside>
-
-        <main class="col-lg-9">
-            <div id="shop-product-section">
-                @await Html.PartialAsync("_ShopProfileProductListPartial", Model)
-            </div>
+            <main class="col-lg-9">
+                @if (Model.Products.Any())
+                {
+                    <div id="shop-product-section">
+                        @await Html.PartialAsync("_ShopProfileProductListPartial", Model)
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-5 text-muted">目前沒有商品</div>
+                }
         </main>
+        }
+
     </div>
 </div>
 

@@ -1,12 +1,17 @@
-﻿using Bake.Data;
+﻿using AspNetCoreGeneratedDocument;
+using Azure.Core;
+using Bake.Data;
 using Bake.Models;
 using Bake.Models.Sales;
 using Bake.ViewModel;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Specialized;
 using System.Diagnostics;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Web;
@@ -17,26 +22,95 @@ namespace Bake.Controllers.api
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PayController : ControllerBase
+    public class PayApiController : ControllerBase
     {
         private readonly BakeContext _bakeContext;
         private readonly IConfiguration _config;
-        public PayController( BakeContext bakeContext, IConfiguration config)
+        public PayApiController( BakeContext bakeContext, IConfiguration config)
         {
             _bakeContext = bakeContext;
             _config = config;
         }
 
-        [HttpGet("GetTradeData/{id}")]
-        public IActionResult GetTradeData(int id)
+        private int CurrentUserId
         {
-            // 從資料庫拿訂單資料
-            var order = _bakeContext.Orders.FirstOrDefault(o => o.OrderId == id);
-            if(order == null) return NotFound("找不到訂單");
+            get
+            {
+                var claimValue = User.FindFirst("UserId")?.Value
+                              ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
-            // 從session拿Info資料、購物車資料
-            string customerEmail = GetEmailFromSession();
-            var cartItem = GetCartItemsFromSession();
+                if (int.TryParse(claimValue, out int id))
+                {
+                    return id;
+                }
+                return 0;
+            }
+        }
+
+
+
+        [Authorize]
+        [HttpPost("GetTradeData")]
+        public async Task<IActionResult> GetTradeData([FromForm]CheckoutViewModel checkoutViewModel, [FromForm]string PaymentMethod)
+        {
+            int userId = CurrentUserId;
+
+            // 驗收防呆：如果真的抓不到登入者 ID，不要讓它進資料庫
+            if (userId == 0) return Unauthorized(new { message = "請先登入" });
+
+            // 購物車資料
+            var cartItems = GetCartItemsFromSession();
+            if (!cartItems.Any()) return BadRequest(new { message = "購物車空空如也" });
+
+            // 優惠券資料
+            string couponCode = Request.Cookies["AppliedCoupon"];
+            decimal discount = 0;
+            if (!string.IsNullOrEmpty(couponCode))
+            {
+                // 呼叫私有方法重新驗證一次
+                discount = await CalculateFinalDiscount(couponCode, cartItems);
+            }
+
+            //運費
+            int shippingFee = HttpContext.Session.GetInt32("ShippingFee") ?? 60;
+
+            //先計算購物車小計
+            decimal subTotal = cartItems.Sum(item => item.Price * item.Quantity);
+            // 建立Order物件實體，並將checkoutdata資料填入Order物件中
+            var order = new Order
+            {
+                UserId = userId,
+                ShippingAddress = checkoutViewModel.ReceiverAddress,
+                TotalAmount = subTotal+ shippingFee - discount,
+                PaymentMethodId = byte.Parse(PaymentMethod),
+                StatusId = (byte.Parse(PaymentMethod) == 2) ? (byte)1 : (byte)0,
+                CreatedAt = DateTime.Now,
+                UpdatedAt = DateTime.Now,
+            };
+
+            foreach (var item in cartItems)
+            {
+                var orderItem = new OrderItem
+                {
+                    ProductId = item.ProductId,
+                    ItemQuantity = item.Quantity,
+                    UnitPrice = item.Price,
+                    Subtotal = item.Quantity * item.Price
+                };
+            }
+
+            //3. 寫入資料庫
+            _bakeContext.Orders.Add(order);
+            await _bakeContext.SaveChangesAsync();
+            Response.Cookies.Delete("AppliedCoupon");
+
+            ClearCart(); //清空購物車
+
+            //4.重新導向: 如果是貨到付款，直接到Success
+            if (order.PaymentMethodId == 2)
+            {
+                return Ok(new { success=true, isCod=true, id = order.OrderId });
+            }
 
             // 金流配置
             string merchantID = _config["NewebPayConfig:MerchantID"];
@@ -44,16 +118,23 @@ namespace Bake.Controllers.api
             string hashIV = _config["NewebPayConfig:HashIV"];
             string baseAddress = $"{Request.Scheme}://{Request.Host}";
 
-            string itemDesc = string.Join(", ", cartItem.Select(c => c.ProductName));
+            string itemDesc = string.Join(",", cartItems.Select(item => item.ProductName.Trim() ?? "烘焙商品"))
+                .Replace("&", "").Replace("=", "");
             if (itemDesc.Length > 50) itemDesc = itemDesc.Substring(0, 47) + "...";
+            
+            long nowTimeStamp = DateTimeOffset.Now.ToUnixTimeSeconds();
+
+            string customerEmail = string.IsNullOrWhiteSpace(checkoutViewModel.ReceiverEmail)
+                       ? "guest@example.com"
+                       : checkoutViewModel.ReceiverEmail;
             // 金流資訊→組成藍新金流需要的TradeInfo
             var payData = new List<string>
             {
                 $"MerchantID={merchantID}",
-                $"RespondType=String",
-                $"TimeStamp={DateTimeOffset.Now.ToUnixTimeSeconds()}",
-                $"Version=2.0",
-                $"MerchantOrderNo={order.OrderId}_{DateTimeOffset.Now.ToUnixTimeSeconds()}",  // 要加上時間戳?
+                $"RespondType=JSON",
+                $"TimeStamp={nowTimeStamp}",
+                $"Version=2.3",
+                $"MerchantOrderNo={order.OrderId}_{nowTimeStamp}",
                 $"Amt={(int)order.TotalAmount}",
                 $"ItemDesc={itemDesc}",
                 $"ExpireDate={DateTime.Now.AddDays(3).ToString("yyyyMMdd")}",
@@ -64,12 +145,13 @@ namespace Bake.Controllers.api
                 (order.PaymentMethodId == 0 ? "CREDIT=1" : "CREDIT=0"),
                 (order.PaymentMethodId == 1 ? "VACC=1" : "VACC=0"),
             };
-            string rawTradeInfo = string.Join("&", payData);
+            string rawTradeInfo = string.Join("&", payData).Trim();
+            Console.WriteLine($"加密前字串:{rawTradeInfo}");
 
-            // 執行AES加密
+            // 交易資料做 AES加密、SHA256 加密
             string TradeInfoEncrypt = EncryptAESHex(rawTradeInfo, hashKey, hashIV);
-            //交易資料 SHA256 加密
-            string TradeSha = EncryptSHA256($"HashKey={hashKey}&{TradeInfoEncrypt}&HashIV={hashIV}");
+            string shaSource = $"HashKey={hashKey}&{TradeInfoEncrypt}&HashIV={hashIV}";
+            string TradeSha = EncryptSHA256(shaSource);
 
             //使用viewmodel包裝要傳給前端的資料
             var response = new PayViewModel
@@ -77,97 +159,63 @@ namespace Bake.Controllers.api
                 MerchantID = merchantID,
                 TradeInfo = TradeInfoEncrypt,
                 TradeSha = TradeSha,
+                Version = "2.3",
                 PayGateWay = _config["NewebPayConfig:PayGateWay"]
             };
-            return Ok(response);
+
+            //檢查用
+            //string testDecrypt = DecryptAESHex(TradeInfoEncrypt, hashKey, hashIV);
+            //Console.WriteLine($"反向解密結果: {testDecrypt}");
+            //Console.WriteLine($"[Debug] Raw: {rawTradeInfo}");
+            //string shaSource_ = $"HashKey={hashKey}&{TradeInfoEncrypt.ToUpper()}&HashIV={hashIV}";
+            //Console.WriteLine($"[Debug] SHA Source: {shaSource_}");
+            return Ok(new { isCod=false, payData = response});
+
+            
         }
 
-        
-        /// 支付完成返回網址
-        //public IActionResult CallbackReturn()
-        //{
-        //    // 接收參數
-        //    StringBuilder receive = new StringBuilder();
-        //    foreach (var item in Request.Form)
-        //    {
-        //        receive.AppendLine(item.Key + "=" + item.Value + "<br>");
-        //    }
-        //    //ViewData["ReceiveObj"] = receive.ToString();
+        private async Task<decimal> CalculateFinalDiscount(string couponCode, List<CartViewModel> cartItems)
+        {
+            //檢查優惠券是否存在
+            var coupon = await _bakeContext.Coupons
+                .FirstOrDefaultAsync(c => c.Code == couponCode && c.IsActive && c.ExpirationDate >= DateTime.Now);
 
-        //    // 解密訊息
-        //    IConfiguration Config = new ConfigurationBuilder().AddJsonFile("appSettings.json").Build();
-        //    string HashKey = Config.GetSection("HashKey").Value;//API 串接金鑰
-        //    string HashIV = Config.GetSection("HashIV").Value;//API 串接密碼
+            if (coupon == null) return 0;
 
-        //    string TradeInfoDecrypt = DecryptAESHex(Request.Form["TradeInfo"], HashKey, HashIV);
-        //    NameValueCollection decryptTradeCollection = HttpUtility.ParseQueryString(TradeInfoDecrypt);
-        //    receive.Length = 0;
-        //    foreach (String key in decryptTradeCollection.AllKeys)
-        //    {
-        //        receive.AppendLine(key + "=" + decryptTradeCollection[key] + "<br>");
-        //    }
-        //    //ViewData["TradeInfo"] = receive.ToString();
+            var productIds = cartItems.Select(i => i.ProductId).ToList();
+            var productsInDb = await _bakeContext.Products
+                .Where(p => productIds.Contains(p.ProductId))
+                .Select(p => new {
+                    p.ProductId,
+                    p.ProductDetail.ProductPrice,
+                    p.UserId
+                }).ToListAsync();
 
-        //    return View();
-        //}
+            //計算金額
+            decimal subTotal = 0;  //購物車總金額
+            decimal applyAmout = 0;  //符合優惠券條件的金額 (如果有指定賣家，則只計算該賣家的商品金額)
 
-        ///// 商店取號網址？?
-        ///// </summary>
-        ///// <returns></returns>
-        //public IActionResult CallbackCustomer()
-        //{
-        //    // 接收參數
-        //    StringBuilder receive = new StringBuilder();
-        //    foreach (var item in Request.Form)
-        //    {
-        //        receive.AppendLine(item.Key + "=" + item.Value + "<br>");
-        //    }
-        //    ViewData["ReceiveObj"] = receive.ToString();
+            foreach (var item in cartItems)
+            {
+                var dbProduct = productsInDb.FirstOrDefault(p => p.ProductId == item.ProductId);
+                if (dbProduct == null) continue;
 
-        //    // 解密訊息
-        //    IConfiguration Config = new ConfigurationBuilder().AddJsonFile("appSettings.json").Build();
-        //    string HashKey = Config.GetSection("HashKey").Value;//API 串接金鑰
-        //    string HashIV = Config.GetSection("HashIV").Value;//API 串接密碼
-        //    string TradeInfoDecrypt = DecryptAESHex(Request.Form["TradeInfo"], HashKey, HashIV);
-        //    NameValueCollection decryptTradeCollection = HttpUtility.ParseQueryString(TradeInfoDecrypt);
-        //    receive.Length = 0;
-        //    foreach (String key in decryptTradeCollection.AllKeys)
-        //    {
-        //        receive.AppendLine(key + "=" + decryptTradeCollection[key] + "<br>");
-        //    }
-        //    ViewData["TradeInfo"] = receive.ToString();
-        //    return View();
-        //}
+                decimal itemTotal = dbProduct.ProductPrice * item.Quantity;
+                subTotal += itemTotal;
 
-        
-        ///// 支付通知網址 ??????
-        ///// </summary>
-        ///// <returns></returns>
-        //public IActionResult CallbackNotify()
-        //{
-        //    // 接收參數
-        //    StringBuilder receive = new StringBuilder();
-        //    foreach (var item in Request.Form)
-        //    {
-        //        receive.AppendLine(item.Key + "=" + item.Value + "<br>");
-        //    }
-        //    ViewData["ReceiveObj"] = receive.ToString();
+                //全站券走條件1 : 如果優惠券SellerId為null，每個itemTotal都會被加進applyAmount；如果有指定SellerId
+                //賣家券走條件2 : 只有當商品的UserId與SellerId相符時，itemTotal才會被加進applyAmount
+                if (!coupon.SellerId.HasValue || dbProduct.UserId == coupon.SellerId)
+                {
+                    applyAmout += itemTotal;
+                }
+            }
 
-        //    // 解密訊息
-        //    IConfiguration Config = new ConfigurationBuilder().AddJsonFile("appSettings.json").Build();
-        //    string HashKey = Config.GetSection("HashKey").Value;//API 串接金鑰
-        //    string HashIV = Config.GetSection("HashIV").Value;//API 串接密碼
-        //    string TradeInfoDecrypt = DecryptAESHex(Request.Form["TradeInfo"], HashKey, HashIV);
-        //    NameValueCollection decryptTradeCollection = HttpUtility.ParseQueryString(TradeInfoDecrypt);
-        //    receive.Length = 0;
-        //    foreach (String key in decryptTradeCollection.AllKeys)
-        //    {
-        //        receive.AppendLine(key + "=" + decryptTradeCollection[key] + "<br>");
-        //    }
-        //    ViewData["TradeInfo"] = receive.ToString();
+            //檢查消費門檻
+            if (applyAmout < coupon.MinimumPurchase) return 0;
 
-        //    return View();
-        //}
+            return coupon.DiscountValue;
+        }
 
         private List<CartViewModel> GetCartItemsFromSession()
         {
@@ -180,7 +228,6 @@ namespace Bake.Controllers.api
 
             return JsonSerializer.Deserialize<List<CartViewModel>>(cartJson);
         }
-
         private string GetEmailFromSession()
         {
             var infoJson = HttpContext.Session.GetString("ReceiverInfo");
@@ -193,6 +240,10 @@ namespace Bake.Controllers.api
             return model.ReceiverEmail;
         }
 
+        private void ClearCart()
+        {
+            HttpContext.Session.Remove("UserCart");
+        }
 
         // ↓↓↓加密解密方法↓↓↓
         /// <summary>
@@ -349,4 +400,6 @@ namespace Bake.Controllers.api
             }
         }
     }
+
+    
 }
