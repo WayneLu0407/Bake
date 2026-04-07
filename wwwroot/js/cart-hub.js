@@ -1,9 +1,22 @@
-﻿// 呼叫API的全域變數
+﻿// 購物車也只發一次請求
+let _cartPromise = null;
+function fetchCartOnce() {
+    if (!_cartPromise) {
+        _cartPromise = (async () => {
+            const res = await fetch("/Cart/GetCartItems");
+            const ct = res.headers.get('content-type') || '';
+            if (!res.ok || !ct.includes('application/json')) return [];
+            return await res.json();
+        })();
+    }
+    return _cartPromise;
+}
+
+// 呼叫API的全域變數
 const cartService = {
     // 1. 取得購物車訂單
     async getItem() {
-        const res = await fetch("/Cart/GetCartItems") //GET
-        return await res.json();
+        return await fetchCartOnce();
     },
     // 2. 數量加減 > 觸發全域事件，通知所有Vue購物車數量變動與更新
     async updateQty(productId, change=1) {
@@ -13,7 +26,7 @@ const cartService = {
             body: JSON.stringify({ productId: productId, quantity: change })
         });
         if (res.ok) {
-            //await this.getItem(); 
+            _cartPromise = null;  // 清掉快取，下次會重新 fetch
             window.dispatchEvent(new Event('update-cart'));
             return true;
         }
@@ -27,7 +40,7 @@ const cartService = {
             body: JSON.stringify(productId)
         });
         if (res.ok) {
-            //await this.getItem();
+            _cartPromise = null;  // 清掉快取，下次會重新 fetch
             window.dispatchEvent(new Event('update-cart'));
             return true;
         }
@@ -137,7 +150,6 @@ const CartMixin = {
     mounted() {
         this.refreshCart();
         window.addEventListener('update-cart', () => this.refreshCart());
-        //window.addEventListener(new Event('update-Cart'));
     }   
 }
 
