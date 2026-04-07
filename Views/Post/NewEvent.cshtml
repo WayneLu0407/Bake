@@ -117,7 +117,7 @@
                     </div>
                 </div>
 
-                <form asp-action="NewEvent" asp-controller="Post" method="post" onsummit="return confirm('確認發起活動?')" enctype="multipart/form-data" novalidate>
+                <form id="eventForm" asp-action="NewEvent" asp-controller="Post" method="post" onsubmmit="return confirm('確認發起活動?')" enctype="multipart/form-data" novalidate>
                     @Html.AntiForgeryToken()
 
                     <div class="mb-3">
@@ -212,9 +212,32 @@
                     <div id="photoEmpty" class="preview-empty">請上傳一張活動照片</div>
 
                     <div class="mt-4">
-                        <button type="submit" class="btn btn-warning w-100">建立活動</button>
+                        <button type="button" id="btnShowModal" class="btn btn-warning w-100 fw-bold">建立活動</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* madel容器 *@
+<div class="modal fade" id="confirmPublishModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius: 15px; border: none;">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" id="confirmModalLabel">發佈確認</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center pb-4">
+                <p class="fs-5 fw-bold mb-2" style="color: #444;">發佈後將可能不能任意下架，是否確定發佈？</p>
+                
+                <p class="text-danger mb-0" style="font-size: 0.9rem; letter-spacing: 0.5px;">
+                    *若已有人報名，將無法更改活動狀態及時間、地點。
+                </p>
+            </div>
+            <div class="modal-footer border-0 justify-content-center pt-0">
+                <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal" style="border-radius: 10px;">再檢查一遍</button>
+                <button type="button" id="btnSubmitFinal" class="btn btn-warning px-4 fw-bold" style="border-radius: 10px;">確定發佈</button>
             </div>
         </div>
     </div>
@@ -225,9 +248,34 @@
     <script>
     $(function() {
         @* 取得jQuery物件 *@
+        const $form = $("#eventForm");
+        const $btnShowModal = $("#btnShowModal");
+        const $btnSubmitFinal = $("#btnSubmitFinal");
+
         const $photoInput = $("#PhotoInput");
         const $previewWrap = $("#photoPreview");
         const $previewEmpty = $("#photoEmpty");
+
+        // 2. 初始化Bootstrap Modal 物件
+        const confirmModal = new bootstrap.Modal(document.getElementById('confirmPublishModal'));
+
+        $btnShowModal.on("click", function() {
+            if ($form.valid()) {
+                confirmModal.show();
+            } else {
+                // 驗證失敗，滾動到第一個錯誤的地方
+                const firstError = $(".text-danger:visible").first();
+                if (firstError.length > 0) {
+                    $([document.documentElement, document.body]).animate({
+                        scrollTop: firstError.offset().top - 100
+                    }, 200);
+                }
+            }
+        });
+
+        $btnSubmitFinal.on("click", function() {
+            $form.submit();
+        });
 
         $photoInput.on("change", function() {
             @*清空之前的預覽內容 *@
