@@ -63,7 +63,7 @@ namespace Bake.Areas.Seller.Controllers
                     productDescription = p.ProductDescription,
                     productImage = p.ProductImage,
                     productPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : 0,
-                    productDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : 0,
+                    productDiscount = p.ProductDetail != null ? (int)((1-p.ProductDetail.ProductDiscount)*100) : 100,
                     productQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0,
                     productExpireDate = p.ProductDetail != null && p.ProductDetail.ExpireDate != null
                     ? p.ProductDetail.ExpireDate: null,
@@ -108,7 +108,7 @@ namespace Bake.Areas.Seller.Controllers
                 productImage = p.ProductImage,
                 productDescription = p.ProductDescription,
                 productPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : 0,
-                productDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : 0,
+                productDiscount = p.ProductDetail != null ? (int)((1 - p.ProductDetail.ProductDiscount) * 100) : 0,
                 productQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0,
                 productExpireDate = p.ProductDetail != null ? p.ProductDetail.ExpireDate : null,
                 ingredients = p.ProductIngredient != null ? p.ProductIngredient.Ingredients : null,
@@ -152,7 +152,7 @@ namespace Bake.Areas.Seller.Controllers
                 if (product.ProductDetail != null)
                 {
                     product.ProductDetail.ProductPrice = ProductPrice;
-                    product.ProductDetail.ProductDiscount = ProductDiscount;
+                    product.ProductDetail.ProductDiscount = (100 - ProductDiscount) / 100m;
                     product.ProductDetail.ProductQuantity = ProductQuantity;
                     product.ProductDetail.ExpireDate = ExpireDate;
                 }
@@ -272,7 +272,7 @@ namespace Bake.Areas.Seller.Controllers
                 var detail = new ProductDetail
                 {
                     ProductPrice = item.ProductPrice,
-                    ProductDiscount = item.ProductDiscount,
+                    ProductDiscount = (100-item.ProductDiscount.GetValueOrDefault(0)) / 100m,
                     ProductQuantity = item.ProductQuantity,
                     ExpireDate = item.ExpireDate,
                 };
@@ -334,7 +334,7 @@ namespace Bake.Areas.Seller.Controllers
                     ProductDescription = p.ProductDescription != null ? p.ProductDescription : null,
                     ProductImagePath = p.ProductImage,
                     ProductPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : 0,
-                    ProductDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : 0,
+                    ProductDiscount = p.ProductDetail != null ? (int)((1 - p.ProductDetail.ProductDiscount) * 100) : 0,
                     ProductQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0,
                     ExpireDate = p.ProductDetail != null && p.ProductDetail.ExpireDate != null
                          ? p.ProductDetail.ExpireDate.Value
@@ -382,7 +382,7 @@ namespace Bake.Areas.Seller.Controllers
                 if (product.ProductDetail != null)
                 {
                     product.ProductDetail.ProductPrice = item.ProductPrice;
-                    product.ProductDetail.ProductDiscount = item.ProductDiscount;
+                    product.ProductDetail.ProductDiscount = (100 - item.ProductDiscount.GetValueOrDefault(0)) / 100m;
                     product.ProductDetail.ProductQuantity = item.ProductQuantity;
                 }
 
