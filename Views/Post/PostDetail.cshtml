@@ -320,6 +320,7 @@
                     </div>
                 </div>
             } *@
+
              @*---     報名/詢問/編輯/下架按鈕   --- *@
             @if (Model.IsActivity)
             {
@@ -352,7 +353,26 @@
                     }
                     else if (Model.IsPublished)
                     {
-                        <a href="/apply/@Model.EventDetail.EventId" class="btn-cta-primary">我要報名</a>
+                        @if (Model.IsCurrentUserRegistered)
+                        {
+                            <div class="btn-cta-outline text-center">你已報名此活動</div>
+
+                            @if (Model.CanCurrentUserCancelRegistration)
+                            {
+                                <form asp-controller="Post"
+                                      asp-action="CancelRegistration"
+                                      asp-route-eventId="@Model.EventDetail.EventId"
+                                      method="post"
+                                      onsubmit="return confirm('確認要取消報名嗎？');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-cta-primary">取消報名</button>
+                                </form>
+                            }
+                        }
+                        else
+                        {
+                            <a href="/apply/@Model.EventDetail.EventId" class="btn-cta-primary">我要報名</a>
+                        }
                         <div>
                             <h6 class="fw-bold mb-2">我要詢問</h6>
                             <a href="@Url.Action("StartChat", "Chat", new { targetId = Model.Author.UserId })" class="btn-cta-outline">私訊主辦人</a>

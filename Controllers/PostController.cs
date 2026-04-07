@@ -22,11 +22,12 @@ namespace Bake.Controllers
 {
     public class PostController : Controller
     {
-
         private readonly BakeContext _db;
         private readonly IWebHostEnvironment _env;
 
         private const string EventApplySessionKey = "EventApplyDraft";
+        private const byte ConfirmedRegistStatusId = 1;
+        private const byte CancelledRegistStatusId = 3;
 
         private static readonly HashSet<string> AllowedImageExtensions = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -165,10 +166,9 @@ namespace Bake.Controllers
         // ------建立活動(尾)
 
         [Authorize]
-        [HttpGet("Post/events/{postId}/edit")]
+        [HttpGet("/Post/events/{postId:int}/edit")]
         public async Task<IActionResult> EditEvent(int postId)
         {
-            //var hostedEventsVm = await BuildHostedEventsSectionAsync(CurrentUserId); 偵錯用
             var post = await GetOwnedEventPostAsync(postId, CurrentUserId);
 
             if (post == null)
@@ -180,7 +180,8 @@ namespace Bake.Controllers
         }
 
         [Authorize]
-        [HttpPost("Post/events/{postId}/edit")]
+        [ValidateAntiForgeryToken]
+        [HttpPost("/Post/events/{postId:int}/edit")]
         public async Task<IActionResult> EditEvent(int postId , EventEditViewModel input)
         {
             var post = await GetOwnedEventPostAsync(postId, CurrentUserId);
@@ -194,7 +195,8 @@ namespace Bake.Controllers
 
             input.PostId = post.PostId;
             input.EventId = eventDetail.EventId;
-            input.HasRegistrations = eventDetail.EventRegistrations.Any();
+            input.HasRegistrations = eventDetail.EventRegistrations
+                .Any(x => x.RegistStatusId == ConfirmedRegistStatusId);
             input.ExistingPhotoUrl = post.PostAttachments
                 .Where(a=>a.IsCover == true)
                 .Select(a=>a.FileUrl)
@@ -244,7 +246,7 @@ namespace Bake.Controllers
 
         [Authorize]
         [ValidateAntiForgeryToken]
-        [HttpPost("/Post/events/{postId}/unpublish")]
+        [HttpPost("/Post/events/{postId:int}/unpublish")]
         public async Task<IActionResult> UnpublishEvent(int postId)
         {
             var post = await GetOwnedEventPostAsync(postId, CurrentUserId);
@@ -372,21 +374,12 @@ namespace Bake.Controllers
                 return RedirectToAction(nameof(Apply), new { eventId = vm.EventId });
             }
 
-
-
-            var defaultRegistStatusId = await GetDefaultRegistStatusIdAsync();
-            if (!defaultRegistStatusId.HasValue)
-            {
-                return StatusCode(500, "找不到預設報名狀態，請先確認 Regist_Status_Lookup 是否有資料");
-            }
-
-
             var registration = new EventRegistration
             {
                 EventId = vm.EventId,
                 UserId = CurrentUserId,
                 NumParticipants = vm.NumParticipants,
-                RegistStatusId = defaultRegistStatusId.Value,
+                RegistStatusId = ConfirmedRegistStatusId,
                 CreatedAt = DateTime.Now
             };
 
@@ -411,6 +404,51 @@ namespace Bake.Controllers
 
             return View();
         }
+
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        [HttpPost("/events/{eventId:int}/cancel")]
+        public async Task<IActionResult> CancelRegistration(int eventId)
+        {
+            var error = await ValidateCancelRegistrationAsync(eventId, CurrentUserId);
+            if (error != null)
+            {
+                TempData["ErrorMessage"] = error;
+                return RedirectToAction(nameof(PostDetailByEventId), new { eventId });
+            }
+
+            var registration = await GetMyActiveRegistrationAsync(eventId, CurrentUserId);
+            if (registration == null)
+            {
+                TempData["ErrorMessage"] = "找不到可取消的報名紀錄";
+                return RedirectToAction(nameof(Events));
+            }
+
+            registration.RegistStatusId = CancelledRegistStatusId;
+            await _db.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "已取消報名";
+            return RedirectToAction(nameof(PostDetailByEventId), new { eventId });
+        }
+
+        //讓Cancel成功能導回活動詳細頁面
+        [HttpGet("/events/{eventId:int}/detail")]
+        public async Task<IActionResult> PostDetailByEventId(int eventId)
+        {
+            var postId = await _db.EventDetails
+                .Where(e => e.EventId == eventId)
+                .Select(e => (int?)e.PostId)
+                .FirstOrDefaultAsync();
+
+            if (!postId.HasValue)
+            {
+                return NotFound();
+            }
+
+            return RedirectToAction(nameof(PostDetail), new { id = postId.Value });
+        }
+
+
         // ------ 申請參加活動(尾)
 
         public IActionResult UserProfile()
@@ -434,6 +472,8 @@ namespace Bake.Controllers
                     .ThenInclude(e => e.EventRegistrations)
                 .FirstOrDefaultAsync(p => p.PostId == id);
 
+            if (post==null) return NotFound();
+
             // 判斷文章擁有者(編輯活動貼文用)
             var isOwner = post.AuthorId == CurrentUserId && CurrentUserId > 0;
             var isPublished = post.IsPublished == true;
@@ -441,9 +481,6 @@ namespace Bake.Controllers
             {
                 return NotFound();
             }
-
-
-            if (post==null) return NotFound();
 
             var eventDetail = post.EventDetails.FirstOrDefault();
 
@@ -474,6 +511,18 @@ namespace Bake.Controllers
                 }
             }
 
+            // 判斷報名或取消報名活動用
+            var isCurrentUserRegistered = false;
+            var canCurrentUserCancelRegistration = false;
+
+            if (eventDetail != null && CurrentUserId > 0)
+            {
+                isCurrentUserRegistered = eventDetail.EventRegistrations
+                    .Any(x => x.UserId == CurrentUserId && x.RegistStatusId == ConfirmedRegistStatusId);
+
+                canCurrentUserCancelRegistration = isCurrentUserRegistered;
+            }
+
             var vm = new PostDetailViewModel
             {
                 PostId = post.PostId,
@@ -486,6 +535,9 @@ namespace Bake.Controllers
                 // 判斷文章擁有者(編輯活動貼文用)
                 IsOwner = isOwner,
                 IsPublished = isPublished,
+                // 判斷報名或取消報名活動用
+                IsCurrentUserRegistered = isCurrentUserRegistered,
+                CanCurrentUserCancelRegistration = canCurrentUserCancelRegistration,
 
                 Attachments = post.PostAttachments
                     .OrderBy(pa => pa.SortOrder)
@@ -530,7 +582,7 @@ namespace Bake.Controllers
                     LocationAddress = eventDetail.LocationAddress,
                 },
 
-                
+
 
                 Comments = comments,
                 IsFavorited = false,
@@ -647,7 +699,7 @@ namespace Bake.Controllers
                 return "活動報名已截止";
             }
 
-            var hasRegistered = await _db.EventRegistrations
+            var hasRegistered = await ActiveRegistrationsQuery()
                 .AnyAsync(x => x.EventId == eventId && x.UserId == userId);
 
             if (hasRegistered)
@@ -668,7 +720,7 @@ namespace Bake.Controllers
                 return "找不到活動資料";
             }
 
-            var currentTotalParticipants = await _db.EventRegistrations
+            var currentTotalParticipants = await ActiveRegistrationsQuery()
                 .Where(x => x.EventId == eventId)
                 .SumAsync(x => (int?)x.NumParticipants) ?? 0;
 
@@ -679,13 +731,9 @@ namespace Bake.Controllers
 
             return null;
         }
-
-        private async Task<byte?> GetDefaultRegistStatusIdAsync()
+        private IQueryable<EventRegistration> ActiveRegistrationsQuery()  //尚未執行的查詢，比IEnumable省資源
         {
-            return await _db.RegistStatusLookups
-                .OrderBy(x => x.RegStatusId)
-                .Select(x => (byte?)x.RegStatusId)
-                .FirstOrDefaultAsync();
+            return _db.EventRegistrations.Where(x => x.RegistStatusId == ConfirmedRegistStatusId);
         }
 
         private void SaveApplyDraft(EventApplyViewModel vm)
@@ -709,6 +757,38 @@ namespace Bake.Controllers
         {
             HttpContext.Session.Remove(EventApplySessionKey);
         }
+
+        //找出我的報名
+        private async Task<EventRegistration?> GetMyActiveRegistrationAsync(int eventId, int userId)
+        {
+            return await _db.EventRegistrations
+                .FirstOrDefaultAsync(x =>
+                    x.EventId == eventId &&
+                    x.UserId == userId &&
+                    x.RegistStatusId == ConfirmedRegistStatusId);
+        }
+
+        //取消報名用
+        private async Task<string?> ValidateCancelRegistrationAsync(int eventId, int userId)
+        {
+            var eventDetail = await _db.EventDetails
+                .Include(e => e.Post)
+                .FirstOrDefaultAsync(e => e.EventId == eventId);
+
+            if (eventDetail?.Post == null)
+            {
+                return "找不到活動資料";
+            }
+
+            var registration = await GetMyActiveRegistrationAsync(eventId, userId);
+            if (registration == null)
+            {
+                return "你目前沒有可取消的有效報名紀錄";
+            }
+
+            return null;
+        }
+
         // ------ 申請參加活動方法(尾)
 
 
@@ -741,7 +821,7 @@ namespace Bake.Controllers
 
                 EventDate = eventDetail.EventTime.Date,
                 StartTime = eventDetail.EventTime.TimeOfDay,
-                EndTime = eventDetail.EventTime.TimeOfDay,
+                EndTime = eventDetail.EventEndTime.TimeOfDay,
 
                 LocationCity = eventDetail.LocationCity ?? string.Empty,
                 LocationAddress = eventDetail.LocationAddress ?? string.Empty,
@@ -760,7 +840,7 @@ namespace Bake.Controllers
                     .Select(a => a.FileUrl)
                     .FirstOrDefault(),
 
-                HasRegistrations = eventDetail.EventRegistrations.Any() //回傳布林
+                HasRegistrations = eventDetail.EventRegistrations.Any(x => x.RegistStatusId == ConfirmedRegistStatusId) //回傳布林
             };
 
             await FillOrganizerInfoAsync(vm, CurrentUserId);
@@ -774,7 +854,7 @@ namespace Bake.Controllers
         {
             var eventDetail = post.EventDetails.First();
 
-            if (!eventDetail.EventRegistrations.Any())
+            if (!eventDetail.EventRegistrations.Any(x => x.RegistStatusId == ConfirmedRegistStatusId))
             {
                 return;
             }
@@ -928,7 +1008,9 @@ namespace Bake.Controllers
                 eventDetail.LocationAddress
             }.Where(x => !string.IsNullOrWhiteSpace(x))),
 
-                    ParticipantCount = eventDetail.EventRegistrations.Sum(x => x.NumParticipants),
+                    ParticipantCount = eventDetail.EventRegistrations   //改成加總報名人數
+                        .Where(x => x.RegistStatusId == ConfirmedRegistStatusId)
+                        .Sum(x => x.NumParticipants),
                     MaxParticipants = eventDetail.MaxParticipants,
 
                     IsPublished = post.IsPublished == true,
