@@ -16,6 +16,17 @@
     @Html.AntiForgeryToken()
     <div class="row g-4">
 
+        @* 訊息 *@
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+        }
+
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+        }
+
         <!-- ==================== 左欄：主內容 ==================== -->
         <div class="col-lg-8">
 
@@ -31,6 +42,14 @@
                     else
                     {
                         <h4 class="fw-bold mb-3">「@Model.Title」</h4>
+                    }
+
+                    @*---     活動發起者專用的狀態顯示   --- *@
+                    @if (Model.IsActivity && !Model.IsPublished && Model.IsOwner)
+                    {
+                        <div class="alert alert-secondary mb-3">
+                            此活動目前為已下架狀態，前台列表不會顯示，也不可再報名。
+                        </div>
                     }
 
                     <!-- 圖片 -->
@@ -155,7 +174,7 @@
             </div>
 
             <!-- 活動 CTA（僅活動顯示） -->
-            @if (Model.IsActivity)
+            @* @if (Model.IsActivity)
             {
                 <div class="mb-4 d-flex flex-column gap-3">
                     <a href="#" class="btn-cta-primary">我要報名</a>
@@ -163,6 +182,66 @@
                         <h6 class="fw-bold mb-2">我要詢問</h6>
                         <a href="@Url.Action("StartChat", "Chat", new { targetId = Model.Author.UserId })" class="btn-cta-outline">私訊主辦人</a>
                     </div>
+                </div>
+            } *@
+
+             @*---     報名/詢問/編輯/下架按鈕   --- *@
+            @if (Model.IsActivity)
+            {
+                <div class="mb-4 d-flex flex-column gap-3">
+
+                    @if (Model.IsOwner)
+                    {
+                        <a asp-controller="Post"
+                           asp-action="EditEvent"
+                           asp-route-postId="@Model.PostId"
+                           class="btn-cta-primary">
+                            編輯活動
+                        </a>
+
+                        @if (Model.IsPublished)
+                        {
+                            <form asp-controller="Post"
+                                  asp-action="UnpublishEvent"
+                                  asp-route-postId="@Model.PostId"
+                                  method="post"
+                                  onsubmit="return confirm('確認要下架這個活動嗎？下架後前台列表將不再顯示。');">
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="btn-cta-outline">下架活動</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <div class="btn-cta-outline text-center">活動已下架</div>
+                        }
+                    }
+                    else if (Model.IsPublished)
+                    {
+                        @if (Model.IsCurrentUserRegistered)
+                        {
+                            <div class="btn-cta-outline text-center">你已報名此活動</div>
+
+                            @if (Model.CanCurrentUserCancelRegistration)
+                            {
+                                <form asp-controller="Post"
+                                      asp-action="CancelRegistration"
+                                      asp-route-eventId="@Model.EventDetail.EventId"
+                                      method="post"
+                                      onsubmit="return confirm('確認要取消報名嗎？');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn-cta-primary">取消報名</button>
+                                </form>
+                            }
+                        }
+                        else
+                        {
+                            <a href="/apply/@Model.EventDetail.EventId" class="btn-cta-primary">我要報名</a>
+                        }
+                        <div>
+                            <h6 class="fw-bold mb-2">我要詢問</h6>
+                            <a href="@Url.Action("StartChat", "Chat", new { targetId = Model.Author.UserId })" class="btn-cta-outline">私訊主辦人</a>
+                        </div>
+                    }
                 </div>
             }
 
