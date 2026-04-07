@@ -45,6 +45,15 @@ public class PostDetailViewModel
     public bool IsFavorited { get; set; }
     public bool IsFollowed { get; set; }
 
+
+    // 判斷文章擁有者(編輯活動貼文用)
+    public bool IsOwner { get; set; }
+    public bool IsPublished { get; set; }
+    // 判斷報名或取消報名活動用
+    public bool IsCurrentUserRegistered { get; set; }
+    public bool CanCurrentUserCancelRegistration { get; set; }
+
+
     // =========== 內部 DTO ===========
 
     public class AttachmentDto
@@ -86,6 +95,7 @@ public class PostDetailViewModel
         public string? Bio { get; set; }
         public int ShareCount { get; set; }     // 該作者的貼文數
         public int FollowerCount { get; set; }  // 粉絲數
+        
     }
     public class PostComment
     {

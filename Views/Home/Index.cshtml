@@ -1,12 +1,16 @@
 ﻿@section Styles
-{
+{ 
+    <link rel="stylesheet" href="~/css/homeIndexCss.css" asp-append-version="true" />
 <style>
-        <link rel="stylesheet" href="~/css/homeIndexCss.css" asp-append-version="true" / >
+       
+            
 </style>
 }
+    
+
 
 <div id="product">
-
+    @Html.AntiForgeryToken()
     <div class="container-fluid">
         <div class="row py-3 justify-content-center">
             <div class="d-flex  justify-content-center align-items-center　">
@@ -142,8 +146,12 @@
                                     <div class="col" v-for="product in productsByRating.slice(0,10)" :key="product.productId">
                                         <div class="product-item" value="rating">
                                             <span v-if="discountLabel(product.productDiscount)" class="badge bg-success position-absolute m-3">{{ discountLabel(product.productDiscount) }}</span>
-                                            <a href="#" class="btn-wishlist">
-                                                <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
+                                            <a href="#" class="btn-wishlist" :class="{'is-active' : product.isFavorited}" @@click.prevent="toggleFavorite(product)">
+                                                            <iconify-icon :key="product.isFavorited" 
+                                                                          :icon="product.isFavorited ? 'ph:heart-fill' : 'ph:heart'"
+                                                                          :style="{ color: product.isFavorited ? '#ff4d4d' : 'inherit' }"
+                                                                          width="24">
+                                                            </iconify-icon>
                                             </a>
                                             <figure class="mb-3">
                                                 <a :href="'/Products/Details/' + product.productId" title="Product Title">
@@ -194,8 +202,12 @@
                                     <div class="col" v-for="product in products.slice(0, 10)" :key="product.productId">
                                         <div class="product-item">
                                             <span v-if="discountLabel(product.productDiscount)" class="badge bg-success position-absolute m-3">{{ discountLabel(product.productDiscount) }}</span>
-                                            <a href="#" class="btn-wishlist">
-                                                <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
+                                            <a href="#" class="btn-wishlist" :class="{'is-active' : product.isFavorited}" @@click.prevent="toggleFavorite(product)">
+                                                 <iconify-icon :key="product.isFavorited" 
+                                                               :icon="product.isFavorited ? 'ph:heart-fill' : 'ph:heart'"
+                                                               :style="{ color: product.isFavorited ? '#ff4d4d' : 'inherit' }"
+                                                               width="24">
+                                                 </iconify-icon>
                                             </a>
                                             <figure class="mb-3">
                                                 <a :href="'Product/Details/'+product.productID" title="Product Title">
@@ -245,8 +257,12 @@
                                     <div class="col" v-for="product in products.slice(0, 10)" :key="product.productId">
                                         <div class="product-item">
                                             <span v-if="discountLabel(product.productDiscount)" class="badge bg-success position-absolute m-3">{{ discountLabel(product.productDiscount) }}</span>
-                                            <a href="#" class="btn-wishlist">
-                                                <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
+                                            <a href="#" class="btn-wishlist" :class="{'is-active' : product.isFavorited}" @@click.prevent="toggleFavorite(product)">
+                                                 <iconify-icon :key="product.isFavorited" 
+                                                               :icon="product.isFavorited ? 'ph:heart-fill' : 'ph:heart'"
+                                                               :style="{ color: product.isFavorited ? '#ff4d4d' : 'inherit' }"
+                                                               width="24">
+                                                 </iconify-icon>
                                             </a>
                                             <figure class="mb-3">
                                                 <a :href="'/Products/Details/' + product.productId" title="Product Title">
@@ -355,9 +371,14 @@
                             <div class=" swiper-slide" v-for="product in productsByDate.slice(0, 10)" :key="product.productId">
                                 <div class="product-item">
                                     <span v-if="discountLabel(product.productDiscount)" class="badge bg-success position-absolute m-3">{{ discountLabel(product.productDiscount) }}</span>
-                                    <a href="#" class="btn-wishlist">
-                                        <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
-                                    </a>
+                                    <a href="#" class="btn-wishlist" :class="{'is-active' : product.isFavorited}" @@click.prevent="toggleFavorite(product)">
+                                                            
+                                                 <iconify-icon :key="product.isFavorited" 
+                                                               :icon="product.isFavorited ? 'ph:heart-fill' : 'ph:heart'"
+                                                               :style="{ color: product.isFavorited ? '#ff4d4d' : 'inherit' }"
+                                                               width="24">
+                                                 </iconify-icon>
+                                            </a>
                                     <figure class="mb-3">
                                         <a :href="'/Products/Details/' + product.productId" title="Product Title">
                                             <img :src="product.productImage" :alt="product.productName" class="tab-image">
@@ -431,8 +452,12 @@
                             <div class="swiper-slide" v-for="product in productsByDiscount.slice(0, 10)" :key="product.productId">
                                 <div class="product-item">
                                     <span v-if="discountLabel(product.productDiscount)" class="badge bg-success position-absolute m-3">{{ discountLabel(product.productDiscount) }}</span>
-                                    <a href="#" class="btn-wishlist">
-                                        <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
+                                    <a href="#" class="btn-wishlist" :class="{'is-active' : product.isFavorited}" @@click.prevent="toggleFavorite(product)">
+                                        <iconify-icon :key="product.isFavorited" 
+                                                      :icon="product.isFavorited ? 'ph:heart-fill' : 'ph:heart'"
+                                                      :style="{ color: product.isFavorited ? '#ff4d4d' : 'inherit' }"
+                                                      width="24">
+                                        </iconify-icon>
                                     </a>
                                     <figure class="mb-3">
                                         <a :href="'/Products/Details/' + product.productId" title="Product Title">
@@ -533,6 +558,7 @@
     <script>
         const app=Vue.createApp({
             mixins: [CartMixin],
+
             data(){
                 return{
                     products: [],
@@ -549,6 +575,44 @@
                 originalPrice(price, discount) {
                 if (!discount || discount <= 0) return null
                 return Math.round(price / (1 - discount))  // 100 / 0.8 = 125
+                },
+                async toggleFavorite(product){
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+                    try {
+                        const response = await fetch('/Products/ToggleFavorite', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                            body: new URLSearchParams({ 
+                                productId: product.productId,
+                                __RequestVerificationToken: token
+                            })
+                        });
+                        const res = await response.json();
+
+                        if (res.success) {
+                            // 直接更新物件屬性，Vue 3 會自動感應
+                            product.isFavorited = res.isFavorited;
+            
+                            Swal.fire({
+                            icon: "success",
+                            title: res.message,
+                            showConfirmButton: false,
+                            timer: 1500
+                        });
+                        } else {
+                            Swal.fire({
+                            icon: "warning",
+                            title: "提示",
+                            text: res.message
+                        }).then(() => {
+                            if (res.message.includes("登入")) {
+                                window.location.href = '/Home/Login';
+                            }
+                            });
+                        }
+                    } catch (err) {
+                            console.error("收藏失敗", err);
+                    }
                 }
             },
             computed:{
@@ -568,7 +632,7 @@
 
                 const res = await fetch('/api/Product/Get')
                 const data = await res.json()
-                this.products = data.map(p => ({ ...p, qty: 1 }))
+                this.products = data.map(p => ({ ...p, qty: 1, isFavorited: p.isFavorited || false  }))  // +上 isFavorited 屬性
                 const sho = await fetch('/api/Shop/Get')
                 this.shops = await sho.json()
 

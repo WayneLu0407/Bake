@@ -6,6 +6,21 @@
                     height: 100vh !important;
                 }
             }
+
+            /* 防止 Vue 渲染前的閃爍 */
+            [v-cloak] {
+                display: none;
+            }
+
+            /* 空購物車的圖示動畫（選用） */
+            .fa-shopping-cart {
+                animation: fadeIn 1s ease-in-out;
+            }
+
+            @@keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 0.25; transform: translateY(0); }
+            }
     </style>
 </head>
 
@@ -18,47 +33,59 @@
                         <div class="card-body p-0">
                             <div class="row g-0">
                                 <div class="col-lg-8">
-                                    <div class="p-5">
+                                    <div class="p-5" id="cart-app" v-cloak>
                                         <div class="d-flex justify-content-between align-items-center mb-5">
                                             <h1 class="fw-bold mb-0">我的購物車</h1>
                                             <h3 class="mb-0 text-muted">共 {{totalCount}} 件商品</h3>
                                         </div>
                                         <hr class="my-4">
 
-                                        <div v-for="item in cart" :key="item.productId" class="row mb-4 d-flex justify-content-between align-items-center">
-                                            <div class="col-md-2 col-lg-2 col-xl-2">
-                                                <img :src="item.imgUrl"
-                                                     class="img-fluid rounded-3" alt="Cotton T-shirt">
-                                            </div>
-                                            <div class="col-md-3 col-lg-3 col-xl-3">
-                                                <h5 class="text-muted">{{item.productName}}</h5>
-                                            </div>
-                                            @* 數量增減 *@
-                                            <div class="col-md-3 col-lg-3 col-xl-2 d-flex align-items-center">
-                                                <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
-                                                        v-on:click="updateQuantity(item.productId, -1)">
-                                                    <i class="fas fa-minus"></i>
-                                                </button>
+                                        <div v-if="cart.length > 0">
+                                            <div v-for="item in cart" :key="item.productId" class="row mb-4 d-flex justify-content-between align-items-center">
+                                                <div class="col-md-2 col-lg-2 col-xl-2">
+                                                    <img :src="item.imgUrl"
+                                                         class="img-fluid rounded-3" alt="Cotton T-shirt">
+                                                </div>
+                                                <div class="col-md-3 col-lg-3 col-xl-3">
+                                                    <h5 class="text-muted">{{item.productName}}</h5>
+                                                </div>
+                                                @* 數量增減 *@
+                                                <div class="col-md-3 col-lg-3 col-xl-2 d-flex align-items-center">
+                                                    <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
+                                                            v-on:click="updateQuantity(item.productId, -1)">
+                                                        <i class="fas fa-minus"></i>
+                                                    </button>
 
-                                                <input id="form1" min="0" name="quantity" :value="item.quantity" type="number" readonly
-                                                       class="form-control form-control-sm text-center" style="width: 50px" />
+                                                    <input id="form1" min="0" name="quantity" :value="item.quantity" type="number" readonly
+                                                           class="form-control form-control-sm text-center" style="width: 50px" />
 
-                                                <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
-                                                        v-on:click="updateQuantity(item.productId, 1)">
-                                                    <i class="fas fa-plus"></i>
-                                                </button>
+                                                    <button data-mdb-button-init data-mdb-ripple-init class="btn btn-link px-2"
+                                                            v-on:click="updateQuantity(item.productId, 1)">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
 
+                                                </div>
+                                                <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
+                                                    <h6 class="mb-0">{{item.price}}</h6>
+                                                </div>
+                                                <div class="col-md-1 col-lg-1 col-xl-1 text-end">
+                                                    <a href="#!" class="text-muted" v-on:click.prevent="deleteItem(item.productId)"><i class="fas fa-trash-alt"></i></a>
+                                                </div>
+                                                <hr class="my-4">
                                             </div>
-                                            <div class="col-md-3 col-lg-2 col-xl-2 offset-lg-1">
-                                                <h6 class="mb-0">{{item.price}}</h6>
+                                        </div>
+                                        <div v-else class="text-center py-5">
+                                            <div class="mb-4">
+                                                <i class="fas fa-shopping-basket fa-4x text-muted opacity-25"></i>
                                             </div>
-                                            <div class="col-md-1 col-lg-1 col-xl-1 text-end">
-                                                <a href="#!" class="text-muted" v-on:click.prevent="deleteItem(item.productId)"><i class="fas fa-trash-alt"></i></a>
-                                            </div>
-                                            <hr class="my-4">
+                                            <h4 class="text-muted">您的購物車目前沒有商品</h4>
+                                            <p class="text-muted mb-4">這是一個填飽肚子的好機會！</p>
+                                            <a asp-controller="Products" asp-action="Index" class="btn btn-primary btn-lg px-5 shadow-0">
+                                                立即去選購
+                                            </a>
                                         </div>
 
-                                        <div class="pt-5">
+                                        <div class="pt-5" v-if="cart.length > 0">
                                             <h6 class="mb-0">
                                                 <a asp-controller="Products" asp-action="Index" class="text-body">
                                                     <i class="fas fa-long-arrow-alt-left me-2"></i>回到商店
@@ -81,7 +108,7 @@
 
                                         <div class="mb-4 pb-2">
                                             <select data-mdb-select-init v-model="selectedShipping">
-                                                <option v-for="opt in shippingOptions" :key="opt.name" :value="opt">
+                                                <option v-for="opt in shippingOptions" :key="opt.value" :value="opt">
                                                     {{opt.name}} ${{opt.fee}}
                                                 </option>
                                             </select>
@@ -91,21 +118,43 @@
 
                                         <div class="mb-5">
                                             <div data-mdb-input-init class="form-outline">
-                                                <input type="text" id="form3Examplea2" class="form-control form-control-lg" />
                                                 <label class="form-label" for="form3Examplea2">輸入您的優惠折扣碼</label>
+                                                <div class="input-group">
+                                                    <input type="text" id="couponInput" v-model="couponCode" class="form-control form-control-lg" placeholder="" />
+                                                    <button class="btn" style="background-color: #ffc107; color: black;" type="button" data-mdb-ripple-init v-on:click="checkCoupon(false)">
+                                                        套用
+                                                    </button>
+                                                </div>
+                                                <div class="form-text">每筆訂單僅限使用一張優惠券</div>
+                                            </div>
+
+                                            @* 顯示目前套用的折扣金額 (可選) *@
+                                            <div v-if="appliedDiscount > 0" class="text-success mt-2 small">
+                                                <i class="fas fa-check-circle"></i> 已折抵: $ {{formatNumber(appliedDiscount)}}
                                             </div>
                                         </div>
 
                                         <hr class="my-4">
-
+                                        
+                                        <div class="d-flex justify-content-between mb-2">
+                                            <h6 class="text-uppercase">商品小計</h6>
+                                            <h6>$ {{formatNumber(totalPrice)}}</h6>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-2 text-success" v-if="appliedDiscount > 0">
+                                            <h6 class="text-uppercase">優惠折抵</h6>
+                                            <h6>- $ {{formatNumber(appliedDiscount)}}</h6>
+                                        </div>
+                                        <div class="d-flex justify-content-between mb-4">
+                                            <h6 class="text-uppercase">運費</h6>
+                                            <h6>$ {{formatNumber(selectedShipping.fee)}}</h6>
+                                        </div>
                                         <div class="d-flex justify-content-between mb-5">
                                             <h5 class="text-uppercase">訂單總額</h5>
                                             <h5>$ {{formatNumber(grandTotal)}} </h5>
                                         </div>
 
-                                        <a href="#" v-on:click.prevent="saveShipping" style="background-color: #ffc107;" data-mdb-button-init data-mdb-ripple-init class="btn btn-danger btn-block w-100 btn-lg"
-                                               data-mdb-ripple-color="dark">
-                                            結帳
+                                        <a href="#" v-on:click.prevent="handleCheckout" :class="checkoutBtnClass" :style="checkoutBtnStyle">
+                                            {{ checkoutBtnText }}
                                         </a>
 
                                     </div>
@@ -127,37 +176,58 @@
             mixins: [CartMixin],
             data(){
                 return{
-                    selectedShipping:{name:'宅配', fee:120},
+                    selectedShipping:{name:'宅配', value: 'Home', fee:120},
                     shippingOptions:[
-                        {name:'宅配', fee:120},
-                        {name:'貨到付款', fee:60}
-                    ]
+                        {name:'宅配', value: 'Home', fee:120},
+                        {name:'貨到付款', value: 'COD', fee:60}
+                    ],
                 }
             },
-            computed:{
-                grandTotal(){
-                    return this.totalPrice + this.selectedShipping.fee;
+            computed: {
+                checkoutBtnClass() {
+                    return {
+                        'btn btn-block w-100 btn-lg shadow-0': true,
+                        'disabled': this.cart.length === 0
+                    };
+                },
+                checkoutBtnStyle() {
+                    if (this.cart.length === 0) {
+                        return {
+                            backgroundColor: '#e0e0e0',
+                            cursor: 'not-allowed',
+                            pointerEvents: 'none'
+                        };
+                    }
+                    return {
+                        backgroundColor: '#ffc107',
+                        color: '#000'
+                    };
+                },
+                checkoutBtnText() {
+                    return this.cart.length > 0 ? '前往結帳' : '購物車目前無商品';
                 }
             },
             methods:{
-                async saveShipping(fee) {
-                    const feeData = {fee:this.selectedShipping.fee};
+                async saveShipping() {
                     const res = await fetch('/Cart/SaveShippingToSession',{
                         method:'POST',
                         headers:{'Content-Type':'application/json'},
-                        body: JSON.stringify(feeData)
+                        body: JSON.stringify({ ShippingMethod: this.selectedShipping.value })
                     });
 
                     if(res.ok){
                         window.location.href = '/Checkout/Info';
+                        const data = await res.json();
+                        this.shippingFee = data.fee;
                     }
                     else{
                         alert("系統繁忙，請稍後再試");
                     }
                 },
-                formatNumber(num) {
-                    if (!num) return '0';
-                    return num.toLocaleString('zh-TW'); // 強制台灣格式
+                handleCheckout() {
+                    if (this.cart.length > 0) {
+                        this.saveShipping();
+                    }
                 }
             }
         }).mount('#checkoutApp');

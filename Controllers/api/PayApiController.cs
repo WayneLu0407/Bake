@@ -1,8 +1,10 @@
 ﻿using AspNetCoreGeneratedDocument;
+using Azure.Core;
 using Bake.Data;
 using Bake.Models;
 using Bake.Models.Sales;
 using Bake.ViewModel;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -45,42 +47,47 @@ namespace Bake.Controllers.api
             }
         }
 
-        
 
 
+        [Authorize]
         [HttpPost("GetTradeData")]
         public async Task<IActionResult> GetTradeData([FromForm]CheckoutViewModel checkoutViewModel, [FromForm]string PaymentMethod)
         {
             int userId = CurrentUserId;
 
             // 驗收防呆：如果真的抓不到登入者 ID，不要讓它進資料庫
-            if (userId == 0)
+            if (userId == 0) return Unauthorized(new { message = "請先登入" });
+
+            // 購物車資料
+            var cartItems = GetCartItemsFromSession();
+            if (!cartItems.Any()) return BadRequest(new { message = "購物車空空如也" });
+
+            // 優惠券資料
+            string couponCode = Request.Cookies["AppliedCoupon"];
+            decimal discount = 0;
+            if (!string.IsNullOrEmpty(couponCode))
             {
-                return RedirectToAction("Login", "Home");
+                // 呼叫私有方法重新驗證一次
+                discount = await CalculateFinalDiscount(couponCode, cartItems);
             }
 
-            //從session拿Info資料
-            var infoJson = HttpContext.Session.GetString("ReceiverInfo");
-            if (string.IsNullOrEmpty(infoJson)) return RedirectToAction("Info");
-            var receiverInfo = JsonSerializer.Deserialize<CheckoutViewModel>(infoJson);
+            //運費
+            int shippingFee = HttpContext.Session.GetInt32("ShippingFee") ?? 60;
 
-            //1. 建立Order物件實體，並將checkoutdata資料填入Order物件中
+            //先計算購物車小計
+            decimal subTotal = cartItems.Sum(item => item.Price * item.Quantity);
+            // 建立Order物件實體，並將checkoutdata資料填入Order物件中
             var order = new Order
             {
                 UserId = userId,
-                ShippingAddress = receiverInfo.ReceiverAddress,
-                TotalAmount = 0, //這裡先設為0，實際金額應該從購物車計算
+                ShippingAddress = checkoutViewModel.ReceiverAddress,
+                TotalAmount = subTotal+ shippingFee - discount,
                 PaymentMethodId = byte.Parse(PaymentMethod),
-                StatusId = 0, //0:待付款、1:待出貨
+                StatusId = (byte.Parse(PaymentMethod) == 2) ? (byte)1 : (byte)0,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
             };
 
-            //2. 建立OrderItem物件實體，並將購物車中的每個商品資料填入OrderItem物件中，並加入Order的OrderItems集合中
-            var cartItems = GetCartItemsFromSession();
-            if (!cartItems.Any()) return RedirectToAction("Index", "Cart"); // 沒東西買就回購物車
-
-            decimal totalAmount = 0;
             foreach (var item in cartItems)
             {
                 var orderItem = new OrderItem
@@ -90,30 +97,20 @@ namespace Bake.Controllers.api
                     UnitPrice = item.Price,
                     Subtotal = item.Quantity * item.Price
                 };
-
-                order.OrderItems.Add(orderItem);
-                totalAmount += item.Quantity * item.Price;
             }
-
-
-            int shippingFee = HttpContext.Session.GetInt32("ShippingFee") ?? 60;
-            order.TotalAmount = totalAmount + shippingFee;
 
             //3. 寫入資料庫
             _bakeContext.Orders.Add(order);
             await _bakeContext.SaveChangesAsync();
+            Response.Cookies.Delete("AppliedCoupon");
 
-            //ClearCart(); //清空購物車
+            ClearCart(); //清空購物車
 
             //4.重新導向: 如果是貨到付款，直接到Success
             if (order.PaymentMethodId == 2)
             {
                 return Ok(new { success=true, isCod=true, id = order.OrderId });
             }
-
-
-            // [ 待修改 ] 用ViewBag拿資料
-            string customerEmail = GetEmailFromSession();
 
             // 金流配置
             string merchantID = _config["NewebPayConfig:MerchantID"];
@@ -124,7 +121,12 @@ namespace Bake.Controllers.api
             string itemDesc = string.Join(",", cartItems.Select(item => item.ProductName.Trim() ?? "烘焙商品"))
                 .Replace("&", "").Replace("=", "");
             if (itemDesc.Length > 50) itemDesc = itemDesc.Substring(0, 47) + "...";
+            
             long nowTimeStamp = DateTimeOffset.Now.ToUnixTimeSeconds();
+
+            string customerEmail = string.IsNullOrWhiteSpace(checkoutViewModel.ReceiverEmail)
+                       ? "guest@example.com"
+                       : checkoutViewModel.ReceiverEmail;
             // 金流資訊→組成藍新金流需要的TradeInfo
             var payData = new List<string>
             {
@@ -169,12 +171,51 @@ namespace Bake.Controllers.api
             //Console.WriteLine($"[Debug] SHA Source: {shaSource_}");
             return Ok(new { isCod=false, payData = response});
 
-            //ClearCart(); //清空購物車
+            
         }
 
-        
+        private async Task<decimal> CalculateFinalDiscount(string couponCode, List<CartViewModel> cartItems)
+        {
+            //檢查優惠券是否存在
+            var coupon = await _bakeContext.Coupons
+                .FirstOrDefaultAsync(c => c.Code == couponCode && c.IsActive && c.ExpirationDate >= DateTime.Now);
 
-        
+            if (coupon == null) return 0;
+
+            var productIds = cartItems.Select(i => i.ProductId).ToList();
+            var productsInDb = await _bakeContext.Products
+                .Where(p => productIds.Contains(p.ProductId))
+                .Select(p => new {
+                    p.ProductId,
+                    p.ProductDetail.ProductPrice,
+                    p.UserId
+                }).ToListAsync();
+
+            //計算金額
+            decimal subTotal = 0;  //購物車總金額
+            decimal applyAmout = 0;  //符合優惠券條件的金額 (如果有指定賣家，則只計算該賣家的商品金額)
+
+            foreach (var item in cartItems)
+            {
+                var dbProduct = productsInDb.FirstOrDefault(p => p.ProductId == item.ProductId);
+                if (dbProduct == null) continue;
+
+                decimal itemTotal = dbProduct.ProductPrice * item.Quantity;
+                subTotal += itemTotal;
+
+                //全站券走條件1 : 如果優惠券SellerId為null，每個itemTotal都會被加進applyAmount；如果有指定SellerId
+                //賣家券走條件2 : 只有當商品的UserId與SellerId相符時，itemTotal才會被加進applyAmount
+                if (!coupon.SellerId.HasValue || dbProduct.UserId == coupon.SellerId)
+                {
+                    applyAmout += itemTotal;
+                }
+            }
+
+            //檢查消費門檻
+            if (applyAmout < coupon.MinimumPurchase) return 0;
+
+            return coupon.DiscountValue;
+        }
 
         private List<CartViewModel> GetCartItemsFromSession()
         {
@@ -199,6 +240,10 @@ namespace Bake.Controllers.api
             return model.ReceiverEmail;
         }
 
+        private void ClearCart()
+        {
+            HttpContext.Session.Remove("UserCart");
+        }
 
         // ↓↓↓加密解密方法↓↓↓
         /// <summary>
