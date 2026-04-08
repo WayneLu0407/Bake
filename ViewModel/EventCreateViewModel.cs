@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Bake.ViewModel
 {
-    public class EventCreateViewModel
+    public class EventCreateViewModel : IValidatableObject
     {
         public string OrganizerName { get; set; } = string.Empty;
         public string? OrganizerAvatarUrl { get; set; }
@@ -84,5 +84,40 @@ namespace Bake.ViewModel
         public byte EventTypeId { get; set; } = 0;
 
         public List<SelectListItem> EventTypeOptions { get; set; } = new();
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            if (SignupEndDate < EventDate)
+            {
+                yield return new ValidationResult(
+                    "報名截止日期不能早於開始日期",
+                    new[] { nameof(SignupEndDate) }
+                );
+            }
+
+            if (SignupEndDate > EventDate)
+            {
+                yield return new ValidationResult(
+                    "報名截止日期不能晚於活動舉辦日期",
+                    new[] { nameof(SignupEndDate) }
+                );
+            }
+
+            if (SignupStartDate > EventDate)
+            {
+                yield return new ValidationResult(
+                    "報名開始日期不能晚於活動日期",
+                    new[] { nameof(SignupStartDate) }
+                );
+            }
+
+            if (EndTime > StartTime)
+            {
+                yield return new ValidationResult(
+                    "活動結束時間不能早於活動開始時間",
+                    new[] { nameof(EndTime) }
+                );
+            }
+        }
     }
 }
