@@ -176,12 +176,12 @@
                     <div class="row g-3 mt-1">
                         <div class="col-12 col-md-6">
                             <label asp-for="MaxParticipants" class="form-label"></label>
-                            <input asp-for="MaxParticipants" class="form-control" type="number" min="1" disabled="@(Model.HasRegistrations)" />
+                            <input asp-for="MaxParticipants" class="form-control" type="number" data-val-number="請輸入有效的數字" disabled="@(Model.HasRegistrations)" />
                             <span asp-validation-for="MaxParticipants" class="text-danger"></span>
                         </div>
                         <div class="col-12 col-md-6">
                             <label asp-for="Price" class="form-label"></label>
-                            <input asp-for="Price" class="form-control" type="number" min="0" />
+                            <input asp-for="Price" class="form-control" type="number" data-val-number="請輸入有效的數字" disabled="@(Model.HasRegistrations) />
                             <span asp-validation-for="Price" class="text-danger"></span>
                         </div>
                     </div>
@@ -244,7 +244,9 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
     <script>
     $(function() {
         @* 取得jQuery物件 *@
@@ -277,6 +279,11 @@
                 $previewWrap.append($item);
             };
             reader.readAsDataURL(file);
+        });
+
+        @* 當輸入框失去焦點時，自動修剪前後空白 *@
+        $('input[type="text"], textarea').on('blur', function () {
+            $(this).val($.trim($(this).val()));
         });
     });
     </script>
