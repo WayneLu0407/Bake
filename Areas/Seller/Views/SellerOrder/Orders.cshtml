@@ -21,8 +21,8 @@
                                 </ol>
                                 <div class="btn-group">
                                     <button class="btn btn-outline-primary btn-sm active" onclick="filterOrders(this,null)">全部</button>
-                                    <button class="btn btn-outline-warning btn-sm" onclick="filterOrders(this,2)">以出貨</button>
-                                    <button class="btn btn-outline-success btn-sm" onclick="filterOrders(this,3)">已出貨</button>
+                                    <button class="btn btn-outline-warning btn-sm" onclick="filterOrders(this,1)">待出貨</button>
+                                    <button class="btn btn-outline-success btn-sm" onclick="filterOrders(this,2)">已出貨</button>
                                 </div>
                             </nav>
                         </div>
@@ -193,8 +193,8 @@
                 const productsHtml = order.products.map(p=>`<p>${p.productName}</p><p>數量：${p.quantity}</p>`).join('');
 
                 let statusClass = 'active-btn';
-                if(order.statusId === 2) statusClass = 'warning-btn';
-                if(order.statusId === 3) statusClass = 'success-btn';
+                if(order.statusId === 1) statusClass = 'warning-btn';
+                if(order.statusId === 2) statusClass = 'success-btn';
                 if(order.statusId === 4) statusClass = 'close-btn';
 
                 let buttonHtml = '';
