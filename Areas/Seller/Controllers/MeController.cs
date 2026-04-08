@@ -50,9 +50,6 @@ namespace Bake.Areas.Seller.Controllers
             var user = await _context.AccountAuths
                 .AsNoTracking()
                 .Include(x => x.UserProfile)
-                .Include(x => x.RoleNavigation)
-                .Include(x => x.AccountStatusNavigation)
-                .Include(x => x.Shop)
                 .FirstOrDefaultAsync(x => x.UserId == userId.Value);
 
             if (user == null)
@@ -60,29 +57,123 @@ namespace Bake.Areas.Seller.Controllers
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
 
+            var now = DateTime.Now;
+            const string defaultCardImage = "seller_assets/images/cards/card-style-6/card-1.jpg";
+
+            var myPosts = await _context.Posts
+                .AsNoTracking()
+                .Where(p => p.AuthorId == userId.Value
+                         && p.TypeId == 0
+                         && p.IsPublished == true)
+                .OrderByDescending(p => p.CreatedAt)
+                .Select(p => new MemberDashboardPostCardViewModel
+                {
+                    PostId = p.PostId,
+                    Title = p.Title,
+                    CreatedAt = p.CreatedAt,
+                    ImageUrl =
+                        p.PostAttachments
+                            .Where(a => a.IsCover == true)
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? p.PostAttachments
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? defaultCardImage,
+                    LikesCount = p.PostLikes.Count(),
+                    CommentsCount = p.PostComments.Count()
+                })
+                .Take(10)
+                .ToListAsync();
+
+            var activeHostedEvents = await _context.Posts
+                .AsNoTracking()
+                .Where(p => p.AuthorId == userId.Value
+                         && p.TypeId == 1
+                         && p.IsPublished == true
+                         && p.EventDetails.Any(e => e.EventEndTime >= now))
+                .Select(p => new MemberDashboardEventCardViewModel
+                {
+                    PostId = p.PostId,
+                    Title = p.Title,
+                    EventTime = p.EventDetails
+                        .OrderBy(e => e.EventTime)
+                        .Select(e => (DateTime?)e.EventTime)
+                        .FirstOrDefault(),
+                    ImageUrl =
+                        p.PostAttachments
+                            .Where(a => a.IsCover == true)
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? p.PostAttachments
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? defaultCardImage,
+                    LikesCount = p.PostLikes.Count()
+                })
+                .OrderBy(x => x.EventTime)
+                .Take(10) //先抓前十筆
+                .ToListAsync();
+
+            var pastHostedEvents = await _context.Posts
+                .AsNoTracking()
+                .Where(p => p.AuthorId == userId.Value
+                         && p.TypeId == 1
+                         && (p.IsPublished != true || p.EventDetails.Any(e => e.EventEndTime < now)))
+                .Select(p => new MemberDashboardEventCardViewModel
+                {
+                    PostId = p.PostId,
+                    Title = p.Title,
+                    EventTime = p.EventDetails
+                        .OrderByDescending(e => e.EventTime)
+                        .Select(e => (DateTime?)e.EventTime)
+                        .FirstOrDefault(),
+                    ImageUrl =
+                        p.PostAttachments
+                            .Where(a => a.IsCover == true)
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? p.PostAttachments
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? defaultCardImage,
+                    LikesCount = p.PostLikes.Count()
+                })
+                .OrderByDescending(x => x.EventTime)
+                .Take(10)
+                .ToListAsync();
+
             var vm = new MemberDashboardViewModel
             {
                 UserId = user.UserId,
-                FullName = user.UserProfile?.FullName ?? user.UserName,
-                //RoleName = user.RoleNavigation?.StatusName ?? string.Empty,
+                FullName = user.UserProfile.FullName,
                 IsEmailConfirmed = user.IsEmailConfirmed,
-                Bio = user.UserProfile?.Bio,
+                Bio = user.UserProfile?.Bio,  //先保留
                 AvatarUrl = user.UserProfile?.AvatarUrl,
 
-                //PostCount = await _context.Posts
-                //    .AsNoTracking()
-                //    .CountAsync(p => p.AuthorId == user.UserId),
+                PostCount = await _context.Posts
+                    .AsNoTracking()
+                    .CountAsync(p => p.AuthorId == user.UserId
+                                  && p.TypeId == 0
+                                  && p.IsPublished == true),
 
-                //FollowersCount = await _context.Follows
-                //    .AsNoTracking()
-                //    .CountAsync(f => f.BefollowedId == user.UserId),
+                FollowersCount = await _context.Follows
+                    .AsNoTracking()
+                    .CountAsync(f => f.BefollowedId == user.UserId),
 
-                //FollowingCount = await _context.Follows
-                //    .AsNoTracking()
-                //    .CountAsync(f => f.FollowerId == user.UserId),
+                FollowingCount = await _context.Follows
+                    .AsNoTracking()
+                    .CountAsync(f => f.FollowerId == user.UserId),
 
-                //HasShop = user.Shop != null,
-                //ShopName = user.Shop?.ShopName
+                MyPosts = myPosts,
+                ActiveHostedEvents = activeHostedEvents,
+                PastHostedEvents = pastHostedEvents
             };
 
             return View(vm);
