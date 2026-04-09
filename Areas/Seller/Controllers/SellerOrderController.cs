@@ -114,9 +114,52 @@ namespace Bake.Areas.Seller.Controllers
             return View(orderList);
         }
 
-        public IActionResult Past()
+        [HttpGet]
+        public async Task<IActionResult> OrdersJson(int? statusId)
         {
-            return View();
+            // 從 Claims(HomeController) 取得目前登入買家的ID
+            if (CurrentUserId == 0)
+                return RedirectToAction("Login", "Home");
+
+            //因為OrderItems裡面有ProductId，但Orders裡面沒有，所以需要使用LINQ JOIN來抓取相關資訊
+            //使用LINQ JOIN 抓取Orders和Users資料表的相關資訊
+            var ordersData = from order in _bakeContext.Orders
+                             join orderItem in _bakeContext.OrderItems on order.OrderId equals orderItem.OrderId
+                             join product in _bakeContext.Products on orderItem.ProductId equals product.ProductId
+                             // 只抓產品擁有者是目前登入者的資料
+                             where product.UserId == CurrentUserId
+                             join status in _bakeContext.OrderStatuses on order.StatusId equals status.StatusId
+                             join user in _bakeContext.AccountAuths on order.UserId equals user.UserId
+                             select new { order, orderItem, product, status, user, };
+
+
+            //如果有傳入statusId參數，就過濾訂單資料
+            if (statusId.HasValue)
+            {
+                ordersData = ordersData.Where(o => o.order.StatusId == statusId.Value);
+            }
+            var ordersQuery = await ordersData.ToListAsync();
+
+            //進行GroupBy 整合一筆訂單對多個購買產品 寫入OrderListViewModel
+            var orderList = ordersQuery.GroupBy(x => x.order.OrderId)
+                .Select(p => new OrderListViewModel
+                {
+                    OrderId = p.Key,
+                    UserName = p.First().user.UserName,
+                    Email = p.First().user.Email,
+                    StatusName = p.First().status.StatusName,
+                    StatusId = p.First().status.StatusId,
+                    TotalAmount = p.First().order.TotalAmount,
+                    CreatedAt = p.First().order.CreatedAt,
+
+                    Products = p.Select(x => new OrderItemInfo
+                    {
+                        ProductName = x.product.ProductName,
+                        Quantity = x.orderItem.ItemQuantity
+                    }).ToList(),
+                }).OrderByDescending(x => x.CreatedAt).ToList();
+
+            return Json(orderList);
         }
     }
 }
