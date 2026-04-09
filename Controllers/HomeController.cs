@@ -283,9 +283,24 @@ public class HomeController : Controller
         return View();
     }
 
+    [Route("Error/{statusCode?}")]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+    public IActionResult Error(int? statusCode)
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        // 判斷原始請求路徑
+        var originalPath = HttpContext.Features
+            .Get<Microsoft.AspNetCore.Diagnostics.IStatusCodeReExecuteFeature>()
+            ?.OriginalPath ?? "";
+
+        if (originalPath.StartsWith("/Seller", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectToAction("Index", "Error", new { area = "Seller", statusCode });
+        }
+        return statusCode switch
+        {
+            404 => View("Error404"),
+            500 => View("Error500"),
+            _ => View("Error404")
+        };
     }
 }
