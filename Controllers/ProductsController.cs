@@ -1,6 +1,7 @@
 ﻿using Bake.Data;
 using Bake.Models;
 using Bake.Models.Sales;
+using Bake.ViewModel;
 using Bake.ViewModel.Products;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -100,9 +101,8 @@ namespace Bake.Controllers
                     ProductId = w.ProductId,
                     Name = w.Product.ProductName,
                     Price = w.Product.ProductDetail.ProductPrice,
-                    ImagePath = "/Product"
+                    ImagePath =w.Product.ProductImage
                 })
-                
                 .ToListAsync();
             return View(myFavorite);
         }

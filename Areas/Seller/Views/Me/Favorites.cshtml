@@ -1,5 +1,109 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model Bake.Areas.Seller.ViewModels.FavoritePostViewModel
 @{
+	ViewBag.Title = "我的最愛";
+}
+@section Styles{
+	<style>
+		.user{
+			 padding-left : 20px;
+			 }
+		.followername{
+			color:black
+		}
+	</style>
+}
+
+<div class="tables-wrapper">
+	<div class="">
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="card-style mb-30">
+					<div id="FavoritePostContainer">
+						
+						@await Html.PartialAsync("_FavoritesPartial", Model)
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@*------------------------------------------------------------------------------------------*@
+
+<div>
+	<h1 class="text-center">誰追蹤我</h1>
+	<div>
+		<div class=" user d-flex flex-wrap gap-4 justify-content-start">
+			@foreach (var item in Model.MyFollowers)
+			{
+				// 直接取得路徑最後的檔名 (例如: image_123.jpg)
+				string fileName = System.IO.Path.GetFileName(item.AvatarUrl);
+
+				// 手動拼接網址路徑
+				string displayUrl = string.IsNullOrEmpty(fileName)
+									? "/ProfilePicture/User/image_ad83a87f.png"
+									: $"/ProfilePicture/User/{fileName}";
+				<a asp-area="" asp-controller="User" asp-action="UserDetail" asp-route-id="@item.UserId">
+					<img src="@displayUrl"
+						alt="@item.FullName"
+						style="width:150px; height:150px; object-fit: cover; border-radius: 50%; border: 1px solid #ddd;"
+						onerror="this.src='/ProfilePicture/User/49821272-448f-4281-9dab-109af112c57e.jpg';" />
+					<p class="followername text-center text-decoration-none">@item.FullName</p>
+				</a>
+				
+			}
+		</div>
+	</div>
+</div>
+	
+@section Scripts {
+	
+	<script>
+		// 1. 使用原生 JavaScript 監聽點擊，防止 jQuery 載入順序問題
+		document.addEventListener('click', function (e) {
+			// 檢查點擊的是否為分頁按鈕 (包含裡面的文字)
+			var btn = e.target.closest('.ajax-page-link');
+            
+			if (btn) {
+				e.preventDefault(); // 【核心】強制禁止網頁刷新跳轉
+				e.stopPropagation();
+
+				var page = btn.getAttribute('data-page');
+				var parentLi = btn.parentElement;
+
+				// 防呆：如果是已停用或沒有頁碼，則不執行
+				if (!page || (parentLi && parentLi.classList.contains('disabled'))) {
+					return false;
+				}
+
+				// 2. 執行 AJAX 請求
+				var container = document.getElementById('FavoritePostContainer');
+				if (container) container.style.opacity = '0.5';
+
+				// 使用 fetch (原生 AJAX) 更穩定
+				fetch('@Url.Action("Favorites", "Me")?page=' + page + '&isAjax=true', {
+					headers: { 'X-Requested-With': 'XMLHttpRequest' }
+				})
+				.then(response => response.text())
+				.then(html => {
+					if (container) {
+						container.innerHTML = html;
+						container.style.opacity = '1';
+
+					const newUrl = `@Url.Action("Favorites", "Me")?page=${page}`;
+						window.history.pushState({ page: page }, '', newUrl);
+					}
+					// 捲動回頂部
+					window.scrollTo({ top: 0, behavior: 'smooth' });
+				})
+				.catch(err => {
+					console.error('載入失敗:', err);
+					if (container) container.style.opacity = '1';
+					alert("載入失敗，請檢查網路。");
+				});
+
+				return false;
+			}
+		}, true); // 使用 Capture 模式優先捕捉事件
+	</script>
 }
