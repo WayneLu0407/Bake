@@ -52,7 +52,7 @@ namespace Bake.Controllers.api
         public async Task<IActionResult> Latest()
         {
             var list = await ToCard(
-                BaseQuery().OrderByDescending(p => p.CreatedAt)
+                BaseQuery().Where(p => p.TypeId == 0).OrderByDescending(p => p.CreatedAt)
                 )
                 .Take(10)
                 .ToListAsync();
@@ -64,7 +64,7 @@ namespace Bake.Controllers.api
         public async Task<IActionResult> Hot()
         {
             var list = await ToCard(
-                        BaseQuery().OrderByDescending(p => p.ViewCount)
+                        BaseQuery().Where(p => p.TypeId == 0).OrderByDescending(p => p.ViewCount)
                     )
                     .Take(10)
                     .ToListAsync();
@@ -129,6 +129,9 @@ namespace Bake.Controllers.api
                 p.Content.Contains(keyword));
             }
             var list = await query
+                .Where(p =>
+                    p.TypeId == 0 ||
+                    p.EventDetails.Any(e => e.EventTime > DateTime.Now))
                 .OrderByDescending(p => p.CreatedAt)
                 .Select(p => new
                 {
