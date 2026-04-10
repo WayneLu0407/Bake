@@ -110,6 +110,9 @@ namespace Bake.Areas.Seller.Controllers
                 })
                 .OrderByDescending(x => x.TotalSales).Take(5).ToListAsync();
 
+            var followerCount = await _bakeContext.Follows.CountAsync(f => f.FollowerId == sellerId);
+                                
+
             var dashboardVeiwData = new DashboardViewModel
             {
                 TodayRevenue = todayRevenue,
@@ -124,7 +127,9 @@ namespace Bake.Areas.Seller.Controllers
                 CategoryData =  categorySales.Select(x=>x.Total).ToList(),
 
                 LowStock = lowInventory,
-                TopProducts = topProducts
+                TopProducts = topProducts,
+                FollowersCount = followerCount
+                
             };
         
             return View(dashboardVeiwData);
