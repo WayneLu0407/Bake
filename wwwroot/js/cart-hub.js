@@ -25,11 +25,19 @@ const cartService = {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ productId: productId, quantity: change })
         });
+        if (res.status === 401) {
+            alert("請先登入會員");
+            window.location.href = "/Home/Login";
+            return false
+        }
+
         if (res.ok) {
             _cartPromise = null;  // 清掉快取，下次會重新 fetch
             window.dispatchEvent(new Event('update-cart'));
             return true;
         }
+
+        console.error("加入購物車失敗");
         return false;
     },
     // 3. 移除商品 > 觸發全域事件，通知所有Vue購物車數量變動與更新
@@ -94,6 +102,8 @@ const CartMixin = {
             if (addSuccess) {
                 product.quantity = 1; //把畫面數字重設回1
                 alert(`商品${product.productName}選購${selectedQty}件 已加入購物車!`);
+            } else {
+                console.log("加入失敗，不顯示alert");
             }
         },
         
