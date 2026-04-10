@@ -1,4 +1,4 @@
-﻿namespace Bake.Models
+﻿namespace Bake.ViewModel
 {
     public class WishListViewModel
     {

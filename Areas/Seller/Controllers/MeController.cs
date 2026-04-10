@@ -405,10 +405,41 @@ namespace Bake.Areas.Seller.Controllers
 
             return Json(new { success = true, message = "會員資料已更新" });
         }
-
-        public IActionResult Favorites()
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Favorites(int page = 1, bool isAjax = false)
         {
-            return View();
+            var userId = User.FindFirst("UserId")?.Value;
+            var currentUserId = int.Parse(userId);
+            var allSave = _context.PostFavorites.Where(u => u.UserId == currentUserId);
+            int totalCount = await allSave.CountAsync();
+            int pageSize = 4;
+            var viewModel = new FavoritePostViewModel {
+                MySavePosts = await _context.PostFavorites
+                              .Include(p => p.Post.PostAttachments)
+                              .AsNoTracking()
+                              .Where(u => u.UserId == currentUserId)
+                              .Skip((page - 1) * pageSize)
+                              .Take(pageSize)
+                              
+                              .Select(s => s.Post)
+                              
+                              .ToListAsync(),
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
+                SavedCount = totalCount,
+                MyFollowers = await _context.Follows
+                              .AsNoTracking()   
+                              .Where(u => u.BefollowedId == currentUserId)
+                              .Select(s => s.Follower)
+                              .ToListAsync()
+            };
+            if (isAjax)
+            {
+                return PartialView("_FavoritesPartial", viewModel);
+            }
+
+            return View(viewModel);
         }
 
         [Authorize]

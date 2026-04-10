@@ -43,12 +43,18 @@ builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>(); // 小�
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+
+if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/Error/500");
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
 app.UseHttpsRedirection();
 
@@ -56,7 +62,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 app.UseSession(); //啟用Session中介軟體，讓應用程式能夠使用Session功能
-app.UseMiddleware<GlobalExceptionMiddleware>();
+
+//GlobalExceptionMiddleware 跟 UseExceptionHandler 功能重複了
+//if (!app.Environment.IsDevelopment())
+//{
+//    app.UseMiddleware<GlobalExceptionMiddleware>();
+//}
 
 app.UseAuthentication();  //登入驗證
 app.UseAuthorization();   //登入授權

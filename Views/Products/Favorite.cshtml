@@ -1,109 +1,61 @@
-﻿@model IEnumerable<Bake.Models.Sales.FavoriteProduct>
+﻿@model IEnumerable<Bake.ViewModel.WishListViewModel>
 @inject Bake.Data.BakeContext context
 @{
 	ViewBag.Title = "我的關注商品";
 }
 
 <div class="tables-wrapper">
-	<div class="row">
-		<div class="col-lg-12">
-			<div class="card-style mb-30">
-				<div id="tableFavorite">
-					<div class="table-responsive">
-						<table id="favoriteTable" class="table">
-							<thead>
-								<tr>
-									<th>
-										<h6></h6>
-									</th>
-									<th>
-										<h6>商品名稱</h6>
-									</th>
-									<th>
-										<h6>商品數量</h6>
-									</th>
-									<th>
-										<h6>價格</h6>
-									</th>
-									<th>
-										<h6>小計</h6>
-									</th>
-									<th>
-										<h6></h6>
-									</th>
-								</thead>
-								<tbody>
-									@if (Model != null && Model.Any())
-									{
-										foreach (var item in Model)
+	<div class="">
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="card-style mb-30">
+					<div id="tableFavorite">
+						<div class="table-responsive ">
+							<h1 class="text-center">我的關注商品</h1>
+							<table id="favoriteTable" class="table">
+								<thead class="text-center">
+									<tr>
+										<th>
+											<h6>商品連結</h6>
+										</th>
+										<th>
+											<h6>商品名稱</h6>
+										</th>
+										<th>
+											<h6>價格</h6>
+										</th>
+										<th>
+										</th>
+									</thead>
+									<tbody class="text-center">
+										@foreach (var item in Model)
 										{
 											<tr>
 												<td>
-													@Html.DisplayFor(modelItem => item.Product.ProductImage)
+													<a asp-controller="Products" asp-action="Details" asp-route-id="@item.ProductId">
+													<img src="@Html.DisplayFor(modelItem=>item.ImagePath)" alt="商品圖片" style="width:150px;" />
+													</a>
 												</td>
 												<td>
-													@Html.DisplayFor(modelItem => item.Product.ProductName)
-												</td>
-													@Html.DisplayFor(modelItem => item.Product.ProductDetail)
-												<td>
-													<p></p>
+													@Html.DisplayFor(modelItem=>item.Name)
 												</td>
 												<td>
-													<p></p>
-												</td>
-												<td>
-													<p></p>
-												</td>
-												<td>
-													 
-												
-													<div class="mb-2">
-														
-														
-															<button type="button" class="btn btn-outline-secondary btn-sm" disabled>
-																加入購物車
-															</button>
-														
-													</div>
-												 
+													@Html.DisplayFor(modelItem=>item.Price)
 												</td>
 											</tr>
 										}
-									}
-									else
-									{
-										<p class="text-center">查無訂單資料</p>
-									}
-								</tbody>
-							</table>
-							@if (ViewBag.TotalPages > 1)
-							{
-								<nav class="mt-4">
-									<ul class="pagination justify-content-center">
-										@* 上一頁 *@
-										<li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
-											<a class="page-link ajax-page-link" href="javascript:void(0);" data-page="@(ViewBag.CurrentPage - 1)">上一頁</a>
-										</li>
-
-										@* 頁碼按鈕 *@
-										@for (int i = 1; i <= ViewBag.TotalPages; i++)
-										{
-											<li class="page-item @(ViewBag.CurrentPage == i ? "active" : "")">
-												<a class="page-link ajax-page-link" href="javascript:void(0);" data-page="@i">@i</a>
-											</li>
-										}
-
-										@* 下一頁 *@
-										<li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
-											<a class="page-link ajax-page-link" href="javascript:void(0);" data-page="@(ViewBag.CurrentPage + 1)">下一頁</a>
-										</li>
-									</ul>
-								</nav>
-							}
-						
+									</tbody>
+								</table>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
 	</div>
+
+	@section Scripts {
+		<script>
+
+		</script>
+	}
