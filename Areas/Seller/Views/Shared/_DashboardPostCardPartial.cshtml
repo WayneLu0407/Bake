@@ -1,0 +1,48 @@
+﻿@model Bake.Areas.Seller.ViewModels.MemberDashboardPostCardViewModel
+
+@{
+    string imageUrl = !string.IsNullOrWhiteSpace(Model.ImageUrl)
+        ? (Model.ImageUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+            ? Model.ImageUrl
+            : Url.Content("~/" + Model.ImageUrl.TrimStart('/')))
+        : Url.Content("~/seller_assets/images/cards/card-style-6/card-1.jpg");
+}
+
+<div class="swiper-slide">
+    <div class="card-style-6 mb-30 dashboard-history-card">
+        <div class="card-meta mb-25">
+            <div class="d-flex align-items-center flex-wrap mb-10">
+                <h5 class="text-bold mr-20 mb-0 dashboard-card-title">
+                    <a asp-area=""
+                           asp-controller="Post"
+                           asp-action="PostDetail"
+                           asp-route-id="@Model.PostId"
+                           class="title">
+                        @Model.Title
+                    </a>
+                </h5>
+                <span>@Model.CreatedAt?.ToString("yyyy/MM/dd")</span>
+            </div>
+        </div>
+
+        <div class="card-image">
+            <a asp-area=""
+                   asp-controller="Post"
+                   asp-action="PostDetail"
+                   asp-route-id="@Model.PostId">
+                <img src="@imageUrl" alt="@Model.Title" />
+            </a>
+        </div>
+
+        <div class="card-action">
+            <div class="action mr-20">
+                <span class="action-icon"><i class="lni lni-thumbs-up"></i></span>
+                <span>@Model.LikesCount</span>
+            </div>
+            <div class="action">
+                <span class="action-icon"><i class="lni lni-comments"></i></span>
+                <span>@Model.CommentsCount</span>
+            </div>
+        </div>
+    </div>
+</div>
