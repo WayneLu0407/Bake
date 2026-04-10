@@ -12,7 +12,9 @@ namespace Bake.Areas.Seller.ViewModels
 
         [StringLength(1000, ErrorMessage = "個人介紹最多 1000 字")]
         public string? Bio { get; set; }
-
+        public byte? Gender { get; set; }
+        public string? Persona { get; set; }
+        public string? Phone { get; set; }
         public IFormFile? AvatarFile { get; set; }
     }
 }

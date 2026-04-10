@@ -367,23 +367,27 @@ namespace Bake.Areas.Seller.Controllers
 
             user.UserName = vm.FullName.Trim();
 
-            if (user.UserProfile == null)
+            if (user.UserProfile != null)
             {
                 user.UserProfile = new UserProfile
                 {
-                    UserId = user.UserId,
+                    
                     FullName = vm.FullName.Trim(),
+                    Persona = vm.Persona,
+                    UserGender = vm.Gender,
+                    UserPhone = vm.Phone,
                     AvatarUrl = "seller_assets/images/profile/profile-image.png",
                     Bio = string.IsNullOrWhiteSpace(vm.Bio) ? null : vm.Bio.Trim(),
+
                 };
 
-                _context.UserProfiles.Add(user.UserProfile);
+                _context.UserProfiles.Update(user.UserProfile);
             }
-            else
-            {
-                user.UserProfile.FullName = vm.FullName.Trim();
-                user.UserProfile.Bio = string.IsNullOrWhiteSpace(vm.Bio) ? null : vm.Bio.Trim();
-            }
+            //else
+            //{
+            //    user.UserProfile.FullName = vm.FullName.Trim();
+            //    user.UserProfile.Bio = string.IsNullOrWhiteSpace(vm.Bio) ? null : vm.Bio.Trim();
+            //}
 
             if (vm.AvatarFile != null && vm.AvatarFile.Length > 0)
             {
