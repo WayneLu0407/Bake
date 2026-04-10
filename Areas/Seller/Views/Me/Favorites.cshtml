@@ -10,6 +10,7 @@
 		.followername{
 			color:black
 		}
+		
 	</style>
 }
 
@@ -36,10 +37,10 @@
 		<div class=" user d-flex flex-wrap gap-4 justify-content-start">
 			@foreach (var item in Model.MyFollowers)
 			{
-				// 直接取得路徑最後的檔名 (例如: image_123.jpg)
+				// 取得路徑的圖片檔名 
 				string fileName = System.IO.Path.GetFileName(item.AvatarUrl);
 
-				// 手動拼接網址路徑
+				// 拼接網址路徑
 				string displayUrl = string.IsNullOrEmpty(fileName)
 									? "/ProfilePicture/User/image_ad83a87f.png"
 									: $"/ProfilePicture/User/{fileName}";

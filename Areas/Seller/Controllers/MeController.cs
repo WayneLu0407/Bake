@@ -413,7 +413,7 @@ namespace Bake.Areas.Seller.Controllers
             var currentUserId = int.Parse(userId);
             var allSave = _context.PostFavorites.Where(u => u.UserId == currentUserId);
             int totalCount = await allSave.CountAsync();
-            int pageSize = 4;
+            int pageSize = 3;
             var viewModel = new FavoritePostViewModel {
                 MySavePosts = await _context.PostFavorites
                               .Include(p => p.Post.PostAttachments)
