@@ -215,6 +215,63 @@
                             </div>
                         }
                     </div>
+
+                <div class="card-style mb-30">
+                    <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                        <h6 class="mb-20">參加中的活動</h6>
+                        <div class="d-flex align-items-center mb-20">
+                            <button class="swiper-prev initiated-prev btn btn-sm">❮</button>
+                            <button class="swiper-next initiated-next btn btn-sm">❯</button>
+                        </div>
+                    </div>
+
+                    @if (Model.ActiveEvents.Any())
+                    {
+                        <div class="swiper initiated-carousel overflow-hidden">
+                            <div class="swiper-wrapper">
+                                @foreach (var item in Model.ActiveEvents)
+                                {
+                                    <partial name="_DashboardEventCardPartial" model="item" />
+                                }
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-history-block">
+                            目前沒有參加中的活動
+                        </div>
+                    }
+                </div>
+
+                <div class="card-style mb-30">
+                    <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                        <h6 class="mb-20">曾參加過的活動</h6>
+                        <div class="d-flex align-items-center mb-20">
+                            <button class="swiper-prev initiated-prev btn btn-sm">❮</button>
+                            <button class="swiper-next initiated-next btn btn-sm">❯</button>
+                        </div>
+                    </div>
+
+                    @if (Model.PastActiveEvents.Any())
+                    {
+                        <div class="swiper initiated-carousel overflow-hidden">
+                            <div class="swiper-wrapper">
+                                @foreach (var item in Model.PastActiveEvents)
+                                {
+                                    <partial name="_DashboardEventCardPartial" model="item" />
+                                }
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="empty-history-block">
+                            目前沒有曾參加過的活動
+                        </div>
+                    }
+                </div>
+
             <!-- end col -->
         </div>
     </div>

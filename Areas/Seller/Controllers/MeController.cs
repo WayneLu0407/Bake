@@ -149,12 +149,77 @@ namespace Bake.Areas.Seller.Controllers
                 .Take(10)
                 .ToListAsync();
 
+            var activeEvents = await _context.Posts
+                .AsNoTracking()
+                .Where(p => p.IsPublished == true
+                         && p.TypeId == 1
+                         && p.AuthorId != userId.Value
+                         && p.EventDetails.Any(e =>
+                                e.EventEndTime >= now &&
+                                e.EventRegistrations.Any(r => r.UserId == userId.Value && r.RegistStatusId == 1)))
+                .Select(p => new MemberDashboardEventCardViewModel
+                {
+                    PostId = p.PostId,
+                    Title = p.Title,
+                    EventTime = p.EventDetails
+                        .OrderBy(e => e.EventTime)
+                        .Select(e => (DateTime?)e.EventTime)
+                        .FirstOrDefault(),
+                    ImageUrl =
+                        p.PostAttachments
+                            .Where(a => a.IsCover == true)
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? p.PostAttachments
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? defaultCardImage,
+                    LikesCount = p.PostLikes.Count()
+                })
+                .OrderBy(x => x.EventTime)
+                .Take(10)
+                .ToListAsync();
+
+            var pastActiveEvents = await _context.Posts
+                .AsNoTracking()
+                .Where(p => p.IsPublished == true
+                         && p.TypeId == 1
+                         && p.AuthorId != userId.Value
+                         && p.EventDetails.Any(e =>
+                                e.EventEndTime < now &&
+                                e.EventRegistrations.Any(r => r.UserId == userId.Value && r.RegistStatusId == 1)))
+                .Select(p => new MemberDashboardEventCardViewModel
+                {
+                    PostId = p.PostId,
+                    Title = p.Title,
+                    EventTime = p.EventDetails
+                        .OrderByDescending(e => e.EventTime)
+                        .Select(e => (DateTime?)e.EventTime)
+                        .FirstOrDefault(),
+                    ImageUrl =
+                        p.PostAttachments
+                            .Where(a => a.IsCover == true)
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? p.PostAttachments
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? defaultCardImage,
+                    LikesCount = p.PostLikes.Count()
+                })
+                .OrderByDescending(x => x.EventTime)
+                .Take(10)
+                .ToListAsync();
+
             var vm = new MemberDashboardViewModel
             {
                 UserId = user.UserId,
                 FullName = user.UserProfile.FullName,
                 IsEmailConfirmed = user.IsEmailConfirmed,
-                Bio = user.UserProfile?.Bio,  //先保留
                 AvatarUrl = user.UserProfile?.AvatarUrl,
 
                 PostCount = await _context.Posts
@@ -173,7 +238,10 @@ namespace Bake.Areas.Seller.Controllers
 
                 MyPosts = myPosts,
                 ActiveHostedEvents = activeHostedEvents,
-                PastHostedEvents = pastHostedEvents
+                PastHostedEvents = pastHostedEvents,
+
+                ActiveEvents = activeEvents,
+                PastActiveEvents = pastActiveEvents
             };
 
             return View(vm);

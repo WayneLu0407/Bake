@@ -19,5 +19,8 @@
         public List<MemberDashboardPostCardViewModel> MyPosts { get; set; } = new();
         public List<MemberDashboardEventCardViewModel> ActiveHostedEvents { get; set; } = new();
         public List<MemberDashboardEventCardViewModel> PastHostedEvents { get; set; } = new();
+
+        public List<MemberDashboardEventCardViewModel> ActiveEvents { get; set; } = new ();
+        public List<MemberDashboardEventCardViewModel> PastActiveEvents { get; set; } = new();
     }
 }
