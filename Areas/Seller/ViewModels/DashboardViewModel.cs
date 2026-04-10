@@ -1,4 +1,6 @@
-﻿namespace Bake.Areas.Seller.ViewModels
+﻿using Bake.Models.User;
+
+namespace Bake.Areas.Seller.ViewModels
 {
     public class DashboardViewModel
     {
@@ -8,6 +10,10 @@
         public int TotalProductsCount { get; set; } // 在架商品總數
         public int TotalOrdersMonth { get; set; } //本月總訂單數
         public decimal MonthRevenue { get; set; } //本月總營收
+
+        
+        public int FollowersCount { get; set; } // 被追蹤數
+
 
         public List<string> Last7DaysLabels { get; set; } //過去7天趨勢圖
         public List<int> Last7DaysData { get; set; } //過去7天趨勢圖
