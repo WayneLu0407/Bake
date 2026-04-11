@@ -134,7 +134,7 @@ namespace Bake.Controllers
 
             HttpContext.Session.SetInt32("ShippingFee", fee);
             HttpContext.Session.SetString("ShippingMethod", request.ShippingMethod);
-            return Ok(new { sucess=true, fee = fee});
+            return Ok(new { success=true, fee = fee});
         }
 
         public class shippingRequest
