@@ -454,13 +454,13 @@
 
         })
         // 1. 初始化連線 (先定義物件)
-    const connection = new signalR.HubConnectionBuilder()
+    const notificationConnection = new signalR.HubConnectionBuilder()
         .withUrl("/notificationHub")
         .withAutomaticReconnect()
         .build();
 
     // 2. 註冊監聽事件 (在啟動前設定好規則)
-        connection.on("receiveNotification", (title, message) => {
+        notificationConnection.on("receiveNotification", (title, message) => {
         // 彈出通知
             console.log("收到通知了！", title, message);
             toastr.success(message, title);
@@ -481,7 +481,7 @@
         
 
     // 3. 正式啟動連線
-    connection.start()
+    notificationConnection.start()
         .then(() => console.log("SignalR 已成功啟動"))
         .catch(err => console.error("SignalR 啟動失敗: ", err.toString()));
 
