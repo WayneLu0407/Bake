@@ -13,11 +13,11 @@ public partial class Shop
 
     public string? ShopDescription { get; set; }
 
-    public decimal ShopRating { get; set; }
+    public decimal? ShopRating { get; set; }
 
-    public string ShopImg { get; set; } = null!;
+    public string? ShopImg { get; set; }
 
-    public DateTime ShopTime { get; set; }
+    public DateTime? ShopTime { get; set; }
 
     public DateTime SellerApprovedAt { get; set; }
 

@@ -53,11 +53,14 @@
 					<span class="btn-loader"></span>
 				</button>
 				<a class="text-decoration-none" asp-controller="Home" asp-action="Register">註冊帳號</a>
+				<div>
+					<a class="text-decoration-none " asp-controller="Home" asp-action="Index">回首頁</a>
+				</div>
 			</form>
 		</div>
 	</div>
 </body>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 	function togglePassword()
 	{
@@ -73,6 +76,30 @@
 	}
 		
 </script>
+
+@if(TempData["AlertMessage"] != null)
+{
+	<script>
+		Swal.fire({
+		icon: "warning",
+		title: "提示",
+		text: '@Html.Raw(TempData["AlertMessage"])',
+		timer: 1500
+		})
+	</script>
+}
+@if(TempData["EmailConfirm"] != null)
+{
+	<script>
+		Swal.fire({
+		icon: "warning",
+		title: "提示",
+		text: '@Html.Raw(TempData["EmailConfirm"])',
+		timer: 1500
+		})
+	</script>
+}
+
 
 @section Scripts {
 	@{

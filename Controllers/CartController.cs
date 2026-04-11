@@ -7,7 +7,6 @@ using System.Text.Json;
 
 namespace Bake.Controllers
 {
-    [Authorize]
     public class CartController : Controller
     {
         private const string CartSessionKey = "UserCart";
@@ -16,6 +15,8 @@ namespace Bake.Controllers
         {
             _bakeContext = bakeContext;
         }
+
+        [Authorize]
         public IActionResult Index()
         {
             return View();
@@ -26,6 +27,7 @@ namespace Bake.Controllers
         // 1. 加入商品到購物車
         // 網址：/Cart/Add (對應fetch)
         [HttpPost]
+        [AllowAnonymous]
         public IActionResult Add([FromBody] CartItemRequest request)
         {
             if (request == null || request.ProductId <= 0)
@@ -71,6 +73,7 @@ namespace Bake.Controllers
         //2. 移除商品
         // 網址：/Cart/Remove (對應fetch)
         [HttpPost]
+        [AllowAnonymous]
         public IActionResult Remove([FromBody] int productId) 
         {
             var cart = GetCartFromSession();
@@ -87,6 +90,7 @@ namespace Bake.Controllers
         //3. 取得購物車資料 (給 購物車側邊欄、Cart頁面)
         //對應網址 Cart/GetCartItems
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult GetCartItems()
         {
             var cart = GetCartFromSession();
@@ -130,7 +134,7 @@ namespace Bake.Controllers
 
             HttpContext.Session.SetInt32("ShippingFee", fee);
             HttpContext.Session.SetString("ShippingMethod", request.ShippingMethod);
-            return Ok(new { sucess=true, message="運費已暫存"});
+            return Ok(new { success=true, fee = fee});
         }
 
         public class shippingRequest

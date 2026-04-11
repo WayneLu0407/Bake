@@ -43,7 +43,10 @@
                     {
                         <h4 class="fw-bold mb-3">「@Model.Title」</h4>
                     }
-
+                    @if (Model.IsActivity && Model.EventDetail.EventTime < DateTime.Now)
+                    {
+                        <span class="badge bg-primary fs-6 mb-3">此活動已結束</span>
+                    }
                     @*---     活動發起者專用的狀態顯示   --- *@
                     @if (Model.IsActivity && !Model.IsPublished && Model.IsOwner)
                     {
@@ -94,7 +97,7 @@
                         <span class="text">@(Model.IsLiked ? "已按讚" : "讚")</span>
                     </button>
                     <button class="action-bar__btn" id="btn-favorite" data-id="@Model.PostId">
-                        <i class="@(Model.IsFavorited ? "fa-solid" : "fa-heart")"></i> 
+                        <i class="@(Model.IsFavorited ? "fa-solid" : "fa-regular") fa-heart"></i>
                         <span class="text">@(Model.IsFavorited ? "已收藏" : "收藏")</span>
                     </button>
                     <button class="action-bar__btn">
@@ -215,7 +218,7 @@
                             <div class="btn-cta-outline text-center">活動已下架</div>
                         }
                     }
-                    else if (Model.IsPublished)
+                    else if (Model.IsPublished && Model.EventDetail.EventTime > DateTime.Now)
                     {
                         @if (Model.IsCurrentUserRegistered)
                         {
@@ -238,7 +241,6 @@
                             <a href="/apply/@Model.EventDetail.EventId" class="btn-cta-primary">我要報名</a>
                         }
                         <div>
-                            <h6 class="fw-bold mb-2">我要詢問</h6>
                             <a href="@Url.Action("StartChat", "Chat", new { targetId = Model.Author.UserId })" class="btn-cta-outline">私訊主辦人</a>
                         </div>
                     }

@@ -60,7 +60,7 @@
         </div>
     </div>
 
-    <section class="py-3" style="background-image: url('images/background-pattern.jpg');background-repeat: no-repeat;background-size: cover;">
+    <section class="py-3" style="background-image: url('/images/background-pattern.jpg');background-repeat: no-repeat;background-size: cover;">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-md-12">
@@ -68,7 +68,7 @@
                         <div class="banner-ad large block-1">
                             <div class="swiper main-swiper">
                                 <div class="swiper-wrapper">
-                                    <div class="swiper-slide" style="background: url('ProductPicture/banner/3.jpg');background-repeat: no-repeat;background-position: right bottom;">
+                                    <div class="swiper-slide" style="background: url('/ProductPicture/banner/3.jpg');background-repeat: no-repeat;background-position: right bottom;">
                                         <div class="row banner-content p-5">
                                             <div class="content-wrapper col-md-6"style="background: rgba(255,255,255,0.3); backdrop-filter: blur(3px); border-radius:16px;  padding: 1rem;">
                                                 <div class="categories my-3">新鮮出爐</div>
@@ -81,7 +81,7 @@
                                         </div>
                                     </div>
 
-                                        <div class="swiper-slide" style="background: url('ProductPicture/banner/1.jpg');background-repeat: no-repeat;background-position: right bottom;">
+                                        <div class="swiper-slide" style="background: url('/ProductPicture/banner/1.jpg');background-repeat: no-repeat;background-position: right bottom;">
                                         <div class="row banner-content p-5">
                                                     <div class="content-wrapper col-md-6" style="background: rgba(255,255,255,0.3); backdrop-filter: blur(3px); border-radius:16px;  padding: 1rem;">
                                                 <div class="categories mb-3 pb-3">餅乾怪獸的最愛</div>
@@ -94,7 +94,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="swiper-slide" style="background: url('ProductPicture/banner/2.jpg');background-repeat: no-repeat;background-position: right bottom;">
+                                    <div class="swiper-slide" style="background: url('/ProductPicture/banner/2.jpg');background-repeat: no-repeat;background-position: right bottom;">
                                         <div class="row banner-content p-5">
                                                         <div class="content-wrapper col-md-6" style="background: rgba(255,255,255,0.3); backdrop-filter: blur(3px); border-radius:16px;  padding: 1rem;">
                                                 <div class="categories mb-3 pb-3">風味升級 栗子香氣</div>
@@ -155,21 +155,25 @@
                                                 {{ product.productRating }}
                                             </span>
                                             <div class="d-flex align-items-center gap-2">
-                                                <span class="price">NT${{ product.productPrice }}</span>
-                                                <del v-if="originalPrice(product.productPrice, product.productDiscount)" class="text-muted small">
-                                                    NT${{ originalPrice(product.productPrice, product.productDiscount) }}
+                                                <del v-if="salePrice(product.productPrice, product.productDiscount)" class="text-muted small">
+                                                    NT${{ product.productPrice }}
                                                 </del>
+                                                <span class="price">NT${{ salePrice(product.productPrice, product.productDiscount) || product.productPrice }}</span>
                                             </div>
                                             <div class="d-flex align-items-center justify-content-between">
                                                 <div class="input-group product-qty">
                                                     <span class="input-group-btn">
-                                                        <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent ="product.qty = Math.max(1, product.qty - 1)">
+                                                        <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
                                                             <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
                                                         </button>
                                                     </span>
-                                                        <input type="text" class="form-control input-number" v-model.number="product.qty" min="1" max="9" @@change="product.qty = Math.min(9,Math.max(1,product.qty||1))">
+                                                    <input type="text" class="form-control input-number"
+                                                            v-model.number="product.qty"
+                                                             min="1" :max="product.productQuantity"
+                                                            style="min-width: 40px !important; padding: 2px 4px !important; text-align: center;"
+                                                    @@change="product.qty = Math.min(product.productQuantity, Math.max(1, product.qty||1))">
                                                     <span class="input-group-btn">
-                                                                    <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(9, product.qty + 1)">
+                                                        <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(product.productQuantity, product.qty + 1)">
                                                             <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
                                                         </button>
                                                     </span>
@@ -211,24 +215,28 @@
                                                 {{ product.productRating }}
                                             </span>
                                             <div class="d-flex align-items-center gap-2">
-                                                <span class="price">NT${{ product.productPrice }}</span>
-                                                <del v-if="originalPrice(product.productPrice, product.productDiscount)" class="text-muted small">
-                                                    NT${{ originalPrice(product.productPrice, product.productDiscount) }}
+                                                <del v-if="salePrice(product.productPrice, product.productDiscount)" class="text-muted small">
+                                                    NT${{ product.productPrice }}
                                                 </del>
+                                                <span class="price">NT${{ salePrice(product.productPrice, product.productDiscount) || product.productPrice }}</span>
+
                                             </div>
                                             <div class="d-flex align-items-center justify-content-between">
                                                 <div class="input-group product-qty">
-                                                    <span class="input-group-btn">
-                                                        <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
-                                                            <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
-                                                        </button>
-                                                    </span>
-                                                    <input type="text" class="form-control input-number" v-model.number="product.qty" min="1" max="9" @@change="product.qty = Math.min(9,Math.max(1,product.qty||1))">
-                                                    <span class="input-group-btn">
-                                                        <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(9, product.qty + 1)">
-                                                            <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
-                                                        </button>
-                                                    </span>
+                                                                <span class="input-group-btn">
+                                                                    <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
+                                                                        <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
+                                                                    </button>
+                                                                </span>
+                                                                <input type="text" class="form-control input-number"
+                                                                       v-model.number="product.qty"
+                                                                       min="1" :max="product.productQuantity"
+                                                                       style="min-width: 40px !important; padding: 2px 4px !important; text-align: center;"
+                                                                @@change="product.qty = Math.min(product.productQuantity, Math.max(1, product.qty||1))">                                                                <span class="input-group-btn">
+                                                                    <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(product.productQuantity, product.qty + 1)">
+                                                                        <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
+                                                                    </button>
+                                                                </span>
                                                 </div>
                                                 <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                             </div>
@@ -266,24 +274,28 @@
                                                 {{ product.productRating }}
                                             </span>
                                             <div class="d-flex align-items-center gap-2">
-                                                <span class="price">NT${{ product.productPrice }}</span>
-                                                <del v-if="originalPrice(product.productPrice, product.productDiscount)" class="text-muted small">
-                                                    NT${{ originalPrice(product.productPrice, product.productDiscount) }}
+                                                <del v-if="salePrice(product.productPrice, product.productDiscount)" class="text-muted small">
+                                                    NT${{ product.productPrice }}
                                                 </del>
+                                                <span class="price">NT${{ salePrice(product.productPrice, product.productDiscount) || product.productPrice }}</span>
+
                                             </div>
                                             <div class="d-flex align-items-center justify-content-between">
                                                 <div class="input-group product-qty">
-                                                    <span class="input-group-btn">
-                                                        <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
-                                                            <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
-                                                        </button>
-                                                    </span>
-                                                    <input type="text" class="form-control input-number" v-model.number="product.qty" min="1" max="9" @@change="product.qty = Math.min(9,Math.max(1,product.qty||1))">
-                                                    <span class="input-group-btn">
-                                                        <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(9, product.qty + 1)">
-                                                            <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
-                                                        </button>
-                                                    </span>
+                                                                <span class="input-group-btn">
+                                                                    <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
+                                                                        <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
+                                                                    </button>
+                                                                </span>
+                                                                <input type="text" class="form-control input-number"
+                                                                       v-model.number="product.qty"
+                                                                       min="1" :max="product.productQuantity"
+                                                                       style="min-width: 40px !important; padding: 2px 4px !important; text-align: center;"
+                                                            @@change="product.qty = Math.min(product.productQuantity, Math.max(1, product.qty||1))">                                                                <span class="input-group-btn">
+                                                                    <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(product.productQuantity, product.qty + 1)">
+                                                                        <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
+                                                                    </button>
+                                                                </span>
                                                 </div>
                                                 <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                             </div>
@@ -305,7 +317,7 @@
             <div class="row">
 
                 <div class="col-md-6">
-                    <div class="banner-ad" style="background: url('ProductPicture/banner/pie.png') 90% center /40% no-repeat,linear-gradient(135deg, #FFFF37 0%, #f2ffc0 50%, #e8f5a3 100%);">
+                    <div class="banner-ad" style="background: url('/ProductPicture/banner/pie.png') 90% center /40% no-repeat,linear-gradient(135deg, #FFFF37 0%, #f2ffc0 50%, #e8f5a3 100%);">
                         <div class="p-3">
 
                             <div class="categories text-primary fs-3 fw-bold">改良配方</div>
@@ -318,7 +330,7 @@
                     </div>
                 </div>
                 <div class="col-md-6">
-                    <div class="banner-ad" style="background:url('ProductPicture/banner/cake.png') 90% center / 30% no-repeat,linear-gradient(135deg, #FFECF5 0%, #FFD2D2 50%, #FFB5B5 100%)">
+                    <div class="banner-ad" style="background:url('/ProductPicture/banner/cake.png') 90% center / 30% no-repeat,linear-gradient(135deg, #FFECF5 0%, #FFD2D2 50%, #FFB5B5 100%)">
                         <div class="p-3">
                             <div class="categories text-primary fs-3 fw-bold">新品預告</div>
                             <h3 class="banner-title">草莓夾心蛋糕</h3>
@@ -381,24 +393,28 @@
                                         {{ product.productRating }}
                                     </span>
                                     <div class="d-flex align-items-center gap-2">
-                                        <span class="price">NT${{ product.productPrice }}</span>
-                                        <del v-if="originalPrice(product.productPrice, product.productDiscount)" class="text-muted small">
-                                            NT${{ originalPrice(product.productPrice, product.productDiscount) }}
+                                        <del v-if="salePrice(product.productPrice, product.productDiscount)" class="text-muted small">
+                                            NT${{ product.productPrice }}
                                         </del>
+                                        <span class="price">NT${{ salePrice(product.productPrice, product.productDiscount) || product.productPrice }}</span>
+
                                     </div>
                                     <div class="d-flex align-items-center justify-content-between">
                                         <div class="input-group product-qty">
-                                            <span class="input-group-btn">
-                                                <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
-                                                    <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
-                                                </button>
-                                            </span>
-                                            <input type="text" class="form-control input-number" v-model.number="product.qty" min="1" max="9" @@change="product.qty = Math.min(9,Math.max(1,product.qty||1))">
-                                            <span class="input-group-btn">
-                                                <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(9, product.qty + 1)">
-                                                    <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
-                                                </button>
-                                            </span>
+                                                        <span class="input-group-btn">
+                                                            <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
+                                                                <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
+                                                            </button>
+                                                        </span>
+                                                        <input type="text" class="form-control input-number"
+                                                               v-model.number="product.qty"
+                                                               min="1" :max="product.productQuantity"
+                                                               style="min-width: 40px !important; padding: 2px 4px !important; text-align: center;"
+                                                @@change="product.qty = Math.min(product.productQuantity, Math.max(1, product.qty||1))">                                                        <span class="input-group-btn">
+                                                            <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(product.productQuantity, product.qty + 1)">
+                                                                <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
+                                                            </button>
+                                                        </span>
                                         </div>
                                         <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                     </div>
@@ -460,24 +476,28 @@
                                         {{ product.productRating }}
                                     </span>
                                     <div class="d-flex align-items-center gap-2">
-                                        <span class="price">NT${{ product.productPrice }}</span>
-                                        <del v-if="originalPrice(product.productPrice, product.productDiscount)" class="text-muted small">
-                                            NT${{ originalPrice(product.productPrice, product.productDiscount) }}
+                                        <del v-if="salePrice(product.productPrice, product.productDiscount)" class="text-muted small">
+                                            NT${{ product.productPrice }}
                                         </del>
+                                        <span class="price">NT${{ salePrice(product.productPrice, product.productDiscount) || product.productPrice }}</span>
+
                                     </div>
                                         <div class="d-flex align-items-center justify-content-between">
                                             <div class="input-group product-qty">
-                                                <span class="input-group-btn">
-                                                    <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
-                                                        <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
-                                                    </button>
-                                                </span>
-                                                <input type="text" class="form-control input-number" v-model.number="product.qty" min="1" max="9" @@change="product.qty = Math.min(9,Math.max(1,product.qty||1))">
-                                                <span class="input-group-btn">
-                                                    <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(9, product.qty + 1)">
-                                                        <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
-                                                    </button>
-                                                </span>
+                                                            <span class="input-group-btn">
+                                                                <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
+                                                                    <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
+                                                                </button>
+                                                            </span>
+                                                            <input type="text" class="form-control input-number"
+                                                                   v-model.number="product.qty"
+                                                                   min="1" :max="product.productQuantity"
+                                                                   style="min-width: 40px !important; padding: 2px 4px !important; text-align: center;"
+                                                            @@change="product.qty = Math.min(product.productQuantity, Math.max(1, product.qty||1))">                                                            <span class="input-group-btn">
+                                                                <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(product.productQuantity, product.qty + 1)">
+                                                                    <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
+                                                                </button>
+                                                            </span>
                                             </div>
                                             <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
                                         </div>
@@ -560,10 +580,10 @@
                 if (!discount || discount <= 0) return null
                 return `-${Math.round(discount * 100)}%`   // 0.20 → "-20%"
                 },
-                originalPrice(price, discount) {
-                if (!discount || discount <= 0) return null
-                return Math.round(price / (1 - discount))  // 100 / 0.8 = 125
-                },
+                        salePrice(price, discount) {
+                        if (!discount || discount <= 0) return null
+                        return Math.round(price*(1 - discount))  //  100 * (1-0.15) = 85
+                        },
                 async toggleFavorite(product){
                     const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
                     try {

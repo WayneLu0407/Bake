@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] 烘焙交流網</title>
+    <title>@ViewData["Title"] SweetStack 甜點棧</title>
     <style>
             [v-cloak] {
                 display: none !important;
@@ -231,9 +231,9 @@
                         {
                             <!-- 已登入才顯示 -->
                             <li class="nav-item dropdown">
-                                <a href="#" class="rounded-circle bg-light p-2 mx-1 position-relative" id="bell-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a href="#" class="rounded-circle bg-light p-2 mx-1 position-relative d-inline-flex align-items-center justify-content-center overflow-visible" id="bell-dropdown" data-bs-toggle="dropdown" aria-expanded="false" style="width: 36px; height: 36px;">
                                     <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#bell"></use></svg>
-                                    <span id="notificationCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill " style="display: none;background-color: #8b0000; border: 1.5px solid white; font-weight: bold;">0</span>  <!-- 預設隱藏，有數字才顯示 -->
+                                    <span id="notificationCount" class="position-absolute badge rounded-pill " style="display: none;background-color: #8b0000; border: 1.5px solid white; font-weight: bold; top: -2px; right: -2px; font-size: 0.6rem;line-height: 1; padding: 3px 5px;">0</span>  <!-- 預設隱藏，有數字才顯示 -->
                                 </a>
 
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="bell-dropdown" style="min-width: 250px;">
@@ -454,13 +454,13 @@
 
         })
         // 1. 初始化連線 (先定義物件)
-    const connection = new signalR.HubConnectionBuilder()
+    const notificationConnection = new signalR.HubConnectionBuilder()
         .withUrl("/notificationHub")
         .withAutomaticReconnect()
         .build();
 
     // 2. 註冊監聽事件 (在啟動前設定好規則)
-        connection.on("receiveNotification", (title, message) => {
+        notificationConnection.on("receiveNotification", (title, message) => {
         // 彈出通知
             console.log("收到通知了！", title, message);
             toastr.success(message, title);
@@ -481,7 +481,7 @@
         
 
     // 3. 正式啟動連線
-    connection.start()
+    notificationConnection.start()
         .then(() => console.log("SignalR 已成功啟動"))
         .catch(err => console.error("SignalR 啟動失敗: ", err.toString()));
 
@@ -517,7 +517,7 @@
     
     </script>
     <script>
-    var baseAddress = "https://localhost:7285/";
+    var baseAddress = "/";
     $("#getUSD").on("click",async()=>{
         try{
             var response = await fetch(`${baseAddress}Home/ExchangeRate`,{

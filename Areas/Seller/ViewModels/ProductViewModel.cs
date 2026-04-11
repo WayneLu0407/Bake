@@ -33,8 +33,9 @@ namespace Bake.Areas.Seller.ViewModels
         [Display(Name = "商品價格")]
         public decimal ProductPrice { get; set; }
 
-        [Range(0, 0.99, ErrorMessage = "折數必須介於 0 到 0.99 之間")]
-        [Display(Name = "優惠折數(如: 不打折填 0，九折填 0.1)")]
+        [Range(0, 100, ErrorMessage = "折數必須介於 0 到 100 之間")]
+        [Display(Name = "優惠折數(如: 不打折原價填 100，九折填 90，八五折填 85)")]
+
         public decimal? ProductDiscount { get; set; }
 
         [Required(ErrorMessage = "請輸入數量")]

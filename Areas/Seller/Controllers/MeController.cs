@@ -50,9 +50,6 @@ namespace Bake.Areas.Seller.Controllers
             var user = await _context.AccountAuths
                 .AsNoTracking()
                 .Include(x => x.UserProfile)
-                .Include(x => x.RoleNavigation)
-                .Include(x => x.AccountStatusNavigation)
-                .Include(x => x.Shop)
                 .FirstOrDefaultAsync(x => x.UserId == userId.Value);
 
             if (user == null)
@@ -60,29 +57,192 @@ namespace Bake.Areas.Seller.Controllers
                 return RedirectToAction("Login", "Home", new { area = "" });
             }
 
+            var now = DateTime.Now;
+            const string defaultCardImage = "seller_assets/images/cards/card-style-6/card-1.jpg";
+
+            var myPosts = await _context.Posts
+                .AsNoTracking()
+                .Where(p => p.AuthorId == userId.Value
+                         && p.TypeId == 0
+                         && p.IsPublished == true)
+                .OrderByDescending(p => p.CreatedAt)
+                .Select(p => new MemberDashboardPostCardViewModel
+                {
+                    PostId = p.PostId,
+                    Title = p.Title,
+                    CreatedAt = p.CreatedAt,
+                    ImageUrl =
+                        p.PostAttachments
+                            .Where(a => a.IsCover == true)
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? p.PostAttachments
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? defaultCardImage,
+                    LikesCount = p.PostLikes.Count(),
+                    CommentsCount = p.PostComments.Count()
+                })
+                .Take(10)
+                .ToListAsync();
+
+            var activeHostedEvents = await _context.Posts
+                .AsNoTracking()
+                .Where(p => p.AuthorId == userId.Value
+                         && p.TypeId == 1
+                         && p.IsPublished == true
+                         && p.EventDetails.Any(e => e.EventEndTime >= now))
+                .Select(p => new MemberDashboardEventCardViewModel
+                {
+                    PostId = p.PostId,
+                    Title = p.Title,
+                    EventTime = p.EventDetails
+                        .OrderBy(e => e.EventTime)
+                        .Select(e => (DateTime?)e.EventTime)
+                        .FirstOrDefault(),
+                    ImageUrl =
+                        p.PostAttachments
+                            .Where(a => a.IsCover == true)
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? p.PostAttachments
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? defaultCardImage,
+                    LikesCount = p.PostLikes.Count()
+                })
+                .OrderBy(x => x.EventTime)
+                .Take(10) //先抓前十筆
+                .ToListAsync();
+
+            var pastHostedEvents = await _context.Posts
+                .AsNoTracking()
+                .Where(p => p.AuthorId == userId.Value
+                         && p.TypeId == 1
+                         && (p.IsPublished != true || p.EventDetails.Any(e => e.EventEndTime < now)))
+                .Select(p => new MemberDashboardEventCardViewModel
+                {
+                    PostId = p.PostId,
+                    Title = p.Title,
+                    EventTime = p.EventDetails
+                        .OrderByDescending(e => e.EventTime)
+                        .Select(e => (DateTime?)e.EventTime)
+                        .FirstOrDefault(),
+                    ImageUrl =
+                        p.PostAttachments
+                            .Where(a => a.IsCover == true)
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? p.PostAttachments
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? defaultCardImage,
+                    LikesCount = p.PostLikes.Count()
+                })
+                .OrderByDescending(x => x.EventTime)
+                .Take(10)
+                .ToListAsync();
+
+            var activeEvents = await _context.Posts
+                .AsNoTracking()
+                .Where(p => p.IsPublished == true
+                         && p.TypeId == 1
+                         && p.AuthorId != userId.Value
+                         && p.EventDetails.Any(e =>
+                                e.EventEndTime >= now &&
+                                e.EventRegistrations.Any(r => r.UserId == userId.Value && r.RegistStatusId == 1)))
+                .Select(p => new MemberDashboardEventCardViewModel
+                {
+                    PostId = p.PostId,
+                    Title = p.Title,
+                    EventTime = p.EventDetails
+                        .OrderBy(e => e.EventTime)
+                        .Select(e => (DateTime?)e.EventTime)
+                        .FirstOrDefault(),
+                    ImageUrl =
+                        p.PostAttachments
+                            .Where(a => a.IsCover == true)
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? p.PostAttachments
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? defaultCardImage,
+                    LikesCount = p.PostLikes.Count()
+                })
+                .OrderBy(x => x.EventTime)
+                .Take(10)
+                .ToListAsync();
+
+            var pastActiveEvents = await _context.Posts
+                .AsNoTracking()
+                .Where(p => p.IsPublished == true
+                         && p.TypeId == 1
+                         && p.AuthorId != userId.Value
+                         && p.EventDetails.Any(e =>
+                                e.EventEndTime < now &&
+                                e.EventRegistrations.Any(r => r.UserId == userId.Value && r.RegistStatusId == 1)))
+                .Select(p => new MemberDashboardEventCardViewModel
+                {
+                    PostId = p.PostId,
+                    Title = p.Title,
+                    EventTime = p.EventDetails
+                        .OrderByDescending(e => e.EventTime)
+                        .Select(e => (DateTime?)e.EventTime)
+                        .FirstOrDefault(),
+                    ImageUrl =
+                        p.PostAttachments
+                            .Where(a => a.IsCover == true)
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? p.PostAttachments
+                            .OrderBy(a => a.SortOrder)
+                            .Select(a => a.FileUrl)
+                            .FirstOrDefault()
+                        ?? defaultCardImage,
+                    LikesCount = p.PostLikes.Count()
+                })
+                .OrderByDescending(x => x.EventTime)
+                .Take(10)
+                .ToListAsync();
+
             var vm = new MemberDashboardViewModel
             {
                 UserId = user.UserId,
-                FullName = user.UserProfile?.FullName ?? user.UserName,
-                //RoleName = user.RoleNavigation?.StatusName ?? string.Empty,
+                FullName = user.UserProfile.FullName,
                 IsEmailConfirmed = user.IsEmailConfirmed,
-                Bio = user.UserProfile?.Bio,
                 AvatarUrl = user.UserProfile?.AvatarUrl,
+                Bio= user.UserProfile?.Bio,
 
-                //PostCount = await _context.Posts
-                //    .AsNoTracking()
-                //    .CountAsync(p => p.AuthorId == user.UserId),
+                PostCount = await _context.Posts
+                    .AsNoTracking()
+                    .CountAsync(p => p.AuthorId == user.UserId
+                                  && p.TypeId == 0
+                                  && p.IsPublished == true),
 
-                //FollowersCount = await _context.Follows
-                //    .AsNoTracking()
-                //    .CountAsync(f => f.BefollowedId == user.UserId),
+                FollowersCount = await _context.Follows
+                    .AsNoTracking()
+                    .CountAsync(f => f.BefollowedId == user.UserId),
 
-                //FollowingCount = await _context.Follows
-                //    .AsNoTracking()
-                //    .CountAsync(f => f.FollowerId == user.UserId),
+                FollowingCount = await _context.Follows
+                    .AsNoTracking()
+                    .CountAsync(f => f.FollowerId == user.UserId),
 
-                //HasShop = user.Shop != null,
-                //ShopName = user.Shop?.ShopName
+                MyPosts = myPosts,
+                ActiveHostedEvents = activeHostedEvents,
+                PastHostedEvents = pastHostedEvents,
+
+                ActiveEvents = activeEvents,
+                PastActiveEvents = pastActiveEvents
             };
 
             return View(vm);
@@ -170,7 +330,9 @@ namespace Bake.Areas.Seller.Controllers
                     fullName = user.UserProfile?.FullName ?? user.UserName,
                     bio = user.UserProfile?.Bio ?? "",
                     avatarUrl = avatarUrl,
-                    genderOptions = genderOptions
+                    persona = user.UserProfile?.Persona,
+                    phone = user.UserProfile?.UserPhone,
+                    gender = user.UserProfile?.UserGender
                 }
             });
         }
@@ -208,23 +370,27 @@ namespace Bake.Areas.Seller.Controllers
 
             user.UserName = vm.FullName.Trim();
 
-            if (user.UserProfile == null)
+            if (user.UserProfile != null)
             {
                 user.UserProfile = new UserProfile
                 {
-                    UserId = user.UserId,
+                    
                     FullName = vm.FullName.Trim(),
+                    Persona = vm.Persona,
+                    UserGender = vm.Gender,
+                    UserPhone = vm.Phone,
                     AvatarUrl = "seller_assets/images/profile/profile-image.png",
                     Bio = string.IsNullOrWhiteSpace(vm.Bio) ? null : vm.Bio.Trim(),
+
                 };
 
-                _context.UserProfiles.Add(user.UserProfile);
+                _context.UserProfiles.Update(user.UserProfile);
             }
-            else
-            {
-                user.UserProfile.FullName = vm.FullName.Trim();
-                user.UserProfile.Bio = string.IsNullOrWhiteSpace(vm.Bio) ? null : vm.Bio.Trim();
-            }
+            //else
+            //{
+            //    user.UserProfile.FullName = vm.FullName.Trim();
+            //    user.UserProfile.Bio = string.IsNullOrWhiteSpace(vm.Bio) ? null : vm.Bio.Trim();
+            //}
 
             if (vm.AvatarFile != null && vm.AvatarFile.Length > 0)
             {
@@ -246,10 +412,41 @@ namespace Bake.Areas.Seller.Controllers
 
             return Json(new { success = true, message = "會員資料已更新" });
         }
-
-        public IActionResult Favorites()
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> Favorites(int page = 1, bool isAjax = false)
         {
-            return View();
+            var userId = User.FindFirst("UserId")?.Value;
+            var currentUserId = int.Parse(userId);
+            var allSave = _context.PostFavorites.Where(u => u.UserId == currentUserId);
+            int totalCount = await allSave.CountAsync();
+            int pageSize = 3;
+            var viewModel = new FavoritePostViewModel {
+                MySavePosts = await _context.PostFavorites
+                              .Include(p => p.Post.PostAttachments)
+                              .AsNoTracking()
+                              .Where(u => u.UserId == currentUserId)
+                              .Skip((page - 1) * pageSize)
+                              .Take(pageSize)
+                              
+                              .Select(s => s.Post)
+                              
+                              .ToListAsync(),
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
+                SavedCount = totalCount,
+                MyFollowers = await _context.Follows
+                              .AsNoTracking()   
+                              .Where(u => u.BefollowedId == currentUserId)
+                              .Select(s => s.Follower)
+                              .ToListAsync()
+            };
+            if (isAjax)
+            {
+                return PartialView("_FavoritesPartial", viewModel);
+            }
+
+            return View(viewModel);
         }
 
         [Authorize]
@@ -419,23 +616,36 @@ namespace Bake.Areas.Seller.Controllers
                 byte[] InputAccount = Encoding.UTF8.GetBytes(model.BankAccount);
                 byte[] HashAccount = sha256.ComputeHash(InputAccount);
 
-                _context.UserPaymentSecrets.Add(new UserPaymentSecret
+                var newSeller = new UserPaymentSecret
                 {
                     UserId = int.Parse(userId),
-                    EncryptedBankAcc = HashAccount 
-                });
+                    EncryptedBankAcc = HashAccount
+                };
+
+                _context.UserPaymentSecrets.Add(newSeller);
                 
                 users.IsSeller = true;
                 users.Role = 1;
                 await _context.SaveChangesAsync();
+
+                _context.Shops.Add(new Shop
+                {
+                    UserId = newSeller.UserId,
+                    ShopName = users.UserName + "的店鋪",
+                    SellerApprovedAt = DateTime.Now,
+                    StatusId = 0,
+                });
+                await _context.SaveChangesAsync();
             }
             
 
-            var user = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             var claims = new List<Claim>
             {
+                new Claim("UserId", userId),
                 new Claim(ClaimTypes.Name, User.Identity.Name),
                 new Claim(ClaimTypes.Role, "Seller")  // 動態新增賣家身分
+
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

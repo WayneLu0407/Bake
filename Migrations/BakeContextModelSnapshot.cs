@@ -898,7 +898,6 @@ namespace Bake.Migrations
                         .HasColumnName("shop_description");
 
                     b.Property<string>("ShopImg")
-                        .IsRequired()
                         .HasMaxLength(2048)
                         .HasColumnType("nvarchar(2048)")
                         .HasColumnName("shop_img");
@@ -909,11 +908,11 @@ namespace Bake.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("shop_name");
 
-                    b.Property<decimal>("ShopRating")
+                    b.Property<decimal?>("ShopRating")
                         .HasColumnType("decimal(2, 1)")
                         .HasColumnName("shop_rating");
 
-                    b.Property<DateTime>("ShopTime")
+                    b.Property<DateTime?>("ShopTime")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasColumnName("shop_time")
@@ -1700,7 +1699,6 @@ namespace Bake.Migrations
                         .HasColumnName("user_id");
 
                     b.Property<string>("AvatarUrl")
-                        .IsRequired()
                         .HasMaxLength(2048)
                         .HasColumnType("nvarchar(2048)")
                         .HasColumnName("avatar_url");
@@ -1711,27 +1709,24 @@ namespace Bake.Migrations
                         .HasColumnName("bio");
 
                     b.Property<string>("FullName")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("full_name");
 
                     b.Property<string>("Persona")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("persona");
 
-                    b.Property<DateTime>("UserBirthdate")
+                    b.Property<DateTime?>("UserBirthdate")
                         .HasColumnType("datetime2")
                         .HasColumnName("user_birthdate");
 
-                    b.Property<byte>("UserGender")
+                    b.Property<byte?>("UserGender")
                         .HasColumnType("tinyint")
                         .HasColumnName("user_gender");
 
                     b.Property<string>("UserPhone")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .IsUnicode(false)
                         .HasColumnType("varchar(20)")
@@ -2306,7 +2301,6 @@ namespace Bake.Migrations
                     b.HasOne("Bake.Models.User.UserGenderStatusDefinition", "UserGenderNavigation")
                         .WithMany("UserProfiles")
                         .HasForeignKey("UserGender")
-                        .IsRequired()
                         .HasConstraintName("FK_User_Profile_Gender");
 
                     b.HasOne("Bake.Models.User.AccountAuth", "User")

@@ -1,0 +1,27 @@
+﻿@model Bake.Areas.Seller.ViewModels.FavoritePostViewModel
+<h1 class="text-center">貼文活動收藏 (@Model.SavedCount)</h1>
+<div class="d-flex flex-wrap gap-5 justify-content-start">
+	@foreach (var item in Model.MySavePosts)
+	{
+		<div  style="width:300px;height:400px">
+			<a asp-area="" asp-controller="Post" asp-action="PostDetail" asp-route-id="@item.PostId">
+				<img src="@item.PostAttachments?.FirstOrDefault()?.FileUrl" alt="@item.Title" style="width:300px; height:250px;" />
+			</a>
+			<p>@item.Title</p>
+			<p> 建立日期 : @item.CreatedAt.ToString()</p>
+		</div>
+	}
+</div>
+@if (Model.TotalPages > 1)
+{
+	<nav aria-label="Page navigation" class="mt-4">
+		<ul class="pagination justify-content-center">
+			@for (int i = 1; i <= Model.TotalPages; i++)
+			{
+				<li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+					<a class="page-link ajax-page-link" href="javascript:void(0);" data-page="@i">@i</a>
+				</li>
+			}
+		</ul>
+	</nav>
+}
