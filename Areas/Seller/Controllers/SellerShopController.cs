@@ -95,7 +95,7 @@ namespace Bake.Areas.Seller.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Shop_settings(SellerShopSettingsReadViewModel vm)
+        public async Task<IActionResult> Shop_settings(SellerShopSettingsReadViewModel vm)
         {
             int? userId = GetCurrentUserIdFromClaim();
 
@@ -130,7 +130,7 @@ namespace Bake.Areas.Seller.Controllers
                     ShopRating = 0m,
                     ShopTime = DateTime.Now,
                     SellerApprovedAt = DateTime.Now,
-                    StatusId = shop.StatusId,
+                    StatusId = vm.StatusId!.Value,
                     FacebookUrl = vm.FacebookUrl?.Trim(),
                     InstagramUrl = vm.InstagramUrl?.Trim(),
                     YoutubeUrl = vm.YoutubeUrl?.Trim(),

@@ -24,24 +24,24 @@ namespace Bake.Areas.Seller.ViewModels
         // 目前先保留顯示用
         public byte? StatusId { get; set; }
 
-            [Display(Name = "連結FB")]
-            [StringLength(2048)]
-            [Url(ErrorMessage = "FB 連結格式不正確")]
-            public string? FacebookUrl { get; set; }
+        [Display(Name = "連結FB")]
+        [StringLength(2048)]
+        [Url(ErrorMessage = "FB 連結格式不正確")]
+        public string? FacebookUrl { get; set; }
 
-            [Display(Name = "連結IG")]
-            [StringLength(2048)]
-            [Url(ErrorMessage = "IG 連結格式不正確")]
-            public string? InstagramUrl { get; set; }
+        [Display(Name = "連結IG")]
+        [StringLength(2048)]
+        [Url(ErrorMessage = "IG 連結格式不正確")]
+        public string? InstagramUrl { get; set; }
 
-            [Display(Name = "連結YT")]
-            [StringLength(2048)]
-            [Url(ErrorMessage = "YT 連結格式不正確")]
-            public string? YoutubeUrl { get; set; }
+        [Display(Name = "連結YT")]
+        [StringLength(2048)]
+        [Url(ErrorMessage = "YT 連結格式不正確")]
+        public string? YoutubeUrl { get; set; }
 
-            [Display(Name = "連Pinterest")]
-            [StringLength(2048)]
-            [Url(ErrorMessage = "Pinterest 連結格式不正確")]
-            public string? PinterestUrl { get; set; }
+        [Display(Name = "連Pinterest")]
+        [StringLength(2048)]
+        [Url(ErrorMessage = "Pinterest 連結格式不正確")]
+        public string? PinterestUrl { get; set; }
     }
 }
