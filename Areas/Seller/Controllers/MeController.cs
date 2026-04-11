@@ -625,11 +625,13 @@ namespace Bake.Areas.Seller.Controllers
             }
             
 
-            var user = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
             var claims = new List<Claim>
             {
+                new Claim("UserId", userId),
                 new Claim(ClaimTypes.Name, User.Identity.Name),
                 new Claim(ClaimTypes.Role, "Seller")  // 動態新增賣家身分
+
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
