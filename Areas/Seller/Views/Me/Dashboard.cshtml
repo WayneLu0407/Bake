@@ -313,8 +313,23 @@
                             <div class="col-md-8">
 
                                 <div class="mb-3">
-                                    <label class="form-label">顯示名稱</label>
+                                    <label class="form-label">姓名</label>
                                     <input type="text" id="editFullName" name="FullName" class="form-control" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">暱稱</label>
+                                    <input type="text" id="editPersona" name="Persona" class="form-control" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">性別</label>
+                                    <select class="form-select" id="editGender" name="Gender">
+                                        <option class="form-options" value="0">男</option>
+                                        <option class="form-options" value="1">女</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">電話</label>
+                                    <input type="text" id="editPhone" name="Phone" class="form-control" />
                                 </div>
 
                                 <div class="mb-3">
@@ -388,6 +403,9 @@
                     const data = res.data;
 
                     $("#editFullName").val(data.fullName);
+                    $("#editGender").val(data.gender);
+                    $("#editPhone").val(data.phone);
+                    $("#editPersona").val(data.persona);
                     $("#editBio").val(data.bio);
                     $("#editAvatarPreview").attr("src", data.avatarUrl);
                     $("#editAvatarFile").val("");

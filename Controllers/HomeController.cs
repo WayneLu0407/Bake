@@ -12,7 +12,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal;
+using Microsoft.Identity.Client;
 using System.Diagnostics;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -133,14 +135,13 @@ public class HomeController : Controller
                 {
                     return View();
                 }
-                //using(SHA256 sha256 = SHA256.Create())
-                //{
-                //    byte[] InputPassword = Encoding.UTF8.GetBytes(model.Password);
-                //    byte[] HashPassword = sha256.ComputeHash(InputPassword);
-                //}
-                    _context.AccountAuths.Add(new AccountAuth { UserName = model.Name, Email = model.Email, PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password) });
+                var newAccount = new AccountAuth { UserName = model.Name, Email = model.Email, PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password) };
+
+                    _context.AccountAuths.Add(newAccount);
                     _context.SaveChanges();
-                
+                    _context.UserProfiles.Add(new UserProfile { UserId = newAccount.UserId , FullName = model.Name });
+                    _context.SaveChanges();
+
                 //encrypt 加密
                 var encrypted = AesHelper.Encrypt(model.Email);
                 var encodedToken = System.Net.WebUtility.UrlEncode(encrypted);
