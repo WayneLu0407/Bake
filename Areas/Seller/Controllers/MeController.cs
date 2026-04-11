@@ -221,6 +221,7 @@ namespace Bake.Areas.Seller.Controllers
                 FullName = user.UserProfile.FullName,
                 IsEmailConfirmed = user.IsEmailConfirmed,
                 AvatarUrl = user.UserProfile?.AvatarUrl,
+                Bio= user.UserProfile?.Bio,
 
                 PostCount = await _context.Posts
                     .AsNoTracking()
