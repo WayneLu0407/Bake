@@ -329,7 +329,9 @@ namespace Bake.Areas.Seller.Controllers
                     fullName = user.UserProfile?.FullName ?? user.UserName,
                     bio = user.UserProfile?.Bio ?? "",
                     avatarUrl = avatarUrl,
-                    genderOptions = genderOptions
+                    persona = user.UserProfile?.Persona,
+                    phone = user.UserProfile?.UserPhone,
+                    gender = user.UserProfile?.UserGender
                 }
             });
         }
