@@ -53,6 +53,9 @@
 					<span class="btn-loader"></span>
 				</button>
 				<a class="text-decoration-none" asp-controller="Home" asp-action="Register">註冊帳號</a>
+				<div>
+					<a class="text-decoration-none " asp-controller="Home" asp-action="Index">回首頁</a>
+				</div>
 			</form>
 		</div>
 	</div>
@@ -73,6 +76,14 @@
 	}
 		
 </script>
+
+@if(TempData["AlertMessage"] != null)
+{
+	<script>
+		alert('@Html.Raw(TempData["AlertMessage"])');
+	</script>
+}
+
 
 @section Scripts {
 	@{
