@@ -84,6 +84,7 @@ public class HomeController : Controller
         {
             if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password,user.PasswordHash)) // 如果沒有資料為Null 則return 回登入畫面  使用Bcrypt套件 做雜湊比對
             {
+                TempData["AlertMessage"] = "密碼輸入錯誤!";
                 return View();
             }
 
@@ -94,8 +95,7 @@ public class HomeController : Controller
                 new Claim("UserId",user.UserId.ToString()),
                 new Claim(ClaimTypes.Name,model.Account),
                 new Claim(ClaimTypes.Role,user.RoleNavigation.StatusName),
-                new Claim("FullName",userProfile?.FullName??""),
-                new Claim("AvatarUrl",userProfile?.AvatarUrl??"")
+                
 
             };
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

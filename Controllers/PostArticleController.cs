@@ -1,12 +1,14 @@
 ﻿using Bake.Data;
 using Bake.Models.Social;
 using Bake.ViewModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics.Contracts;
 
 namespace Bake.Controllers
 {
+    [Authorize]
     public class PostArticleController : Controller
     {
         private readonly BakeContext _bakeContext;
@@ -36,7 +38,9 @@ namespace Bake.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPostList() 
         {
-            var list = (await _bakeContext.Posts.OrderByDescending(p => p.CreatedAt).ToListAsync())
+            var list = (await _bakeContext.Posts
+                .Where(p => p.AuthorId == CurrentUserId)
+                .OrderByDescending(p => p.CreatedAt).ToListAsync())
                 .Select(p => new
                 {
                     p.PostId,
@@ -53,7 +57,7 @@ namespace Bake.Controllers
         {
             var post = await _bakeContext.Posts
                 .Include(p=>p.PostAttachments)
-                .FirstOrDefaultAsync(p=>p.PostId==id);
+                .FirstOrDefaultAsync(p=>p.PostId==id && p.AuthorId==CurrentUserId);
             if (post == null) return NotFound();
 
             var coverImg = post.PostAttachments.FirstOrDefault(a => a.IsCover == true)?.FileUrl;
@@ -171,7 +175,9 @@ namespace Bake.Controllers
         [HttpPost]
         public async Task<IActionResult> DeletePost(int id) 
         {
-            var post = await _bakeContext.Posts.FindAsync(id);
+            var post = await _bakeContext.Posts
+                .FirstOrDefaultAsync(p=>p.PostId ==id && p.AuthorId == CurrentUserId);
+
             if(post == null) return Json(new { success = false, message = "找不到文章" });
 
             _bakeContext.Posts.Remove(post);
