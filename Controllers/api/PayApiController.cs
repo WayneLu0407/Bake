@@ -86,8 +86,10 @@ namespace Bake.Controllers.api
                 StatusId = (byte.Parse(PaymentMethod) == 2) ? (byte)1 : (byte)0,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
+                OrderItems = new List<OrderItem>()
             };
 
+            
             foreach (var item in cartItems)
             {
                 var orderItem = new OrderItem
@@ -97,6 +99,8 @@ namespace Bake.Controllers.api
                     UnitPrice = item.Price,
                     Subtotal = item.Quantity * item.Price
                 };
+
+                order.OrderItems.Add(orderItem);
             }
 
             //3. 寫入資料庫
