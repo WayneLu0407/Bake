@@ -45,6 +45,7 @@ namespace Bake.Controllers.api
                     productRating = p.ProductRating,
                     productDate = p.ProductDate,
                     categoryId = p.CategoryId,
+                    productQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0,
                     productPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : (decimal?)null,
                     productDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : (decimal?)null,
                     shopName = p.User.Shop != null ? p.User.Shop.ShopName : "未知店家",

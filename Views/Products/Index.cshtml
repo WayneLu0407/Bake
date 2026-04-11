@@ -117,10 +117,10 @@
                                     {{ product.productRating }}
                                 </span>
                                 <div class="d-flex align-items-center gap-2">
-                                <span class="price">NT${{ product.productPrice }}</span>
-                                <del v-if="originalPrice(product.productPrice, product.productDiscount)" class="text-muted small">
-                                     NT${{ originalPrice(product.productPrice, product.productDiscount) }}
-                                 </del>
+                                    <del v-if="salePrice(product.productPrice, product.productDiscount)" class="text-muted small">
+                                        NT${{ product.productPrice }}
+                                    </del>
+                                    <span class="price">NT${{ salePrice(product.productPrice, product.productDiscount) || product.productPrice }}</span>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div class="input-group product-qty">
@@ -129,9 +129,13 @@
                                                 <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
                                             </button>
                                         </span>
-                                        <input type="text" class="form-control input-number" v-model.number="product.qty">
+                                        <input type="text" class="form-control input-number"
+                                               v-model.number="product.qty"
+                                               min="1" :max="product.productQuantity"
+                                               style="min-width: 40px !important; padding: 2px 4px !important; text-align: center;"
+                                        @@change="product.qty = Math.min(product.productQuantity, Math.max(1, product.qty||1))">
                                         <span class="input-group-btn">
-                                            <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty += 1">
+                                            <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(product.productQuantity, product.qty + 1)">
                                                 <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
                                             </button>
                                         </span>
@@ -165,7 +169,7 @@
                         </nav>
                         <div class="d-flex align-items-center gap-2 ms-3">
                             <span class="text-muted small">前往頁面</span>
-                            <input type="number" class="form-control form-control-sm" style="width: 60px;" value="1" min="1">
+                            <input type="number" class="form-control form-control-sm" style="width: 60px;" v-model.number="goToPage" min="1" :max="totalPages" @@keyup.enter="currentPage = Math.min(totalPages, Math.max(1, goToPage || 1))">
                         </div>
                     </div>
                     <!-- / 分頁 -->
@@ -193,7 +197,8 @@
                     pageSize: 12,
                     sortBy: 'default',
                     priceRange:'all',
-                    selectedCategory:'all'
+                    selectedCategory:'all',
+                    goToPage: 1,
                 }
             },
             methods: {
@@ -201,10 +206,10 @@
                 if (!discount || discount <= 0) return null
                 return `-${Math.round(discount * 100)}%`   // 0.20 → "-20%"
                 },
-                originalPrice(price, discount) {
-                if (!discount || discount <= 0) return null
-                return Math.round(price / (1 - discount))  // 100 / 0.8 = 125
-                },
+            salePrice(price, discount) {
+            if (!discount || discount <= 0) return null
+            return Math.round(price*(1 - discount))  //  100 * (1-0.15) = 85
+            },
                 async toggleFavorite(product){
                     const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
                     try {
