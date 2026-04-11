@@ -165,16 +165,20 @@ namespace Bake.Controllers
                         ProductImage = p.ProductImage,
                         ShopName = shop.ShopName,
                         CategoryName = p.Category.CategoryName,
-                        Price = p.ProductDetail != null ? p.ProductDetail.ProductPrice : 0,
+                        Price = p.ProductDetail != null
+                        ? (p.ProductDetail.ProductDiscount.HasValue &&
+                           p.ProductDetail.ProductDiscount.Value > 0 &&
+                           p.ProductDetail.ProductDiscount.Value < 1
+                            ? Math.Round(p.ProductDetail.ProductPrice * (1 - p.ProductDetail.ProductDiscount.Value), 0)
+                            : p.ProductDetail.ProductPrice)
+                        : 0,
                         OriginalPrice =
-                            p.ProductDetail != null &&
-                            p.ProductDetail.ProductDiscount.HasValue &&
-                            p.ProductDetail.ProductDiscount.Value > 0 &&
-                            p.ProductDetail.ProductDiscount.Value < 1
-                                ? Math.Round(
-                                    p.ProductDetail.ProductPrice /
-                                    (1 - p.ProductDetail.ProductDiscount.Value), 0)
-                                : null,
+                        p.ProductDetail != null &&
+                        p.ProductDetail.ProductDiscount.HasValue &&
+                        p.ProductDetail.ProductDiscount.Value > 0 &&
+                        p.ProductDetail.ProductDiscount.Value < 1
+                            ? p.ProductDetail.ProductPrice
+                            : null,
                         Rating = p.ProductRating
                     })
                     .ToListAsync();

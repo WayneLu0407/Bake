@@ -90,13 +90,15 @@
 
                 <!-- 售價 -->
                 <div class="d-flex flex-column gap-2">
-                    <span class="fs-1 fw-bold" style="color: #e02020;">NT${{ product.productPrice }}</span>
-                    <span v-if="originalPrice(product.productPrice, product.productDiscount)" class="text-muted text-decoration-line-through">NT${{ originalPrice(product.productPrice, product.productDiscount) }}</span>
+                        <del v-if="salePrice(product.productPrice, product.productDiscount)" class="text-muted small">
+                            NT${{ product.productPrice }}
+                        </del>
+                        <span class="fs-1 fw-bold" style="color: #e02020;">NT${{ salePrice(product.productPrice, product.productDiscount) || product.productPrice }}</span>
                 </div>
 
                 <!-- 數量 -->
                 <div>
-                    <p class="qty mb-1">數量</p>
+                        <p class="qty mb-1">數量<span class="text-muted small">(庫存：{{ product.productQuantity }} 件)</span></p>
                     <div class="input-group product-qty" style="width: 140px;">
                         <span class="input-group-btn">
                             <button type="button" class="quantity-left-minus btn btn-danger btn-number"
@@ -106,11 +108,11 @@
                         </span>
                         <input type="number" class="form-control input-number text-center"
                                 v-model.number="product.qty"
-                                min="1" max="9"
-                        @@change="product.qty = Math.min(9, Math.max(1, product.qty || 1))">
+                                   min="1" :max="product.productQuantity"
+                            @@change="product.qty = Math.min(product.productQuantity, Math.max(1, product.qty || 1))">
                         <span class="input-group-btn">
                             <button type="button" class="quantity-right-plus btn btn-success btn-number"
-                                @@click.prevent="product.qty = Math.min(9, product.qty + 1)">
+                                    @@click.prevent="product.qty = Math.min(product.productQuantity, product.qty + 1)">
                                 <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
                             </button>
                         </span>
@@ -251,10 +253,11 @@
                                             {{ product.productRating }}
                                         </span>
                                         <div class="d-flex align-items-center gap-2">
-                                            <span class="price">NT${{ product.productPrice }}</span>
-                                            <del v-if="originalPrice(product.productPrice, product.productDiscount)" class="text-muted small">
-                                                NT${{ originalPrice(product.productPrice, product.productDiscount) }}
+                                            <del v-if="salePrice(product.productPrice, product.productDiscount)" class="text-muted small">
+                                                NT${{ product.productPrice }}
                                             </del>
+                                            <span class="price">NT${{ salePrice(product.productPrice, product.productDiscount) || product.productPrice }}</span>
+
                                         </div>
                                         <div class="d-flex align-items-center justify-content-between">
                                             <div class="input-group product-qty">
@@ -263,9 +266,13 @@
                                                         <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
                                                     </button>
                                                 </span>
-                                                <input type="text" class="form-control input-number" v-model.number="product.qty" min="1" max="9" @@change="product.qty = Math.min(9,Math.max(1,product.qty||1))">
+                                                <input type="text" class="form-control input-number"
+                                                       v-model.number="product.qty"
+                                                       min="1" :max="product.productQuantity"
+                                                       style="min-width: 40px !important; padding: 2px 4px !important; text-align: center;"
+                                                @@change="product.qty = Math.min(product.productQuantity, Math.max(1, product.qty||1))">
                                                 <span class="input-group-btn">
-                                                    <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(9, product.qty + 1)">
+                                                    <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(product.productQuantity, product.qty + 1)">
                                                         <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
                                                     </button>
                                                 </span>
@@ -307,9 +314,9 @@
                 if (!discount || discount <= 0) return null
                 return `-${Math.round(discount * 100)}%`   // 0.20 → "-20%"
                 },
-                originalPrice(price, discount) {
+            salePrice(price, discount) {
                 if (!discount || discount <= 0) return null
-                return Math.round(price / (1 - discount))  // 100 / 0.8 = 125
+                return Math.round(price*(1 - discount))  //  100 * (1-0.15) = 85
                 },
                 async toggleFavorite(product){
                     const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
