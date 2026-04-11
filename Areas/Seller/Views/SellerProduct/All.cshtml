@@ -326,6 +326,8 @@
                         function (result) {
                             if (result.success) {
                                 $("#productTable").DataTable().ajax.reload();
+                            }else {
+                                alert("儲存失敗：" + result.message);
                             }
                         });
                 }
