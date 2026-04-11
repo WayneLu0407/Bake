@@ -87,27 +87,32 @@ public class HomeController : Controller
                 TempData["AlertMessage"] = "密碼輸入錯誤!";
                 return View();
             }
-
-            var userProfile = _context.UserProfiles.FirstOrDefault(x => x.UserId == user.UserId);
-
-            var claims = new List<Claim>    //網站會員的身分證
+            if (user.IsEmailConfirmed)
             {
+                var userProfile = _context.UserProfiles.FirstOrDefault(x => x.UserId == user.UserId);
+
+                var claims = new List<Claim>    //網站會員的身分證
+                {
                 new Claim("UserId",user.UserId.ToString()),
                 new Claim(ClaimTypes.Name,model.Account),
                 new Claim(ClaimTypes.Role,user.RoleNavigation.StatusName),
-                
-
-            };
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var claimPrincipal = new ClaimsPrincipal(identity);
-
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimPrincipal); //將身分證發給user
 
 
+                };
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var claimPrincipal = new ClaimsPrincipal(identity);
+
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimPrincipal); //將身分證發給user
 
 
 
-            return RedirectToAction("index", "home");   // 登入後 回首頁
+
+
+                return RedirectToAction("index", "home");   // 登入後 回首頁
+            }else
+            {
+                TempData["EmailConfirmMessage"] = "請至Email收取驗證信!";
+            }
         }
         return View(model);
 
