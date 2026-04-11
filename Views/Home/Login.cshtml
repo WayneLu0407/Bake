@@ -60,7 +60,7 @@
 		</div>
 	</div>
 </body>
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 	function togglePassword()
 	{
@@ -80,7 +80,23 @@
 @if(TempData["AlertMessage"] != null)
 {
 	<script>
-		alert('@Html.Raw(TempData["AlertMessage"])');
+		Swal.fire({
+		icon: "warning",
+		title: "提示",
+		text: '@Html.Raw(TempData["AlertMessage"])',
+		timer: 1500
+		})
+	</script>
+}
+@if(TempData["EmailConfirm"] != null)
+{
+	<script>
+		Swal.fire({
+		icon: "warning",
+		title: "提示",
+		text: '@Html.Raw(TempData["EmailConfirm"])',
+		timer: 1500
+		})
 	</script>
 }
 
