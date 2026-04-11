@@ -208,19 +208,32 @@ namespace Bake.Areas.Seller.Controllers
             var product = await _context.Products
                 .Where(p => p.UserId == userId)
                 .Include(p => p.ProductDetail)  // ← 一起載入
+                .Include(p => p.ProductIngredient)  // ← 一起載入
                 .FirstOrDefaultAsync(p => p.ProductId == id);
 
-            if (product != null)
+            bool hasOrder = await _context.OrderItems.AnyAsync(o=>o.ProductId == id);
+
+            if (product==null)
             {
-                if (product.ProductDetail != null)
-                {
-                    _context.Remove(product.ProductDetail);  // ← 先刪 Detail
-                }
-                _context.Products.Remove(product);
-                await _context.SaveChangesAsync();
-                return Json(new { success = true });
+                return Json(new { success = false, message = "找不到商品" });
             }
-            return Json(new { success = false, message = "找不到商品" });
+            if (hasOrder)
+            {
+                return Json(new { success = false, message = "此商品已有訂單無法刪除" });
+            }
+
+            if (product.ProductDetail != null)
+            {
+                _context.Remove(product.ProductDetail);  // ← 先刪 Detail
+            }
+
+            if (product.ProductIngredient != null)
+            {
+                _context.Remove(product.ProductIngredient);  
+            }
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+            return Json(new { success = true });
         }
 
 
