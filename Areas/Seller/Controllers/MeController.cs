@@ -616,14 +616,25 @@ namespace Bake.Areas.Seller.Controllers
                 byte[] InputAccount = Encoding.UTF8.GetBytes(model.BankAccount);
                 byte[] HashAccount = sha256.ComputeHash(InputAccount);
 
-                _context.UserPaymentSecrets.Add(new UserPaymentSecret
+                var newSeller = new UserPaymentSecret
                 {
                     UserId = int.Parse(userId),
-                    EncryptedBankAcc = HashAccount 
-                });
+                    EncryptedBankAcc = HashAccount
+                };
+
+                _context.UserPaymentSecrets.Add(newSeller);
                 
                 users.IsSeller = true;
                 users.Role = 1;
+                await _context.SaveChangesAsync();
+
+                _context.Shops.Add(new Shop
+                {
+                    UserId = newSeller.UserId,
+                    ShopName = users.UserName + "的店鋪",
+                    SellerApprovedAt = DateTime.Now,
+                    StatusId = 0,
+                });
                 await _context.SaveChangesAsync();
             }
             
