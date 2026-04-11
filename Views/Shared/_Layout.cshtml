@@ -231,9 +231,9 @@
                         {
                             <!-- 已登入才顯示 -->
                             <li class="nav-item dropdown">
-                                <a href="#" class="rounded-circle bg-light p-2 mx-1 position-relative" id="bell-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a href="#" class="rounded-circle bg-light p-2 mx-1 position-relative d-inline-flex align-items-center justify-content-center overflow-visible" id="bell-dropdown" data-bs-toggle="dropdown" aria-expanded="false" style="width: 36px; height: 36px;">
                                     <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#bell"></use></svg>
-                                    <span id="notificationCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill " style="display: none;background-color: #8b0000; border: 1.5px solid white; font-weight: bold;">0</span>  <!-- 預設隱藏，有數字才顯示 -->
+                                    <span id="notificationCount" class="position-absolute badge rounded-pill " style="display: none;background-color: #8b0000; border: 1.5px solid white; font-weight: bold; top: -2px; right: -2px; font-size: 0.6rem;line-height: 1; padding: 3px 5px;">0</span>  <!-- 預設隱藏，有數字才顯示 -->
                                 </a>
 
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="bell-dropdown" style="min-width: 250px;">
