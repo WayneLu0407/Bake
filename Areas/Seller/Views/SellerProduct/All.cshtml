@@ -177,7 +177,19 @@
                     { data: "netWeight" ,responsivePriority: 6},
                     { data: "shelfLifeNote",responsivePriority: 6 },
                     { data: "productDate",responsivePriority: 5  },
-                    { data: "productExpireDate" ,responsivePriority: 4 },
+                    { data: "productExpireDate",
+                      responsivePriority: 4,
+                      render:function(data){
+                        if(!data) return'';
+                        var today = new Date();
+                        var expiredDate = new Date(data);
+                        today.setHours(0,0,0,0);
+                        expiredDate.setHours(0, 0, 0, 0);
+                        var isExpired = today>expiredDate;
+                        var label = data.split('T')[0];
+                        return isExpired?label+'<span class="badge bg-danger">已過期</span>':label;
+                      }
+                    },
                     { data: "productId",responsivePriority: 1,
                         render: function (data, type, row) {
                             return `
