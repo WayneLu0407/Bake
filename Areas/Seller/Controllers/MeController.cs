@@ -319,7 +319,7 @@ namespace Bake.Areas.Seller.Controllers
                 ? (user.UserProfile.AvatarUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)
                     ? user.UserProfile.AvatarUrl
                     : Url.Content("~/" + user.UserProfile.AvatarUrl.TrimStart('/')))
-                : Url.Content("~/seller_assets/images/profile/profile-image.png");
+                : Url.Content("~/seller_assets/images/profile/NoImage.png");
 
             return Json(new
             {
@@ -344,14 +344,20 @@ namespace Bake.Areas.Seller.Controllers
         {
             int? userId = GetCurrentUserIdFromClaim();
 
+            var user = await _context.AccountAuths
+                .Include(x => x.UserProfile)
+                .FirstOrDefaultAsync(x => x.UserId == userId.Value);
+
+            string avatarUrl = !string.IsNullOrWhiteSpace(user.UserProfile?.AvatarUrl)
+                ? (user.UserProfile.AvatarUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                    ? user.UserProfile.AvatarUrl
+                    : Url.Content("~/" + user.UserProfile.AvatarUrl.TrimStart('/')))
+                : Url.Content("~/seller_assets/images/profile/NoImage.png");
+
             if (userId == null)
             {
                 return Json(new { success = false, message = "請重新登入" });
             }
-
-            var user = await _context.AccountAuths
-                .Include(x => x.UserProfile)
-                .FirstOrDefaultAsync(x => x.UserId == userId.Value);
 
             if (user == null)
             {
@@ -379,18 +385,14 @@ namespace Bake.Areas.Seller.Controllers
                     Persona = vm.Persona,
                     UserGender = vm.Gender,
                     UserPhone = vm.Phone,
-                    AvatarUrl = "seller_assets/images/profile/profile-image.png",
+                    AvatarUrl = avatarUrl,
                     Bio = string.IsNullOrWhiteSpace(vm.Bio) ? null : vm.Bio.Trim(),
 
                 };
 
                 _context.UserProfiles.Update(user.UserProfile);
             }
-            //else
-            //{
-            //    user.UserProfile.FullName = vm.FullName.Trim();
-            //    user.UserProfile.Bio = string.IsNullOrWhiteSpace(vm.Bio) ? null : vm.Bio.Trim();
-            //}
+            
 
             if (vm.AvatarFile != null && vm.AvatarFile.Length > 0)
             {
@@ -409,6 +411,8 @@ namespace Bake.Areas.Seller.Controllers
             }
 
             await _context.SaveChangesAsync();
+
+            TempData["ProfileMessage"] = "個人資料已變更！";
 
             return Json(new { success = true, message = "會員資料已更新" });
         }
@@ -551,6 +555,7 @@ namespace Bake.Areas.Seller.Controllers
             user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password);
             
             _context.SaveChanges();
+            TempData["SettingMessage"] = "已完成更改";
             return RedirectToAction("Dashboard","Me", new {area = "Seller"});
         }
 
@@ -654,6 +659,7 @@ namespace Bake.Areas.Seller.Controllers
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity));
+            TempData["SellerMessage"] = "已成為賣家，可以前往商店設定！";
 
             return RedirectToAction("Dashboard", "Me", new { area="Seller"});
             
@@ -685,6 +691,7 @@ namespace Bake.Areas.Seller.Controllers
                 _context.UserPaymentSecrets.Update(users.UserPaymentSecret);
                 await _context.SaveChangesAsync();
             }
+            TempData["BankAccountChangeMessage"] = "已成功變更銀行帳戶！";
             return RedirectToAction("Dashboard", "Me", new { area = "Seller" });
         }
     }
