@@ -20,6 +20,7 @@ namespace Bake.Controllers.api
         {
             var shop = _db.Shops
                 .Include(s => s.Status)
+                .Where(s => s.StatusId == 0) 
                 .Select(s => new {
                     userId = s.UserId,
                     shopName = s.ShopName,
