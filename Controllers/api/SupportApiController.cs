@@ -38,7 +38,7 @@ namespace Bake.Controllers.api
 
             var bestAnswer = result.Answers[0];
 
-            if (bestAnswer.Confidence < 0.5)
+            if (bestAnswer.Confidence < 0.4)
             {
                 return Ok(new
                 {
