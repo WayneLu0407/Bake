@@ -82,17 +82,17 @@ public class HomeController : Controller
 
         if (ModelState.IsValid)
         {
-            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password,user.PasswordHash)) // 如果沒有資料為Null 則return 回登入畫面  使用Bcrypt套件 做雜湊比對
+            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash)) // 如果沒有資料為Null 則return 回登入畫面  使用Bcrypt套件 做雜湊比對
             {
                 TempData["AlertMessage"] = "密碼輸入錯誤!";
                 return View();
             }
-        }
-        if (user.IsEmailConfirmed)
-        {
-            var userProfile = _context.UserProfiles.FirstOrDefault(x => x.UserId == user.UserId);
 
-            var claims = new List<Claim>    //網站會員的身分證
+            if (user.IsEmailConfirmed)
+            {
+                var userProfile = _context.UserProfiles.FirstOrDefault(x => x.UserId == user.UserId);
+
+                var claims = new List<Claim>    //網站會員的身分證
             {
                 new Claim("UserId",user.UserId.ToString()),
                 new Claim(ClaimTypes.Name,model.Account),
@@ -100,16 +100,17 @@ public class HomeController : Controller
 
 
             };
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var claimPrincipal = new ClaimsPrincipal(identity);
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var claimPrincipal = new ClaimsPrincipal(identity);
 
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimPrincipal); //將身分證發給user
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimPrincipal); //將身分證發給user
 
-            return RedirectToAction("index", "home");   // 登入後 回首頁
-        }
-        else
-        {
-            TempData["EmailConfirm"] = "請到Email信箱收取驗證信!";
+                return RedirectToAction("index", "home");   // 登入後 回首頁
+            }
+            else
+            {
+                TempData["EmailConfirm"] = "請到Email信箱收取驗證信!";
+            }
         }
         return View(model);
 
