@@ -228,13 +228,11 @@
                     $("#editNetWeight").val(data.netWeight);
                     $("#editShelfLifeNote").val(data.shelfLifeNote);
                     $("#editModal").modal("show");
-                    if (data.productExpireDate ) {
-                    var d = new Date(data.productExpireDate);
-                        var formatted = d.toISOString().split('T')[0];  // 轉成 "2026-04-10"
-                        $("#editExpireDate").val(formatted);
-                    } else {
-                        $("#editExpireDate").val('');
-                    }
+                        if (data.productExpireDate) {
+                        $("#editExpireDate").val(data.productExpireDate.split('T')[0]);
+                        } else {
+                            $("#editExpireDate").val('');
+                        }
                     $("#editImagePreview").attr("src", data.productImage);
                     var pd = new Date(data.productDate);
                     var minDate = pd.toISOString().split('T')[0];
