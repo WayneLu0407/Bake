@@ -77,9 +77,19 @@
 											已評論
 										</button>
 									}
+									else if (!product.CanReview)
+									{
+										<button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+											待訂單完成
+										</button>
+									}
 									else
 									{
-										<a asp-area="" asp-controller="ProductReview" asp-action="Create" asp-route-productId="@product.ProductId" asp-route-orderId="@item.OrderId" class="btn btn-warning btn-sm">評論商品</a>
+										<button type="button"
+												class="btn btn-warning btn-sm open-review-modal"
+												data-url="@Url.Action("Create", "ProductReview", new { area = "", productId = product.ProductId, orderId = item.OrderId })">
+											評論商品
+										</button>
 									}
 								</div>
 							}

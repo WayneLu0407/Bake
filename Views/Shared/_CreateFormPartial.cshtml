@@ -1,0 +1,49 @@
+﻿@model Bake.ViewModel.ProductReviewCreateViewModel
+
+
+
+<h2 class="mb-2">評論商品：@Model.ProductName</h2>
+<p class="text-muted">訂單編號：#@Model.OrderId</p>
+
+<div class="text-danger  mb-2">
+    @Html.ValidationSummary()
+</div>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+    @*隱藏但要留著*@
+    <input type="hidden" asp-for="ProductId" />
+    <input type="hidden" asp-for="OrderId" />
+
+    <div class="mb-3">
+        <label class="form-label">評分</label>
+        <select class="form-select" asp-for="UserRating">
+            @for (int i = 5; i >= 1; i--)
+            {
+                var stars = new string('★', i) + new string('☆', 5 - i);
+                <option value="@i">@stars（@i 分）</option>
+            }
+        </select>
+        <span asp-validation-for="UserRating" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">請輸入評論</label>
+        <textarea class="form-control" asp-for="Comment" required maxlength="1000" rows="4"></textarea>
+    </div>
+
+    <button type="submit" id="submitReviewBtn" class="btn btn-warning">儲存</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.querySelector("form")?.addEventListener("submit", function () {
+            const btn = document.getElementById("submitReviewBtn");
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = "送出中...";
+            }
+        });
+    </script>
+}
