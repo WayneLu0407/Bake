@@ -1273,12 +1273,33 @@ public partial class BakeContext : DbContext
                 .HasDefaultValueSql("(sysdatetime())")
                 .HasColumnName("create_at");
 
+            entity.Property(n => n.CouponId)
+                .HasColumnName("coupon_id");
+
+            entity.Property(n => n.SenderId)
+                .HasColumnName("sender_id");
+
             // ★ 外鍵：關聯到 Orders 表
             entity.HasOne(e => e.Order)
                 .WithMany()                              // Order 那邊不需要導航回來的話就空著
                 .HasForeignKey(e => e.OrderId)
                 .OnDelete(DeleteBehavior.ClientSetNull)   // 跟你們其他表一致的刪除行為
                 .HasConstraintName("FK_Notification_Orders");
+
+            // 新增：Coupon 關聯
+            entity.HasOne(n => n.Coupon)
+                  .WithMany()
+                  .HasForeignKey(n => n.CouponId)
+                  .OnDelete(DeleteBehavior.ClientSetNull)
+                  .HasConstraintName("FK_Notification_Coupons");
+
+
+            // 新增：Sender（賣家）關聯
+            entity.HasOne(n => n.Sender)
+                  .WithMany()
+                  .HasForeignKey(n => n.SenderId)
+                  .OnDelete(DeleteBehavior.SetNull)
+                  .HasConstraintName("FK_Notification_AccountAuth");
         });
         modelBuilder.Entity<PostComment>(entity =>
         {
