@@ -91,15 +91,15 @@ namespace Bake.Controllers
                 return Forbid();
             }
 
-            if (access.HasReviewed)
-            {
-                TempData["ReviewMessage"] = "你已經評論過這個商品囉！";
-                return RedirectToAction("Orders", "Me", new { area = "Seller" });
-            }
-
             if (!access.IsCompleted)
             {
                 TempData["ReviewMessage"] = "只有已完成訂單才能評論";
+                return RedirectToAction("Orders", "Me", new { area = "Seller" });
+            }
+
+            if (access.HasReviewed)
+            {
+                TempData["ReviewMessage"] = "你已經評論過這個商品囉！";
                 return RedirectToAction("Orders", "Me", new { area = "Seller" });
             }
 
@@ -230,7 +230,8 @@ namespace Bake.Controllers
             }
 
             var hasReviewed = await HasReviewedAsync(userId, orderId, productId);
-            var isCompleted = row.StatusId == (byte)OrderStatusEnum.Completed;
+            var isCompleted = row.StatusId != (byte)OrderStatusEnum.Unpaid
+                       && row.StatusId != (byte)OrderStatusEnum.Cancelled;
 
             return (true, isCompleted, hasReviewed, row.ProductName);
         }
@@ -241,65 +242,6 @@ namespace Bake.Controllers
             return Request.Headers["X-Requested-With"] == "XMLHttpRequest";
         }
 
-        /* 尚未用到
-        // GET: ProductReview/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var productReview = await _context.ProductReviews.FindAsync(id);
-            if (productReview == null)
-            {
-                return NotFound();
-            }
-            ViewData["UserId"] = new SelectList(_context.UserProfiles, "UserId", "UserId", productReview.UserId);
-            return View(productReview);
-        }
-
-        // POST: ProductReview/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id,ProductReview productReview)  
-        {
-            if (id != productReview.ReviewId)
-            {
-                return NotFound();
-            }
-
-            if (ModelState.IsValid) 
-            {
-                try
-                {
-                    _context.Update(productReview);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProductReviewExists(productReview.ReviewId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["UserId"] = new SelectList(_context.UserProfiles, "UserId", "UserId", productReview.UserId);
-            return View(productReview);
-        }
-        */
-
-        //private bool ProductReviewExists(int id)
-        //{
-        //    return _context.ProductReviews.Any(e => e.ReviewId == id);
-        //}
 
         [HttpGet]
         public async Task<IActionResult> Panel(int productId)
