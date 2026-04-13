@@ -477,6 +477,23 @@
             } 
         })
 
+        couponNotificationConnection.on("receiveCouponNotification", (title, message) => {
+        // 彈出通知
+            console.log("收到通知了！", title, message);
+            toastr.success(message, title);
+
+        // 更新小鈴鐺數字
+            let $badge = $("#notificationCount");
+            let count = parseInt($badge.text()) || 0;
+            count += 1;
+
+            $badge.text(count).show().removeClass("d-none");
+            const $container = $("#notificationItems");
+            if ($container.find(".text-muted").length > 0) {
+            $container.empty();
+            } 
+        })
+
     // 建立新的通知項目 (置頂插入)
         
 
