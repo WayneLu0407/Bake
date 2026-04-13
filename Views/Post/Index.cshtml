@@ -129,7 +129,7 @@
                     <h3 class="section-heading">熱門活動分類</h3>
                 </div>
                 <div class="row g-4">
-                    <div class="col-3" v-for="cat in categories.filter(c=>c.eventTypeId!==0)" :key="cat.eventTypeId">
+                    <div class="col-6 col-md-3" v-for="cat in categories.filter(c=>c.eventTypeId!==0)" :key="cat.eventTypeId">
                             <a :href="'/Post/PostList?category=' + cat.eventTypeId" class="text-decoration-none text-dark">
                             <div class="category-icon-card text-center">
                                 <div class="icon-circle">
@@ -264,17 +264,7 @@
                         },
                         { sel: '.latest-post-carousel',  prev: '.latest-post-prev',  next: '.latest-post-next' },
                         { sel: '.hot-post-carousel',     prev: '.hot-post-prev',     next: '.hot-post-next' },
-                        {
-                            sel: '.category-carousel',
-                            prev: '.cat-prev', next: '.cat-next',
-                            breakpoints: {
-                                0:    { slidesPerView: 2, spaceBetween: 12 },
-                                768:  { slidesPerView: 3, spaceBetween: 20 },
-                                1200: { slidesPerView: 4, spaceBetween: 28 }
-                            }
-                        },
-                        { sel: '.group1-carousel', prev: '.group1-prev', next: '.group1-next' },
-                        { sel: '.group2-carousel', prev: '.group2-prev', next: '.group2-next' },
+                        { sel: '.group1-carousel', prev: '.group1-prev', next: '.group1-next' }
                     ]
 
                     configs.forEach(cfg => {
