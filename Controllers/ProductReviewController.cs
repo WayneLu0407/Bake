@@ -248,6 +248,7 @@ namespace Bake.Controllers
         {
             var reviews = await _context.ProductReviews
                 .AsNoTracking()
+                .Include(r=>r.User)
                 .Where(r => r.ProductId == productId)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
