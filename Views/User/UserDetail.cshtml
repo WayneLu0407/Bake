@@ -224,13 +224,13 @@
                                     <div class="card-meta mb-25">
                                         <div class="d-flex align-items-center flex-wrap mb-10">
                                             <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">{{item.title}}</a>
+                                                <a a :href="'/Post/PostDetail/' + item.postId" class="title">{{item.title}}</a>
                                             </h5>
                                             <span>{{formatDate(item.eventTime)}}</span>
                                         </div>
                                     </div>
                                     <div class="card-image">
-                                        <a href="#0">
+                                        <a a :href="'/Post/PostDetail/' + item.postId">
                                             <img :src="item.image" alt="" />
                                         </a>
                                     </div>
@@ -256,13 +256,13 @@
                                     <div class="card-meta mb-25">
                                         <div class="d-flex align-items-center flex-wrap mb-10">
                                             <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">{{item.title}}</a>
+                                                <a a :href="'/Post/PostDetail/' + item.postId" class="title">{{item.title}}</a>
                                             </h5>
                                             <span>{{formatDate(item.eventTime)}}</span>
                                         </div>
                                     </div>
                                     <div class="card-image">
-                                        <a href="#0">
+                                        <a a :href="'/Post/PostDetail/' + item.postId">
                                             <img :src="item.image" alt="" />
                                         </a>
                                     </div>
@@ -285,7 +285,7 @@
             function initProfileSwipers() {
                 const defaultBreak = {
                     0:    { slidesPerView: 1, spaceBetween: 12 },
-                    768:  { slidesPerView: 2, spaceBetween: 16 },
+                    668:  { slidesPerView: 2, spaceBetween: 12 },
                     992:  { slidesPerView: 3, spaceBetween: 20 },
                     1200: { slidesPerView: 4, spaceBetween: 20 },
                     1600: { slidesPerView: 5, spaceBetween: 24 },
