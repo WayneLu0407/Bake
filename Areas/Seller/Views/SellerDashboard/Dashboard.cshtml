@@ -26,10 +26,8 @@
                             </div>
                             <div class="content">
                                 <h6 class="mb-10">今日營收</h6>
-                                <h3 class="text-bold mb-10">@Model.TodayRevenue</h3>
-                                <p class="text-sm text-success">
-                                    <i class="lni lni-arrow-up"></i> +23.4%
-                                </p>
+                                <h3 class="text-bold mb-10">@Model.TodayRevenue.ToString("N0")</h3>
+                                
                             </div>
                         </div>
                         <!-- End Icon Cart -->
@@ -42,10 +40,8 @@
                             </div>
                             <div class="content">
                                 <h6 class="mb-10">本月總營收</h6>
-                                <h3 class="text-bold mb-10">@Model.MonthRevenue</h3>
-                                <p class="text-sm text-success">
-                                    <i class="lni lni-arrow-up"></i> +23.4%
-                                </p>
+                                <h3 class="text-bold mb-10">@Model.MonthRevenue.ToString("N0")</h3>
+                                
                             </div>
                         </div>
                     </div>
@@ -58,9 +54,7 @@
                             <div class="content">
                                 <h6 class="mb-10">待出貨訂單</h6>
                                 <h3 class="text-bold mb-10">@Model.PendingOrdersCount</h3>
-                                <p class="text-sm text-danger">
-                                    <i class="lni lni-arrow-down"></i> -12.00%
-                                </p>
+                                
                             </div>
                         </div>
                     </div>
@@ -73,9 +67,7 @@
                             <div class="content">
                                 <h6 class="mb-10">本月總訂單數</h6>
                                 <h3 class="text-bold mb-10">@Model.TotalOrdersMonth</h3>
-                                <p class="text-sm text-success">
-                                    <i class="lni lni-arrow-up"></i> +23.4%
-                                </p>
+                                
                             </div>
                         </div>
                     </div>
@@ -88,9 +80,7 @@
                             <div class="content">
                                 <h6 class="mb-10">在架商品總數</h6>
                                 <h3 class="text-bold mb-10">@Model.TotalProductsCount</h3>
-                                <p class="text-sm text-danger">
-                                    <i class="lni lni-arrow-down"></i> -2.00%
-                                </p>
+                                
                             </div>
                         </div>
                         <!-- End Icon Cart -->
@@ -135,7 +125,7 @@
                         <div class="card shadow-sm mb-4">
                             <div class="card-header bg-white py-3 d-flex align-items-center">
                                 <h6 class="m-0 font-weight-bold text-primary">
-                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>低庫存警示 ⚠️
+                                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>低庫存警示
                                 </h6>
                             </div>
                             <div class="card-body p-0">
@@ -145,7 +135,7 @@
                                             <tr>
                                                 <th class="ps-3">商品名稱</th>
                                                 <th class="text-center">目前庫存</th>
-                                                <th class="text-center">狀態</th>
+                                                
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -160,9 +150,7 @@
                                                                 @item.Stock
                                                             </span>
                                                         </td>
-                                                        <td class="text-center">
-                                                            <a href="#" class="btn btn-sm btn-outline-primary">補貨</a>
-                                                        </td>
+                                                       
                                                     </tr>
                                                 }
                                             }
@@ -176,6 +164,12 @@
                                             }
                                         </tbody>
                                     </table>
+                                </div>
+                                <div class="p-3 text-end border-top">
+                                    <a asp-area="Seller" asp-controller="SellerProduct" asp-action="All"
+                                           class="btn btn-sm btn-outline-primary shadow-sm">
+                                        <i class="lni lni-cog"></i> 前往管理
+                                    </a>
                                 </div>
                             </div>
                         </div>
