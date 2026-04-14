@@ -36,8 +36,10 @@
                     <!-- 標題 -->
                     @if (Model.IsActivity)
                     {
-                        <h4 class="fw-bold mb-3">@Model.EventDetail.EventTime.ToString("yyyy/M/d (ddd) tt h:mm")
-                        -@Model.EventDetail.EventEndTime.ToString("h:mm") ｜ 「@Model.Title」</h4>
+                        <h4 class="fw-bold mb-3">
+                            @Model.EventDetail.EventTime.ToString("yyyy/M/d (ddd) HH:mm")
+                            -@Model.EventDetail.EventEndTime.ToString("HH:mm") ｜ 「@Model.Title」
+                        </h4>
                     }
                     else
                     {

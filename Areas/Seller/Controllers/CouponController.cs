@@ -1,9 +1,13 @@
 ﻿using Bake.Areas.Seller.ViewModels;
 using Bake.Data;
+using Bake.Hubs;
+using Bake.Models;
 using Bake.Models.Sales;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using OpenAI.Graders;
 using System.Numerics;
 using System.Security.Claims;
 
@@ -14,9 +18,11 @@ namespace Bake.Areas.Seller.Controllers
     public class CouponController : Controller
     {
         private readonly BakeContext _bakeContext;
-        public CouponController(BakeContext bakeContext) 
+        private readonly IHubContext<NotificationHub> _hubContext;
+        public CouponController(BakeContext bakeContext, IHubContext<NotificationHub> hubContext) 
         {
             _bakeContext = bakeContext;
+            _hubContext = hubContext;
         }
 
         private int CurrentSellerId
@@ -32,6 +38,8 @@ namespace Bake.Areas.Seller.Controllers
                 return 0;
             }
         }
+
+        
 
         [HttpGet]
         public async Task<IActionResult> CouponManagement()
@@ -59,10 +67,12 @@ namespace Bake.Areas.Seller.Controllers
         public async Task<IActionResult> CreateCoupon([FromBody] CouponCreateViewModel model)
         {
             int sellerId = CurrentSellerId;
+            
             if (!ModelState.IsValid) return Json(new { success = false, message = "資料格式錯誤，請檢查輸入內容" });
             if (model.ExpirationDate <= DateTime.Now)
                 return Json(new { success = false, message = "到期日必須大於今天" });
-
+            
+                
             string couponCode = GenerateRandomCouponCode(8);
             var newCoupon = new Coupon
             {
@@ -76,6 +86,8 @@ namespace Bake.Areas.Seller.Controllers
 
             _bakeContext.Coupons.Add(newCoupon);
             await _bakeContext.SaveChangesAsync();
+
+            await SendCouponNotify(newCoupon.CouponId.ToString());
 
             return Json(new { success = true, data = newCoupon});
         }
@@ -145,6 +157,32 @@ namespace Bake.Areas.Seller.Controllers
             return new string(Enumerable.Repeat(chars, length)
               .Select(s => s[random.Next(s.Length)]).ToArray());
         }
+        public async Task SendCouponNotify( string couponId)
+        {
+            try
+            {
+                var user = await _bakeContext.AccountAuths.Select(u=>u.UserId).ToListAsync();
+                var coupon = await _bakeContext.Coupons.FirstOrDefaultAsync(c => c.CouponId == int.Parse(couponId));
+                if (coupon == null) return;
+                var couponNotify = user.Select( uid =>  new Notification 
+                {
+                    UserId = uid, 
+                    CouponId = coupon.CouponId, 
+                    Title = "優惠券通知", 
+                    Content = $"您的優惠券{coupon.Code}已送達，須購買金額達{coupon.MinimumPurchase}元才可折抵{coupon.DiscountValue}元 !", 
+                    URL = "/Seller/Me/Orders" 
+                }).ToList();
+                _bakeContext.Notifications.AddRange(couponNotify);
+                await _bakeContext.SaveChangesAsync();
+
+                await _hubContext.Clients.All.SendAsync("receiveCouponNotification","優惠券通知", $"您的優惠券{coupon.Code}已送達，須購買金額達{coupon.MinimumPurchase}元才可折抵{coupon.DiscountValue}元 !");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"未發送訊息:{ex.Message}");
+            }
+        }
+        
     }
 
     public class ExpirationUpdateModel
