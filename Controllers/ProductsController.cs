@@ -68,6 +68,7 @@ namespace Bake.Controllers
             //查評論
             var reviews = await _db.ProductReviews
                 .AsNoTracking()
+                .Include(r => r.User)
                 .Where(r => r.ProductId == id)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();
@@ -91,7 +92,7 @@ namespace Bake.Controllers
             {
                 return RedirectToAction("Login", "Home");
             }
-
+            
             var myFavorite = await _db.FavoriteProducts
                 .Where(u =>u.UserId == user.Value)
                 .Include(i=> i.Product)
@@ -100,7 +101,7 @@ namespace Bake.Controllers
                 {
                     ProductId = w.ProductId,
                     Name = w.Product.ProductName,
-                    Price = w.Product.ProductDetail.ProductPrice,
+                    Price = Math.Round((decimal)(w.Product.ProductDetail.ProductPrice * (1 - w.Product.ProductDetail.ProductDiscount))),
                     ImagePath =w.Product.ProductImage
                 })
                 .ToListAsync();
