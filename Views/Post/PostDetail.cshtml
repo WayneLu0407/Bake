@@ -13,7 +13,6 @@
 <!--                      頁面主體                                 -->
 <!-- ============================================================ -->
 <div class="container-fluid py-4">
-    @Html.AntiForgeryToken()
     <div class="row g-4">
 
         @* 訊息 *@
@@ -191,7 +190,6 @@
                                   asp-route-postId="@Model.PostId"
                                   method="post"
                                   onsubmit="return confirm('確認要下架這個活動嗎？下架後前台列表將不再顯示。');">
-                                @Html.AntiForgeryToken()
                                 <button type="submit" class="btn-cta-outline">下架活動</button>
                             </form>
                         }
@@ -213,7 +211,6 @@
                                       asp-route-eventId="@Model.EventDetail.EventId"
                                       method="post"
                                       onsubmit="return confirm('確認要取消報名嗎？');">
-                                    @Html.AntiForgeryToken()
                                     <button type="submit" class="btn-cta-primary">取消報名</button>
                                 </form>
                             }
@@ -367,9 +364,12 @@
             methods:{
                 async addComment(){
                     if(!this.content.trim())return;
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
                     const res = await fetch("/api/PostApi/AddComment",{
                      method:"POST",
-                     headers:{"Content-Type": "application/json"},
+                     headers:{"Content-Type": "application/json",
+                     "RequestVerificationToken": token
+                     },
                      body:JSON.stringify({postId:this.postId, content:this.content})
                     });
                     if(!res.ok)return alert("留言失敗");

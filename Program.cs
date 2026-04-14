@@ -29,6 +29,11 @@ builder.Services.AddControllersWithViews(options =>
         x => $"'{x}' 必須是有效的數字。");
 });
 
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "RequestVerificationToken";
+});
+
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme) //驗證身分證的關卡
 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, option =>
 {

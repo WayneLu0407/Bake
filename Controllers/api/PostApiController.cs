@@ -176,8 +176,8 @@ namespace Bake.Controllers.api
                 {
                     userName = c.User.FullName ?? "匿名",
                     avatarUrl = !string.IsNullOrEmpty(c.User.AvatarUrl)
-                        ? "/" + c.User.AvatarUrl
-                        : "/ProductPicture/NoImage.jpg",
+    ? (c.User.AvatarUrl.StartsWith("/") ? c.User.AvatarUrl : "/" + c.User.AvatarUrl)
+    : "/ProductPicture/NoImage.jpg",
                     content = c.Content,
                     createdAt=c.CreatedAt.HasValue?c.CreatedAt.Value.ToString("yyyy/MM/dd HH:mm"):""
                 }).ToList();
@@ -187,6 +187,7 @@ namespace Bake.Controllers.api
         //  api/PostApi/AddComment
         [HttpPost("AddComment")]
         [Authorize]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddCommentApi([FromBody] CommentInput input)
         {
             var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");

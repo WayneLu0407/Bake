@@ -477,7 +477,7 @@
             } 
         })
 
-        couponNotificationConnection.on("receiveCouponNotification", (title, message) => {
+        notificationConnection.on("receiveCouponNotification", (title, message) => {
         // 彈出通知
             console.log("收到通知了！", title, message);
             toastr.success(message, title);
