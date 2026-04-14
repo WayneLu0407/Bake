@@ -1,0 +1,21 @@
+{
+  "Status": "MPG01014",
+  "Message": "NotifyUrl\u7db2\u5740\u8a2d\u5b9a\u932f\u8aa4 (\u57e0\u865f \u50c5\u53ef\u4f7f\u7528 80 \u6216 443, \u76ee\u524d\u4f7f\u7528 7285)",
+  "Result": {
+    "MerchantID": "MS158552552",
+    "RespondType": "JSON",
+    "TimeStamp": "1776147388",
+    "Version": "2.3",
+    "MerchantOrderNo": "139_1776147388",
+    "Amt": "1280",
+    "ItemDesc": "\u624b\u5de5\u677e\u9732\u5de7\u514b\u529b\u79ae\u76d2,\u8349\u8393\u751f\u4e73\u86cb\u7cd5",
+    "ExpireDate": "20260417",
+    "Email": "autumn99770@gmail.com",
+    "ReturnURL": "https:\/\/localhost:7285\/Pay\/CallbackReturn",
+    "NotifyURL": "https:\/\/localhost:7285\/Pay\/CallbackNotify",
+    "CustomerURL": "https:\/\/localhost:7285\/Pay\/CallbackCustomer",
+    "CREDIT": "1",
+    "VACC": "0",
+    "EncryptType": null
+  }
+}
