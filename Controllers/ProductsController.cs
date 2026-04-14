@@ -68,6 +68,7 @@ namespace Bake.Controllers
             //查評論
             var reviews = await _db.ProductReviews
                 .AsNoTracking()
+                .Include(r => r.User)
                 .Where(r => r.ProductId == id)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();

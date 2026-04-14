@@ -12,7 +12,7 @@ namespace Bake.ViewModel
         public byte UserRating { get; set; } = 5;
 
         [Required(ErrorMessage = "請輸入評論內容")]
-        [StringLength(500, ErrorMessage = "評論內容不可超過500字")]
+        [StringLength(1000, ErrorMessage = "評論內容不可超過1000字")]
         public string Comment { get; set; } = "";
     }
 }

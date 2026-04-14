@@ -11,6 +11,8 @@ namespace Bake.Areas.Seller.ViewModels
         public string PaymentMethod { get; set; }
         public DateTime CreatedAt { get; set; }
         public string StatusName { get; set; }
+
+        public byte StatusId { get; set; }  //評論功能用
     }
    public class Item
     {
@@ -18,7 +20,8 @@ namespace Bake.Areas.Seller.ViewModels
         public string ProductName { get; set; }
         public int Quantity { get; set; }
         
-        public bool IsReviewed { get; set; }
+        public bool IsReviewed { get; set; }//評論功能用
+        public bool CanReview { get; set; }//評論功能用
     }
 
     public class OrderPagedListViewModel
