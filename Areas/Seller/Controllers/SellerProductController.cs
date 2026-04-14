@@ -46,6 +46,7 @@ namespace Bake.Areas.Seller.Controllers
 
         // Post: Products/IndexJson
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<JsonResult> AllJson()
         {
             var userId = GetCurrentUserId();
@@ -122,6 +123,7 @@ namespace Bake.Areas.Seller.Controllers
 
         // Modal 儲存用
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<JsonResult> EditJson(int ProductId, string ProductName, string? ProductDescription, decimal ProductPrice, int ProductQuantity, decimal ProductDiscount, int CategoryId, DateTime? ExpireDate, IFormFile? ProductImage, string? Ingredients, string? NetWeight, string? ShelfLifeNote)
         {
             try
@@ -202,6 +204,7 @@ namespace Bake.Areas.Seller.Controllers
 
         // AJAX 刪除用
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<JsonResult> DeleteJson(int id)
         {
             var userId = GetCurrentUserId();

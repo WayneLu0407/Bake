@@ -53,6 +53,7 @@ namespace Bake.Controllers
                 //如果沒有，就新增一筆
                 var product = _bakeContext.Products.FirstOrDefault(p => p.ProductId == request.ProductId);
                 var productDetails = _bakeContext.ProductDetails.FirstOrDefault(p => p.ProductId == request.ProductId);
+                var price = Math.Round((decimal)(productDetails.ProductPrice * (1 - productDetails.ProductDiscount)),MidpointRounding.AwayFromZero);
                 if (product == null || productDetails == null)
                 {
                     return NotFound(new { message = "找不到商品" });
@@ -61,7 +62,7 @@ namespace Bake.Controllers
                 {
                     ProductId = product.ProductId,
                     ProductName = product.ProductName,
-                    Price = productDetails.ProductPrice, //從 ProductDetails 取價格
+                    Price = price, //從 ProductDetails 取價格
                     Quantity = request.Quantity,
                     ImgUrl = product.ProductImage
                 });

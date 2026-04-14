@@ -22,6 +22,7 @@
     </style>
 }
 <!-- ========== section start ========== -->
+@Html.AntiForgeryToken()
 <section>
     <div class="container-fluid">
         <!-- ========== title-wrapper start ========== -->
@@ -153,6 +154,9 @@
                 ajax: {
                     type: "POST",
                     url: "@Url.Action("AllJson", "SellerProduct", new { area = "Seller" })",
+                    headers: {
+                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                    },
                     dataSrc: function (data) {
                         return data;
                     }
@@ -315,6 +319,9 @@
                     data: formData,
                     contentType: false,   // ← 必加，讓瀏覽器自己設定 boundary
                     processData: false,   // ← 必加，告訴 jQuery 不要轉換 FormData
+                    headers: {
+                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                    },
                     success: function (result) {
                         if (result.success) {
                             $("#editModal").modal("hide");
@@ -326,21 +333,27 @@
                 });
             });
 
-            // 點刪除
+                // 點刪除
             $(document).on("click", ".delete-btn", function () {
                 var id = $(this).data("id");
                 var name = $(this).data("name");
                 if (confirm("確定要刪除【" + name + "】？")) {
-                    $.post("@Url.Action("DeleteJson", "SellerProduct", new { area = "Seller" })",
-                        { id: id },
-                        function (result) {
-                            if (result.success) {
-                                $("#productTable").DataTable().ajax.reload();
-                            }else {
-                                alert("儲存失敗：" + result.message);
-                            }
-                        });
-                }
+                $.ajax({
+                    url: "@Url.Action("DeleteJson", "SellerProduct", new { area = "Seller" })",
+                    type: "POST",
+                    data: { id: id },
+                    headers: {
+                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (result) {
+                        if (result.success) {
+                            $("#productTable").DataTable().ajax.reload();
+                        } else {
+                            alert("儲存失敗：" + result.message);
+                        }
+                    }
+                    });
+                }   // ← 關 if
             });
         });
     </script>
