@@ -207,8 +207,8 @@ namespace Bake.Controllers.api
             {
                 userName = user?.FullName??"匿名",
                 avatarUrl = !string.IsNullOrEmpty(user?.AvatarUrl)
-                    ? "/" + user.AvatarUrl
-                    : "/ProductPicture/NoImage.jpg",
+                ? (user.AvatarUrl.StartsWith("/") ? user.AvatarUrl : "/" + user.AvatarUrl)
+                : "/ProductPicture/NoImage.jpg",
                 content = comment.Content,
                 createdAt = DateTime.Now.ToString("yyyy/MM/dd HH:mm")
             });
