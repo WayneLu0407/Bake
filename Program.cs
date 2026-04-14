@@ -44,7 +44,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddSignalR();//聊天室注入
 
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>(); // 小鈴鐺通知注入
-
+builder.Services.AddHttpClient();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
