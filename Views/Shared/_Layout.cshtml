@@ -319,14 +319,6 @@
     </div>
     @* 以上是footer全站通用 *@
 
-    @* product 資料抽成一個共用 Promise，全頁只 fetch 一次。 *@
-    <script>
-        window.productPromise = fetch('/api/Product/Get').then(r => {
-            const ct = r.headers.get('content-type') || '';
-            if (!r.ok || !ct.includes('application/json')) return [];
-            return r.json();
-        });
-    </script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
 <!-- 補上 Toastr 通知視窗庫 (如果你有用 toastr) -->

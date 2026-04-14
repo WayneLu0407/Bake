@@ -133,7 +133,7 @@
                             <div class="tab-pane fade show active" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab">
                                 <div class="product-grid row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
                                     <!-- 單一商品 — 複製此區塊重複使用 -->
-                                    <div class="col" v-for="product in productsByRating.slice(0,10)" :key="product.productId">
+                                    <div class="col" v-for="product in productsByRating" :key="product.productId">
                                         <div class="product-item" value="rating">
                                             <span v-if="discountLabel(product.productDiscount)" class="badge bg-success position-absolute m-3">{{ discountLabel(product.productDiscount) }}</span>
                                             <a href="#" class="btn-wishlist" :class="{'is-active' : product.isFavorited}" @@click.prevent="toggleFavorite(product)">
@@ -183,127 +183,7 @@
                                         </div>
                                     </div>
                                     <!-- / 單一商品 -->
-
                                 </div>
-                                <!-- / product-grid -->
-
-                            </div>
-
-                            <div class="tab-pane fade" id="nav-fruits" role="tabpanel" aria-labelledby="nav-fruits-tab">
-
-                                <div class="product-grid row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
-                                    <!-- 單一商品 — 複製此區塊重複使用 -->
-                                    <div class="col" v-for="product in products.slice(0, 10)" :key="product.productId">
-                                        <div class="product-item">
-                                            <span v-if="discountLabel(product.productDiscount)" class="badge bg-success position-absolute m-3">{{ discountLabel(product.productDiscount) }}</span>
-                                            <a href="#" class="btn-wishlist" :class="{'is-active' : product.isFavorited}" @@click.prevent="toggleFavorite(product)">
-                                                 <iconify-icon :key="product.isFavorited" 
-                                                               :icon="product.isFavorited ? 'ph:heart-fill' : 'ph:heart'"
-                                                               :style="{ color: product.isFavorited ? '#ff4d4d' : 'inherit' }"
-                                                               width="24">
-                                                 </iconify-icon>
-                                            </a>
-                                            <figure class="mb-3">
-                                                <a :href="'Product/Details/'+product.productID" title="Product Title">
-                                                    <img :src="product.productImage" :alt="product.productName" class="tab-image">
-                                                </a>
-                                            </figure>
-                                            <h3>{{product.productName }}</h3>
-                                            <span class="qty">{{ product.shopName }}</span>
-                                            <span class="rating">
-                                                <iconify-icon icon="ph:star-fill" style="color:#FFC43F; font-size:16px; vertical-align:-2px;"></iconify-icon>
-                                                {{ product.productRating }}
-                                            </span>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <del v-if="salePrice(product.productPrice, product.productDiscount)" class="text-muted small">
-                                                    NT${{ product.productPrice }}
-                                                </del>
-                                                <span class="price">NT${{ salePrice(product.productPrice, product.productDiscount) || product.productPrice }}</span>
-
-                                            </div>
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div class="input-group product-qty">
-                                                                <span class="input-group-btn">
-                                                                    <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
-                                                                        <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
-                                                                    </button>
-                                                                </span>
-                                                                <input type="text" class="form-control input-number"
-                                                                       v-model.number="product.qty"
-                                                                       min="1" :max="product.productQuantity"
-                                                                       style="min-width: 40px !important; padding: 2px 4px !important; text-align: center;"
-                                                                @@change="product.qty = Math.min(product.productQuantity, Math.max(1, product.qty||1))">                                                                <span class="input-group-btn">
-                                                                    <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(product.productQuantity, product.qty + 1)">
-                                                                        <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
-                                                                    </button>
-                                                                </span>
-                                                </div>
-                                                <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- / 單一商品 -->
-                                </div>
-                                <!-- / product-grid -->
-
-                            </div>
-                            <div class="tab-pane fade" id="nav-juices" role="tabpanel" aria-labelledby="nav-juices-tab">
-
-                                <div class="product-grid row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5">
-
-                                    <!-- 單一商品 — 複製此區塊重複使用 -->
-                                    <div class="col" v-for="product in products.slice(0, 10)" :key="product.productId">
-                                        <div class="product-item">
-                                            <span v-if="discountLabel(product.productDiscount)" class="badge bg-success position-absolute m-3">{{ discountLabel(product.productDiscount) }}</span>
-                                            <a href="#" class="btn-wishlist" :class="{'is-active' : product.isFavorited}" @@click.prevent="toggleFavorite(product)">
-                                                 <iconify-icon :key="product.isFavorited" 
-                                                               :icon="product.isFavorited ? 'ph:heart-fill' : 'ph:heart'"
-                                                               :style="{ color: product.isFavorited ? '#ff4d4d' : 'inherit' }"
-                                                               width="24">
-                                                 </iconify-icon>
-                                            </a>
-                                            <figure class="mb-3">
-                                                <a :href="'/Products/Details/' + product.productId" title="Product Title">
-                                                    <img :src="product.productImage" :alt="product.productName" class="tab-image">
-                                                </a>
-                                            </figure>
-                                            <h3>{{product.productName }}</h3>
-                                            <span class="qty">{{ product.shopName }}</span>
-                                            <span class="rating">
-                                                <iconify-icon icon="ph:star-fill" style="color:#FFC43F; font-size:16px; vertical-align:-2px;"></iconify-icon>
-                                                {{ product.productRating }}
-                                            </span>
-                                            <div class="d-flex align-items-center gap-2">
-                                                <del v-if="salePrice(product.productPrice, product.productDiscount)" class="text-muted small">
-                                                    NT${{ product.productPrice }}
-                                                </del>
-                                                <span class="price">NT${{ salePrice(product.productPrice, product.productDiscount) || product.productPrice }}</span>
-
-                                            </div>
-                                            <div class="d-flex align-items-center justify-content-between">
-                                                <div class="input-group product-qty">
-                                                                <span class="input-group-btn">
-                                                                    <button type="button" class="quantity-left-minus btn btn-danger btn-number" @@click.prevent="product.qty = Math.max(1, product.qty - 1)">
-                                                                        <svg width="16" height="16"><use xlink:href="#minus"></use></svg>
-                                                                    </button>
-                                                                </span>
-                                                                <input type="text" class="form-control input-number"
-                                                                       v-model.number="product.qty"
-                                                                       min="1" :max="product.productQuantity"
-                                                                       style="min-width: 40px !important; padding: 2px 4px !important; text-align: center;"
-                                                            @@change="product.qty = Math.min(product.productQuantity, Math.max(1, product.qty||1))">                                                                <span class="input-group-btn">
-                                                                    <button type="button" class="quantity-right-plus btn btn-success btn-number" @@click.prevent="product.qty = Math.min(product.productQuantity, product.qty + 1)">
-                                                                        <svg width="16" height="16"><use xlink:href="#plus"></use></svg>
-                                                                    </button>
-                                                                </span>
-                                                </div>
-                                                <a href="#" class="btn btn-danger btn-sm w-20 mt-1" @@click.prevent="addCart(product)">加入購物車 <iconify-icon icon="uil:shopping-cart"></a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <!-- / 單一商品 -->
-                                </div>
-                                <!-- / product-grid -->
                             </div>
                         </div>
                     </div>
@@ -370,7 +250,7 @@
                         <div class="swiper-wrapper">
 
                             <!-- 單一商品 — 複製此區塊重複使用 -->
-                            <div class=" swiper-slide" v-for="product in productsByDate.slice(0, 10)" :key="product.productId">
+                            <div class=" swiper-slide" v-for="product in productsByDate" :key="product.productId">
                                 <div class="product-item">
                                     <span v-if="discountLabel(product.productDiscount)" class="badge bg-success position-absolute m-3">{{ discountLabel(product.productDiscount) }}</span>
                                     <a href="#" class="btn-wishlist" :class="{'is-active' : product.isFavorited}" @@click.prevent="toggleFavorite(product)">
@@ -454,7 +334,7 @@
                         <div class="swiper-wrapper">
 
                             <!-- 單一商品 — 複製此區塊重複使用 -->
-                            <div class="swiper-slide" v-for="product in productsByDiscount.slice(0, 10)" :key="product.productId">
+                            <div class="swiper-slide" v-for="product in productsByDiscount" :key="product.productId">
                                 <div class="product-item">
                                     <span v-if="discountLabel(product.productDiscount)" class="badge bg-success position-absolute m-3">{{ discountLabel(product.productDiscount) }}</span>
                                     <a href="#" class="btn-wishlist" :class="{'is-active' : product.isFavorited}" @@click.prevent="toggleFavorite(product)">
@@ -569,10 +449,10 @@
 
             data(){
                 return{
-                    products: [],
-                    product:{},
-                    sortBy: 'default',
                     shops:[],
+                    productsByRating:[],
+                    productsByDate: [],
+                    productsByDiscount: [],
                 }
             },
             methods: {
@@ -623,25 +503,19 @@
                     }
                 }
             },
-            computed:{
-
-                 productsByRating(){
-                 return [...this.products].sort((a,b)=> b.productRating - a.productRating)
-                 },
-                 productsByDate(){
-                 return [...this.products].sort((a,b)=> new Date(b.productDate) - new Date(a.productDate))
-                 },
-                 productsByDiscount(){
-                 return [...this.products].sort((a,b)=> b.productDiscount - a.productDiscount)
-                 }
-
-            },
             async mounted() {
 
-                const data = await window.productPromise
-                this.products = data.map(p => ({ ...p, qty: 1, isFavorited: p.isFavorited || false  }))  // +上 isFavorited 屬性
-                const sho = await fetch('/api/Shop/Get')
-                this.shops = await sho.json()
+                const[rated,newest,discounted,shopRes]= await Promise.all([
+                    fetch('/api/Product/TopRated?take=10').then(r=>r.json()),
+                    fetch('/api/Product/NewArrivals?take=10').then(r=>r.json()),
+                    fetch('/api/Product/TopDiscount?take=10').then(r=>r.json()),
+                    fetch('/api/Shop/Get').then(r=>r.json()),
+                ]);
+                this.productsByRating = rated.map(p=>({...p,qty:1,isFavorited: p.isFavorited || false}));
+                this.productsByDate = newest.map(p=>({...p,qty:1,isFavorited: p.isFavorited || false}));
+                this.productsByDiscount = discounted.map(p=>({...p,qty:1,isFavorited: p.isFavorited || false}));
+                this.shops = shopRes;
+
 
                 this.$nextTick(() => {
                 // 新品上市 — 銷毀再重建
@@ -714,17 +588,17 @@
     
 
     <script>
-                        // 檢查是否有來自後端的 SuccessMessage
-                        var successMsg = '@Html.Raw(TempData["SuccessMessage"])';
+        // 檢查是否有來自後端的 SuccessMessage
+        var successMsg = '@Html.Raw(TempData["SuccessMessage"])';
         
-                        if (successMsg && successMsg.trim() !== "") {
-                        Swal.fire({
-                        title: '註冊成功！',
-                        text: successMsg,
-                        icon: 'success',
-                        confirmButtonText: '確定',
-                        confirmButtonColor: '#3085d6' // 可根據您的主題調整顏色
-                        });
-                        }
+        if (successMsg && successMsg.trim() !== "") {
+        Swal.fire({
+        title: '註冊成功！',
+        text: successMsg,
+        icon: 'success',
+        confirmButtonText: '確定',
+        confirmButtonColor: '#3085d6' // 可根據您的主題調整顏色
+        });
+        }
     </script>
 }
