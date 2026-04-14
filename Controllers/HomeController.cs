@@ -28,13 +28,14 @@ public class HomeController : Controller
 {
     private readonly BakeContext _context;  //DI 注入
     private readonly IWebHostEnvironment _webHostEnvironment;
-    
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public HomeController(BakeContext context, IWebHostEnvironment webHostEnvironment)
+    public HomeController(BakeContext context, IWebHostEnvironment webHostEnvironment, IHttpClientFactory httpClientFactory)
     {
         _context = context;  //HomeController 建構子 DI注入  
         _webHostEnvironment = webHostEnvironment;
-        
+        _httpClientFactory = httpClientFactory;
+
     }
     
 
@@ -44,15 +45,36 @@ public class HomeController : Controller
     }
     //GET : /Home/ExchangeRate
     [HttpGet]
-    public async Task<string> ExchangeRate()
+    public async Task<IActionResult> ExchangeRate()
     {
-        HttpClient client = new HttpClient();
-        HttpResponseMessage response = await client.GetAsync("https://openapi.taifex.com.tw/v1/DailyForeignExchangeRates");
-        string Rates = await response.Content.ReadAsStringAsync();
-        exchangeRate[] arr = JsonSerializer.Deserialize<exchangeRate[]>(Rates);
-        return arr[arr.Length - 1].USDNTD;
-    }
+        try
+        {
+            HttpClient client = _httpClientFactory.CreateClient();
+            HttpResponseMessage response = await client.GetAsync(
+                "https://openapi.taifex.com.tw/v1/DailyForeignExchangeRates");
 
+            if (!response.IsSuccessStatusCode)
+            {
+                return StatusCode((int)response.StatusCode,
+                    $"外部 API 回傳: {response.StatusCode}");
+            }
+
+            string Rates = await response.Content.ReadAsStringAsync();
+            exchangeRate[]? arr = JsonSerializer.Deserialize<exchangeRate[]>(Rates);
+
+            // 防止空陣列或反序列化失敗
+            if (arr == null || arr.Length == 0)
+            {
+                return StatusCode(502, "外部 API 回傳資料為空");
+            }
+
+            return Ok(arr[arr.Length - 1].USDNTD);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"錯誤: {ex.Message}");
+        }
+    }
     public IActionResult Support()
     {
         return View();

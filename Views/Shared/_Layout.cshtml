@@ -534,10 +534,10 @@
     
     </script>
     <script>
-    var baseAddress = "/";
+    var baseAddress = "https://team1website-cze8h7ewahcdb5gm.westus3-01.azurewebsites.net/";
     $("#getUSD").on("click",async()=>{
         try{
-            var response = await fetch(`${baseAddress}Home/ExchangeRate`,{
+            var response = await fetch('/Home/ExchangeRate',{
                 method:"GET",
             });
             if(response.ok){
