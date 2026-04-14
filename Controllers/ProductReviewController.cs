@@ -10,6 +10,7 @@ using Bake.Models.Sales;
 using Bake.ViewModel;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Bake.Enum;
 
 namespace Bake.Controllers
 {
@@ -25,25 +26,6 @@ namespace Bake.Controllers
         private int CurrentUserId =>
             int.TryParse(User.FindFirstValue("UserId"), out var userId) ? userId : 0;
 
-        private async Task<string?> GetOwnedProductNameAsync(int userId, int orderId, int productId)
-        {
-            return await _context.OrderItems
-                .AsNoTracking()
-                .Where(oi => oi.OrderId == orderId
-                          && oi.ProductId == productId
-                          && oi.Order.UserId == userId)
-                .Select(oi => oi.Product.ProductName)
-                .FirstOrDefaultAsync();
-        }
-
-        private async Task<bool> HasReviewedAsync(int userId, int orderId, int productId)
-        {
-            return await _context.ProductReviews
-                .AsNoTracking()
-                .AnyAsync(r => r.UserId == userId
-                            && r.OrderId == orderId
-                            && r.ProductId == productId);
-        }
 
         //將平均值回寫入ProductRating 
         private async Task UpdateProductRatingAsync(int productId)
@@ -102,14 +84,20 @@ namespace Bake.Controllers
                 return Challenge();
             }
 
-            var productName = await GetOwnedProductNameAsync(CurrentUserId, orderId, productId);
-            if (productName == null)
+            var access = await GetReviewAccessAsync(CurrentUserId, orderId, productId);
+
+            if (!access.IsOwner)
             {
                 return Forbid();
             }
 
-            var alreadyReviewed = await HasReviewedAsync(CurrentUserId, orderId, productId);
-            if (alreadyReviewed)
+            if (!access.IsCompleted)
+            {
+                TempData["ReviewMessage"] = "只有已完成訂單才能評論";
+                return RedirectToAction("Orders", "Me", new { area = "Seller" });
+            }
+
+            if (access.HasReviewed)
             {
                 TempData["ReviewMessage"] = "你已經評論過這個商品囉！";
                 return RedirectToAction("Orders", "Me", new { area = "Seller" });
@@ -119,9 +107,14 @@ namespace Bake.Controllers
             {
                 ProductId = productId,
                 OrderId = orderId,
-                ProductName = productName,
+                ProductName = access.ProductName!,
                 UserRating = 5
             };
+
+            if (IsAjaxRequest())
+            {
+                return PartialView("_CreateFormPartial", vm);
+            }
 
             return View(vm);
         }
@@ -137,13 +130,20 @@ namespace Bake.Controllers
                 return Challenge();
             }
 
-            var productName = await GetOwnedProductNameAsync(CurrentUserId, vm.OrderId, vm.ProductId);
-            if (productName == null)
+            var access = await GetReviewAccessAsync(CurrentUserId, vm.OrderId, vm.ProductId);
+
+            if (!access.IsOwner)
             {
-                return Forbid();  //禁止存取
+                return Forbid();
             }
 
-            vm.ProductName = productName;
+            if (!access.IsCompleted)
+            {
+                TempData["ReviewMessage"] = "只有已完成訂單才能評論";
+                return RedirectToAction("Orders", "Me", new { area = "Seller" });
+            }
+
+            vm.ProductName = access.ProductName!;
 
             if (string.IsNullOrWhiteSpace(vm.Comment))
             {
@@ -155,8 +155,7 @@ namespace Bake.Controllers
                 return View(vm);
             }
 
-            var alreadyReviewed = await HasReviewedAsync(CurrentUserId, vm.OrderId, vm.ProductId);
-            if (alreadyReviewed)
+            if (access.HasReviewed)
             {
                 ModelState.AddModelError(string.Empty, "你已經評論過這個商品囉！");
                 return View(vm);
@@ -177,75 +176,79 @@ namespace Bake.Controllers
             await UpdateProductRatingAsync(vm.ProductId);
             await _context.SaveChangesAsync();
 
+            if (IsAjaxRequest())
+            {
+                return Json(new
+                {
+                    success = true,
+                    message = "評論成功！"
+                });
+            }
+
             TempData["ReviewMessage"] = "評論成功！";
             return RedirectToAction("Orders", "Me", new { area = "Seller" });
         }
 
-        /* 尚未用到
-        // GET: ProductReview/Edit/5
-        public async Task<IActionResult> Edit(int? id)
+        private async Task<string?> GetOwnedProductNameAsync(int userId, int orderId, int productId)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var productReview = await _context.ProductReviews.FindAsync(id);
-            if (productReview == null)
-            {
-                return NotFound();
-            }
-            ViewData["UserId"] = new SelectList(_context.UserProfiles, "UserId", "UserId", productReview.UserId);
-            return View(productReview);
+            return await _context.OrderItems
+                .AsNoTracking()
+                .Where(oi => oi.OrderId == orderId
+                          && oi.ProductId == productId
+                          && oi.Order.UserId == userId)
+                .Select(oi => oi.Product.ProductName)
+                .FirstOrDefaultAsync();
         }
 
-        // POST: ProductReview/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id,ProductReview productReview)  
+        private async Task<bool> HasReviewedAsync(int userId, int orderId, int productId)
         {
-            if (id != productReview.ReviewId)
-            {
-                return NotFound();
-            }
+            return await _context.ProductReviews
+                .AsNoTracking()
+                .AnyAsync(r => r.UserId == userId
+                            && r.OrderId == orderId
+                            && r.ProductId == productId);
+        }
 
-            if (ModelState.IsValid) 
-            {
-                try
+        //判斷訂單使用者/是否已結單Complete/是否評論過統整
+        private async Task<(bool IsOwner, bool IsCompleted, bool HasReviewed, string? ProductName)> GetReviewAccessAsync(int userId, int orderId, int productId)
+        {
+            var row = await _context.OrderItems
+                .AsNoTracking()
+                .Where(oi => oi.OrderId == orderId
+                          && oi.ProductId == productId
+                          && oi.Order.UserId == userId)
+                .Select(oi => new
                 {
-                    _context.Update(productReview);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!ProductReviewExists(productReview.ReviewId))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["UserId"] = new SelectList(_context.UserProfiles, "UserId", "UserId", productReview.UserId);
-            return View(productReview);
-        }
-        */
+                    oi.Product.ProductName,
+                    oi.Order.StatusId
+                })
+                .FirstOrDefaultAsync();
 
-        private bool ProductReviewExists(int id)
-        {
-            return _context.ProductReviews.Any(e => e.ReviewId == id);
+            if (row == null)
+            {
+                return (false, false, false, null);
+            }
+
+            var hasReviewed = await HasReviewedAsync(userId, orderId, productId);
+            var isCompleted = row.StatusId != (byte)OrderStatusEnum.Unpaid
+                       && row.StatusId != (byte)OrderStatusEnum.Cancelled;
+
+            return (true, isCompleted, hasReviewed, row.ProductName);
         }
+
+
+        private bool IsAjaxRequest()
+        {
+            return Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+        }
+
 
         [HttpGet]
         public async Task<IActionResult> Panel(int productId)
         {
             var reviews = await _context.ProductReviews
                 .AsNoTracking()
+                .Include(r=>r.User)
                 .Where(r => r.ProductId == productId)
                 .OrderByDescending(r => r.CreatedAt)
                 .ToListAsync();

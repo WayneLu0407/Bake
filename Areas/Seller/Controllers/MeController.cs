@@ -20,6 +20,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using Bake.Enum;
 using BuyerOrderListViewModel = Bake.Areas.Seller.ViewModels.BuyerOrderListViewModel;
 
 namespace Bake.Areas.Seller.Controllers
@@ -487,6 +488,7 @@ namespace Bake.Areas.Seller.Controllers
                     PaymentMethod = g.First().Order.PaymentMethod.Name,
                     CreatedAt = g.First().Order.CreatedAt,
                     StatusName = g.First().Order.Status.StatusName,
+                    StatusId = g.First().Order.StatusId,// 評論需要
                     ProductsList = g.First().Order.OrderItems.Select(oi => new Item
                     {
                         ProductId = oi.ProductId, // 評論需要
@@ -501,11 +503,10 @@ namespace Bake.Areas.Seller.Controllers
             {
                 foreach (var item in order.ProductsList)
                 {
-                    
-                    if (reviewedSet.Contains($"{order.OrderId}_{item.ProductId}"))
-                    {
-                        item.IsReviewed = true; 
-                    }
+                    item.IsReviewed = reviewedSet.Contains($"{order.OrderId}_{item.ProductId}");
+                    item.CanReview = order.StatusId != (byte)OrderStatusEnum.Unpaid     // 不是未付款
+                                  && order.StatusId != (byte)OrderStatusEnum.Cancelled  // 不是已取消
+                                  && !item.IsReviewed;                                  // 還沒評論
                 }
             }
 
