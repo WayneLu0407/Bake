@@ -777,6 +777,35 @@ namespace Bake.Controllers
             return RedirectToAction("PostDetail", new { id = PostId });
         }
 
+
+        //-------活動發起及編輯的時間驗證
+        [AcceptVerbs("Get", "Post")]
+        public IActionResult VerifySignupEndDate(DateTime signupEndDate, DateTime signupStartDate, DateTime eventDate)
+        {
+            if (signupEndDate < signupStartDate)
+            {
+                return Json("報名截止日不可早於報名開始日");
+            }
+
+            if (signupEndDate > eventDate)
+            {
+                return Json("報名截止日不可晚於活動日期");
+            }
+
+            return Json(true);
+        }
+
+        [AcceptVerbs("Get", "Post")]
+        public IActionResult VerifyEndTime(TimeSpan endTime, TimeSpan startTime)
+        {
+            if (endTime <= startTime)
+            {
+                return Json("結束時間必須晚於開始時間");
+            }
+
+            return Json(true);
+        }
+
         // ------ 申請參加活動方法(頭)
         private async Task<EventApplyViewModel?> BuildApplyViewModelAsync(int eventId)
         {

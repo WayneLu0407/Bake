@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
@@ -26,6 +26,7 @@ namespace Bake.ViewModel
 
         [Required(ErrorMessage = "請填寫結束時間")]
         [Display(Name = "結束時間")]
+        [Remote(action:"VerifyEndTime",controller:"Post",AdditionalFields =nameof(StartTime),ErrorMessage ="結束時間不可早於開始時間")]
         public TimeSpan EndTime { get; set; } = new(15, 0, 0);
 
         [Required(ErrorMessage = "請填寫活動縣市")]
@@ -66,6 +67,7 @@ namespace Bake.ViewModel
         [Required(ErrorMessage = "請填寫報名截止日")]
         [DataType(DataType.Date)]
         [Display(Name = "報名截止日")]
+        [Remote(action: "VerifySignupEndDate",controller: "Post",AdditionalFields = nameof(SignupStartDate) + "," + nameof(EventDate),ErrorMessage = "報名截止日期不可早於報名開始時間或晚於活動日期")]
         public DateTime SignupEndDate { get; set; } = DateTime.Today.AddDays(7);
 
         [Display(Name = "備註")]
