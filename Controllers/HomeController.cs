@@ -179,7 +179,7 @@ public class HomeController : Controller
                 //encrypt 加密
                 var encrypted = AesHelper.Encrypt(model.Email);
                 var encodedToken = System.Net.WebUtility.UrlEncode(encrypted);
-                var url = "https://localhost:7285/Home/Verifyemail?token=" + encodedToken;
+                var url = "https://team1website-cze8h7ewahcdb5gm.westus3-01.azurewebsites.net/Home/Verifyemail?token=" + encodedToken;
                 var sh = new SmtpHelper();
 
                 string filePath = Path.Combine(_webHostEnvironment.WebRootPath, "Email", "RegisterEmail.html");
@@ -254,7 +254,7 @@ public class HomeController : Controller
                 {
                 var encrypted = AesHelper.Encrypt(model.Email);
                 var encodedToken = System.Net.WebUtility.UrlEncode(encrypted);
-                var url = "https://localhost:7285/Home/ForgotPasswordVerifyEmail?token=" + encodedToken;
+                var url = "https://team1website-cze8h7ewahcdb5gm.westus3-01.azurewebsites.net/Home/ForgotPasswordVerifyEmail?token=" + encodedToken;
                 var sh = new SmtpHelper();
 
                 string filePath = Path.Combine(_webHostEnvironment.WebRootPath, "Email", "ForgotPasswordEmail.html");
