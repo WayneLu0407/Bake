@@ -264,6 +264,8 @@ public class HomeController : Controller
 
                 await sh.SendEmailAsync(model.Email, "更改密碼", body);
 
+                TempData["ForgotPasswordMessage"] = "請至Email信箱收取驗證信，驗證後更改密碼！";
+
                 return RedirectToAction("Index", "Home");
             }
         }
