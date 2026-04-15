@@ -163,3 +163,9 @@
 .hero-swiper:not(.swiper-initialized) .swiper-slide {
     width: 100%;
 }
+
+@media (max-width: 767px) {
+    .post-card .card-title {
+        -webkit-line-clamp: 1;
+    }
+}
