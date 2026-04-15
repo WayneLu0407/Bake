@@ -24,7 +24,7 @@ namespace Bake.Controllers.api
                 .Select(s => new {
                     userId = s.UserId,
                     shopName = s.ShopName,
-                    shopImg = s.ShopImg,
+                    shopImg = !string.IsNullOrEmpty(s.ShopImg) ? (s.ShopImg.StartsWith("/") ? s.ShopImg : "/" + s.ShopImg) : "/ProductPicture/NoImage.jpg",
                     shopRating = s.ShopRating,
                     shopTime = s.ShopTime,
                     shopDescription = s.ShopDescription,
@@ -44,7 +44,7 @@ namespace Bake.Controllers.api
                 .Select(s => new {
                     userId = s.UserId,
                     shopName = s.ShopName,
-                    shopImg = s.ShopImg,
+                    shopImg = !string.IsNullOrEmpty(s.ShopImg)?(s.ShopImg.StartsWith("/")?s.ShopImg:"/" + s.ShopImg):"/ProductPicture/NoImage.jpg",
                     shopRating = s.ShopRating,
                     shopTime = s.ShopTime,
                     shopDescription = s.ShopDescription,

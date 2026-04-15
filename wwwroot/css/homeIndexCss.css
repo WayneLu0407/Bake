@@ -47,3 +47,23 @@
     min-height: 420px;
     align-items: center;
 }
+/* 讓每張卡片等高 */
+.brand-carousel .swiper-wrapper {
+    align-items: stretch;
+}
+
+.brand-carousel .swiper-slide {
+    height: auto;
+}
+
+.brand-carousel .swiper-slide .card {
+    height: 100%;
+}
+
+/* 正方形圖片 + cover 置中 */
+.brand-carousel .shop-img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    object-position: center;
+}
