@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.CodeAnalysis.Options;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,7 @@ builder.Services.AddSession(Options => {
     Options.IOTimeout = TimeSpan.FromDays(10);
     Options.Cookie.IsEssential = true;
     Options.Cookie.HttpOnly = true;
+    Options.Cookie.SameSite = SameSiteMode.Lax;
     Options.Cookie.SecurePolicy = CookieSecurePolicy.Always;  //要求cookie必須透過HTTPS連線傳送
 });
 

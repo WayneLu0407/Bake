@@ -80,7 +80,7 @@
                     </div>
                     <div class="form-group">
                         <label asp-for="ProductImage" class="control-label"></label>
-                        <img src="~/ProductPicture/NoImage.jpg" style="height:320px; display:block; margin-bottom:15px;" />
+                        <img src="~/ProductPicture/NoImage.jpg" style="width:100%; display:block; margin-bottom:15px;" />
                         <input type="file" asp-for="ProductImage" class="form-control" accept="image/*" title="尚無內容" />
                         <span asp-validation-for="ProductImage" class="text-danger"></span>
                     </div>
@@ -220,7 +220,7 @@
             <!-- Modal Footer -->
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
-                <button type="button" class="btn btn-primary" id="btnSubmitFromPreview">確認新增</button>
+                <button type="button" class="btn btn-primary" id="btnSubmitFromPreview">確認</button>
             </div>
 
         </div>
