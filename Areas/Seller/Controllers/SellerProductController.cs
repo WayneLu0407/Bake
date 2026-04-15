@@ -46,6 +46,7 @@ namespace Bake.Areas.Seller.Controllers
 
         // Post: Products/IndexJson
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<JsonResult> AllJson()
         {
             var userId = GetCurrentUserId();
@@ -63,7 +64,7 @@ namespace Bake.Areas.Seller.Controllers
                     productDescription = p.ProductDescription,
                     productImage = p.ProductImage,
                     productPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : 0,
-                    productDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : 0,
+                    productDiscount = p.ProductDetail != null ? (int)((1-p.ProductDetail.ProductDiscount)*100) : 100,
                     productQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0,
                     productExpireDate = p.ProductDetail != null && p.ProductDetail.ExpireDate != null
                     ? p.ProductDetail.ExpireDate: null,
@@ -108,7 +109,7 @@ namespace Bake.Areas.Seller.Controllers
                 productImage = p.ProductImage,
                 productDescription = p.ProductDescription,
                 productPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : 0,
-                productDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : 0,
+                productDiscount = p.ProductDetail != null ? (int)((1 - p.ProductDetail.ProductDiscount) * 100) : 0,
                 productQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0,
                 productExpireDate = p.ProductDetail != null ? p.ProductDetail.ExpireDate : null,
                 ingredients = p.ProductIngredient != null ? p.ProductIngredient.Ingredients : null,
@@ -122,6 +123,7 @@ namespace Bake.Areas.Seller.Controllers
 
         // Modal 儲存用
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<JsonResult> EditJson(int ProductId, string ProductName, string? ProductDescription, decimal ProductPrice, int ProductQuantity, decimal ProductDiscount, int CategoryId, DateTime? ExpireDate, IFormFile? ProductImage, string? Ingredients, string? NetWeight, string? ShelfLifeNote)
         {
             try
@@ -152,7 +154,7 @@ namespace Bake.Areas.Seller.Controllers
                 if (product.ProductDetail != null)
                 {
                     product.ProductDetail.ProductPrice = ProductPrice;
-                    product.ProductDetail.ProductDiscount = ProductDiscount;
+                    product.ProductDetail.ProductDiscount = (100 - ProductDiscount) / 100m;
                     product.ProductDetail.ProductQuantity = ProductQuantity;
                     product.ProductDetail.ExpireDate = ExpireDate;
                 }
@@ -202,25 +204,39 @@ namespace Bake.Areas.Seller.Controllers
 
         // AJAX 刪除用
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<JsonResult> DeleteJson(int id)
         {
             var userId = GetCurrentUserId();
             var product = await _context.Products
                 .Where(p => p.UserId == userId)
                 .Include(p => p.ProductDetail)  // ← 一起載入
+                .Include(p => p.ProductIngredient)  // ← 一起載入
                 .FirstOrDefaultAsync(p => p.ProductId == id);
 
-            if (product != null)
+            bool hasOrder = await _context.OrderItems.AnyAsync(o=>o.ProductId == id);
+
+            if (product==null)
             {
-                if (product.ProductDetail != null)
-                {
-                    _context.Remove(product.ProductDetail);  // ← 先刪 Detail
-                }
-                _context.Products.Remove(product);
-                await _context.SaveChangesAsync();
-                return Json(new { success = true });
+                return Json(new { success = false, message = "找不到商品" });
             }
-            return Json(new { success = false, message = "找不到商品" });
+            if (hasOrder)
+            {
+                return Json(new { success = false, message = "此商品已有訂單無法刪除" });
+            }
+
+            if (product.ProductDetail != null)
+            {
+                _context.Remove(product.ProductDetail);  // ← 先刪 Detail
+            }
+
+            if (product.ProductIngredient != null)
+            {
+                _context.Remove(product.ProductIngredient);  
+            }
+            _context.Products.Remove(product);
+            await _context.SaveChangesAsync();
+            return Json(new { success = true });
         }
 
 
@@ -272,7 +288,7 @@ namespace Bake.Areas.Seller.Controllers
                 var detail = new ProductDetail
                 {
                     ProductPrice = item.ProductPrice,
-                    ProductDiscount = item.ProductDiscount,
+                    ProductDiscount = (100-item.ProductDiscount.GetValueOrDefault(0)) / 100m,
                     ProductQuantity = item.ProductQuantity,
                     ExpireDate = item.ExpireDate,
                 };
@@ -334,7 +350,7 @@ namespace Bake.Areas.Seller.Controllers
                     ProductDescription = p.ProductDescription != null ? p.ProductDescription : null,
                     ProductImagePath = p.ProductImage,
                     ProductPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : 0,
-                    ProductDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : 0,
+                    ProductDiscount = p.ProductDetail != null ? (int)((1 - p.ProductDetail.ProductDiscount) * 100) : 0,
                     ProductQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0,
                     ExpireDate = p.ProductDetail != null && p.ProductDetail.ExpireDate != null
                          ? p.ProductDetail.ExpireDate.Value
@@ -382,7 +398,7 @@ namespace Bake.Areas.Seller.Controllers
                 if (product.ProductDetail != null)
                 {
                     product.ProductDetail.ProductPrice = item.ProductPrice;
-                    product.ProductDetail.ProductDiscount = item.ProductDiscount;
+                    product.ProductDetail.ProductDiscount = (100 - item.ProductDiscount.GetValueOrDefault(0)) / 100m;
                     product.ProductDetail.ProductQuantity = item.ProductQuantity;
                 }
 

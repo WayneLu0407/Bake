@@ -13,7 +13,6 @@
 <!--                      頁面主體                                 -->
 <!-- ============================================================ -->
 <div class="container-fluid py-4">
-    @Html.AntiForgeryToken()
     <div class="row g-4">
 
         @* 訊息 *@
@@ -36,14 +35,19 @@
                     <!-- 標題 -->
                     @if (Model.IsActivity)
                     {
-                        <h4 class="fw-bold mb-3">@Model.EventDetail.EventTime.ToString("yyyy/M/d (ddd) tt h:mm")
-        -@Model.EventDetail.EventEndTime.ToString("h:mm") ｜ 「@Model.Title」</h4>
+                        <h4 class="fw-bold mb-3">
+                            @Model.EventDetail.EventTime.ToString("yyyy/M/d (ddd) HH:mm")
+                            -@Model.EventDetail.EventEndTime.ToString("HH:mm") ｜ 「@Model.Title」
+                        </h4>
                     }
                     else
                     {
                         <h4 class="fw-bold mb-3">「@Model.Title」</h4>
                     }
-
+                    @if (Model.IsActivity && Model.EventDetail.EventTime < DateTime.Now)
+                    {
+                        <span class="badge bg-primary fs-6 mb-3">此活動已結束</span>
+                    }
                     @*---     活動發起者專用的狀態顯示   --- *@
                     @if (Model.IsActivity && !Model.IsPublished && Model.IsOwner)
                     {
@@ -87,64 +91,44 @@
 
                 </div>
 
-                <!-- 讚 / 收藏 / 分享 -->
+                <!-- 讚 / 收藏 -->
                 <div class="action-bar">
                     <button class="action-bar__btn" id="btn-like" data-id="@Model.PostId">
                         <i class="@(Model.IsLiked ? "fa-solid" : "fa-regular") fa-thumbs-up"></i> 
                         <span class="text">@(Model.IsLiked ? "已按讚" : "讚")</span>
                     </button>
                     <button class="action-bar__btn" id="btn-favorite" data-id="@Model.PostId">
-                        <i class="@(Model.IsFavorited ? "fa-solid" : "fa-heart")"></i> 
+                        <i class="@(Model.IsFavorited ? "fa-solid" : "fa-regular") fa-heart"></i>
                         <span class="text">@(Model.IsFavorited ? "已收藏" : "收藏")</span>
-                    </button>
-                    <button class="action-bar__btn">
-                        <i class="fa-regular fa-share-from-square"></i> 分享
                     </button>
                 </div>
             </div>
 
             <!-- ===== 留言區（僅貼文顯示）===== -->
-            @if (!Model.IsActivity)
-            {       
-                <div class="detail-card mt-4 p-4 comment-box">
-                    <h5 class="fw-bold mb-3">留言</h5> 
-                    @if (User.Identity?.IsAuthenticated == true)
-                    {
-                        <form asp-controller="Post" asp-action="AddComment" method="post">
-                            <input type="hidden" name="PostId" value="@Model.PostId" />
-                            <textarea class="form-control" name="Content" rows="4" placeholder="分享你的想法..."required></textarea>
+            <div class="detail-card mt-4 p-4 comment-box" id="comment-app" v-cloak data-authenticated="@User.Identity.IsAuthenticated.ToString().ToLower()">
+                <h5 class="fw-bold mb-3">留言</h5>
+                    <template v-if="isLogin">
+                        <textarea class="form-control" v-model="content" rows="4" placeholder="分享你的想法..."></textarea>
                             <div class="d-flex justify-content-end mt-3">
-                                <button type="submit" class="btn btn-primary px-4 fw-bold">發表留言</button>
+                                <button class="btn btn-primary px-4 fw-bold" @@click="addComment" :disabled="!content.trim()">發表留言</button>
                             </div>
-                        </form>
-                    
-                     }
-                    else
-                    {
+                        </template>
+                    <template v-else>
                         <p class="text-muted">請先 <a asp-controller="Home" asp-action="Login">登入</a> 才能留言</p>
-                    }
-                    <!-- 顯示已有的留言 -->
-                    @foreach (var c in Model.Comments)
-                    {
-                    <div class="d-flex gap-3 mt-4 pt-3 border-top">
-                        <img src="@(c.AvatarUrl ?? "/images/default-avatar.png")"
-                                class="rounded-circle" style="width:40px; height:40px; object-fit:cover;" />
-                        <div>
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="fw-bold small">@c.UserName</span>
-                                <span class="text-muted small">@c.CreatedAt?.ToString("yyyy/MM/dd HH:mm")</span>
-                            </div>
-                            <p class="mb-0 mt-1">@c.Content</p>
+                    </template>
+                <!-- 顯示已有的留言 -->
+                <div v-for="c in comments" :key="c.createdAt" class="d-flex gap-3 mt-4 pt-3 border-top">
+                    <img :src="c.avatarUrl + '?v=' + Date.now()" class="rounded-circle" style="width:40px; height:40px; object-fit:cover;" />
+                    <div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="fw-bold small">{{c.userName}}</span>
+                            <span class="text-muted small">{{c.createdAt}}</span>
                         </div>
+                        <p class="mb-0 mt-1">{{c.content}}</p>
                     </div>
-                    }
-
-                    @if (Model.Comments.Count == 0)
-                    {
-                        <p class="text-muted mt-3">還沒有留言，成為第一個留言的人吧！</p>
-                    }    
                 </div>
-        }
+                    <p v-if="comments.length===0" class="text-muted mt-3">還沒有留言，成為第一個留言的人吧！</p>
+            </div>
         </div>
         <!-- ==================== 右欄：側邊欄 ==================== -->
         <div class="col-lg-4">
@@ -209,7 +193,6 @@
                                   asp-route-postId="@Model.PostId"
                                   method="post"
                                   onsubmit="return confirm('確認要下架這個活動嗎？下架後前台列表將不再顯示。');">
-                                @Html.AntiForgeryToken()
                                 <button type="submit" class="btn-cta-outline">下架活動</button>
                             </form>
                         }
@@ -218,7 +201,7 @@
                             <div class="btn-cta-secondary text-center">活動已下架</div>
                         }
                     }
-                    else if (Model.IsPublished)
+                    else if (Model.IsPublished && Model.EventDetail.EventTime > DateTime.Now)
                     {
                         @if (Model.IsCurrentUserRegistered)
                         {
@@ -231,7 +214,6 @@
                                       asp-route-eventId="@Model.EventDetail.EventId"
                                       method="post"
                                       onsubmit="return confirm('確認要取消報名嗎？');">
-                                    @Html.AntiForgeryToken()
                                     <button type="submit" class="btn-cta-primary">取消報名</button>
                                 </form>
                             }
@@ -241,7 +223,6 @@
                             <a href="/apply/@Model.EventDetail.EventId" class="btn-cta-primary">我要報名</a>
                         }
                         <div>
-                            <h6 class="fw-bold mb-2">我要詢問</h6>
                             <a href="@Url.Action("StartChat", "Chat", new { targetId = Model.Author.UserId })" class="btn-cta-outline">私訊主辦人</a>
                         </div>
                     }
@@ -368,6 +349,39 @@
                 });
             }
         });
+    </script>
+    <script>
+        var app=Vue.createApp({
+            data(){
+                return{
+                    content:'',
+                    comments:[],
+                    postId:@Model.PostId,
+                    isLogin: document.getElementById('comment-app').dataset.authenticated === 'true'
+                }
+            },
+            async mounted(){
+                const res= await fetch(`/api/PostApi/GetComments?postId=${this.postId}`);
+                this.comments=await res.json();
+            },
+            methods:{
+                async addComment(){
+                    if(!this.content.trim())return;
+                    const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                    const res = await fetch("/api/PostApi/AddComment",{
+                     method:"POST",
+                     headers:{"Content-Type": "application/json",
+                     "RequestVerificationToken": token
+                     },
+                     body:JSON.stringify({postId:this.postId, content:this.content})
+                    });
+                    if(!res.ok)return alert("留言失敗");
+                    const data = await res.json();
+                    this.comments.push(data);
+                    this.content='';
+                }
+            }
+        }).mount("#comment-app");
     </script>
 }
 

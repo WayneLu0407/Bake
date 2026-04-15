@@ -10,19 +10,19 @@ public partial class UserProfile
 {
     public int UserId { get; set; }
 
-    public string FullName { get; set; } = null!;
+    public string? FullName { get; set; }
 
-    public string Persona { get; set; } = null!;
+    public string? Persona { get; set; }
 
-    public string AvatarUrl { get; set; } = null!;
+    public string? AvatarUrl { get; set; } 
 
     public string? Bio { get; set; }
 
-    public string UserPhone { get; set; } = null!;
+    public string? UserPhone { get; set; }
 
-    public byte UserGender { get; set; }
+    public byte? UserGender { get; set; }
 
-    public DateTime UserBirthdate { get; set; }
+    public DateTime? UserBirthdate { get; set; }
 
     public virtual ICollection<Cart> Carts { get; set; } = new List<Cart>();
 

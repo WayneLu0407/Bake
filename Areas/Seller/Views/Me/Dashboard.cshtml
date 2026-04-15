@@ -4,17 +4,13 @@
 }
 @{
     ViewBag.Title = "會員資料";
-
+    
     // 替代圖片
     string avatarUrl = !string.IsNullOrWhiteSpace(Model.AvatarUrl)
     ? (Model.AvatarUrl.StartsWith("http", StringComparison.OrdinalIgnoreCase)
         ? Model.AvatarUrl
         : Url.Content("~/" + Model.AvatarUrl.TrimStart('/')))
     : Url.Content("~/seller_assets/images/profile/NoImage.png");
-
-    // string profileTitle = !string.IsNullOrWhiteSpace(Model.Persona)
-    //     ? Model.Persona
-    //     : Model.RoleName;
 
     string aboutText = !string.IsNullOrWhiteSpace(Model.Bio)
         ? Model.Bio
@@ -41,12 +37,12 @@
                     <div class="profile-wrapper mb-30">
                         <div class="profile-cover">
                             <img src="~/seller_assets/images/profile/profile-cover.jpg" alt="cover-image" />
-                            <div class="update-image">
+                            @* <div class="update-image">
                                 <input type="file" />
                                 <label for="">
                                     <i class="lni lni-camera"></i> 編輯背景圖片
                                 </label>
-                            </div>
+                            </div> *@
                         </div>
                         <div class="d-md-flex">
                             <div class="profile-photo">
@@ -68,13 +64,13 @@
                             <div class="profiles-activities w-100 pt-30">
                                 <ul class="d-flex align-items-center">
                                     <li class="mr-30">
-                                        <p><strong>234</strong><br></>貼文</p>
+                                        <p><strong>@Model.PostCount</strong><br></>貼文</p>
                                     </li>
                                     <li class="mr-30">
-                                        <p><strong>34K</strong><br></>粉絲</p>
+                                        <p><strong>@Model.FollowersCount</strong><br></>粉絲</p>
                                     </li>
                                     <li class="mr-30">
-                                        <p><strong>4K</strong><br></>關注</p>
+                                        <p><strong>@Model.FollowingCount</strong><br></>關注</p>
                                     </li>
                                     @* <li class="mr-30">
                                         <p><strong>@Model.PostCount</strong><br />貼文</p>
@@ -119,7 +115,7 @@
                                 @* <a href="#0" class="text-medium text-dark">[Read More]</a> *@
                             </p>
 
-                            <ul class="socials">
+                            @* <ul class="socials">  //要做再加回來
                                 <li>
                                     <a href="#0"><i class="lni lni-facebook-fill"></i></a>
                                 </li>
@@ -132,696 +128,150 @@
                                 <li>
                                     <a href="#0"><i class="lni lni-behance-original"></i></a>
                                 </li>
-                            </ul>
+                            </ul> *@
                         </div>
                     </div>
                     <!-- end card -->
-                <!-- ===== 貼文（Swiper） ===== -->
-                <div class="card-style mb-30">
-                    <div class="title d-flex align-items-center justify-content-between flex-wrap">
-                        <h6 class="mb-20">貼文</h6>
-                        <div class="d-flex align-items-center mb-20">
-                            <button class="swiper-prev posts-prev btn btn-sm">❮</button>
-                            <button class="swiper-next posts-next btn btn-sm">❯</button>
-                            <a href="#0" class="main-btn btn-sm primary-btn btn-hover ms-2">
-                                <i class="lni lni-plus mr-10"></i> 新增貼文
-                            </a>
-                        </div>
-                    </div>
-                    <div class="swiper posts-carousel overflow-hidden">
-                        <div class="swiper-wrapper">
-                            <!-- swiper-slide 1 (之後用 foreach 動態產生) -->
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- swiper-slide 2 -->
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- swiper-slide 3 -->
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- swiper-slide 4 -->
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- swiper-slide 5 -->
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- swiper-slide 6 -->
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
+                    <div class="card-style mb-30">
+                        <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                            <h6 class="mb-20">我的貼文</h6>
+                            <div class="d-flex align-items-center mb-20">
+                                <button class="swiper-prev posts-prev btn btn-sm">❮</button>
+                                <button class="swiper-next posts-next btn btn-sm">❯</button>
                             </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- ===== 發起的活動（Swiper） ===== -->
-                <div class="card-style mb-30">
-                    <div class="title d-flex align-items-center justify-content-between flex-wrap">
-                        <h6 class="mb-20">發起的活動</h6>
-                        <div class="d-flex align-items-center mb-20">
-                            <button class="swiper-prev initiated-prev btn btn-sm">❮</button>
-                            <button class="swiper-next initiated-next btn btn-sm">❯</button>
-                            <a href="#0" class="main-btn btn-sm primary-btn btn-hover ms-2">
-                                <i class="lni lni-plus mr-10"></i> 新增活動
-                            </a>
-                        </div>
+                        @if (Model.MyPosts.Any())
+                        {
+                            <div class="swiper posts-carousel overflow-hidden">
+                                <div class="swiper-wrapper">
+                                    @foreach (var item in Model.MyPosts)
+                                    {
+                                        <partial name="_DashboardPostCardPartial" model="item" />
+                                    }
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-history-block">
+                                目前還沒有貼文
+                            </div>
+                        }
                     </div>
-                    <div class="swiper initiated-carousel overflow-hidden">
-                        <div class="swiper-wrapper">
-                            <!-- swiper-slide 1 (之後用 foreach 動態產生) -->
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- swiper-slide 2 -->
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- swiper-slide 3 -->
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- swiper-slide 4 -->
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
+                    <div class="card-style mb-30">
+                        <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                            <h6 class="mb-20">發起的活動</h6>
+                            <div class="d-flex align-items-center mb-20">
+                                <button class="swiper-prev initiated-prev btn btn-sm">❮</button>
+                                <button class="swiper-next initiated-next btn btn-sm">❯</button>
+                            </div>
                         </div>
-                    </div>
-                </div>
 
-                <!-- ===== 發起過的活動（Swiper） ===== -->
-                <div class="card-style mb-30">
-                    <div class="title d-flex align-items-center justify-content-between flex-wrap">
-                        <h6 class="mb-20">發起過的活動</h6>
-                        <div class="d-flex align-items-center mb-20">
-                            <button class="swiper-prev past-initiated-prev btn btn-sm">❮</button>
-                            <button class="swiper-next past-initiated-next btn btn-sm">❯</button>
-                        </div>
+                        @if (Model.ActiveHostedEvents.Any())
+                        {
+                            <div class="swiper initiated-carousel overflow-hidden">
+                                <div class="swiper-wrapper">
+                                    @foreach (var item in Model.ActiveHostedEvents)
+                                    {
+                                        <partial name="_DashboardEventCardPartial" model="item" />
+                                    }
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-history-block">
+                                目前沒有進行中的活動
+                            </div>
+                        }
                     </div>
-                    <div class="swiper past-initiated-carousel overflow-hidden">
-                        <div class="swiper-wrapper">
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- ===== 參加中的活動（Swiper） ===== -->
+                    <div class="card-style mb-30">
+                        <div class="title d-flex align-items-center justify-content-between flex-wrap">
+                            <h6 class="mb-20">發起過的活動</h6>
+                            <div class="d-flex align-items-center mb-20">
+                                <button class="swiper-prev past-initiated-prev btn btn-sm">❮</button>
+                                <button class="swiper-next past-initiated-next btn btn-sm">❯</button>
+                            </div>
+                        </div>
+
+                        @if (Model.PastHostedEvents.Any())
+                        {
+                            <div class="swiper past-initiated-carousel overflow-hidden">
+                                <div class="swiper-wrapper">
+                                    @foreach (var item in Model.PastHostedEvents)
+                                    {
+                                        <partial name="_DashboardEventCardPartial" model="item" />
+                                    }
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="empty-history-block">
+                                目前沒有歷史活動
+                            </div>
+                        }
+                    </div>
+
                 <div class="card-style mb-30">
                     <div class="title d-flex align-items-center justify-content-between flex-wrap">
                         <h6 class="mb-20">參加中的活動</h6>
                         <div class="d-flex align-items-center mb-20">
-                            <button class="swiper-prev joining-prev btn btn-sm">❮</button>
-                            <button class="swiper-next joining-next btn btn-sm">❯</button>
+                            <button class="swiper-prev initiated-prev btn btn-sm">❮</button>
+                            <button class="swiper-next initiated-next btn btn-sm">❯</button>
                         </div>
                     </div>
-                    <div class="swiper joining-carousel overflow-hidden">
-                        <div class="swiper-wrapper">
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
+
+                    @if (Model.ActiveEvents.Any())
+                    {
+                        <div class="swiper initiated-carousel overflow-hidden">
+                            <div class="swiper-wrapper">
+                                @foreach (var item in Model.ActiveEvents)
+                                {
+                                    <partial name="_DashboardEventCardPartial" model="item" />
+                                }
                             </div>
                         </div>
-                    </div>
+                    }
+                    else
+                    {
+                        <div class="empty-history-block">
+                            目前沒有參加中的活動
+                        </div>
+                    }
                 </div>
 
-                <!-- ===== 參加過的活動（Swiper） ===== -->
                 <div class="card-style mb-30">
                     <div class="title d-flex align-items-center justify-content-between flex-wrap">
-                        <h6 class="mb-20">參加過的活動</h6>
+                        <h6 class="mb-20">曾參加過的活動</h6>
                         <div class="d-flex align-items-center mb-20">
-                            <button class="swiper-prev past-joined-prev btn btn-sm">❮</button>
-                            <button class="swiper-next past-joined-next btn btn-sm">❯</button>
+                            <button class="swiper-prev initiated-prev btn btn-sm">❮</button>
+                            <button class="swiper-next initiated-next btn btn-sm">❯</button>
                         </div>
                     </div>
-                    <div class="swiper past-joined-carousel overflow-hidden">
-                        <div class="swiper-wrapper">
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-1.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="swiper-slide">
-                                <div class="card-style-6 mb-30">
-                                    <div class="card-meta mb-25">
-                                        <div class="d-flex align-items-center flex-wrap mb-10">
-                                            <h5 class="text-bold mr-20">
-                                                <a href="#0" class="title">EcommaerceHTML</a>
-                                            </h5>
-                                            <span>11 Jun, 2022</span>
-                                        </div>
-                                    </div>
-                                    <div class="card-image">
-                                        <a href="#0">
-                                            <img src="~/seller_assets/images/cards/card-style-6/card-2.jpg" alt="" />
-                                        </a>
-                                    </div>
-                                    <div class="card-action">
-                                        <div class="action mr-20">
-                                            <button><i class="lni lni-thumbs-up"></i></button>
-                                            <a href="#0">434 Like</a>
-                                        </div>
-                                        <div class="action">
-                                            <button><i class="lni lni-comments"></i></button>
-                                            <a href="#0">43 Comments</a>
-                                        </div>
-                                    </div>
-                                </div>
+
+                    @if (Model.PastActiveEvents.Any())
+                    {
+                        <div class="swiper initiated-carousel overflow-hidden">
+                            <div class="swiper-wrapper">
+                                @foreach (var item in Model.PastActiveEvents)
+                                {
+                                    <partial name="_DashboardEventCardPartial" model="item" />
+                                }
                             </div>
                         </div>
-                    </div>
+                    }
+                    else
+                    {
+                        <div class="empty-history-block">
+                            目前沒有曾參加過的活動
+                        </div>
+                    }
                 </div>
-            </div>
+
             <!-- end col -->
         </div>
     </div>
@@ -863,8 +313,23 @@
                             <div class="col-md-8">
 
                                 <div class="mb-3">
-                                    <label class="form-label">顯示名稱</label>
+                                    <label class="form-label">姓名</label>
                                     <input type="text" id="editFullName" name="FullName" class="form-control" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">暱稱</label>
+                                    <input type="text" id="editPersona" name="Persona" class="form-control" />
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">性別</label>
+                                    <select class="form-select" id="editGender" name="Gender" >
+                                        <option class="form-options" value="0">男</option>
+                                        <option class="form-options" value="1">女</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">電話</label>
+                                    <input type="text" id="editPhone" name="Phone" class="form-control" />
                                 </div>
 
                                 <div class="mb-3">
@@ -887,6 +352,54 @@
 <!-- modal的JS資料弄進去 -->
 
 @section Scripts {
+    
+	<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    @if (TempData["SettingMessage"] != null)
+    {
+	    <script>
+		    Swal.fire({
+		    icon: "success",
+		    title: '@Html.Raw(TempData["SettingMessage"])',
+		    showConfirmButton: false,
+		    timer: 1500
+		    });
+	    </script>			
+    }
+    @if (TempData["SellerMessage"] != null)
+    {
+	    <script>
+		    Swal.fire({
+		    icon: "success",
+		    title: '@Html.Raw(TempData["SellerMessage"])',
+		    showConfirmButton: false,
+		    timer: 1500
+		    });
+	    </script>			
+    }
+    @if (TempData["BankAccountChangeMessage"] != null)
+    {
+	    <script>
+		    Swal.fire({
+		    icon: "success",
+		    title: '@Html.Raw(TempData["BankAccountChangeMessage"])',
+		    showConfirmButton: false,
+		    timer: 1500
+		    });
+	    </script>			
+    }
+        @if (TempData["ProfileMessage"] != null)
+        {
+            <script>
+                Swal.fire({
+                icon: "success",
+                title: '@Html.Raw(TempData["ProfileMessage"])',
+                showConfirmButton: false,
+                timer: 1500
+                });
+            </script>
+        }
+
+    
     <script>
         $(function () {
 
@@ -901,11 +414,9 @@
                 };
 
                 const configs = [
-                    { sel: '.posts-carousel',          prev: '.posts-prev',          next: '.posts-next' },        // 新增
+                    { sel: '.posts-carousel',          prev: '.posts-prev',          next: '.posts-next' },
                     { sel: '.initiated-carousel',      prev: '.initiated-prev',      next: '.initiated-next' },
                     { sel: '.past-initiated-carousel', prev: '.past-initiated-prev', next: '.past-initiated-next' },
-                    { sel: '.joining-carousel',        prev: '.joining-prev',        next: '.joining-next' },
-                    { sel: '.past-joined-carousel',    prev: '.past-joined-prev',    next: '.past-joined-next' },
                 ];
 
                 configs.forEach(function (cfg) {
@@ -940,6 +451,9 @@
                     const data = res.data;
 
                     $("#editFullName").val(data.fullName);
+                    $("#editGender").val(data.gender);
+                    $("#editPhone").val(data.phone);
+                    $("#editPersona").val(data.persona);
                     $("#editBio").val(data.bio);
                     $("#editAvatarPreview").attr("src", data.avatarUrl);
                     $("#editAvatarFile").val("");

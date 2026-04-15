@@ -26,6 +26,112 @@ namespace Bake.Controllers.api
             return int.Parse(userId);
         }
 
+        // 熱門商品 → /api/Product/TopRated?take=10
+        [HttpGet]
+        [ResponseCache(Duration = 60)]
+        public IActionResult TopRated(int take=10) 
+        {
+            var userId = CurrentUserId();
+
+            var favSet = userId != null
+                ? _db.FavoriteProducts
+                    .Where(f => f.UserId == userId.Value)
+                    .Select(f=>f.ProductId)
+                    .ToHashSet()
+                : new HashSet<int>();
+
+            var prod = _db.Products
+                .Where(p => p.User.Shop != null && p.User.Shop.StatusId == 0)
+                .OrderByDescending(p => p.ProductRating)
+                .Take(take)
+                .Select(p => new {
+                        productId = p.ProductId,
+                        userId = p.UserId,
+                        productName = p.ProductName,
+                        productImage = p.ProductImage,
+                        productRating = p.ProductRating,
+                        productDate = p.ProductDate,
+                        categoryId = p.CategoryId,
+                        productQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0,
+                        productPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : (decimal?)null,
+                        productDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : (decimal?)null,
+                        shopName = p.User.Shop != null ? p.User.Shop.ShopName : "未知店家",
+                        isFavorited = favSet.Contains(p.ProductId)
+                    })
+                .ToList();
+            return Ok(prod);
+        }
+        // 新商品 → /api/Product/NewArrivals?take=10
+        [HttpGet]
+        [ResponseCache(Duration = 60)]
+        public IActionResult NewArrivals(int take = 10)
+        {
+            var userId = CurrentUserId();
+
+            var favSet = userId != null
+                ? _db.FavoriteProducts
+                    .Where(f => f.UserId == userId.Value)
+                    .Select(f => f.ProductId)
+                    .ToHashSet()
+                : new HashSet<int>();
+
+            var prod = _db.Products
+                .Where(p => p.User.Shop != null && p.User.Shop.StatusId == 0)
+                .OrderByDescending(p => p.ProductDate)
+                .Take(take)
+                .Select(p => new {
+                    productId = p.ProductId,
+                    userId = p.UserId,
+                    productName = p.ProductName,
+                    productImage = p.ProductImage,
+                    productRating = p.ProductRating,
+                    productDate = p.ProductDate,
+                    categoryId = p.CategoryId,
+                    productQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0,
+                    productPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : (decimal?)null,
+                    productDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : (decimal?)null,
+                    shopName = p.User.Shop != null ? p.User.Shop.ShopName : "未知店家",
+                    isFavorited = favSet.Contains(p.ProductId)
+                })
+                .ToList();
+            return Ok(prod);
+        }
+        // 最高折扣商品 → /api/Product/TopDiscount?take=10
+        [HttpGet]
+        [ResponseCache(Duration = 60)]
+        public IActionResult TopDiscount(int take = 10)
+        {
+            var userId = CurrentUserId();
+
+            var favSet = userId != null
+                ? _db.FavoriteProducts
+                    .Where(f => f.UserId == userId.Value)
+                    .Select(f => f.ProductId)
+                    .ToHashSet()
+                : new HashSet<int>();
+
+            var prod = _db.Products
+                .Where(p => p.User.Shop != null && p.User.Shop.StatusId == 0)
+                .OrderByDescending(p => p.ProductDetail.ProductDiscount)
+                .Take(take)
+                .Select(p => new {
+                    productId = p.ProductId,
+                    userId = p.UserId,
+                    productName = p.ProductName,
+                    productImage = p.ProductImage,
+                    productRating = p.ProductRating,
+                    productDate = p.ProductDate,
+                    categoryId = p.CategoryId,
+                    productQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0,
+                    productPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : (decimal?)null,
+                    productDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : (decimal?)null,
+                    shopName = p.User.Shop != null ? p.User.Shop.ShopName : "未知店家",
+                    isFavorited = favSet.Contains(p.ProductId)
+                })
+                .ToList();
+            return Ok(prod);
+        }
+
         // 取全部商品 → /api/Product/Get
         [HttpGet]
         public IActionResult Get()
@@ -45,6 +151,7 @@ namespace Bake.Controllers.api
                     productRating = p.ProductRating,
                     productDate = p.ProductDate,
                     categoryId = p.CategoryId,
+                    productQuantity = p.ProductDetail != null ? p.ProductDetail.ProductQuantity : 0,
                     productPrice = p.ProductDetail != null ? p.ProductDetail.ProductPrice : (decimal?)null,
                     productDiscount = p.ProductDetail != null ? p.ProductDetail.ProductDiscount : (decimal?)null,
                     shopName = p.User.Shop != null ? p.User.Shop.ShopName : "未知店家",

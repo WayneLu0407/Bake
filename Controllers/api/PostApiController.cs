@@ -1,5 +1,6 @@
 ﻿using Bake.Data;
 using Bake.Models.Social;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -52,7 +53,7 @@ namespace Bake.Controllers.api
         public async Task<IActionResult> Latest()
         {
             var list = await ToCard(
-                BaseQuery().OrderByDescending(p => p.CreatedAt)
+                BaseQuery().Where(p => p.TypeId == 0).OrderByDescending(p => p.CreatedAt)
                 )
                 .Take(10)
                 .ToListAsync();
@@ -64,7 +65,7 @@ namespace Bake.Controllers.api
         public async Task<IActionResult> Hot()
         {
             var list = await ToCard(
-                        BaseQuery().OrderByDescending(p => p.ViewCount)
+                        BaseQuery().Where(p => p.TypeId == 0).OrderByDescending(p => p.ViewCount)
                     )
                     .Take(10)
                     .ToListAsync();
@@ -129,6 +130,9 @@ namespace Bake.Controllers.api
                 p.Content.Contains(keyword));
             }
             var list = await query
+                .Where(p =>
+                    p.TypeId == 0 ||
+                    p.EventDetails.Any(e => e.EventTime > DateTime.Now))
                 .OrderByDescending(p => p.CreatedAt)
                 .Select(p => new
                 {
@@ -160,6 +164,59 @@ namespace Bake.Controllers.api
                         .FirstOrDefault(),
                 }).ToListAsync();
             return Ok(list);
+        }
+        //  api/PostApi/GetComments
+        [HttpGet("GetComments")]
+        public IActionResult GetComments(int postId) 
+        {
+            var comments = _db.PostComments
+                .Where(c => c.PostId == postId)
+                .OrderBy(c => c.CreatedAt)
+                .Select(c => new
+                {
+                    userName = c.User.FullName ?? "匿名",
+                    avatarUrl = !string.IsNullOrEmpty(c.User.AvatarUrl)
+    ? (c.User.AvatarUrl.StartsWith("/") ? c.User.AvatarUrl : "/" + c.User.AvatarUrl)
+    : "/ProductPicture/NoImage.jpg",
+                    content = c.Content,
+                    createdAt=c.CreatedAt.HasValue?c.CreatedAt.Value.ToString("yyyy/MM/dd HH:mm"):""
+                }).ToList();
+
+            return Ok(comments);
+        }
+        //  api/PostApi/AddComment
+        [HttpPost("AddComment")]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddCommentApi([FromBody] CommentInput input)
+        {
+            var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+            if (string.IsNullOrWhiteSpace(input.Content))
+                return BadRequest("留言不能為空");
+            var comment = new Models.Social.PostComment
+            {
+                PostId = input.PostId,
+                UserId = userId,
+                Content = input.Content
+            };
+            _db.PostComments.Add(comment);
+            await _db.SaveChangesAsync();
+            var user = await _db.UserProfiles.FindAsync(userId);
+
+            return Ok(new
+            {
+                userName = user?.FullName??"匿名",
+                avatarUrl = !string.IsNullOrEmpty(user?.AvatarUrl)
+                ? (user.AvatarUrl.StartsWith("/") ? user.AvatarUrl : "/" + user.AvatarUrl)
+                : "/ProductPicture/NoImage.jpg",
+                content = comment.Content,
+                createdAt = DateTime.Now.ToString("yyyy/MM/dd HH:mm")
+            });
+        }
+        public class CommentInput
+        { 
+            public int PostId { get; set; }
+            public string Content { get; set; }
         }
     }
 }

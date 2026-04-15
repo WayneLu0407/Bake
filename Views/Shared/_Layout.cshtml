@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] 烘焙交流網</title>
+    <title>@ViewData["Title"] SweetStack 甜點棧</title>
     <style>
             [v-cloak] {
                 display: none !important;
@@ -40,7 +40,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/MyStyleSheet -nav .css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/homeIndexCss.css" asp-append-version="true" />
-
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
@@ -90,12 +90,12 @@
             </symbol>
             <symbol xmlns="http://www.w3.org/2000/svg" id="close" viewBox="0 0 15 15">
                 <path fill="currentColor" d="M7.953 3.788a.5.5 0 0 0-.906 0L6.08 5.85l-2.154.33a.5.5 0 0 0-.283.843l1.574 1.613l-.373 2.284a.5.5 0 0 0 .736.518l1.92-1.063l1.921 1.063a.5.5 0 0 0 .736-.519l-.373-2.283l1.574-1.613a.5.5 0 0 0-.283-.844L8.921 5.85l-.968-2.062Z" />
-            <symbol xmlns="http://www.w3.org/2000/svg" id="bell" viewBox="0 0 24 24">
+            </symbol>
+                <symbol xmlns="http://www.w3.org/2000/svg" id="bell" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M19.29 17.29L18 16v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-1.29 1.29c-.63.63-.19 1.71.7 1.71h13.17c.9 0 1.34-1.08.71-1.71M16 17H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5zm-4 5c1.1 0 2-.9 2-2h-4a2 2 0 0 0 2 2" />
             </symbol>
             <symbol xmlns="http://www.w3.org/2000/svg" id="message" viewBox="0 0 24 24">
                 <path fill="currentColor" d="M20 4v12H5.17L4 17.17V4zm0-2H4c-1.1 0-2 .9-2 2v15.59c0 .89 1.08 1.34 1.71.71L6 18h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2" />
-            </symbol>
             </symbol>
         </defs>
     </svg>
@@ -186,14 +186,20 @@
                 </div>
 
 
-                <div b-pjrg6lzpyy class="col-4 col-lg-2 text-start" style="display:flex; align-items:center;">
+                <div b-pjrg6lzpyy class="col-auto col-lg-1 text-start" style="display:flex; align-items:center;">
                     <a class="nav-link text-dark fw-bold" asp-controller="Products" asp-action="Index">
                         <h5 b-pjrg6lzpyy class="mb-0">所有商品</h5>
                     </a>
                 </div>
 
+                <div class="col-auto col-lg-1 text-start d-lg-flex" style="display:flex; align-items:center;">
+                    <a class="nav-link text-dark" asp-area="" asp-controller="Post" asp-action="Index">
+                        <h5 class="mb-0">交流區</h5>
+                    </a>
+                </div>
 
-                    <div class="col-lg-4 d-none d-lg-block" id="search-app" v-cloak>
+
+                    <div class="col-lg d-none d-lg-block" id="search-app" v-cloak>
                     <div class="search-bar d-flex align-items-center bg-light px-3 my-2 rounded-4 position-relative">
                          <input type="text" class="form-control border-0 bg-transparent" placeholder="請搜尋關鍵字" v-model="keyword" @@input="search" @@focus="showDropdown=true" @@blur="hideDropdown"/>
                             <a :href="'/Products/Index?keyword='+keyword" class="border-0 bg-transparent p-0">
@@ -220,10 +226,7 @@
                 </div>
 
 
-                <div class="col-4 col-lg-4 d-flex justify-content-end gap-5 align-items-center mt-4 mt-sm-0 justify-content-center justify-content-sm-end">
-                        <div class="support-box text-center d-none d-xxl-block">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Post" asp-action="Index"><h5 class="mb-0">交流分享區</h5></a>
-                    </div>
+                <div class="col-12 col-md-4 col-lg-3 d-flex justify-content-end gap-3 align-items-center mt-4 mt-md-0 justify-content-center justify-content-md-end">
 
                     <ul class="d-flex justify-content-end list-unstyled m-0">
 
@@ -231,17 +234,19 @@
                         {
                             <!-- 已登入才顯示 -->
                             <li class="nav-item dropdown">
-                                <a href="#" class="rounded-circle bg-light p-2 mx-1 position-relative" id="bell-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a href="#" class="rounded-circle bg-light p-2 mx-1 position-relative d-inline-flex align-items-center justify-content-center overflow-visible" id="bell-dropdown" data-bs-toggle="dropdown" aria-expanded="false" style="width: 36px; height: 36px;">
                                     <svg width="24" height="24" viewBox="0 0 24 24"><use xlink:href="#bell"></use></svg>
-                                    <span id="notificationCount" class="position-absolute top-0 start-100 translate-middle badge rounded-pill " style="display: none;background-color: #8b0000; border: 1.5px solid white; font-weight: bold;">0</span>  <!-- 預設隱藏，有數字才顯示 -->
+                                    <span id="notificationCount" class="position-absolute badge rounded-pill " style="display: none;background-color: #8b0000; border: 1.5px solid white; font-weight: bold; top: -2px; right: -2px; font-size: 0.6rem;line-height: 1; padding: 3px 5px;">0</span>  <!-- 預設隱藏，有數字才顯示 -->
                                 </a>
 
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="bell-dropdown" style="min-width: 250px;">
                                     <li><h6 class="dropdown-header border-bottom pb-2">系統通知</h6></li>
+                                    <li style="padding:0; list-style:none;"> 
                                         <div id="notificationItems" style="max-height: 350px; overflow-y: auto;" >       <!-- 即時收到的訊息會動態塞在這裡 -->
-                                            <li><a class="dropdown-item text-muted text-center py-3"  >暫無新通知</a></li>
-                                            <li><hr class="dropdown-divider"></li>
+                                            <a class="dropdown-item text-muted text-center py-3">暫無新通知</a>
+                                            <hr class="dropdown-divider">
                                         </div>
+                                    </li>
                                 </ul>
                             </li>
                             <li>
@@ -254,7 +259,6 @@
                                     <svg width="24" height="24"><use xlink:href="#heart"></use></svg>
                                 </a>
                             </li>
-
                         }
                         <!-- User 圖示永遠顯示，但連結不同 -->
                         <li>
@@ -291,7 +295,6 @@
                         </button>
                     </div>
                 </div>
-
             </div>
         </div>
     </header>
@@ -318,7 +321,6 @@
         </div>
     </div>
     @* 以上是footer全站通用 *@
-
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.7/signalr.min.js"></script>
@@ -375,12 +377,7 @@
                         this.showDropdown = false;
                     }, 200);
                 }
-                },
-                created(){
-                    fetch('/api/Product/Get')
-                        .then(res => res.json())
-                        .then(data => { this.allProducts = data })
-                }
+            },
         }).mount('#search-app')
      </script>
      <script>
@@ -421,8 +418,11 @@
 
     <script>
         $(document).ready(function(){
-            fetchSystemInfo();
-            fetchNotifications();
+            @if (User.Identity.IsAuthenticated)
+            {
+                @:fetchSystemInfo();
+                @:fetchNotifications();
+            }
 
             $(document).on("click",".notification-link", function(e){
                 e.preventDefault(); //停止跳轉
@@ -449,13 +449,30 @@
 
         })
         // 1. 初始化連線 (先定義物件)
-    const connection = new signalR.HubConnectionBuilder()
+    const notificationConnection = new signalR.HubConnectionBuilder()
         .withUrl("/notificationHub")
         .withAutomaticReconnect()
         .build();
 
     // 2. 註冊監聽事件 (在啟動前設定好規則)
-        connection.on("receiveNotification", (title, message) => {
+        notificationConnection.on("receiveNotification", (title, message) => {
+        // 彈出通知
+            console.log("收到通知了！", title, message);
+            toastr.success(message, title);
+
+        // 更新小鈴鐺數字
+            let $badge = $("#notificationCount");
+            let count = parseInt($badge.text()) || 0;
+            count += 1;
+
+            $badge.text(count).show().removeClass("d-none");
+            const $container = $("#notificationItems");
+            if ($container.find(".text-muted").length > 0) {
+            $container.empty();
+            } 
+        })
+
+        notificationConnection.on("receiveCouponNotification", (title, message) => {
         // 彈出通知
             console.log("收到通知了！", title, message);
             toastr.success(message, title);
@@ -476,7 +493,7 @@
         
 
     // 3. 正式啟動連線
-    connection.start()
+    notificationConnection.start()
         .then(() => console.log("SignalR 已成功啟動"))
         .catch(err => console.error("SignalR 啟動失敗: ", err.toString()));
 
@@ -512,10 +529,9 @@
     
     </script>
     <script>
-    var baseAddress = "https://localhost:7285/";
-    $("#getUSD").on("click",async()=>{
+    $("#getUSD").on("click",async function(){
         try{
-            var response = await fetch(`${baseAddress}Home/ExchangeRate`,{
+            var response = await fetch('/Home/ExchangeRate',{
                 method:"GET",
             });
             if(response.ok){
@@ -531,10 +547,7 @@
                      currencyUnit.innerText = "USD"
                      this.disabled = true;
                  }
-                 
-                 
             }
-            
         }
         catch(err){
             alert(err.message)

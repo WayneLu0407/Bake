@@ -46,6 +46,11 @@ namespace Bake.Controllers
 
         public IActionResult Index()
         {
+            var user = User.FindFirst("UserId")?.Value;
+            if (user == null)// 判斷有沒有登入
+            {
+                
+            }
             return View();
         }
 

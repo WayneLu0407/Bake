@@ -55,6 +55,10 @@ namespace Bake.Migrations
                         .HasColumnType("nvarchar(1000)")
                         .HasColumnName("content");
 
+                    b.Property<int?>("CouponId")
+                        .HasColumnType("int")
+                        .HasColumnName("coupon_id");
+
                     b.Property<DateTime>("CreateAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -67,9 +71,13 @@ namespace Bake.Migrations
                         .HasDefaultValue(false)
                         .HasColumnName("is_read");
 
-                    b.Property<int>("OrderId")
+                    b.Property<int?>("OrderId")
                         .HasColumnType("int")
                         .HasColumnName("order_id");
+
+                    b.Property<int?>("SenderId")
+                        .HasColumnType("int")
+                        .HasColumnName("sender_id");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -89,7 +97,11 @@ namespace Bake.Migrations
 
                     b.HasKey("NotificationId");
 
+                    b.HasIndex("CouponId");
+
                     b.HasIndex("OrderId");
+
+                    b.HasIndex("SenderId");
 
                     b.ToTable("Notifications", "Service");
                 });
@@ -898,7 +910,6 @@ namespace Bake.Migrations
                         .HasColumnName("shop_description");
 
                     b.Property<string>("ShopImg")
-                        .IsRequired()
                         .HasMaxLength(2048)
                         .HasColumnType("nvarchar(2048)")
                         .HasColumnName("shop_img");
@@ -909,11 +920,11 @@ namespace Bake.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("shop_name");
 
-                    b.Property<decimal>("ShopRating")
+                    b.Property<decimal?>("ShopRating")
                         .HasColumnType("decimal(2, 1)")
                         .HasColumnName("shop_rating");
 
-                    b.Property<DateTime>("ShopTime")
+                    b.Property<DateTime?>("ShopTime")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
                         .HasColumnName("shop_time")
@@ -1700,7 +1711,6 @@ namespace Bake.Migrations
                         .HasColumnName("user_id");
 
                     b.Property<string>("AvatarUrl")
-                        .IsRequired()
                         .HasMaxLength(2048)
                         .HasColumnType("nvarchar(2048)")
                         .HasColumnName("avatar_url");
@@ -1711,27 +1721,24 @@ namespace Bake.Migrations
                         .HasColumnName("bio");
 
                     b.Property<string>("FullName")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("full_name");
 
                     b.Property<string>("Persona")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
                         .HasColumnName("persona");
 
-                    b.Property<DateTime>("UserBirthdate")
+                    b.Property<DateTime?>("UserBirthdate")
                         .HasColumnType("datetime2")
                         .HasColumnName("user_birthdate");
 
-                    b.Property<byte>("UserGender")
+                    b.Property<byte?>("UserGender")
                         .HasColumnType("tinyint")
                         .HasColumnName("user_gender");
 
                     b.Property<string>("UserPhone")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .IsUnicode(false)
                         .HasColumnType("varchar(20)")
@@ -1765,13 +1772,27 @@ namespace Bake.Migrations
 
             modelBuilder.Entity("Bake.Models.Notification", b =>
                 {
+                    b.HasOne("Bake.Models.Sales.Coupon", "Coupon")
+                        .WithMany()
+                        .HasForeignKey("CouponId")
+                        .HasConstraintName("FK_Notification_Coupons");
+
                     b.HasOne("Bake.Models.Sales.Order", "Order")
                         .WithMany()
                         .HasForeignKey("OrderId")
-                        .IsRequired()
                         .HasConstraintName("FK_Notification_Orders");
 
+                    b.HasOne("Bake.Models.User.AccountAuth", "Sender")
+                        .WithMany()
+                        .HasForeignKey("SenderId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_Notification_AccountAuth");
+
+                    b.Navigation("Coupon");
+
                     b.Navigation("Order");
+
+                    b.Navigation("Sender");
                 });
 
             modelBuilder.Entity("Bake.Models.Platform.PaymentTransaction", b =>
@@ -2306,7 +2327,6 @@ namespace Bake.Migrations
                     b.HasOne("Bake.Models.User.UserGenderStatusDefinition", "UserGenderNavigation")
                         .WithMany("UserProfiles")
                         .HasForeignKey("UserGender")
-                        .IsRequired()
                         .HasConstraintName("FK_User_Profile_Gender");
 
                     b.HasOne("Bake.Models.User.AccountAuth", "User")

@@ -85,12 +85,33 @@ namespace Bake.Controllers
             else
             {
 
-                var productQuery = _context.Products
+                var baseProductQuery = _context.Products
                     .AsNoTracking()
-                    .Where(p => p.UserId == id)
+                    .Where(p => p.UserId == id
+                        && p.User.Shop != null
+                        && p.User.Shop.StatusId == 0
+                        && p.ProductDetail != null
+                        && p.ProductDetail.ProductQuantity > 0)
                     .Include(p => p.Category)
                     .Include(p => p.ProductDetail)
                     .AsQueryable();
+
+                categories = await baseProductQuery
+                    .GroupBy(p => new
+                    {
+                        p.CategoryId,
+                        CategoryName = p.Category.CategoryName
+                    })
+                    .Select(g => new ShopCategoryFilterItemViewModel
+                    {
+                        CategoryId = g.Key.CategoryId,
+                        CategoryName = g.Key.CategoryName,
+                        Count = g.Count()
+                    })
+                    .OrderBy(x => x.CategoryId)
+                    .ToListAsync();
+
+                var productQuery = baseProductQuery;
 
                 if (!string.IsNullOrWhiteSpace(keyword))
                 {
@@ -106,56 +127,28 @@ namespace Bake.Controllers
 
                 productQuery = priceRange switch
                 {
-                    "0-100" => productQuery.Where(p =>
-                        p.ProductDetail != null &&
-                        p.ProductDetail.ProductPrice < 100),
+                    "0-100" => productQuery.Where(p => p.ProductDetail!.ProductPrice < 100),
                     "100-300" => productQuery.Where(p =>
-                        p.ProductDetail != null &&
-                        p.ProductDetail.ProductPrice >= 100 &&
+                        p.ProductDetail!.ProductPrice >= 100 &&
                         p.ProductDetail.ProductPrice < 300),
                     "300-500" => productQuery.Where(p =>
-                        p.ProductDetail != null &&
-                        p.ProductDetail.ProductPrice >= 300 &&
+                        p.ProductDetail!.ProductPrice >= 300 &&
                         p.ProductDetail.ProductPrice < 500),
-                    "500-up" => productQuery.Where(p =>
-                        p.ProductDetail != null &&
-                        p.ProductDetail.ProductPrice >= 500),
+                    "500-up" => productQuery.Where(p => p.ProductDetail!.ProductPrice >= 500),
                     _ => productQuery
                 };
 
                 productQuery = sort switch
                 {
-                    "price_asc" => productQuery.OrderBy(p =>
-                        p.ProductDetail != null ?
-                        p.ProductDetail.ProductPrice : 0),
-                    "price_desc" => productQuery.OrderByDescending(p =>
-                        p.ProductDetail != null ? p.ProductDetail.ProductPrice : 0),
-                    "rating" => productQuery.OrderByDescending(p =>
-                        p.ProductRating ?? 0),
-                    _ => productQuery.OrderByDescending(p =>
-                        p.ProductDate)
+                    "price_asc" => productQuery.OrderBy(p => p.ProductDetail!.ProductPrice),
+                    "price_desc" => productQuery.OrderByDescending(p => p.ProductDetail!.ProductPrice),
+                    "rating" => productQuery.OrderByDescending(p => p.ProductRating ?? 0),
+                    _ => productQuery.OrderByDescending(p => p.ProductDate)
                 };
 
-                 categories = await _context.Products
-                    .AsNoTracking()
-                    .Where(p => p.UserId == id)
-                    .GroupBy(p => new
-                    {
-                        p.CategoryId,
-                        CategoryName = p.Category.CategoryName
-                    })
-                    .Select(g => new ShopCategoryFilterItemViewModel
-                    {
-                        CategoryId = g.Key.CategoryId,
-                        CategoryName = g.Key.CategoryName,
-                        Count = g.Count()
-                    })
-                    .OrderBy(x => x.CategoryId)
-                    .ToListAsync();
+                totalCount = await productQuery.CountAsync();
 
-                 totalCount = await productQuery.CountAsync();
-
-                 products = await productQuery
+                products = await productQuery
                     .Skip((page - 1) * pageSize)
                     .Take(pageSize)
                     .Select(p => new ShopProductCardViewModel
@@ -165,16 +158,21 @@ namespace Bake.Controllers
                         ProductImage = p.ProductImage,
                         ShopName = shop.ShopName,
                         CategoryName = p.Category.CategoryName,
-                        Price = p.ProductDetail != null ? p.ProductDetail.ProductPrice : 0,
+                        Price = p.ProductDetail != null &&
+                        p.ProductDetail.ProductDiscount.HasValue &&
+                        p.ProductDetail.ProductDiscount.Value > 0 &&
+                        p.ProductDetail.ProductDiscount.Value < 1
+                            ? Math.Round(
+                                p.ProductDetail.ProductPrice *
+                                (1 - p.ProductDetail.ProductDiscount.Value), 0)
+                            : p.ProductDetail != null ? p.ProductDetail.ProductPrice : 0,
                         OriginalPrice =
-                            p.ProductDetail != null &&
-                            p.ProductDetail.ProductDiscount.HasValue &&
-                            p.ProductDetail.ProductDiscount.Value > 0 &&
-                            p.ProductDetail.ProductDiscount.Value < 1
-                                ? Math.Round(
-                                    p.ProductDetail.ProductPrice /
-                                    (1 - p.ProductDetail.ProductDiscount.Value), 0)
-                                : null,
+                        p.ProductDetail != null &&
+                        p.ProductDetail.ProductDiscount.HasValue &&
+                        p.ProductDetail.ProductDiscount.Value > 0 &&
+                        p.ProductDetail.ProductDiscount.Value < 1
+                            ? p.ProductDetail.ProductPrice
+                            : null,
                         Rating = p.ProductRating
                     })
                     .ToListAsync();

@@ -62,6 +62,27 @@ namespace Bake.Controllers.api
             var cartItems = GetCartItemsFromSession();
             if (!cartItems.Any()) return BadRequest(new { message = "購物車空空如也" });
 
+            //庫存檢查
+            foreach (var item in cartItems) 
+            {
+                var stockInfo = await _bakeContext.ProductDetails
+                    .Where(pd => pd.ProductId==item.ProductId)
+                    .Select(pd=> new { pd.ProductQuantity, pd.Product.ProductName})
+                    .FirstOrDefaultAsync();
+
+                if (stockInfo == null) 
+                {
+                    return BadRequest(new { message = $"找不到產品{item.ProductId} {item.ProductName}的資料" });
+                }
+
+                if (stockInfo.ProductQuantity < item.Quantity) 
+                {
+                    return BadRequest(new 
+                    { message = $"庫存不足!{item.ProductId}{item.ProductName}僅存{stockInfo.ProductQuantity}件" +
+                    $"但購物車中有{item.Quantity}件" });
+                }
+            }
+
             // 優惠券資料
             string couponCode = Request.Cookies["AppliedCoupon"];
             decimal discount = 0;
@@ -86,8 +107,10 @@ namespace Bake.Controllers.api
                 StatusId = (byte.Parse(PaymentMethod) == 2) ? (byte)1 : (byte)0,
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now,
+                OrderItems = new List<OrderItem>()
             };
 
+            
             foreach (var item in cartItems)
             {
                 var orderItem = new OrderItem
@@ -97,20 +120,47 @@ namespace Bake.Controllers.api
                     UnitPrice = item.Price,
                     Subtotal = item.Quantity * item.Price
                 };
+
+                order.OrderItems.Add(orderItem);
             }
 
-            //3. 寫入資料庫
-            _bakeContext.Orders.Add(order);
-            await _bakeContext.SaveChangesAsync();
-            Response.Cookies.Delete("AppliedCoupon");
-
-            ClearCart(); //清空購物車
-
-            //4.重新導向: 如果是貨到付款，直接到Success
-            if (order.PaymentMethodId == 2)
+            using (var transaction = await _bakeContext.Database.BeginTransactionAsync()) 
             {
-                return Ok(new { success=true, isCod=true, id = order.OrderId });
+                try 
+                {
+                    //寫入資料庫
+                    _bakeContext.Orders.Add(order);
+                    await _bakeContext.SaveChangesAsync();
+
+                    //貨到付款庫存處理、直接到Success
+                    if (order.PaymentMethodId == 2)
+                    {
+                        bool isDeductSucess = await DeductStock(order.OrderId);
+                        if (!isDeductSucess)
+                        {
+                            // 庫存不足→滾回
+                            await transaction.RollbackAsync();
+                            return BadRequest(new { message = $"庫存不足，訂單已取消" });
+                        }
+                    }
+
+                    await transaction.CommitAsync();
+
+                    Response.Cookies.Delete("AppliedCoupon");
+                    ClearCart();
+
+                    if (order.PaymentMethodId == 2) 
+                    {
+                        return Ok(new { success = true, isCod = true, id = order.OrderId });
+                    }
+                }
+                catch (Exception ex) 
+                {
+                    await transaction.RollbackAsync();
+                    return StatusCode(500, "系統處理失敗");
+                }
             }
+
 
             // 金流配置
             string merchantID = _config["NewebPayConfig:MerchantID"];
@@ -170,8 +220,6 @@ namespace Bake.Controllers.api
             //string shaSource_ = $"HashKey={hashKey}&{TradeInfoEncrypt.ToUpper()}&HashIV={hashIV}";
             //Console.WriteLine($"[Debug] SHA Source: {shaSource_}");
             return Ok(new { isCod=false, payData = response});
-
-            
         }
 
         private async Task<decimal> CalculateFinalDiscount(string couponCode, List<CartViewModel> cartItems)
@@ -243,6 +291,33 @@ namespace Bake.Controllers.api
         private void ClearCart()
         {
             HttpContext.Session.Remove("UserCart");
+        }
+
+        //扣庫存的方法
+        private async Task<bool> DeductStock(int orderId)
+        { 
+            var order = await _bakeContext.Orders
+                .Include(o => o.OrderItems)
+                .FirstOrDefaultAsync(o => o.OrderId == orderId);
+
+            if(order == null)
+                return false;
+
+            foreach (var item in order.OrderItems) 
+            {
+                var detail = await _bakeContext.ProductDetails
+                    .FirstOrDefaultAsync(pd => pd.ProductId == item.ProductId);
+
+                if (detail != null) 
+                {
+                    detail.ProductQuantity -= item.ItemQuantity;
+
+                    if (detail.ProductQuantity < 0) return false;
+                } 
+            }
+
+            await _bakeContext.SaveChangesAsync();
+            return true;
         }
 
         // ↓↓↓加密解密方法↓↓↓

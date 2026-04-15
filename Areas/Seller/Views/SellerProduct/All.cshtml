@@ -22,6 +22,7 @@
     </style>
 }
 <!-- ========== section start ========== -->
+@Html.AntiForgeryToken()
 <section>
     <div class="container-fluid">
         <!-- ========== title-wrapper start ========== -->
@@ -105,8 +106,8 @@
                     <input type="number" id="editProductQuantity" class="form-control" />
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">優惠折數</label>
-                    <input type="number" id="editProductDiscount" class="form-control" step="0.01" />
+                    <label class="form-label">優惠折數(如: 不打折原價填 100，九折填 90，八五折填 85)</label>
+                    <input type="number" id="editProductDiscount" class="form-control" step="1" />
                 </div>
                 <input type="hidden" id="editProductDate" />
                 <div class="mb-3">
@@ -153,6 +154,9 @@
                 ajax: {
                     type: "POST",
                     url: "@Url.Action("AllJson", "SellerProduct", new { area = "Seller" })",
+                    headers: {
+                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                    },
                     dataSrc: function (data) {
                         return data;
                     }
@@ -170,13 +174,26 @@
                     { data: "categoryName",responsivePriority: 3 },
                     { data: "productDescription",width: "16%",responsivePriority: 8  },
                     { data: "productPrice", responsivePriority: 2 },
-                    { data: "productDiscount",responsivePriority: 5 },
+                    { data: "productDiscount",responsivePriority: 5,render: function(data) {
+                    return data === 100 ? "無折扣" : data + " 折";} },
                     { data: "productQuantity", responsivePriority: 4 },
                     { data: "ingredients", responsivePriority: 7  },
                     { data: "netWeight" ,responsivePriority: 6},
                     { data: "shelfLifeNote",responsivePriority: 6 },
                     { data: "productDate",responsivePriority: 5  },
-                    { data: "productExpireDate" ,responsivePriority: 4 },
+                    { data: "productExpireDate",
+                      responsivePriority: 4,
+                      render:function(data){
+                        if(!data) return'';
+                        var today = new Date();
+                        var expiredDate = new Date(data);
+                        today.setHours(0,0,0,0);
+                        expiredDate.setHours(0, 0, 0, 0);
+                        var isExpired = today>expiredDate;
+                        var label = data.split('T')[0];
+                        return isExpired?label+'<span class="badge bg-danger">已過期</span>':label;
+                      }
+                    },
                     { data: "productId",responsivePriority: 1,
                         render: function (data, type, row) {
                             return `
@@ -215,13 +232,11 @@
                     $("#editNetWeight").val(data.netWeight);
                     $("#editShelfLifeNote").val(data.shelfLifeNote);
                     $("#editModal").modal("show");
-                    if (data.productExpireDate ) {
-                    var d = new Date(data.productExpireDate);
-                        var formatted = d.toISOString().split('T')[0];  // 轉成 "2026-04-10"
-                        $("#editExpireDate").val(formatted);
-                    } else {
-                        $("#editExpireDate").val('');
-                    }
+                        if (data.productExpireDate) {
+                        $("#editExpireDate").val(data.productExpireDate.split('T')[0]);
+                        } else {
+                            $("#editExpireDate").val('');
+                        }
                     $("#editImagePreview").attr("src", data.productImage);
                     var pd = new Date(data.productDate);
                     var minDate = pd.toISOString().split('T')[0];
@@ -264,9 +279,9 @@
                     errors.push("過期日不能早於上架日");
                 }
                 if(!name){errors.push("商品名稱不能為空");}
-                if(!price||parseFloat(price)<=0){errors.push("商品價格必須大於0");}
-                if(!quantity||parseInt(quantity)<=0){errors.push("商品數量必須大於0");}
-                if(discount&&(parseFloat(discount)<0)||parseFloat(discount)>1){errors.push("優惠折數必須在 0 ~ 1 之間");}
+                if(!price||parseFloat(price)<=0){errors.push("商品價格必須大於0");$("#editProductPrice").val("");}
+                if(!quantity||parseInt(quantity)<=0){errors.push("商品數量必須大於0");$("#editProductQuantity").val("");}
+                if(discount&&(parseFloat(discount)<0)||parseFloat(discount)>100){errors.push("優惠折數必須在 0 ~ 100 之間"); $("#editProductDiscount").val("");}
                 var fileInput = $("#editProductImage")[0];
                 if(fileInput.files.length>0){
                     if(!fileInput.files[0].type.startsWith("image/")){
@@ -304,6 +319,9 @@
                     data: formData,
                     contentType: false,   // ← 必加，讓瀏覽器自己設定 boundary
                     processData: false,   // ← 必加，告訴 jQuery 不要轉換 FormData
+                    headers: {
+                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                    },
                     success: function (result) {
                         if (result.success) {
                             $("#editModal").modal("hide");
@@ -315,19 +333,27 @@
                 });
             });
 
-            // 點刪除
+                // 點刪除
             $(document).on("click", ".delete-btn", function () {
                 var id = $(this).data("id");
                 var name = $(this).data("name");
                 if (confirm("確定要刪除【" + name + "】？")) {
-                    $.post("@Url.Action("DeleteJson", "SellerProduct", new { area = "Seller" })",
-                        { id: id },
-                        function (result) {
-                            if (result.success) {
-                                $("#productTable").DataTable().ajax.reload();
-                            }
-                        });
-                }
+                $.ajax({
+                    url: "@Url.Action("DeleteJson", "SellerProduct", new { area = "Seller" })",
+                    type: "POST",
+                    data: { id: id },
+                    headers: {
+                    "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function (result) {
+                        if (result.success) {
+                            $("#productTable").DataTable().ajax.reload();
+                        } else {
+                            alert("儲存失敗：" + result.message);
+                        }
+                    }
+                    });
+                }   // ← 關 if
             });
         });
     </script>

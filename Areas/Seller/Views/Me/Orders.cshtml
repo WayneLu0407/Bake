@@ -8,7 +8,7 @@
 	
 }
 
-<body>
+
 
 
 	<!-- ========== table components start ========== -->
@@ -22,22 +22,6 @@
 							<h2>購買紀錄</h2>
 						</div>
 					</div>
-					<!-- end col -->
-					<div class="col-md-6">
-						<div class="breadcrumb-wrapper">
-							<nav aria-label="breadcrumb">
-								<ol class="breadcrumb">
-									<li class="breadcrumb-item">
-										<a asp-area="Seller" asp-controller="Me" asp-action="Dashboard">會員中心</a>
-									</li>
-									<li class="breadcrumb-item active" aria-current="page">
-										購買紀錄
-									</li>
-								</ol>
-							</nav>
-						</div>
-					</div>
-					<!-- end col -->
 				</div>
 				<!-- end row -->
 			</div>
@@ -47,6 +31,7 @@
 				<div class="row">
 					<div class="col-lg-12">
 						<div class="card-style mb-30">
+							<div id="reviewFeedback"></div>
 							<div id="orderTableContainer">
 								@await Html.PartialAsync("_BuyerOrderTablePartial", Model)
 							</div>
@@ -63,7 +48,27 @@
 	<!-- end container -->
 </section>
 <!-- ========== table components end ========== -->
+
+
+
+<!--評論的modal-->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="reviewModalLabel">商品評論</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body" id="reviewModalBody">
+				<div class="text-center py-3">載入中...</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
 @section Scripts {
+	<partial name="_ValidationScriptsPartial" />
 	
 	<script>
 			// 1. 使用原生 JavaScript 監聽點擊，防止 jQuery 載入順序問題
@@ -112,8 +117,142 @@
 					return false;
 				}
 			}, true); // 使用 Capture 模式優先捕捉事件
+
+
+
+
+			// ------ 評論用的 ------
+            const reviewModalEl = document.getElementById('reviewModal');
+            const reviewModalBody = document.getElementById('reviewModalBody');
+            const reviewFeedback = document.getElementById('reviewFeedback');
+            const reviewModal = new bootstrap.Modal(reviewModalEl);
+
+            function getCurrentPageNumber() {
+                const url = new URL(window.location.href);
+                return url.searchParams.get('pageNumber') || '1';
+            }
+
+            function showReviewFeedback(message, type = 'success') {
+                if (!reviewFeedback) return;
+
+                reviewFeedback.innerHTML = `
+                    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                        ${message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                `;
+            }
+
+            function refreshCurrentOrderTable() {
+                const page = getCurrentPageNumber();
+                const url = `@Url.Action("Orders", "Me")?pageNumber=${page}&isAjax=true`;
+
+                const container = document.getElementById('orderTableContainer');
+                if (!container) return;
+
+                container.style.opacity = '0.5';
+
+                fetch(url, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(res => res.text())
+                .then(html => {
+                    container.innerHTML = html;
+                    container.style.opacity = '1';
+                })
+                .catch(err => {
+                    console.error(err);
+                    container.style.opacity = '1';
+                    showReviewFeedback('刷新訂單列表失敗，請手動重新整理頁面。', 'danger');
+                });
+            }
+
+            document.addEventListener('click', function (e) {
+                const btn = e.target.closest('.open-review-modal');
+                if (!btn) return;
+
+                e.preventDefault();
+
+                const url = btn.dataset.url;
+                if (!url) return;
+
+                reviewModalBody.innerHTML = '<div class="text-center py-3">載入中...</div>';
+                reviewModal.show();
+
+                fetch(url, {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(async res => {
+                    const text = await res.text();
+                    if (!res.ok) {
+                        throw new Error(text || '載入評論表單失敗');
+                    }
+                    return text;
+                })
+                .then(html => {
+                    reviewModalBody.innerHTML = html;
+                })
+                .catch(err => {
+                    console.error(err);
+                    reviewModalBody.innerHTML = `<div class="alert alert-danger mb-0">${err.message}</div>`;
+                });
+            });
+
+            document.addEventListener('submit', function (e) {
+                const form = e.target.closest('#reviewModal form');
+                if (!form) return;
+
+                e.preventDefault();
+
+                const submitBtn = form.querySelector('.js-review-submit-btn');
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = '送出中...';
+                }
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    body: new FormData(form)
+                })
+                .then(async res => {
+                    const contentType = res.headers.get('content-type') || '';
+
+                    if (contentType.includes('application/json')) {
+                        return {
+                            type: 'json',
+                            ok: res.ok,
+                            data: await res.json()
+                        };
+                    }
+
+                    return {
+                        type: 'html',
+                        ok: res.ok,
+                        data: await res.text()
+                    };
+                })
+                .then(result => {
+                    if (result.type === 'json' && result.ok && result.data.success) {
+                        reviewModal.hide();
+                        showReviewFeedback(result.data.message || '評論成功！', 'success');
+                        refreshCurrentOrderTable();
+                        return;
+                    }
+
+                    if (result.type === 'html') {
+                        reviewModalBody.innerHTML = result.data;
+                        return;
+                    }
+
+                    reviewModalBody.innerHTML = `<div class="alert alert-danger mb-0">送出失敗，請稍後再試。</div>`;
+                })
+                .catch(err => {
+                    console.error(err);
+                    reviewModalBody.innerHTML = `<div class="alert alert-danger mb-0">送出失敗，請稍後再試。</div>`;
+                });
+            });
+			// ------ 評論用的 ------
 	</script>
 }
   
-
-</body>

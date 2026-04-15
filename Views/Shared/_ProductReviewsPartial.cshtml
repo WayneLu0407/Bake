@@ -5,18 +5,18 @@
 
     @if (Model == null || !Model.Any())
     {
-        <div class="text-muted">快來搶先留第一筆資料</div>
+        <div class="text-muted">購買商品後即可留言</div>
     }
     else
     {
         foreach (var r in Model)
         {
             <div class="d-flex gap-3 py-3 border-bottom">
-                <div class="rounded-circle bg-secondary-subtle flex-shrink-0" style="width:40px;height:40px;"></div>
+                @* <div class="rounded-circle bg-secondary-subtle flex-shrink-0" style="width:40px;height:40px;"></div> *@
 
                 <div class="flex-grow-1">
                     <div class="d-flex justify-content-between">
-                        <div class="fw-semibold">User @r.UserId</div>
+                        <div class="fw-semibold">@(r.User?.FullName ?? "未命名的用戶")</div>
                         <small class="text-muted">@r.CreatedAt.ToString("yyyy/MM/dd")</small>
                     </div>
 

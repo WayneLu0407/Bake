@@ -24,13 +24,14 @@ namespace Bake.Areas.Seller.Controllers
             _env = env;
         }
 
-        private async Task<IEnumerable<SelectListItem>> GetStatusName()
+        private async Task<IEnumerable<SelectListItem>> GetStatusName(int? selectedId = null)
         {
             return await _context.ShopStatuses
                 .Select(s => new SelectListItem
                 {
                     Value = s.StatusId.ToString(), // tinyint 轉 string
-                    Text = s.StatusName            // 營業中 / 打烊中
+                    Text = s.StatusName,            // 營業中 / 打烊中
+                    Selected=(selectedId!=null)?s.StatusId == selectedId:s.StatusId == 0
                 }).ToListAsync();
         }
 
@@ -83,11 +84,12 @@ namespace Bake.Areas.Seller.Controllers
                 vm.InstagramUrl = shop.InstagramUrl;
                 vm.YoutubeUrl = shop.YoutubeUrl;
                 vm.PinterestUrl = shop.PinterestUrl;
-                vm.StatusName = await GetStatusName();
+                vm.StatusName = await GetStatusName(shop.StatusId);
             }
             else
             {
-                vm.StatusName = await GetStatusName();
+                vm.StatusId = 0;
+                vm.StatusName = await GetStatusName(0);
             }
 
             return View(vm);
@@ -95,7 +97,7 @@ namespace Bake.Areas.Seller.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Shop_settings(SellerShopSettingsReadViewModel vm)
+        public async Task<IActionResult> Shop_settings(SellerShopSettingsReadViewModel vm)
         {
             int? userId = GetCurrentUserIdFromClaim();
 
@@ -114,7 +116,7 @@ namespace Bake.Areas.Seller.Controllers
                     vm.ShopImg = shop.ShopImg;
                     vm.StatusId = shop.StatusId;
                 }
-
+                vm.StatusName = await GetStatusName(vm.StatusId);
                 return View(vm);
             }
 
@@ -130,7 +132,7 @@ namespace Bake.Areas.Seller.Controllers
                     ShopRating = 0m,
                     ShopTime = DateTime.Now,
                     SellerApprovedAt = DateTime.Now,
-                    StatusId = shop.StatusId,
+                    StatusId = vm.StatusId ?? 0,
                     FacebookUrl = vm.FacebookUrl?.Trim(),
                     InstagramUrl = vm.InstagramUrl?.Trim(),
                     YoutubeUrl = vm.YoutubeUrl?.Trim(),
@@ -161,6 +163,7 @@ namespace Bake.Areas.Seller.Controllers
                     ModelState.AddModelError("ShopImageFile", "只允許上傳 jpg、jpeg、png、webp 圖片");
                     vm.ShopImg = shop.ShopImg;
                     vm.StatusId = shop.StatusId;
+                    vm.StatusName = await GetStatusName(shop.StatusId);
                     return View(vm);
                 }
 
@@ -217,7 +220,7 @@ namespace Bake.Areas.Seller.Controllers
         // 失敗時回傳 null
         private string? SaveShopImage(IFormFile file)
         {
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png" };
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png",".webp" };
             string extension = Path.GetExtension(file.FileName).ToLowerInvariant();
 
             if (!allowedExtensions.Contains(extension))

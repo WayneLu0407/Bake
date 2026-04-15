@@ -77,9 +77,19 @@
 											已評論
 										</button>
 									}
+									else if (!product.CanReview)
+									{
+										<button type="button" class="btn btn-outline-secondary btn-sm" disabled>
+											待訂單完成
+										</button>
+									}
 									else
 									{
-										<a asp-area="" asp-controller="ProductReview" asp-action="Create" asp-route-productId="@product.ProductId" asp-route-orderId="@item.OrderId" class="btn btn-warning btn-sm">評論商品</a>
+										<button type="button"
+												class="btn btn-warning btn-sm open-review-modal"
+												data-url="@Url.Action("Create", "ProductReview", new { area = "", productId = product.ProductId, orderId = item.OrderId })">
+											評論商品
+										</button>
 									}
 								</div>
 							}
@@ -97,10 +107,7 @@
 	{
 		<nav class="mt-4">
 			<ul class="pagination justify-content-center">
-				@* 上一頁 *@
-				<li class="page-item @(ViewBag.CurrentPage == 1 ? "disabled" : "")">
-					<a class="page-link ajax-page-link" href="javascript:void(0);" data-page="@(ViewBag.CurrentPage - 1)">上一頁</a>
-				</li>
+				
 
 				@* 頁碼按鈕 *@
 				@for (int i = 1; i <= ViewBag.TotalPages; i++)
@@ -110,10 +117,8 @@
 					</li>
 				}
 
-				@* 下一頁 *@
-				<li class="page-item @(ViewBag.CurrentPage == ViewBag.TotalPages ? "disabled" : "")">
-					<a class="page-link ajax-page-link" href="javascript:void(0);" data-page="@(ViewBag.CurrentPage + 1)">下一頁</a>
-				</li>
+				
 			</ul>
 		</nav>
 	}
+</div>

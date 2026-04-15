@@ -12,7 +12,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.EntityFrameworkCore.SqlServer.Storage.Internal;
+using Microsoft.Identity.Client;
 using System.Diagnostics;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -26,13 +28,14 @@ public class HomeController : Controller
 {
     private readonly BakeContext _context;  //DI 注入
     private readonly IWebHostEnvironment _webHostEnvironment;
-    
+    private readonly IHttpClientFactory _httpClientFactory;
 
-    public HomeController(BakeContext context, IWebHostEnvironment webHostEnvironment)
+    public HomeController(BakeContext context, IWebHostEnvironment webHostEnvironment, IHttpClientFactory httpClientFactory)
     {
         _context = context;  //HomeController 建構子 DI注入  
         _webHostEnvironment = webHostEnvironment;
-        
+        _httpClientFactory = httpClientFactory;
+
     }
     
 
@@ -42,15 +45,45 @@ public class HomeController : Controller
     }
     //GET : /Home/ExchangeRate
     [HttpGet]
-    public async Task<string> ExchangeRate()
+    public async Task<IActionResult> ExchangeRate()
     {
-        HttpClient client = new HttpClient();
-        HttpResponseMessage response = await client.GetAsync("https://openapi.taifex.com.tw/v1/DailyForeignExchangeRates");
-        string Rates = await response.Content.ReadAsStringAsync();
-        exchangeRate[] arr = JsonSerializer.Deserialize<exchangeRate[]>(Rates);
-        return arr[arr.Length - 1].USDNTD;
-    }
+        try
+        {
+            HttpClient client = _httpClientFactory.CreateClient();
+            HttpResponseMessage response = await client.GetAsync(
+            "https://open.er-api.com/v6/latest/USD");
 
+            var json = await response.Content.ReadAsStringAsync();
+            var doc = JsonDocument.Parse(json);
+            var ntdRate = doc.RootElement
+                .GetProperty("rates")
+                .GetProperty("TWD")
+                .GetDecimal();
+
+            return Ok(ntdRate);
+        }
+        catch (HttpRequestException ex)
+        {
+            return StatusCode(503, new
+            {
+                error = "無法連線到外部 API",
+                type = ex.GetType().Name,
+                message = ex.Message,
+                inner = ex.InnerException?.Message
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                error = "未預期的錯誤",
+                type = ex.GetType().Name,
+                message = ex.Message,
+                inner = ex.InnerException?.Message,
+                stackTrace = ex.StackTrace
+            });
+        }
+    }
     public IActionResult Support()
     {
         return View();
@@ -80,32 +113,35 @@ public class HomeController : Controller
 
         if (ModelState.IsValid)
         {
-            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password,user.PasswordHash)) // 如果沒有資料為Null 則return 回登入畫面  使用Bcrypt套件 做雜湊比對
+            if (user == null || !BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash)) // 如果沒有資料為Null 則return 回登入畫面  使用Bcrypt套件 做雜湊比對
             {
+                TempData["AlertMessage"] = "密碼輸入錯誤!";
                 return View();
             }
 
-            var userProfile = _context.UserProfiles.FirstOrDefault(x => x.UserId == user.UserId);
+            if (user.IsEmailConfirmed)
+            {
+                var userProfile = _context.UserProfiles.FirstOrDefault(x => x.UserId == user.UserId);
 
-            var claims = new List<Claim>    //網站會員的身分證
+                var claims = new List<Claim>    //網站會員的身分證
             {
                 new Claim("UserId",user.UserId.ToString()),
                 new Claim(ClaimTypes.Name,model.Account),
                 new Claim(ClaimTypes.Role,user.RoleNavigation.StatusName),
-                new Claim("FullName",userProfile?.FullName??""),
-                new Claim("AvatarUrl",userProfile?.AvatarUrl??"")
+
 
             };
-            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-            var claimPrincipal = new ClaimsPrincipal(identity);
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var claimPrincipal = new ClaimsPrincipal(identity);
 
-            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimPrincipal); //將身分證發給user
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, claimPrincipal); //將身分證發給user
 
-
-
-
-
-            return RedirectToAction("index", "home");   // 登入後 回首頁
+                return RedirectToAction("index", "home");   // 登入後 回首頁
+            }
+            else
+            {
+                TempData["EmailConfirm"] = "請到Email信箱收取驗證信!";
+            }
         }
         return View(model);
 
@@ -133,14 +169,13 @@ public class HomeController : Controller
                 {
                     return View();
                 }
-                //using(SHA256 sha256 = SHA256.Create())
-                //{
-                //    byte[] InputPassword = Encoding.UTF8.GetBytes(model.Password);
-                //    byte[] HashPassword = sha256.ComputeHash(InputPassword);
-                //}
-                    _context.AccountAuths.Add(new AccountAuth { UserName = model.Name, Email = model.Email, PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password) });
+                var newAccount = new AccountAuth { UserName = model.Name, Email = model.Email, PasswordHash = BCrypt.Net.BCrypt.HashPassword(model.Password) };
+
+                    _context.AccountAuths.Add(newAccount);
                     _context.SaveChanges();
-                
+                    _context.UserProfiles.Add(new UserProfile { UserId = newAccount.UserId , FullName = model.Name });
+                    _context.SaveChanges();
+
                 //encrypt 加密
                 var encrypted = AesHelper.Encrypt(model.Email);
                 var encodedToken = System.Net.WebUtility.UrlEncode(encrypted);
@@ -283,9 +318,24 @@ public class HomeController : Controller
         return View();
     }
 
+    [Route("Error/{statusCode?}")]
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+    public IActionResult Error(int? statusCode)
     {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        // 判斷原始請求路徑
+        var originalPath = HttpContext.Features
+            .Get<Microsoft.AspNetCore.Diagnostics.IStatusCodeReExecuteFeature>()
+            ?.OriginalPath ?? "";
+
+        if (originalPath.StartsWith("/Seller", StringComparison.OrdinalIgnoreCase))
+        {
+            return RedirectToAction("Index", "Error", new { area = "Seller", statusCode });
+        }
+        return statusCode switch
+        {
+            404 => View("Error404"),
+            500 => View("Error500"),
+            _ => View("Error404")
+        };
     }
 }

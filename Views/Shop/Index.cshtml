@@ -107,34 +107,27 @@
                       asp-action="Index"
                       asp-route-id="@Model.ShopInfo.UserId">
 
+                    <input type="hidden" name="keyword" value="@Model.Keyword" />
+                    <input type="hidden" name="categoryId" value="@Model.CategoryId" />
+                    <input type="hidden" name="page" value="@Model.Page" />
+
                     <div class="mb-4">
                         <div class="shop-filter-section-title">商品分類</div>
 
-                        <a class="shop-category-link @(Model.CategoryId == null ? "active" : "")"
-                               data-shop-ajax="true"
-                               asp-controller="Shop"
-                               asp-action="Index"
-                               asp-route-id="@Model.ShopInfo.UserId"
-                               asp-route-keyword="@Model.Keyword"
-                               asp-route-sort="@Model.Sort"
-                               asp-route-priceRange="@Model.PriceRange">
-                            全部
-                        </a>
-
-                        @foreach (var category in Model.Categories)
-                        {
-                            <a class="shop-category-link @(Model.CategoryId == category.CategoryId ? "active" : "")"
-                                   data-shop-ajax="true"
-                                   asp-controller="Shop"
-                                   asp-action="Index"
-                                   asp-route-id="@Model.ShopInfo.UserId"
-                                   asp-route-keyword="@Model.Keyword"
-                                   asp-route-categoryId="@category.CategoryId"
-                                   asp-route-sort="@Model.Sort"
-                                   asp-route-priceRange="@Model.PriceRange">
-                                @category.CategoryName
+                            <a class="shop-category-link @(Model.CategoryId == null ? "active" : "")"
+                                   href="#"
+                                   data-category-id="">
+                                全部 <span class="text-muted">(@Model.Categories.Sum(x => x.Count))</span>
                             </a>
-                        }
+
+                            @foreach (var category in Model.Categories)
+                            {
+                                <a class="shop-category-link @(Model.CategoryId == category.CategoryId ? "active" : "")"
+                                       href="#"
+                                       data-category-id="@category.CategoryId">
+                                    @category.CategoryName <span class="text-muted">(@category.Count)</span>
+                                </a>
+                            }
                     </div>
 
                     <div class="mb-4">
@@ -245,16 +238,9 @@
             </div>
         </aside>
             <main class="col-lg-9">
-                @if (Model.Products.Any())
-                {
-                    <div id="shop-product-section">
-                        @await Html.PartialAsync("_ShopProfileProductListPartial", Model)
-                    </div>
-                }
-                else
-                {
-                    <div class="text-center py-5 text-muted">目前沒有商品</div>
-                }
+                <div id="shop-product-section">
+                    @await Html.PartialAsync("_ShopProfileProductListPartial", Model)
+                </div>
         </main>
         }
 
@@ -263,114 +249,89 @@
 
 @section Scripts {
     <script>
-        (() => {
-            const filterForm = document.getElementById("shop-filter-form");
-            const productSection = document.getElementById("shop-product-section");
+        $(function () {
+            const $filterForm = $("#shop-filter-form");
+            const $productSection = $("#shop-product-section");
 
-            if (!filterForm || !productSection) return;
+            if (!$filterForm.length || !$productSection.length) return;
 
-            async function loadShopProducts(url, pushState = true) {
-                try {
-                    productSection.classList.add("shop-loading");
+            //載入產品的函式
+            function loadShopProducts(url, pushState = true) {
+                $productSection.addClass("shop-loading");
 
-                    const response = await fetch(url, {
-                        headers: {
-                            "X-Requested-With": "XMLHttpRequest"
+                $.ajax({
+                    url: url,
+                    method: "GET",
+                    headers: { "X-Requested-With": "XMLHttpRequest" },
+                    success: function (html) {
+                        $productSection.html(html); // 更換HTML內容
+
+                        if (pushState) {
+                            history.pushState({}, "", url);
                         }
-                    });
 
-                    if (!response.ok) {
-                        throw new Error("載入失敗");
+                        // 畫面平滑捲動到頂端
+                        $('html, body').animate({
+                            scrollTop: $productSection.offset().top - 100
+                        }, 500);
+                    },
+                    error: function () {
+                        // 失敗時的降級處理>整頁跳轉
+                        window.location.href = url;
+                    },
+                    complete: function () {
+                        $productSection.removeClass("shop-loading");
                     }
-
-                    const html = await response.text();
-                    productSection.innerHTML = html;
-
-                    if (pushState) {
-                        history.pushState({}, "", url);
-                    }
-
-                    window.scrollTo({
-                        top: productSection.offsetTop - 100,
-                        behavior: "smooth"
-                    });
-                } catch (error) {
-                    window.location.href = url;
-                } finally {
-                    productSection.classList.remove("shop-loading");
-                }
+                });
             }
 
             function buildFormUrl() {
-                const url = new URL(filterForm.action, window.location.origin);
-                const formData = new FormData(filterForm);
-
-                const keyword = (formData.get("keyword") || "").toString().trim();
-                const categoryId = (formData.get("categoryId") || "").toString().trim();
-                const sort = (formData.get("sort") || "latest").toString().trim();
-                const priceRange = (formData.get("priceRange") || "all").toString().trim();
-
-                if (keyword) {
-                    url.searchParams.set("keyword", keyword);
-                }
-
-                if (categoryId) {
-                    url.searchParams.set("categoryId", categoryId);
-                }
-
-                if (sort) {
-                    url.searchParams.set("sort", sort);
-                }
-
-                if (priceRange) {
-                    url.searchParams.set("priceRange", priceRange);
-                }
-
-                url.searchParams.set("page", "1");
-
-                return url.toString();
+                const action = $filterForm.attr("action");
+                const queryString = $filterForm.serialize(); // jQ的serialize，自動抓取表單所有欄位並轉成query string
+                return action + "?" + queryString;
             }
 
-            filterForm.addEventListener("submit", function (e) {
+            // --- 事件監聽區 ---
+
+            // 分類連結點擊
+            $(".shop-category-link").on("click", function (e) {
                 e.preventDefault();
+                const categoryId = $(this).data("category-id") || "";
+                
+                $("input[name='categoryId']").val(categoryId); // 填入隱藏欄位
+                $("input[name='page']").val(1);                // 重置頁碼
+
+                // 切換active樣式
+                $(".shop-category-link").removeClass("active");
+                $(this).addClass("active");
+
                 loadShopProducts(buildFormUrl());
             });
 
-            document.addEventListener("click", function (e) {
-                const link = e.target.closest("a[data-shop-ajax='true']");
-                if (!link) return;
+            // 排序選擇 & 價格區間(change 事件)
+            $("select[name='sort'], input[name='priceRange']").on("change", function () {
+                $("input[name='page']").val(1);
+                loadShopProducts(buildFormUrl());
+            });
 
+            // 表單送出(搜尋功能)
+            $filterForm.on("submit", function (e) {
                 e.preventDefault();
-
-                const hiddenCategory = filterForm.querySelector("input[name='categoryId']");
-                const linkUrl = new URL(link.href, window.location.origin);
-                const categoryIdFromLink = linkUrl.searchParams.get("categoryId") || "";
-
-                if (hiddenCategory) {
-                    hiddenCategory.value = categoryIdFromLink;
-                }
-
-                loadShopProducts(link.href);
+                $("input[name='page']").val(1);
+                loadShopProducts(buildFormUrl());
             });
 
-            const sortSelect = filterForm.querySelector("select[name='sort']");
-            const priceRadios = filterForm.querySelectorAll("input[name='priceRange']");
+            // 動態產生的分頁按鈕(委派事件監聽)
+            $(document).on("click", "a[data-shop-ajax='true']", function (e) {
+                e.preventDefault();
+                const url = $(this).attr("href");
+                
+                // 從網址中抓取page參數更新回隱藏表單
+                const page = new URL(url, window.location.origin).searchParams.get("page") || "1";
+                $("input[name='page']").val(page);
 
-            if (sortSelect) {
-                sortSelect.addEventListener("change", function () {
-                    loadShopProducts(buildFormUrl());
-                });
-            }
-
-            priceRadios.forEach(radio => {
-                radio.addEventListener("change", function () {
-                    loadShopProducts(buildFormUrl());
-                });
+                loadShopProducts(buildFormUrl());
             });
-
-            window.addEventListener("popstate", function () {
-                window.location.reload();
-            });
-        })();
+        });
     </script>
 }

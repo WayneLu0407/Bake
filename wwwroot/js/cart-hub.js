@@ -1,9 +1,22 @@
-﻿// 呼叫API的全域變數
+﻿// 購物車也只發一次請求
+let _cartPromise = null;
+function fetchCartOnce() {
+    if (!_cartPromise) {
+        _cartPromise = (async () => {
+            const res = await fetch("/Cart/GetCartItems");
+            const ct = res.headers.get('content-type') || '';
+            if (!res.ok || !ct.includes('application/json')) return [];
+            return await res.json();
+        })();
+    }
+    return _cartPromise;
+}
+
+// 呼叫API的全域變數
 const cartService = {
     // 1. 取得購物車訂單
     async getItem() {
-        const res = await fetch("/Cart/GetCartItems") //GET
-        return await res.json();
+        return await fetchCartOnce();
     },
     // 2. 數量加減 > 觸發全域事件，通知所有Vue購物車數量變動與更新
     async updateQty(productId, change=1) {
@@ -12,11 +25,19 @@ const cartService = {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ productId: productId, quantity: change })
         });
+        if (res.status === 401) {
+            alert("請先登入會員");
+            window.location.href = "/Home/Login";
+            return false
+        }
+
         if (res.ok) {
-            //await this.getItem(); 
+            _cartPromise = null;  // 清掉快取，下次會重新 fetch
             window.dispatchEvent(new Event('update-cart'));
             return true;
         }
+
+        console.error("加入購物車失敗");
         return false;
     },
     // 3. 移除商品 > 觸發全域事件，通知所有Vue購物車數量變動與更新
@@ -27,7 +48,7 @@ const cartService = {
             body: JSON.stringify(productId)
         });
         if (res.ok) {
-            //await this.getItem();
+            _cartPromise = null;  // 清掉快取，下次會重新 fetch
             window.dispatchEvent(new Event('update-cart'));
             return true;
         }
@@ -81,6 +102,8 @@ const CartMixin = {
             if (addSuccess) {
                 product.quantity = 1; //把畫面數字重設回1
                 alert(`商品${product.productName}選購${selectedQty}件 已加入購物車!`);
+            } else {
+                console.log("加入失敗，不顯示alert");
             }
         },
         
@@ -118,7 +141,8 @@ const CartMixin = {
                     console.log("優惠券套用成功");
                 } else {
                     this.appliedDiscount = 0;
-                    alert(result.message || "優惠碼無效");
+                    const failMsg = result.message || "找不到這組優惠碼，請檢查大小寫是否輸入正確";
+                    alert("💡 貼心提醒：\n" + failMsg);
                 }
             } catch (e) {
                 if (!isAutoRun) {
@@ -126,6 +150,12 @@ const CartMixin = {
                 }
                 return;
             }
+        },
+        removeCoupon() {
+            alert("按鈕觸發成功！");
+            this.appliedDiscount = 0;
+            this.couponCode = '';
+            console.log("已移除優惠券");
         },
 
         formatNumber(num) {
@@ -137,7 +167,6 @@ const CartMixin = {
     mounted() {
         this.refreshCart();
         window.addEventListener('update-cart', () => this.refreshCart());
-        //window.addEventListener(new Event('update-Cart'));
     }   
 }
 

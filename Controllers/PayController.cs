@@ -83,7 +83,7 @@ namespace Bake.Controllers
         public class ResultContent
         {
             public string MerchantID { get; set; }
-            public int Amt { get; set; }
+            public object Amt { get; set; }
             public string TradeNo { get; set; }
             public string MerchantOrderNo { get; set; }
             public string PaymentType { get; set; }
