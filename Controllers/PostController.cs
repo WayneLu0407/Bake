@@ -789,12 +789,12 @@ namespace Bake.Controllers
         {
             if (signupEndDate < signupStartDate)
             {
-                return Json("報名截止日不可早於報名開始日");
+                return Json("報名截止日須晚於報名開始日");
             }
 
-            if (signupEndDate > eventDate)
+            if (signupEndDate >= eventDate)
             {
-                return Json("報名截止日不可晚於活動日期");
+                return Json("報名截止日需早於活動日期");
             }
 
             return Json(true);
@@ -805,7 +805,7 @@ namespace Bake.Controllers
         {
             if (endTime <= startTime)
             {
-                return Json("結束時間必須晚於開始時間");
+                return Json("結束時間需晚於開始時間");
             }
 
             return Json(true);
@@ -1243,20 +1243,6 @@ namespace Bake.Controllers
 
         private void ValidateEventCreateInput(EventCreateViewModel input)
         {
-            if (input.SignupStartDate > input.SignupEndDate)
-            {
-                ModelState.AddModelError(nameof(input.SignupEndDate), "報名截止日不可早於報名開始日");
-            }
-
-            if (input.StartTime >= input.EndTime)
-            {
-                ModelState.AddModelError(nameof(input.EndTime), "結束時間必須晚於開始時間");
-            }
-
-            if (input.SignupEndDate.Date > input.EventDate.Date)
-            {
-                ModelState.AddModelError(nameof(input.SignupEndDate), "報名截止日不可晚於活動日期");
-            }
 
             if (input.Photo == null || input.Photo.Length == 0)
             {

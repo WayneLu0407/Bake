@@ -181,7 +181,7 @@
                         </div>
                         <div class="col-12 col-md-6">
                             <label asp-for="Price" class="form-label"></label>
-                            <input asp-for="Price" class="form-control" type="number" data-val-number="請輸入有效的數字" disabled="@(Model.HasRegistrations) />
+                            <input asp-for="Price" class="form-control" type="number" data-val-number="請輸入有效的數字" disabled="@(Model.HasRegistrations)" />
                             <span asp-validation-for="Price" class="text-danger"></span>
                         </div>
                     </div>

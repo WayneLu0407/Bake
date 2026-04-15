@@ -89,18 +89,18 @@ namespace Bake.ViewModel
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (SignupEndDate < EventDate)
+            if (SignupEndDate < SignupStartDate)
             {
                 yield return new ValidationResult(
-                    "報名截止日期不能早於開始日期",
+                    "報名截止日不可早於報名開始日",
                     new[] { nameof(SignupEndDate) }
                 );
             }
 
-            if (SignupEndDate > EventDate)
+            if (SignupEndDate >= EventDate)
             {
                 yield return new ValidationResult(
-                    "報名截止日期不能晚於活動舉辦日期",
+                    "報名截止日必須早於活動日期",
                     new[] { nameof(SignupEndDate) }
                 );
             }
@@ -108,15 +108,15 @@ namespace Bake.ViewModel
             if (SignupStartDate > EventDate)
             {
                 yield return new ValidationResult(
-                    "報名開始日期不能晚於活動日期",
+                    "報名開始日不可晚於活動日期",
                     new[] { nameof(SignupStartDate) }
                 );
             }
 
-            if (EndTime > StartTime)
+            if (EndTime <= StartTime)
             {
                 yield return new ValidationResult(
-                    "活動結束時間不能早於活動開始時間",
+                    "結束時間不可早於開始時間",
                     new[] { nameof(EndTime) }
                 );
             }
