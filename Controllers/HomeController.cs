@@ -51,28 +51,37 @@ public class HomeController : Controller
         {
             HttpClient client = _httpClientFactory.CreateClient();
             HttpResponseMessage response = await client.GetAsync(
-                "https://openapi.taifex.com.tw/v1/DailyForeignExchangeRates");
+            "https://open.er-api.com/v6/latest/USD");
 
-            if (!response.IsSuccessStatusCode)
+            var json = await response.Content.ReadAsStringAsync();
+            var doc = JsonDocument.Parse(json);
+            var ntdRate = doc.RootElement
+                .GetProperty("rates")
+                .GetProperty("TWD")
+                .GetDecimal();
+
+            return Ok(ntdRate);
+        }
+        catch (HttpRequestException ex)
+        {
+            return StatusCode(503, new
             {
-                return StatusCode((int)response.StatusCode,
-                    $"外部 API 回傳: {response.StatusCode}");
-            }
-
-            string Rates = await response.Content.ReadAsStringAsync();
-            exchangeRate[]? arr = JsonSerializer.Deserialize<exchangeRate[]>(Rates);
-
-            // 防止空陣列或反序列化失敗
-            if (arr == null || arr.Length == 0)
-            {
-                return StatusCode(502, "外部 API 回傳資料為空");
-            }
-
-            return Ok(arr[arr.Length - 1].USDNTD);
+                error = "無法連線到外部 API",
+                type = ex.GetType().Name,
+                message = ex.Message,
+                inner = ex.InnerException?.Message
+            });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"錯誤: {ex.Message}");
+            return StatusCode(500, new
+            {
+                error = "未預期的錯誤",
+                type = ex.GetType().Name,
+                message = ex.Message,
+                inner = ex.InnerException?.Message,
+                stackTrace = ex.StackTrace
+            });
         }
     }
     public IActionResult Support()
