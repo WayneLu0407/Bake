@@ -40,7 +40,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/MyStyleSheet -nav .css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/homeIndexCss.css" asp-append-version="true" />
-
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
@@ -186,14 +186,20 @@
                 </div>
 
 
-                <div b-pjrg6lzpyy class="col-4 col-lg-2 text-start" style="display:flex; align-items:center;">
+                <div b-pjrg6lzpyy class="col-auto col-lg-1 text-start" style="display:flex; align-items:center;">
                     <a class="nav-link text-dark fw-bold" asp-controller="Products" asp-action="Index">
                         <h5 b-pjrg6lzpyy class="mb-0">所有商品</h5>
                     </a>
                 </div>
 
+                <div class="col-auto col-lg-1 text-start d-lg-flex" style="display:flex; align-items:center;">
+                    <a class="nav-link text-dark" asp-area="" asp-controller="Post" asp-action="Index">
+                        <h5 class="mb-0">交流區</h5>
+                    </a>
+                </div>
 
-                    <div class="col-lg-4 d-none d-lg-block" id="search-app" v-cloak>
+
+                    <div class="col-lg d-none d-lg-block" id="search-app" v-cloak>
                     <div class="search-bar d-flex align-items-center bg-light px-3 my-2 rounded-4 position-relative">
                          <input type="text" class="form-control border-0 bg-transparent" placeholder="請搜尋關鍵字" v-model="keyword" @@input="search" @@focus="showDropdown=true" @@blur="hideDropdown"/>
                             <a :href="'/Products/Index?keyword='+keyword" class="border-0 bg-transparent p-0">
@@ -220,10 +226,7 @@
                 </div>
 
 
-                <div class="col-4 col-lg-4 d-flex justify-content-end gap-5 align-items-center mt-4 mt-sm-0 justify-content-center justify-content-sm-end">
-                    <div class="support-box text-center d-none d-xxl-block">
-                    <a class="nav-link text-dark" asp-area="" asp-controller="Post" asp-action="Index"><h5 class="mb-0">交流分享區</h5></a>
-                    </div>
+                <div class="col-12 col-md-4 col-lg-3 d-flex justify-content-end gap-3 align-items-center mt-4 mt-md-0 justify-content-center justify-content-md-end">
 
                     <ul class="d-flex justify-content-end list-unstyled m-0">
 
@@ -526,8 +529,7 @@
     
     </script>
     <script>
-    var baseAddress = "https://team1website-cze8h7ewahcdb5gm.westus3-01.azurewebsites.net/";
-    $("#getUSD").on("click",async()=>{
+    $("#getUSD").on("click",async function(){
         try{
             var response = await fetch('/Home/ExchangeRate',{
                 method:"GET",
