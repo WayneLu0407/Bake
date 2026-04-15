@@ -176,12 +176,15 @@
 
                     @if (Model.IsOwner)
                     {
-                        <a asp-controller="Post"
-                           asp-action="EditEvent"
-                           asp-route-postId="@Model.PostId"
-                           class="btn-cta-primary">
-                            編輯活動
-                        </a>
+                        @if (Model.IsPublished)
+                        {
+                            <a asp-controller="Post"
+                                   asp-action="EditEvent"
+                                   asp-route-postId="@Model.PostId"
+                                   class="btn-cta-primary">
+                                編輯活動
+                            </a>
+                        }
 
                         @if (Model.IsPublished)
                         {
@@ -195,7 +198,7 @@
                         }
                         else
                         {
-                            <div class="btn-cta-outline text-center">活動已下架</div>
+                            <div class="btn-cta-secondary text-center">活動已下架</div>
                         }
                     }
                     else if (Model.IsPublished && Model.EventDetail.EventTime > DateTime.Now)
