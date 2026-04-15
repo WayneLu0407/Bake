@@ -7,7 +7,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Plugins;
 using OpenAI.Graders;
+using OpenAI.Images;
 using System.Numerics;
 using System.Security.Claims;
 
@@ -67,21 +69,46 @@ namespace Bake.Areas.Seller.Controllers
         public async Task<IActionResult> CreateCoupon([FromBody] CouponCreateViewModel model)
         {
             int sellerId = CurrentSellerId;
+
+            if (!ModelState.IsValid) 
+            {
+                var errorMsg = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .FirstOrDefault();
+
+                if (string.IsNullOrEmpty(errorMsg) || errorMsg.Contains("field is required"))
+                {
+                    errorMsg = "請檢查欄位，所有項目皆為必填";
+                }
+
+                return Json(new { success = false, message = errorMsg ?? "資料格式錯誤，請檢查輸入內容" });
+            }
+
             
-            if (!ModelState.IsValid) return Json(new { success = false, message = "資料格式錯誤，請檢查輸入內容" });
+
+            if (model.DiscountAmount <= 0 || model.MinimumPurchase <= 0)
+            {
+                return Json(new { success = false, message = "折扣金額與最低消費皆不能為負數或零" });
+            }
+
+            if (model.DiscountAmount >= model.MinimumPurchase)
+                return Json(new { success = false, message = $"折扣金額({model.DiscountAmount}元)，不得大於最低消費({model.MinimumPurchase})元" });
+
             if (model.ExpirationDate <= DateTime.Now)
                 return Json(new { success = false, message = "到期日必須大於今天" });
+
             
-                
+             
             string couponCode = GenerateRandomCouponCode(8);
             var newCoupon = new Coupon
             {
                 Code = couponCode,
                 DiscountValue = model.DiscountAmount,
                 MinimumPurchase = model.MinimumPurchase,
-                ExpirationDate = model.ExpirationDate,
+                ExpirationDate = model.ExpirationDate.Value,
                 IsActive = true,
-                SellerId = sellerId
+                SellerId = null
             };
 
             _bakeContext.Coupons.Add(newCoupon);
@@ -132,17 +159,22 @@ namespace Bake.Areas.Seller.Controllers
         [HttpPost]
         public async Task<IActionResult> UpdateExpireDate(int id, [FromBody] ExpirationUpdateModel model) 
         {
+            if (model == null || !model.NewDate.HasValue) 
+            {
+                return Json(new { success = false, message = "請選擇一個有效日期" });
+            }
+
             var coupon = await _bakeContext.Coupons
                 .FirstOrDefaultAsync(c => c.CouponId == id && c.SellerId == CurrentSellerId);
 
             if (coupon == null)
                 return Json(new { success = false, message = "找不到優惠券" });
 
-            if (model.NewDate <= DateTime.Now)
+            if (model.NewDate.Value <= DateTime.Now)
                 return Json(new { success = false, message = "新的日期必須大於今日" });
 
             //更新日期
-            coupon.ExpirationDate = model.NewDate;
+            coupon.ExpirationDate = model.NewDate.Value;
             await _bakeContext.SaveChangesAsync();
 
             return Json(new { success = true, newDate= coupon.ExpirationDate.ToString("yyyy-MM-dd")});
@@ -187,6 +219,6 @@ namespace Bake.Areas.Seller.Controllers
 
     public class ExpirationUpdateModel
     {
-        public DateTime NewDate { get; set; }
+        public DateTime? NewDate { get; set; }
     }
 }

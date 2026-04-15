@@ -141,7 +141,8 @@ const CartMixin = {
                     console.log("優惠券套用成功");
                 } else {
                     this.appliedDiscount = 0;
-                    alert(result.message || "優惠碼無效");
+                    const failMsg = result.message || "找不到這組優惠碼，請檢查大小寫是否輸入正確";
+                    alert("💡 貼心提醒：\n" + failMsg);
                 }
             } catch (e) {
                 if (!isAutoRun) {
@@ -149,6 +150,12 @@ const CartMixin = {
                 }
                 return;
             }
+        },
+        removeCoupon() {
+            alert("按鈕觸發成功！");
+            this.appliedDiscount = 0;
+            this.couponCode = '';
+            console.log("已移除優惠券");
         },
 
         formatNumber(num) {

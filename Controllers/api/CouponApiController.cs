@@ -55,6 +55,7 @@ namespace Bake.Controllers.api
             decimal subTotal = 0;  //購物車總金額
             decimal applyAmout = 0;  //符合優惠券條件的金額 (如果有指定賣家，則只計算該賣家的商品金額)
 
+            bool forceGlobal = true; //強制全站true
             foreach (var item in cartItems) 
             {
                 var dbProduct = productsInDb.FirstOrDefault(p => p.ProductId == item.ProductId);
@@ -63,9 +64,15 @@ namespace Bake.Controllers.api
                 decimal itemTotal = dbProduct.ProductPrice * item.Quantity;
                 subTotal += itemTotal;
 
-                //全站券走條件1 : 如果優惠券SellerId為null，每個itemTotal都會被加進applyAmount；如果有指定SellerId
+                //全站券走條件1 : 如果優惠券SellerId為null，每個itemTotal都會被加進applyAmount；
                 //賣家券走條件2 : 只有當商品的UserId與SellerId相符時，itemTotal才會被加進applyAmount
-                if (!coupon.SellerId.HasValue || dbProduct.UserId == coupon.SellerId) 
+                //if (!coupon.SellerId.HasValue || dbProduct.UserId == coupon.SellerId) 
+                //{
+                //    applyAmout += itemTotal;
+                //}
+
+                // 開啟強制全站，或者券本身就是全站券
+                if (forceGlobal || !coupon.SellerId.HasValue || dbProduct.UserId == coupon.SellerId)
                 {
                     applyAmout += itemTotal;
                 }
@@ -74,8 +81,14 @@ namespace Bake.Controllers.api
             //檢查消費門檻
             if (applyAmout < coupon.MinimumPurchase) 
             {
-                string scope = coupon.SellerId.HasValue? "指定賣家商品" : "全站商品";
-                return Ok(new { Success = false, Message = $"此優惠券為{scope}，需購買金額達{coupon.MinimumPurchase:0}元才可使用" });
+                //string scope = coupon.SellerId.HasValue? "指定賣家商品" : "全站商品";
+                //return Ok(new { Success = false, Message = $"此優惠券為{scope}，需購買金額達{coupon.MinimumPurchase:0}元才可使用" });
+
+                return Ok(new
+                {
+                    Success = false,
+                    Message = $"消費未達門檻！本優惠券需消費滿 {coupon.MinimumPurchase:N0} 元即可折抵 {coupon.DiscountValue:N0} 元。"
+                });
             }
 
             //存入Cookie
