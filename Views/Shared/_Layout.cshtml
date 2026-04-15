@@ -424,6 +424,10 @@
             {
                 @:fetchSystemInfo();
                 @:fetchNotifications();
+                  // 3. 正式啟動連線
+                @:notificationConnection.start()
+                    @:.then(() => console.log("SignalR 已成功啟動"))
+                    @:.catch(err => console.error("SignalR 啟動失敗: ", err.toString()));
             }
 
             $(document).on("click",".notification-link", function(e){
@@ -494,10 +498,7 @@
     // 建立新的通知項目 (置頂插入)
         
 
-    // 3. 正式啟動連線
-    notificationConnection.start()
-        .then(() => console.log("SignalR 已成功啟動"))
-        .catch(err => console.error("SignalR 啟動失敗: ", err.toString()));
+
 
     function fetchSystemInfo(){
         $.get("/Checkout/SystemInfo", function(count){
