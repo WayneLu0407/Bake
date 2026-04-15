@@ -141,11 +141,11 @@
             <div class="row g-3">
                 <div class="col-md-3">
                     <label class="form-label">折扣金額</label>
-                    <input type="number" v-model.number="newCoupon.discountAmount" class="form-control" placeholder="例如: 50">
+                    <input type="number" v-model.number="newCoupon.discountAmount" class="form-control" max="500" min="1" placeholder="">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">最低消費</label>
-                    <input type="number" v-model.number="newCoupon.minimumPurchase" class="form-control" placeholder="例如: 500">
+                    <input type="number" v-model.number="newCoupon.minimumPurchase" class="form-control" max="100000" min="0" placeholder="">
                 </div>
                 <div class="col-md-3">
                     <label class="form-label">結束日期</label>
@@ -198,7 +198,8 @@
                     
                     <td>
                         <div class="d-flex align-items-center">
-                            <input type="date" 
+                            <input type="date"
+                                   v-on:min="new Date().toISOString().split('T')[0]"
                                    v-model="c.expirationDateOnly" 
                                    class="form-control form-control-sm border-0 bg-transparent notion-date-input"
                                    style="width: 140px; cursor: pointer; color: #37352f; padding: 0;"
@@ -214,9 +215,6 @@
                     <td style="text-align: center;">
                         <button class="btn-notion-action" @@click="toggleStatus(c)">
                             {{ c.isActive ? '停用' : '啟用' }}
-                        </button>
-                        <button class="btn-notion-action btn-notion-danger" @@click="deleteCoupon(c)">
-                            刪除
                         </button>
                     </td>
                 </tr>
@@ -322,12 +320,31 @@
                 },
                 //修改到期日
                 async updateDate(coupon, event){
-                    const originalDate = this.coupons.find(x => x.couponId === coupon.couponId).expirationDate.split('T')[0];
+                    const newDate = event.target.value;
+                    if(!newDate){
+                        console.log("日期已清空，不執行更新");
+                        this.refreshCoupon(coupon);
+                        return;
+                    }
+
+                    const today = new Date().toISOString().split('T')[0];
+                    if(newDate <= today)
+                    {
+                        alert("到期日必須晚於今天");
+                        this.refreshCoupon(coupon);
+                        return;
+                    }
+
+                    if (!confirm(`確定要將優惠券 ${coupon.code} 的到期日改為 ${newDate} 嗎？`)) {
+                        this.refreshCoupon(coupon);
+                        return;
+                    }
+                    const originalDate = coupon.expirationDateOnly;
                     try{
                         const res = await fetch(`/Seller/Coupon/UpdateExpireDate/${coupon.couponId}`,{
                             method:'POST',
                             headers:{'Content-Type':'application/json'},
-                            body: JSON.stringify({newDate: coupon.expirationDateOnly})
+                            body: JSON.stringify({newDate: newDate})
                         })
                         const result = await res.json();
                         
@@ -337,19 +354,23 @@
                             el.classList.remove('animate-save');
                             void el.offsetWidth;
                             el.classList.add('animate-save');
-                            coupon.expirationDate = coupon.expirationDateOnly;
+                            
+                            coupon.expirationDateOnly = newDate;
                             console.log("日期已更新為:", result.newDate);
                             alert("日期已更新為:"+result.newDate)
                         }else{
                             alert(result.message);
-                            coupon.expirationDateOnly = originalDate;
+                            this.refreshCoupon(coupon);
                         }
                     }
                     catch(error){
                         console.log("更新日期失敗",error);
                         alert("網路連線失敗");
-                        coupon.expirationDateOnly = originalDate;
+                        this.refreshCoupon(coupon);
                     }
+                },
+                refreshCoupon(coupon){
+                    this.fetchCoupons();
                 },
 
                 formatDate(dateStr){
