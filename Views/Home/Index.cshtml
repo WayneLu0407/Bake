@@ -464,7 +464,7 @@
                 async toggleFavorite(product){
                     const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
                     try {
-                        const response = await fetch('/Products/ToggleFavorite', {
+                        const response = await fetch('@Url.Action("ToggleFavorite","Products")', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                             body: new URLSearchParams({ 
@@ -582,7 +582,30 @@
     </script>
 
 
-    
+    @if (TempData["ForgotPasswordMessage"] != null)
+        {
+            <script>
+                Swal.fire({
+                icon: "success",
+                title: @Html.Raw(TempData["ForgotPasswordMessage"]),
+                showConfirmButton: false
+                })
+            </script>
+        }
+    <script>
+        // 檢查是否有來自後端的 ForgotPasswordMessage
+        var forgotPasswordMsg = '@Html.Raw(TempData["ForgotPasswordMessage"])';
+        
+        if (forgotPasswordMsg && forgotPasswordMsg.trim() !== "") {
+        Swal.fire({
+        title: '驗證信已發送！',
+        text: forgotPasswordMsg,
+        icon: 'success',
+        confirmButtonText: '確定',
+        confirmButtonColor: '#3085d6' // 可根據您的主題調整顏色
+        });
+        }
+    </script>
 
     <script>
         // 檢查是否有來自後端的 SuccessMessage
