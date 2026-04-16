@@ -794,7 +794,7 @@ namespace Bake.Controllers
 
             if (signupEndDate >= eventDate)
             {
-                return Json("報名截止日需早於活動日期");
+                return Json("報名截止日須早於活動日期");
             }
 
             return Json(true);
@@ -805,7 +805,7 @@ namespace Bake.Controllers
         {
             if (endTime <= startTime)
             {
-                return Json("結束時間需晚於開始時間");
+                return Json("結束時間須晚於開始時間");
             }
 
             return Json(true);
