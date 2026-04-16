@@ -67,3 +67,54 @@
     object-fit: cover;
     object-position: center;
 }
+/* 手機版 banner 統一高度 */
+@media (max-width: 767.98px) {
+    /* slide 固定高度 */
+    .banner-ad.large .swiper-slide,
+    .banner-content {
+        min-height: 480px !important;
+        max-height: 480px !important;
+        overflow: hidden;
+    }
+
+    /* 縮小標題字體，避免過度換行 */
+    .banner-content .banner-title {
+        font-size: 2rem !important;
+    }
+
+    .banner-content .categories {
+        font-size: 1.3rem !important;
+        margin-bottom: 0.5rem !important;
+        padding-bottom: 0 !important;
+    }
+
+    .banner-content p {
+        font-size: 1rem !important;
+    }
+
+    /* 減少內距，騰出空間給圖片 */
+    .banner-content {
+        padding: 1rem;
+    }
+
+    /* 圖片區域限制高度 */
+    .banner-ad.large .banner-content .img-wrapper {
+        max-height: 200px;
+        display: flex;
+        justify-content: center;
+        overflow: hidden;
+        z-index: 2;
+        position: relative;
+        overflow: visible;
+    }
+    .banner-ad.large .banner-content .content-wrapper {
+        position: relative;
+        z-index: 1;
+        margin-bottom: 0.5rem;
+    }
+    .banner-content .img-wrapper img {
+        width: 70% !important;
+        object-fit: contain;
+        margin-top: -2rem;
+    }
+}

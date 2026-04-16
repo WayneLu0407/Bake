@@ -101,7 +101,14 @@ const CartMixin = {
 
             if (addSuccess) {
                 product.quantity = 1; //把畫面數字重設回1
-                alert(`商品${product.productName}選購${selectedQty}件 已加入購物車!`);
+                //alert(`商品${product.productName}選購${selectedQty}件 已加入購物車!`);
+                Swal.fire({
+                    title: 'SweetStack 甜點棧', // 網站名稱
+                    text: `商品${product.productName}選購${selectedQty}件 已加入購物車!`,
+                    icon: 'success',
+                    confirmButtonText: '確定',
+                    confirmButtonColor: '#ffc107' // 可以配合你目前的按鈕顏色
+                });
             } else {
                 console.log("加入失敗，不顯示alert");
             }
@@ -152,7 +159,7 @@ const CartMixin = {
             }
         },
         removeCoupon() {
-            alert("按鈕觸發成功！");
+            alert("已移除優惠券");
             this.appliedDiscount = 0;
             this.couponCode = '';
             console.log("已移除優惠券");

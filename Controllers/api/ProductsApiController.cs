@@ -28,7 +28,6 @@ namespace Bake.Controllers.api
 
         // 熱門商品 → /api/Product/TopRated?take=10
         [HttpGet]
-        [ResponseCache(Duration = 60)]
         public IActionResult TopRated(int take=10) 
         {
             var userId = CurrentUserId();
@@ -63,7 +62,6 @@ namespace Bake.Controllers.api
         }
         // 新商品 → /api/Product/NewArrivals?take=10
         [HttpGet]
-        [ResponseCache(Duration = 60)]
         public IActionResult NewArrivals(int take = 10)
         {
             var userId = CurrentUserId();
@@ -98,7 +96,6 @@ namespace Bake.Controllers.api
         }
         // 最高折扣商品 → /api/Product/TopDiscount?take=10
         [HttpGet]
-        [ResponseCache(Duration = 60)]
         public IActionResult TopDiscount(int take = 10)
         {
             var userId = CurrentUserId();

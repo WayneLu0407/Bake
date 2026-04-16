@@ -231,8 +231,8 @@
                 return{
                     coupons:[],
                     newCoupon:{
-                    discountAmount:100,
-                    minimumPurchase:500,
+                    discountAmount:'',
+                    minimumPurchase:'',
                     expirationDate:''
                     },
                     isSubmitting: false
@@ -274,8 +274,15 @@
                                 ...result.data,
                                 expirationDateOnly: result.data.expirationDate.split('T')[0]
                             };
-                            this.coupons.unshift(result.data);
+                            this.coupons.unshift(newObj);
                             alert("優惠券產生成功！ 代碼:"+result.data.code);
+
+                            //清空輸入框
+                            this.newCoupon = {
+                                discountAmount:'',
+                                minimumPurchase: '',
+                                expirationDate: new Date().toISOString().split('T')[0]
+                            };
                         }
                         else{
                             alert("優惠券產生失敗: "+result.message);

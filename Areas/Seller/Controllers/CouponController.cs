@@ -108,7 +108,7 @@ namespace Bake.Areas.Seller.Controllers
                 MinimumPurchase = model.MinimumPurchase,
                 ExpirationDate = model.ExpirationDate.Value,
                 IsActive = true,
-                SellerId = null
+                SellerId = CurrentSellerId
             };
 
             _bakeContext.Coupons.Add(newCoupon);
