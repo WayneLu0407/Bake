@@ -99,10 +99,14 @@ namespace Bake.Controllers.api
                 Secure = true
             });
 
-            return Ok(new {
+            // 確保折扣不會大於購物車總金額
+            decimal finalDiscount = Math.Min(coupon.DiscountValue, applyAmout);
+
+            return Ok(new
+            {
                 Success = true,
                 Message = "套用成功！",
-                Discount = coupon.DiscountValue
+                Discount = finalDiscount // 傳回實際能折抵的金額
             });
         }
     }
