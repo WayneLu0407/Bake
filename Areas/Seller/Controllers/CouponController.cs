@@ -202,7 +202,7 @@ namespace Bake.Areas.Seller.Controllers
                     CouponId = coupon.CouponId, 
                     Title = "優惠券通知", 
                     Content = $"您的優惠券{coupon.Code}已送達，須購買金額達{coupon.MinimumPurchase}元才可折抵{coupon.DiscountValue}元 !", 
-                    URL = "/Seller/Me/Orders" 
+                    URL = "/Products/Index"
                 }).ToList();
                 _bakeContext.Notifications.AddRange(couponNotify);
                 await _bakeContext.SaveChangesAsync();

@@ -39,7 +39,7 @@ namespace Bake.Controllers
         public async Task<IActionResult> GetPostList() 
         {
             var list = (await _bakeContext.Posts
-                .Where(p => p.AuthorId == CurrentUserId)
+                .Where(p => p.AuthorId == CurrentUserId && p.TypeId == 0)
                 .OrderByDescending(p => p.CreatedAt).ToListAsync())
                 .Select(p => new
                 {
