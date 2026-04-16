@@ -74,6 +74,7 @@
                     <div class="event-meta mb-4">
                         <div class="event-meta-item">
                             <strong>活動：</strong> @Model.EventTitle
+                            <input asp-for="EventTitle" type="hidden" />
                         </div>
                         <div class="event-meta-item">
                             <strong>時間：</strong> @Model.EventTime.ToString("yyyy/MM/dd HH:mm")
@@ -83,7 +84,7 @@
                         </div>
                     </div>
 
-                    <form asp-action="Apply" asp-controller="Post" asp-route-eventId="@Model.EventId" method="post">
+                    <form id="applyForm" asp-action="Apply" asp-controller="Post" asp-route-eventId="@Model.EventId" method="post">
                         @Html.AntiForgeryToken()
                         <input asp-for="EventId" type="hidden" />
 
@@ -127,8 +128,7 @@
                             </select>
                             <span asp-validation-for="NumParticipants" class="text-danger"></span>
                         </div>
-
-                        <button type="submit" class="btn btn-dark w-100 py-2">下一步</button>
+                        <button type="button" id="btnShowConfirmModal" class="btn btn-dark w-100">確認報名</button>                    
                     </form>
                 </div>
             </div>
@@ -136,6 +136,71 @@
     </div>
 </div>
 
+
+<div class="modal fade" id="confirmApplyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">確認報名資訊</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-2"><strong>活動：</strong><span id="confirmEventTitle"></span></div>
+                <div class="mb-2"><strong>姓名：</strong><span id="confirmApplicantName"></span></div>
+                <div class="mb-2"><strong>手機：</strong><span id="confirmApplicantPhone"></span></div>
+                <div class="mb-2"><strong>Email：</strong><span id="confirmApplicantEmail"></span></div>
+                <div class="mb-2"><strong>性別：</strong><span id="confirmGenderText"></span></div>
+                <div class="mb-2"><strong>報名人數：</strong><span id="confirmNumParticipants"></span></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">返回修改</button>
+                <button type="button" id="btnSubmitApplyFinal" class="btn btn-dark">送出報名</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script>
+        function mapGenderToZh(gender) {
+                if (!gender) return "未提供";
+
+                const value = gender.toString().trim().toLowerCase();
+
+                if (value === "male" || value === "m" || value === "男") return "男";
+                if (value === "female" || value === "f" || value === "女") return "女";
+
+                return gender;
+        }
+        $(function () {
+            const $form = $("#applyForm");
+            const modal = new bootstrap.Modal(document.getElementById("confirmApplyModal"));
+
+            $("#btnShowConfirmModal").on("click", function () {
+                if (!$form.valid()) {
+                    return;
+                }
+
+                const rawGender = $("#GenderText").val() || "";
+
+                $("#confirmEventTitle").text($("#EventTitle").val() || "");
+                $("#confirmApplicantName").text($("#ApplicantName").val() || "");
+                $("#confirmApplicantPhone").text($("#ApplicantPhone").val() || "");
+                $("#confirmApplicantEmail").text($("#ApplicantEmail").val() || "");
+                $("#confirmGenderText").text(mapGenderToZh(rawGender));
+                $("#confirmNumParticipants").text($("#NumParticipants").val() || "");
+
+                modal.show();
+            });
+
+            $("#btnSubmitApplyFinal").on("click", function () {
+                modal.hide();
+                $form.trigger("submit");
+            });
+
+        });
+    </script>
 }
