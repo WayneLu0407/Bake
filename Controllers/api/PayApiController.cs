@@ -83,7 +83,7 @@ namespace Bake.Controllers.api
                 }
             }
 
-            // 優惠券資料
+            // 優惠券資料檢查
             string couponCode = Request.Cookies["AppliedCoupon"];
             decimal discount = 0;
             if (!string.IsNullOrEmpty(couponCode))
@@ -92,7 +92,7 @@ namespace Bake.Controllers.api
                 discount = await CalculateFinalDiscount(couponCode, cartItems);
             }
 
-            //運費
+            //運費確認
             int shippingFee = HttpContext.Session.GetInt32("ShippingFee") ?? 60;
 
             //先計算購物車小計

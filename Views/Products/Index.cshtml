@@ -206,10 +206,10 @@
                 if (!discount || discount <= 0) return null
                 return `-${Math.round(discount * 100)}%`   // 0.20 → "-20%"
                 },
-            salePrice(price, discount) {
-            if (!discount || discount <= 0) return null
-            return Math.round(price*(1 - discount))  //  100 * (1-0.15) = 85
-            },
+                salePrice(price, discount) {
+                if (!discount || discount <= 0) return null
+                return Math.round(price*(1 - discount))  //  100 * (1-0.15) = 85
+                },
                 async toggleFavorite(product){
                     const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
                     try {

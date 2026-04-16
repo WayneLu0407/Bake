@@ -565,8 +565,12 @@ namespace Bake.Areas.Seller.Controllers
             return View();
         }
         
-        public async Task<IActionResult> ResetPassword(string email)
+        public async Task<IActionResult> ResetPassword(string email,string token)
         {
+            if(token == null || email == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
             var model = await _context.AccountAuths.Select(m => new ReSetPasswordModel
             {
                 Email = m.Email

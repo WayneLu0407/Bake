@@ -314,7 +314,7 @@
                 if (!discount || discount <= 0) return null
                 return `-${Math.round(discount * 100)}%`   // 0.20 → "-20%"
                 },
-            salePrice(price, discount) {
+                salePrice(price, discount) {
                 if (!discount || discount <= 0) return null
                 return Math.round(price*(1 - discount))  //  100 * (1-0.15) = 85
                 },
@@ -358,13 +358,6 @@
                 }
             },
             computed:{
-
-                 productsByRating(){
-                 return [...this.products].sort((a,b)=> b.productRating - a.productRating)
-                 },
-                 productsByDate(){
-                 return [...this.products].sort((a,b)=> new Date(b.productDate) - new Date(a.productDate))
-                 },
                  productsByDiscount(){
                  return [...this.products].sort((a,b)=> b.productDiscount - a.productDiscount)
                  },
