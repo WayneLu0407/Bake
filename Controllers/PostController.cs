@@ -25,7 +25,7 @@ namespace Bake.Controllers
         private readonly BakeContext _db;
         private readonly IWebHostEnvironment _env;
 
-        private const string EventApplySessionKey = "EventApplyDraft";
+        //private const string EventApplySessionKey = "EventApplyDraft";7
         private const byte ConfirmedRegistStatusId = 1;
         private const byte CancelledRegistStatusId = 3;
 
@@ -462,83 +462,106 @@ namespace Bake.Controllers
                 return View(vm);
             }
 
-            SaveApplyDraft(vm);
-            //重新導向
-            return RedirectToAction(nameof(Confirmed));
-        }
-
-        [Authorize]
-        [HttpGet("/confirmed")]
-        public IActionResult Confirmed()
-        {
-            var vm = GetApplyDraft();
-            if (vm == null)
-            {
-                TempData["ErrorMessage"] = "請先完成報名資料填寫";
-                return RedirectToAction(nameof(Events));
-            }
-            return View(vm);
-        }
-
-        [Authorize]
-        [ValidateAntiForgeryToken]
-        [ActionName("Confirmed")]
-        [HttpPost("/confirmed")]
-        public async Task<IActionResult> ConfirmedSubmit()
-        {
-            var vm = GetApplyDraft();
-            if(vm == null)
-            {
-            TempData["ErrorMessage"] = "報名資料已逾期，請重新填寫";
-            return RedirectToAction(nameof(Events));
-            }
-
-            var accessError = await ValidateEventAccessAsync(vm.EventId, CurrentUserId);
-            if (accessError != null)
-            {
-                TempData["ErrorMessage"] = accessError;
-                return RedirectToAction(nameof(Apply), new { eventId = vm.EventId });
-            }
-
-
-
-            var capacityError = await ValidateCapacityAsync(vm.EventId, vm.NumParticipants);
-            if (capacityError != null)
-            {
-                TempData["ErrorMessage"] = capacityError;
-                return RedirectToAction(nameof(Apply), new { eventId = vm.EventId });
-            }
+            const byte confirmedRegistStatusId = 1;
 
             var registration = new EventRegistration
             {
                 EventId = vm.EventId,
                 UserId = CurrentUserId,
                 NumParticipants = vm.NumParticipants,
-                RegistStatusId = ConfirmedRegistStatusId,
+                RegistStatusId = confirmedRegistStatusId,
                 CreatedAt = DateTime.Now
             };
 
             _db.EventRegistrations.Add(registration);
             await _db.SaveChangesAsync();
 
-            ClearApplyDraft();
+            var eventDetail = await _db.EventDetails
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.EventId == eventId);
 
-            return RedirectToAction(nameof(Success), new { eventId = vm.EventId });
+            TempData["SuccessMessage"] = "報名成功";
+
+            if (eventDetail == null)
+            {
+                return RedirectToAction(nameof(Events));
+            }
+
+            return RedirectToAction("PostDetail", new { id = eventDetail.PostId });
         }
 
+        //[Authorize] 1
+        //[HttpGet("/confirmed")]
+        //public IActionResult Confirmed()
+        //{
+        //    var vm = GetApplyDraft();
+        //    if (vm == null)
+        //    {
+        //        TempData["ErrorMessage"] = "請先完成報名資料填寫";
+        //        return RedirectToAction(nameof(Events));
+        //    }
+        //    return View(vm);
+        //}
+
+        //[Authorize]2
+        //[ValidateAntiForgeryToken]
+        //[ActionName("Confirmed")]
+        //[HttpPost("/confirmed")]
+        //public async Task<IActionResult> ConfirmedSubmit()
+        //{
+        //    var vm = GetApplyDraft();
+        //    if(vm == null)
+        //    {
+        //    TempData["ErrorMessage"] = "報名資料已逾期，請重新填寫";
+        //    return RedirectToAction(nameof(Events));
+        //    }
+
+        //    var accessError = await ValidateEventAccessAsync(vm.EventId, CurrentUserId);
+        //    if (accessError != null)
+        //    {
+        //        TempData["ErrorMessage"] = accessError;
+        //        return RedirectToAction(nameof(Apply), new { eventId = vm.EventId });
+        //    }
 
 
-        [Authorize]
-        [HttpGet("/events/{eventId:int}/success")]
-        public IActionResult Success(int eventId)
-        {
-            ViewBag.EventId = eventId;
 
-            // 等活動詳情頁完成再導回/posts/events/{eventId}
-            ViewBag.ReturnUrl = "/posts/events";
+        //    var capacityError = await ValidateCapacityAsync(vm.EventId, vm.NumParticipants);
+        //    if (capacityError != null)
+        //    {
+        //        TempData["ErrorMessage"] = capacityError;
+        //        return RedirectToAction(nameof(Apply), new { eventId = vm.EventId });
+        //    }
 
-            return View();
-        }
+        //    var registration = new EventRegistration
+        //    {
+        //        EventId = vm.EventId,
+        //        UserId = CurrentUserId,
+        //        NumParticipants = vm.NumParticipants,
+        //        RegistStatusId = ConfirmedRegistStatusId,
+        //        CreatedAt = DateTime.Now
+        //    };
+
+        //    _db.EventRegistrations.Add(registration);
+        //    await _db.SaveChangesAsync();
+
+        //    ClearApplyDraft();
+
+        //    return RedirectToAction(nameof(Success), new { eventId = vm.EventId });
+        //}
+
+
+
+        //[Authorize]3
+        //[HttpGet("/events/{eventId:int}/success")]
+        //public IActionResult Success(int eventId)
+        //{
+        //    ViewBag.EventId = eventId;
+
+        //    // 等活動詳情頁完成再導回/posts/events/{eventId}
+        //    ViewBag.ReturnUrl = "/posts/events";
+
+        //    return View();
+        //}
 
         [Authorize]
         [ValidateAntiForgeryToken]
@@ -844,8 +867,7 @@ namespace Bake.Controllers
                 ApplicantName = account.UserProfile.FullName,
                 ApplicantPhone = account.UserProfile.UserPhone,
                 ApplicantEmail = account.Email,
-                GenderText = account.UserProfile.UserGenderNavigation?.StatusName ?? "未提供",
-
+                GenderText = MapGenderToZh(account.UserProfile.UserGenderNavigation?.StatusName),
                 NumParticipants = 1
             };
         }
@@ -918,27 +940,27 @@ namespace Bake.Controllers
             return _db.EventRegistrations.Where(x => x.RegistStatusId == ConfirmedRegistStatusId);
         }
 
-        private void SaveApplyDraft(EventApplyViewModel vm)
-        {
-            HttpContext.Session.SetString(
-                EventApplySessionKey,
-                JsonSerializer.Serialize(vm)
-                );
-        }
+        //private void SaveApplyDraft(EventApplyViewModel vm)4
+        //{
+        //    HttpContext.Session.SetString(
+        //        EventApplySessionKey,
+        //        JsonSerializer.Serialize(vm)
+        //        );
+        //}
 
-        private EventApplyViewModel? GetApplyDraft()
-        {
-            var json = HttpContext.Session.GetString(EventApplySessionKey);
+        //private EventApplyViewModel? GetApplyDraft()5
+        //{
+        //    var json = HttpContext.Session.GetString(EventApplySessionKey);
 
-            return string.IsNullOrWhiteSpace(json)
-                ? null
-                : JsonSerializer.Deserialize<EventApplyViewModel>(json);
-        }
+        //    return string.IsNullOrWhiteSpace(json)
+        //        ? null
+        //        : JsonSerializer.Deserialize<EventApplyViewModel>(json);
+        //}
 
-        private void ClearApplyDraft()
-        {
-            HttpContext.Session.Remove(EventApplySessionKey);
-        }
+        //private void ClearApplyDraft()6
+        //{
+        //    HttpContext.Session.Remove(EventApplySessionKey);
+        //}
 
         //找出我的報名
         private async Task<EventRegistration?> GetMyActiveRegistrationAsync(int eventId, int userId)
@@ -969,6 +991,20 @@ namespace Bake.Controllers
             }
 
             return null;
+        }
+        private static string MapGenderToZh(string? genderText)
+        {
+            if (string.IsNullOrWhiteSpace(genderText))
+            {
+                return "未提供";
+            }
+
+            return genderText.Trim().ToLower() switch
+            {
+                "male" => "男",
+                "female" => "女",
+                _ => genderText
+            };
         }
 
         // ------ 申請參加活動方法(尾)
