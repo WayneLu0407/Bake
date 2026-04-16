@@ -261,17 +261,24 @@
         const confirmModal = new bootstrap.Modal(document.getElementById('confirmPublishModal'));
 
         $btnShowModal.on("click", function() {
-            if ($form.valid()) {
-                confirmModal.show();
-            } else {
-                // 驗證失敗，滾動到第一個錯誤的地方
-                const firstError = $(".text-danger:visible").first();
-                if (firstError.length > 0) {
-                    $([document.documentElement, document.body]).animate({
-                        scrollTop: firstError.offset().top - 100
-                    }, 200);
+            const valided = $form.validate();
+            const checkpending = setInterval(function(){
+                if(valided.pendingRequest === 0){
+                    clearInterval(checkpending);
+                if ($form.valid()) {
+                    confirmModal.show();
+                } else {
+                    // 驗證失敗，滾動到第一個錯誤的地方
+                    const firstError = $(".text-danger:visible").first();
+                    if (firstError.length > 0) {
+                        $([document.documentElement, document.body]).animate({
+                            scrollTop: firstError.offset().top - 100
+                        }, 200);
+                    }
                 }
             }
+            },50)
+            
         });
 
         $btnSubmitFinal.on("click", function() {

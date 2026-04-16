@@ -89,7 +89,7 @@ namespace Bake.ViewModel
 
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
-            if (SignupEndDate < SignupStartDate)
+            if (SignupEndDate <= SignupStartDate)
             {
                 yield return new ValidationResult(
                     "報名截止日不可早於報名開始日",
