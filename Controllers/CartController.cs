@@ -129,7 +129,7 @@ namespace Bake.Controllers
             int fee = request.ShippingMethod switch
             {
                 "Home" => 120, // 宅配
-                "COD" => 60,  // 貨到付款
+                "COD" => 60,  // 店到店
                 _ => 60   // 預設值
             };
 

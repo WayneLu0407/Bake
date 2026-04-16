@@ -64,7 +64,8 @@ const CartMixin = {
             cart: [],
             shippingFee: 0,
             couponCode: '',
-            appliedDiscount: 0
+            appliedDiscount: 0,
+            _debounceTimer: null
         };
     },
     // 1. computed > totalPrice、totalCount、grandTotal
@@ -117,11 +118,26 @@ const CartMixin = {
         //全域通用的數量加減邏輯
         async updateQuantity(productId, change) {
             const item = this.cart.find(i => i.productId === productId);
-            if (item.quantity === 1 && change === -1) {
-                await this.deleteItem(productId);
-            } else {
-                await cartService.updateQty(productId, change);
+            if (!item) return;
+
+            const newQty = item.quantity + change
+            if (newQty <= 0) {
+                if (confirm('確定移除商品?')) {
+                    await cartService.removeItem(productId);
+                }
+                return;
             }
+            item.quantity = newQty;
+            clearTimeout(this._debounceTimer);
+            this._debounceTimer = setTimeout(async () => {
+                console.log("500ms 到，正式發送 API 更新資料庫數量...");
+                await cartService.updateQty(productId, change);
+            }, 500);
+            //if (item.quantity === 1 && change === -1) {
+            //    await this.deleteItem(productId);
+            //} else {
+            //    await cartService.updateQty(productId, change);
+            //}
         },
 
         //刪除商品
