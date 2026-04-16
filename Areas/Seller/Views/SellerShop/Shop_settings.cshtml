@@ -33,7 +33,7 @@
                     </div>
                 }
                 <div class="seller-card bg-white rounded-4 p-4 shadow-sm">
-                    <form asp-area="Seller" asp-controller="SellerShop" asp-action="Shop_settings" method="post" enctype="multipart/form-data">
+                    <form id="shopSettingsForm" asp-area="Seller" asp-controller="SellerShop" asp-action="Shop_settings" method="post" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
 
                         <!-- 頭像 + 店名 + 簡介 -->
@@ -123,7 +123,7 @@
                                 {
                                 <button type="button" class="btn btn-outline-secondary px-4 disabled">我的店鋪</button>
                                 }
-                            <button id="saveShopBtn" type="submit" class="btn btn-warning px-4" disable>儲存</button>
+                            <button id="saveShopBtn" type="submit" class="btn btn-warning px-4" disabled>儲存</button>
                         </div>
                     </form>
 
