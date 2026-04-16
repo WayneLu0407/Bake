@@ -810,7 +810,7 @@ namespace Bake.Controllers
         [AcceptVerbs("Get", "Post")]
         public IActionResult VerifySignupEndDate(DateTime signupEndDate, DateTime signupStartDate, DateTime eventDate)
         {
-            if (signupEndDate < signupStartDate)
+            if (signupEndDate <= signupStartDate)
             {
                 return Json("報名截止日須晚於報名開始日");
             }
