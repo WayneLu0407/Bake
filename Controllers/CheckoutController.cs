@@ -66,6 +66,8 @@ namespace Bake.Controllers
         {
             if (!ModelState.IsValid)
             {
+                ViewBag.ShippingFee = HttpContext.Session.GetInt32("ShippingFee") ?? 60;
+                ViewBag.CouponCode = Request.Cookies["AppliedCoupon"] ?? string.Empty;
                 return View(model);
             }
 
