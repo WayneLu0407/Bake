@@ -159,7 +159,6 @@ const CartMixin = {
             }
         },
         removeCoupon() {
-            alert("已移除優惠券");
             this.appliedDiscount = 0;
             this.couponCode = '';
             console.log("已移除優惠券");
