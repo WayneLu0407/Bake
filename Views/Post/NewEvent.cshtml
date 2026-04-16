@@ -117,7 +117,8 @@
                     </div>
                 </div>
 
-                <form id="eventForm" asp-action="NewEvent" asp-controller="Post" method="post" onsubmit="return confirm('確認發起活動?')" enctype="multipart/form-data" novalidate>
+                <form id="eventForm" asp-action="NewEvent" asp-controller="Post" method="post"  enctype="multipart/form-data" novalidate>
+                @* <form id="eventForm" asp-action="NewEvent" asp-controller="Post" method="post" onsubmit="return confirm('確認發起活動?')" enctype="multipart/form-data" novalidate> *@
                     @Html.AntiForgeryToken()
 
                     <div class="mb-3">
