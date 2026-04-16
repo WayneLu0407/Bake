@@ -3,13 +3,18 @@
 @{
     ViewData["Title"] = "Shop_settings";
 
-    string? shopImageUrl = null;
+    string shopImageUrl = Url.Content("~/ProductPicture/NoImage.jpg");
 
-    if (!string.IsNullOrWhiteSpace(Model?.ShopImg) &&
-        !Model.ShopImg.StartsWith("http://") &&
-        !Model.ShopImg.StartsWith("https://"))
+    if (!string.IsNullOrWhiteSpace(Model?.ShopImg))
     {
-        shopImageUrl = Url.Content("~/" + Model.ShopImg.TrimStart('/'));
+        if (Model.ShopImg.StartsWith("http://") || Model.ShopImg.StartsWith("https://"))
+        {
+            shopImageUrl = Model.ShopImg;
+        }
+        else
+        {
+            shopImageUrl = Url.Content("~/" + Model.ShopImg.TrimStart('/'));
+        }
     }
 }
 
@@ -40,22 +45,17 @@
                                 @* //顯示目前店鋪頭像 *@
                                 <div class="seller-avatar bg-secondary-subtle align-items-center justify-content-center overflow-hidden mb-2"
                                      style="width: 140px; height: 140px; border-radius: 16px;">
-                                    @if (!string.IsNullOrWhiteSpace(shopImageUrl))
-                                    {
-                                        <img src="@shopImageUrl"
-                                             alt="店舖圖片"
-                                             style="width:100%; height:100%; object-fit:cover;"
-                                             onerror="this.style.display='none';" />
-                                    }
-                                    else
-                                    {
-                                        <div class="shop-image-fallback d-flex align-items-center justify-content-center w-100 h-100">
-                                            📷
-                                        </div>
-                                    }
-
+                                    <img id="shopImagePreview"
+                                         src="@shopImageUrl"
+                                         alt="店舖圖片"
+                                         style="width:100%; height:100%; object-fit:cover;"
+                                         onerror="this.onerror=null;this.src='@Url.Content("~/ProductPicture/NoImage.jpg")';" />
                                 </div>
-                                <input asp-for="ShopImageFile" type="file" class="form-control form-control-sm" accept=".jpg,.jpeg,.png" />
+
+                                <input asp-for="ShopImageFile"
+                                       type="file"
+                                       class="form-control form-control-sm"
+                                       accept=".jpg,.jpeg,.png,.webp" />
                                 <span asp-validation-for="ShopImageFile" class="text-danger"></span>
                                 <div>
                                     <div class="mb-3 w-50">
@@ -151,35 +151,95 @@
 
     <script>
         $(function () {
-            const previewUrl = '@Url.Action("PreviewPartial", "SellerShop", new { area = "Seller" })';
+            const defaultImage = '@shopImageUrl';
 
-            // 點擊事件
-            $("#openShopPreviewBtn").on("click", async function () {
-                const $modalBody = $("#shopPreviewModalBody");
-                const $modalElement = $("#shopPreviewModal");
-
-                $modalBody.html("<div class='text-muted'>載入預覽中...</div>");
-
-                try {
-                    // 3. 使用 jQuery 的 $.get 或是原本的 fetch (fetch 比較現代，建議保留)
-                    const response = await fetch(previewUrl, {
-                        headers: { "X-Requested-With": "XMLHttpRequest" }
-                    });
-
-                    const html = await response.text();
-                    
-                    // 塞入畫面
-                    $modalBody.html(html);
-
-                    // 5. Bootstrap 5 的 Modal 呼叫 (這部分通常還是用原生 JS 寫法，因為 BS5 脫離 jQuery 了)
-                    const modal = new bootstrap.Modal($modalElement[0]);
-                    modal.show();
-
-                } catch (error) {
-                    $modalBody.html("<div class='alert alert-danger mb-0'>預覽載入失敗。</div>");
-                    const modal = new bootstrap.Modal($modalElement[0]);
-                    modal.show();
+            $("#ShopImageFile").on("change", function (e) {
+                const file = e.target.files && e.target.files[0];
+                if (!file) {
+                    $("#shopImagePreview").attr("src", defaultImage);
+                    return;
                 }
+
+                const reader = new FileReader();
+                reader.onload = function (evt) {
+                    $("#shopImagePreview").attr("src", evt.target.result);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            function escapeHtml(value) {
+                return (value || "")
+                    .replaceAll("&", "&amp;")
+                    .replaceAll("<", "&lt;")
+                    .replaceAll(">", "&gt;")
+                    .replaceAll('"', "&quot;")
+                    .replaceAll("'", "&#39;");
+            }
+
+            function socialIcon(url, iconClass) {
+                if (!url) return "";
+                return `
+                    <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="social-icon">
+                        <i class="${iconClass}"></i>
+                    </a>
+                `;
+            }
+
+            $("#openShopPreviewBtn").on("click", function () {
+                const shopName = ($("#ShopName").val() || "").trim() || "未填寫店鋪名稱";
+                const shopDescriptionRaw = ($("#ShopDescription").val() || "").trim();
+                const shopDescription = shopDescriptionRaw
+                    ? escapeHtml(shopDescriptionRaw).replace(/\n/g, "<br>")
+                    : "尚未填寫店鋪介紹";
+
+                const imageUrl = $("#shopImagePreview").attr("src") || defaultImage;
+
+                const facebookUrl = ($("#FacebookUrl").val() || "").trim();
+                const instagramUrl = ($("#InstagramUrl").val() || "").trim();
+                const youtubeUrl = ($("#YoutubeUrl").val() || "").trim();
+                const pinterestUrl = ($("#PinterestUrl").val() || "").trim();
+
+                const iconsHtml = [
+                    socialIcon(facebookUrl, "fa-brands fa-facebook"),
+                    socialIcon(instagramUrl, "fa-brands fa-instagram"),
+                    socialIcon(pinterestUrl, "fa-brands fa-pinterest"),
+                    socialIcon(youtubeUrl, "fa-brands fa-youtube")
+                ].filter(Boolean).join("");
+
+                const shareBlock = iconsHtml
+                    ? `
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="fw-bold me-1">分享</span>
+                            <div class="d-flex flex-wrap gap-2">
+                                ${iconsHtml}
+                            </div>
+                        </div>
+                    `
+                    : "";
+
+                $("#shopPreviewModalBody").html(`
+                    <div class="bg-white rounded-4 shadow-sm p-4 mb-0">
+                        <div class="d-flex flex-column flex-md-row gap-4 align-items-start">
+                            <div class="flex-shrink-0">
+                                <div class="bg-secondary-subtle d-flex align-items-center justify-content-center overflow-hidden"
+                                     style="width: 140px; height: 140px; border-radius: 16px;">
+                                    <img src="${imageUrl}"
+                                         alt="店舖圖片"
+                                         style="width:100%; height:100%; object-fit:cover;" />
+                                </div>
+                            </div>
+
+                            <div class="flex-grow-1 w-100" style="min-width:0;">
+                                <h3 class="fw-bold mb-3">${escapeHtml(shopName)}</h3>
+                                <p class="text-muted mb-4" style="line-height:1.9;">${shopDescription}</p>
+                                ${shareBlock}
+                            </div>
+                        </div>
+                    </div>
+                `);
+
+                const modal = new bootstrap.Modal(document.getElementById("shopPreviewModal"));
+                modal.show();
             });
         });
     </script>

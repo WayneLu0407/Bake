@@ -2,7 +2,6 @@
 
 @{
     // 功用：整理店鋪圖片路徑，讓 Partial 可直接顯示圖片
-    // 目前先支援站內相對路徑，例如 ProductPicture/Shop/xxx.jpg
     string? shopImageUrl = null;
 
     if (!string.IsNullOrWhiteSpace(Model?.ShopImg) &&
@@ -46,7 +45,7 @@
             </p>
 
             <div class="d-flex align-items-center gap-3">
-                <span class="fw-bold me-1">分享</span> 
+                <span class="fw-bold me-1">歡迎交流</span> 
                 <div class="d-flex flex-wrap gap-2">
                 @if (!string.IsNullOrWhiteSpace(Model.FacebookUrl))
                 {
