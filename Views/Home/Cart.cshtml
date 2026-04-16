@@ -132,7 +132,8 @@
                                             <div v-if="appliedDiscount > 0" class="text-success mt-2 small">
                                                 <i class="fas fa-check-circle"></i> 已折抵: $ {{formatNumber(appliedDiscount)}}
                                                 <button type="button" 
-                                                        class="btn btn-sm p-0 ms-2 text-danger" 
+                                                        class="btn btn-sm p-0 ms-2"
+                                                        style="color:darkred"
                                                         title="移除優惠券"
                                                         v-on:click.prevent="removeCoupon">
                                                     <i class="fas fa-times-circle"></i>
