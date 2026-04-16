@@ -14,6 +14,7 @@ namespace Bake.Areas.Seller.ViewModels
         public string? Bio { get; set; }
         public byte? Gender { get; set; }
         public string? Persona { get; set; }
+        [RegularExpression(@"^09\d{8}$", ErrorMessage = "手機號碼格式不正確")]
         public string? Phone { get; set; }
         public IFormFile? AvatarFile { get; set; }
     }

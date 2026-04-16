@@ -6,6 +6,7 @@
 @section Styles
 {
    <style>
+
        @@keyframes flash-green {
         from { background-color: #e2f6ed !important;}
         to { background-color: transparent !important;}
@@ -126,6 +127,12 @@
     .animate-save {
         animation: flash-green 1s ease-out forwards !important;
     }
+
+    .table-responsive-wrapper {
+    width: 100%;
+    overflow-x: auto; /* 開啟水平滾動 */
+    -webkit-overflow-scrolling: touch; /* 讓手機滑動更順暢 */
+    }
 </style>
 }
 
@@ -168,8 +175,8 @@
                 <span>🎫</span> 賣家優惠券管理
             </h2>
         </div>
-
-        <table class="table-notion">
+        <div class="table-responsive-wrapper">
+            <table class="table-notion">
             <thead>
                 <tr>
                     <th style="width:30%">優惠碼</th>
@@ -220,6 +227,8 @@
                 </tr>
             </tbody>
         </table>
+
+        </div>
     </div>
 </div>
 
