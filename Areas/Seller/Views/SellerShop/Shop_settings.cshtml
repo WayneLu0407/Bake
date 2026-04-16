@@ -3,19 +3,17 @@
 @{
     ViewData["Title"] = "Shop_settings";
 
-    string shopImageUrl = Url.Content("~/ProductPicture/NoImage.jpg");
+    string? shopImageUrl = null;
 
-    if (!string.IsNullOrWhiteSpace(Model?.ShopImg))
+    if (!string.IsNullOrWhiteSpace(Model?.ShopImg) &&
+        !Model.ShopImg.StartsWith("http://") &&
+        !Model.ShopImg.StartsWith("https://"))
     {
-        if (Model.ShopImg.StartsWith("http://") || Model.ShopImg.StartsWith("https://"))
-        {
-            shopImageUrl = Model.ShopImg;
-        }
-        else
-        {
-            shopImageUrl = Url.Content("~/" + Model.ShopImg.TrimStart('/'));
-        }
+        shopImageUrl = Url.Content("~/" + Model.ShopImg.TrimStart('/'));
     }
+
+    int? currentUserId = ViewBag.CurrentUserId as int?;
+    bool hasShop = ViewBag.HasShop is bool b && b;
 }
 
 <div class="container my-4">
@@ -35,7 +33,7 @@
                     </div>
                 }
                 <div class="seller-card bg-white rounded-4 p-4 shadow-sm">
-                    <form asp-area="Seller" asp-controller="SellerShop" asp-action="Shop_settings" method="post" enctype="multipart/form-data">
+                    <form id="shopSettingsForm" asp-area="Seller" asp-controller="SellerShop" asp-action="Shop_settings" method="post" enctype="multipart/form-data">
                         @Html.AntiForgeryToken()
 
                         <!-- 頭像 + 店名 + 簡介 -->
@@ -117,10 +115,15 @@
                         </div>
 
                         <div class="d-flex justify-content-end gap-2">
-                            <button type="button"
-                                    id="openShopPreviewBtn"
-                                    class="btn btn-warning px-4">預覽</button>
-                            <button type="submit" class="btn btn-warning px-4">儲存</button>
+                            @if (hasShop && currentUserId.HasValue)
+                                {
+                                <a href="@Url.Content($"~/Shop/{currentUserId.Value}")" class="btn btn-outline-warning px-4">我的店鋪</a>
+                                }
+                                else
+                                {
+                                <button type="button" class="btn btn-outline-secondary px-4 disabled">我的店鋪</button>
+                                }
+                            <button id="saveShopBtn" type="submit" class="btn btn-warning px-4" disabled>儲存</button>
                         </div>
                     </form>
 
@@ -131,7 +134,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="shopPreviewModal" tabindex="-1" aria-labelledby="shopPreviewModalLabel" aria-hidden="true">
+@* <div class="modal fade" id="shopPreviewModal" tabindex="-1" aria-labelledby="shopPreviewModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content rounded-4">
             <div class="modal-header">
@@ -144,103 +147,84 @@
             </div>
         </div>
     </div>
-</div>
+</div> *@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 
     <script>
         $(function () {
-            const defaultImage = '@shopImageUrl';
+            const $form = $("#shopSettingsForm");
+            const $saveBtn = $("#saveShopBtn");
 
-            $("#ShopImageFile").on("change", function (e) {
-                const file = e.target.files && e.target.files[0];
-                if (!file) {
-                    $("#shopImagePreview").attr("src", defaultImage);
-                    return;
+            function getFormSnapshot() {
+                const snapshot = {};
+
+                $form.find("input, textarea, select").each(function () {
+                    const $field = $(this);
+                    const name = $field.attr("name");
+                    if (!name) return;
+
+                    const type = ($field.attr("type") || "").toLowerCase();
+
+                    if (type === "file") {
+                        snapshot[name] = this.files && this.files.length > 0
+                            ? Array.from(this.files).map(f => `${f.name}_${f.size}_${f.lastModified}`).join("|")
+                            : "";
+                        return;
+                    }
+
+                    if (type === "checkbox" || type === "radio") {
+                        snapshot[name] = $field.prop("checked");
+                        return;
+                    }
+
+                    snapshot[name] = $field.val() ?? "";
+                });
+
+                return snapshot;
+            }
+
+            function isSameSnapshot(a, b) {
+                const aKeys = Object.keys(a);
+                const bKeys = Object.keys(b);
+
+                if (aKeys.length !== bKeys.length) return false;
+
+                for (const key of aKeys) {
+                    if (a[key] !== b[key]) return false;
                 }
 
-                const reader = new FileReader();
-                reader.onload = function (evt) {
-                    $("#shopImagePreview").attr("src", evt.target.result);
-                };
-                reader.readAsDataURL(file);
-            });
-
-            function escapeHtml(value) {
-                return (value || "")
-                    .replaceAll("&", "&amp;")
-                    .replaceAll("<", "&lt;")
-                    .replaceAll(">", "&gt;")
-                    .replaceAll('"', "&quot;")
-                    .replaceAll("'", "&#39;");
+                return true;
             }
 
-            function socialIcon(url, iconClass) {
-                if (!url) return "";
-                return `
-                    <a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer" class="social-icon">
-                        <i class="${iconClass}"></i>
-                    </a>
-                `;
+            function setSaveButtonState(isDirty) {
+                $saveBtn.prop("disabled", !isDirty);
+
+                if (isDirty) {
+                    $saveBtn
+                        .removeClass("btn-secondary")
+                        .addClass("btn-warning");
+                } else {
+                    $saveBtn
+                        .removeClass("btn-warning")
+                        .addClass("btn-secondary");
+                }
             }
 
-            $("#openShopPreviewBtn").on("click", function () {
-                const shopName = ($("#ShopName").val() || "").trim() || "未填寫店鋪名稱";
-                const shopDescriptionRaw = ($("#ShopDescription").val() || "").trim();
-                const shopDescription = shopDescriptionRaw
-                    ? escapeHtml(shopDescriptionRaw).replace(/\n/g, "<br>")
-                    : "尚未填寫店鋪介紹";
+            const initialSnapshot = getFormSnapshot();
 
-                const imageUrl = $("#shopImagePreview").attr("src") || defaultImage;
+            function refreshDirtyState() {
+                const currentSnapshot = getFormSnapshot();
+                const isDirty = !isSameSnapshot(initialSnapshot, currentSnapshot);
+                setSaveButtonState(isDirty);
+            }
 
-                const facebookUrl = ($("#FacebookUrl").val() || "").trim();
-                const instagramUrl = ($("#InstagramUrl").val() || "").trim();
-                const youtubeUrl = ($("#YoutubeUrl").val() || "").trim();
-                const pinterestUrl = ($("#PinterestUrl").val() || "").trim();
-
-                const iconsHtml = [
-                    socialIcon(facebookUrl, "fa-brands fa-facebook"),
-                    socialIcon(instagramUrl, "fa-brands fa-instagram"),
-                    socialIcon(pinterestUrl, "fa-brands fa-pinterest"),
-                    socialIcon(youtubeUrl, "fa-brands fa-youtube")
-                ].filter(Boolean).join("");
-
-                const shareBlock = iconsHtml
-                    ? `
-                        <div class="d-flex align-items-center gap-3">
-                            <span class="fw-bold me-1">分享</span>
-                            <div class="d-flex flex-wrap gap-2">
-                                ${iconsHtml}
-                            </div>
-                        </div>
-                    `
-                    : "";
-
-                $("#shopPreviewModalBody").html(`
-                    <div class="bg-white rounded-4 shadow-sm p-4 mb-0">
-                        <div class="d-flex flex-column flex-md-row gap-4 align-items-start">
-                            <div class="flex-shrink-0">
-                                <div class="bg-secondary-subtle d-flex align-items-center justify-content-center overflow-hidden"
-                                     style="width: 140px; height: 140px; border-radius: 16px;">
-                                    <img src="${imageUrl}"
-                                         alt="店舖圖片"
-                                         style="width:100%; height:100%; object-fit:cover;" />
-                                </div>
-                            </div>
-
-                            <div class="flex-grow-1 w-100" style="min-width:0;">
-                                <h3 class="fw-bold mb-3">${escapeHtml(shopName)}</h3>
-                                <p class="text-muted mb-4" style="line-height:1.9;">${shopDescription}</p>
-                                ${shareBlock}
-                            </div>
-                        </div>
-                    </div>
-                `);
-
-                const modal = new bootstrap.Modal(document.getElementById("shopPreviewModal"));
-                modal.show();
+            $form.on("input change", "input, textarea, select", function () {
+                refreshDirtyState();
             });
+
+            refreshDirtyState();
         });
     </script>
 }
