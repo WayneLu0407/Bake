@@ -229,40 +229,44 @@ namespace Bake.Controllers.api
                 .FirstOrDefaultAsync(c => c.Code == couponCode && c.IsActive && c.ExpirationDate >= DateTime.Now);
 
             if (coupon == null) return 0;
+            decimal subTotal = cartItems.Sum(item => item.Price * item.Quantity);
+            if (subTotal < coupon.MinimumPurchase) return 0;
+            return coupon.DiscountValue;
+            //var productIds = cartItems.Select(i => i.ProductId).ToList();
+            //var productsInDb = await _bakeContext.Products
+            //    .Where(p => productIds.Contains(p.ProductId))
+            //    .Select(p => new {
+            //        p.ProductId,
+            //        p.ProductDetail.ProductPrice,
+            //        p.UserId
+            //    }).ToListAsync();
 
-            var productIds = cartItems.Select(i => i.ProductId).ToList();
-            var productsInDb = await _bakeContext.Products
-                .Where(p => productIds.Contains(p.ProductId))
-                .Select(p => new {
-                    p.ProductId,
-                    p.ProductDetail.ProductPrice,
-                    p.UserId
-                }).ToListAsync();
+
 
             //計算金額
-            decimal subTotal = 0;  //購物車總金額
-            decimal applyAmout = 0;  //符合優惠券條件的金額 (如果有指定賣家，則只計算該賣家的商品金額)
+            //decimal subTotal = 0;  //購物車總金額
+            //decimal applyAmout = 0;  //符合優惠券條件的金額 (如果有指定賣家，則只計算該賣家的商品金額)
 
-            foreach (var item in cartItems)
-            {
-                var dbProduct = productsInDb.FirstOrDefault(p => p.ProductId == item.ProductId);
-                if (dbProduct == null) continue;
+            //foreach (var item in cartItems)
+            //{
+            //    var dbProduct = productsInDb.FirstOrDefault(p => p.ProductId == item.ProductId);
+            //    if (dbProduct == null) continue;
 
-                decimal itemTotal = dbProduct.ProductPrice * item.Quantity;
-                subTotal += itemTotal;
+            //    decimal itemTotal = dbProduct.ProductPrice * item.Quantity;
+            //    subTotal += itemTotal;
 
-                //全站券走條件1 : 如果優惠券SellerId為null，每個itemTotal都會被加進applyAmount；如果有指定SellerId
-                //賣家券走條件2 : 只有當商品的UserId與SellerId相符時，itemTotal才會被加進applyAmount
-                if (!coupon.SellerId.HasValue || dbProduct.UserId == coupon.SellerId)
-                {
-                    applyAmout += itemTotal;
-                }
-            }
+            //    //全站券走條件1 : 如果優惠券SellerId為null，每個itemTotal都會被加進applyAmount；如果有指定SellerId
+            //    //賣家券走條件2 : 只有當商品的UserId與SellerId相符時，itemTotal才會被加進applyAmount
+            //    if (!coupon.SellerId.HasValue || dbProduct.UserId == coupon.SellerId)
+            //    {
+            //        applyAmout += itemTotal;
+            //    }
+            //}
 
-            //檢查消費門檻
-            if (applyAmout < coupon.MinimumPurchase) return 0;
+            ////檢查消費門檻
+            //if (applyAmout < coupon.MinimumPurchase) return 0;
 
-            return coupon.DiscountValue;
+            //return coupon.DiscountValue;
         }
 
         private List<CartViewModel> GetCartItemsFromSession()
