@@ -317,11 +317,11 @@ namespace Bake.Controllers
         [Authorize]
         [ValidateAntiForgeryToken]
         [HttpPost("/Post/events/{postId:int}/edit")]
-        public async Task<IActionResult> EditEvent(int postId , EventEditViewModel input)
+        public async Task<IActionResult> EditEvent(int postId, EventEditViewModel input)
         {
             var post = await GetOwnedEventPostAsync(postId, CurrentUserId);
 
-            if(post == null)
+            if (post == null)
             {
                 return NotFound();
             }
@@ -332,40 +332,45 @@ namespace Bake.Controllers
             input.EventId = eventDetail.EventId;
             input.HasRegistrations = eventDetail.EventRegistrations
                 .Any(x => x.RegistStatusId == ConfirmedRegistStatusId);
+
             input.ExistingPhotoUrl = post.PostAttachments
-                .Where(a=>a.IsCover == true)
-                .Select(a=>a.FileUrl)
+                .Where(a => a.IsCover == true)
+                .Select(a => a.FileUrl)
                 .FirstOrDefault();
-            
+
             await FillOrganizerInfoAsync(input, CurrentUserId);
             await LoadEventTypeOptionsAsync(input);
 
             PreserveLockFieldsForRegisteredEvent(input, post);
 
-            ValidateEventCreateInput(input);
+            if (input.HasRegistrations)
+            {
+                RemoveLockedFieldModelStateForRegisteredEvent();
+            }
 
+            // 檔案驗證（副檔名、大小）
+            ValidateEventCreateInput(input);
             if (!ModelState.IsValid)
             {
                 return View(input);
             }
 
+            // 共同可編輯欄位
             post.Title = input.Title.Trim();
             post.Content = input.Content.Trim();
             eventDetail.EventTypeId = input.EventTypeId;
 
-            //價格應該也要鎖起來才對?
-            eventDetail.Price = input.Price;
-
-            //報名人數=false時,才可編輯
+            // 尚未報名才可動的欄位
             if (!input.HasRegistrations)
             {
                 eventDetail.EventTime = input.EventDate.Date.Add(input.StartTime);
                 eventDetail.EventEndTime = input.EventDate.Date.Add(input.EndTime);
 
-                eventDetail.LocationCity = input.LocationCity.Trim();
+                eventDetail.LocationCity = input.LocationCity?.Trim();
                 eventDetail.LocationAddress = input.LocationAddress.Trim();
 
                 eventDetail.MaxParticipants = input.MaxParticipants;
+                eventDetail.Price = input.Price;
                 eventDetail.SignupStart = input.SignupStartDate.Date;
                 eventDetail.SignupDeadline = input.SignupEndDate.Date.AddDays(1).AddTicks(-1);
             }
@@ -490,78 +495,6 @@ namespace Bake.Controllers
             return RedirectToAction("PostDetail", new { id = eventDetail.PostId });
         }
 
-        //[Authorize] 1
-        //[HttpGet("/confirmed")]
-        //public IActionResult Confirmed()
-        //{
-        //    var vm = GetApplyDraft();
-        //    if (vm == null)
-        //    {
-        //        TempData["ErrorMessage"] = "請先完成報名資料填寫";
-        //        return RedirectToAction(nameof(Events));
-        //    }
-        //    return View(vm);
-        //}
-
-        //[Authorize]2
-        //[ValidateAntiForgeryToken]
-        //[ActionName("Confirmed")]
-        //[HttpPost("/confirmed")]
-        //public async Task<IActionResult> ConfirmedSubmit()
-        //{
-        //    var vm = GetApplyDraft();
-        //    if(vm == null)
-        //    {
-        //    TempData["ErrorMessage"] = "報名資料已逾期，請重新填寫";
-        //    return RedirectToAction(nameof(Events));
-        //    }
-
-        //    var accessError = await ValidateEventAccessAsync(vm.EventId, CurrentUserId);
-        //    if (accessError != null)
-        //    {
-        //        TempData["ErrorMessage"] = accessError;
-        //        return RedirectToAction(nameof(Apply), new { eventId = vm.EventId });
-        //    }
-
-
-
-        //    var capacityError = await ValidateCapacityAsync(vm.EventId, vm.NumParticipants);
-        //    if (capacityError != null)
-        //    {
-        //        TempData["ErrorMessage"] = capacityError;
-        //        return RedirectToAction(nameof(Apply), new { eventId = vm.EventId });
-        //    }
-
-        //    var registration = new EventRegistration
-        //    {
-        //        EventId = vm.EventId,
-        //        UserId = CurrentUserId,
-        //        NumParticipants = vm.NumParticipants,
-        //        RegistStatusId = ConfirmedRegistStatusId,
-        //        CreatedAt = DateTime.Now
-        //    };
-
-        //    _db.EventRegistrations.Add(registration);
-        //    await _db.SaveChangesAsync();
-
-        //    ClearApplyDraft();
-
-        //    return RedirectToAction(nameof(Success), new { eventId = vm.EventId });
-        //}
-
-
-
-        //[Authorize]3
-        //[HttpGet("/events/{eventId:int}/success")]
-        //public IActionResult Success(int eventId)
-        //{
-        //    ViewBag.EventId = eventId;
-
-        //    // 等活動詳情頁完成再導回/posts/events/{eventId}
-        //    ViewBag.ReturnUrl = "/posts/events";
-
-        //    return View();
-        //}
 
         [Authorize]
         [ValidateAntiForgeryToken]
@@ -807,6 +740,28 @@ namespace Bake.Controllers
 
 
         //-------活動發起及編輯的時間驗證
+
+        private void RemoveLockedFieldModelStateForRegisteredEvent()
+        {
+            var lockedFields = new[]
+            {
+                nameof(EventEditViewModel.EventDate),
+                nameof(EventEditViewModel.StartTime),
+                nameof(EventEditViewModel.EndTime),
+                nameof(EventEditViewModel.LocationCity),
+                nameof(EventEditViewModel.LocationAddress),
+                nameof(EventEditViewModel.MaxParticipants),
+                nameof(EventEditViewModel.Price),
+                nameof(EventEditViewModel.SignupStartDate),
+                nameof(EventEditViewModel.SignupEndDate)
+            };
+
+            foreach (var field in lockedFields)
+            {
+                ModelState.Remove(field);
+            }
+        }
+
         [AcceptVerbs("Get", "Post")]
         public IActionResult VerifySignupEndDate(DateTime signupEndDate, DateTime signupStartDate, DateTime eventDate)
         {
@@ -1085,6 +1040,7 @@ namespace Bake.Controllers
             input.LocationAddress = eventDetail.LocationAddress ?? string.Empty;
 
             input.MaxParticipants = eventDetail.MaxParticipants;
+            input.Price = eventDetail.Price ?? 0;
 
             input.SignupStartDate = eventDetail.SignupStart.Date;
             input.SignupEndDate = eventDetail.SignupDeadline.Date;
