@@ -117,7 +117,7 @@
                     </div>
                 </div>
 
-                <form asp-action="EditEvent" asp-controller="Post" asp-route-postId="@Model.PostId" method="post" onsubmit="return confirm('確認更新活動?')" enctype="multipart/form-data" novalidate>
+                <form asp-action="EditEvent" asp-controller="Post" asp-route-postId="@Model.PostId" method="post" enctype="multipart/form-data" novalidate>
                     @Html.AntiForgeryToken()
 
                     @* 與編輯的Controller溝通用 *@
@@ -283,6 +283,21 @@
         $('input[type="text"], textarea').on('blur', function () {
             $(this).val($.trim($(this).val()));
         });
+
+        // 統一在這邊做送出動作
+        $('#editEventForm').on('submit', function (e) {
+        if ($(this).data('confirmed')) {
+            return true;
+        }
+
+        if (confirm('確認更新活動?')) {
+            $(this).data('confirmed', true); 
+            this.submit(); 
+        } else {
+            return false;
+        }
+        });
+
     });
     </script>
 }
