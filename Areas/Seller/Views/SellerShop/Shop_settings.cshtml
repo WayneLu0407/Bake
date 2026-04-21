@@ -3,13 +3,18 @@
 @{
     ViewData["Title"] = "Shop_settings";
 
-    string? shopImageUrl = null;
+    string shopImageUrl = Url.Content("~/ProductPicture/NoImage.jpg");
 
-    if (!string.IsNullOrWhiteSpace(Model?.ShopImg) &&
-        !Model.ShopImg.StartsWith("http://") &&
-        !Model.ShopImg.StartsWith("https://"))
+    if (!string.IsNullOrWhiteSpace(Model?.ShopImg))
     {
-        shopImageUrl = Url.Content("~/" + Model.ShopImg.TrimStart('/'));
+        if (Model.ShopImg.StartsWith("http://") || Model.ShopImg.StartsWith("https://"))
+        {
+            shopImageUrl = Model.ShopImg;
+        }
+        else
+        {
+            shopImageUrl = Url.Content("~/" + Model.ShopImg.TrimStart('/'));
+        }
     }
 
     int? currentUserId = ViewBag.CurrentUserId as int?;
@@ -156,6 +161,38 @@
         $(function () {
             const $form = $("#shopSettingsForm");
             const $saveBtn = $("#saveShopBtn");
+            
+            const $imageInput = $("#ShopImageFile");
+            const $preview = $("#shopImagePreview");
+            const defaultImage = '@Url.Content("~/ProductPicture/NoImage.jpg")';
+            const originalImage = $preview.attr("src") || defaultImage;
+
+            let previewObjectUrl = null;
+
+            $imageInput.on("change", function () {
+                const file = this.files && this.files[0];
+
+                if (!file) {
+                    $preview.attr("src", originalImage);
+                    return;
+                }
+
+                const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp"];
+                const fileName = file.name.toLowerCase();
+                const isValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+
+                if (!isValidExtension) {
+                    $preview.attr("src", originalImage);
+                    return;
+                }
+
+                if (previewObjectUrl) {
+                    URL.revokeObjectURL(previewObjectUrl);
+                }
+
+                previewObjectUrl = URL.createObjectURL(file);
+                $preview.attr("src", previewObjectUrl);
+        });
 
             function getFormSnapshot() {
                 const snapshot = {};
